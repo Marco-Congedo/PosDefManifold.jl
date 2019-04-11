@@ -15,7 +15,7 @@ In this package we are concerned with the manifold **P** of **positive definite 
 
 In several fields of research such as computer vision and brain-computer interface, treating data in the **P** manifold has allowed the introduction of machine learning approaches with remarkable characteristics, such us simplicity of use, excellent classification accuracy, as demonstrated by the winning score obtained in five international data classification competitions, and the ability to operate transfer learning (Congedo et *al.*, 2017)[🎓](@ref)).
 
-For a formal introduction to the **P** manifold the reader is referred to Bhatia (2007)[🎓](@ref). For an introduction to Riemannian geometry and a formal description of mathematical tools implemented in this package, see [Intro To Riemannian Geometry](IntroToRiemannianGeometry/index.html) in this documentation.
+For a formal introduction to the **P** manifold the reader is referred to Bhatia (2007)[🎓](@ref). For an introduction to Riemannian geometry and a formal description of mathematical tools implemented in this package, see [Intro To Riemannian Geometry](IntroToRiemannianGeometry/index.html) in this documentation. 
 
 ## Code units
 
