@@ -39,8 +39,9 @@ of symmetric or Hermitian matrices.
 Thus, a Riemannian metric turns the metric space ``(``**P**``, δ^2)`` into a Riemannian manifold. This is the case, for example, of the [Fisher](@ref) metric, which has a fundamental role in the manifolds of positive definite matrices and of the
 [Wasserstein](@ref) metric, fundamental in optimal transport theory.
 
-![](https://drive.google.com/open?id=1BCuHRitBUKJwU-hRAP51goCAH-Z17-hD)
-Figure 1
+![Figure 1](assets/Fig1.jpg)
+Figure 1. Schematic illustration of the Riemannian manifold of positive definite matrices. Left: geodesic relying points ``P`` and ``Q`` passing through its-mid-point (mean) ``G`` (green curve), tangent space at point ``G`` with tangent vectors to geodesic from ``G`` to ``P_1`` and from ``G`` to ``P_2`` (blue arrowed lines) and distance ``δ(G, P2)``. 
+Right: the center of mass (also named mean) ``G`` of points ``P1,…,P4`` defined as the point minimizing the sum of the four squared distances ``δ2(G, Pi)``, for ``i={1,…,4}``.
 
 ## geodesic
 
