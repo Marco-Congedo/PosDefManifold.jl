@@ -40,7 +40,7 @@ Thus, a Riemannian metric turns the metric space ``(``**P**``, δ^2)`` into a Ri
 [Wasserstein](@ref) metric, fundamental in optimal transport theory.
 
 ![Figure 1](assets/Fig1.jpg)
-Figure 1. Schematic illustration of the Riemannian manifold of positive definite matrices. Left: geodesic relying points ``P`` and ``Q`` passing through its-mid-point (mean) ``G`` (green curve), tangent space at point ``G`` with tangent vectors to geodesic from ``G`` to ``P_1`` and from ``G`` to ``P_2`` (blue arrowed lines) and distance ``δ(G, P2)``. 
+Figure 1. Schematic illustration of the Riemannian manifold of positive definite matrices. Left: geodesic relying points ``P`` and ``Q`` passing through its-mid-point (mean) ``G`` (green curve), tangent space at point ``G`` with tangent vectors to geodesic from ``G`` to ``P_1`` and from ``G`` to ``P_2`` (blue arrowed lines) and distance ``δ(G, P2)``.
 Right: the center of mass (also named mean) ``G`` of points ``P1,…,P4`` defined as the point minimizing the sum of the four squared distances ``δ2(G, Pi)``, for ``i={1,…,4}``.
 
 ## geodesic
