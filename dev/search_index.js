@@ -21,7 +21,7 @@ var documenterSearchIndex = {"docs": [
     "page": "PosDefManifold Documentation",
     "title": "Requirement",
     "category": "section",
-    "text": "Julia 1.0.3 or higher"
+    "text": "Julia v1.0.3 or higher"
 },
 
 {
@@ -29,7 +29,7 @@ var documenterSearchIndex = {"docs": [
     "page": "PosDefManifold Documentation",
     "title": "Installation",
     "category": "section",
-    "text": "The package is not registered yet. Use the github  url for adding the PosDefManifold package."
+    "text": "The package is not registered yet. Use the github url for adding the PosDefManifold package."
 },
 
 {
