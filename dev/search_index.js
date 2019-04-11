@@ -29,7 +29,7 @@ var documenterSearchIndex = {"docs": [
     "page": "PosDefManifold Documentation",
     "title": "Overview",
     "category": "section",
-    "text": "(Image: )"
+    "text": "(Image: Figure 1)"
 },
 
 {
