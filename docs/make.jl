@@ -1,3 +1,5 @@
+using Documenter
+
 makedocs(sitename="PosDefManifold", pages =
 [ "index.md", "introToRiemannianGeometry.md", "MainModule.md", "riemannianGeometry.md",
  "linearAlgebra.md", "signalProcessing.md", "test.md"])
