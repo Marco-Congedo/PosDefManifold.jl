@@ -17,11 +17,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "#Requirement-1",
+    "page": "PosDefManifold Documentation",
+    "title": "Requirement",
+    "category": "section",
+    "text": "Julia v1.0.3 or higher"
+},
+
+{
     "location": "#Installation-1",
     "page": "PosDefManifold Documentation",
     "title": "Installation",
     "category": "section",
-    "text": ""
+    "text": "The package is not registered yet. Use the github url for adding the PosDefManifold package."
 },
 
 {
@@ -29,7 +37,7 @@ var documenterSearchIndex = {"docs": [
     "page": "PosDefManifold Documentation",
     "title": "Overview",
     "category": "section",
-    "text": "(Image: )"
+    "text": "(Image: Figure 1)Riemannian geometry studies smooth manifolds, multi-dimensional curved spaces with peculiar geometries endowed with non-Euclidean metrics. In these spaces Riemannian geometry allows the definition of angles, geodesics (shortest path between two points), distances between points, centers of mass of several points, etc.In this package we are concerned with the manifold P of positive definite matrices, either symmetric positive definite or Hermitian positive definite.In several fields of research such as computer vision and brain-computer interface, treating data in the P manifold has allowed the introduction of machine learning approaches with remarkable characteristics, such us simplicity of use, excellent classification accuracy, as demonstrated by the winning score obtained in five international data classification competitions, and the ability to operate transfer learning (Congedo et al., 2017)🎓).For a formal introduction to the P manifold the reader is referred to Bhatia (2007)🎓.For an introduction to Riemannian geometry and an overview of mathematical tools implemented in this package, see Intro To Riemannian Geometry in this documentation.For starting using this package, browse the code units listed here below and execute the many example code you will find therein."
 },
 
 {
@@ -37,7 +45,7 @@ var documenterSearchIndex = {"docs": [
     "page": "PosDefManifold Documentation",
     "title": "Code units",
     "category": "section",
-    "text": "PosDefManifold includes five code units (.jl files):Unit Description\nPosDefManifold.jl Main module\nriemannianGeometry.jl The fundamental unit collecting all Riemannian functions\nlinearAlgebra.jl Collection of linear algebra routines\nsignalProcessing.jl Collection of signal processing routines\ntest.jl Unit performing all tests"
+    "text": "PosDefManifold includes five code units (.jl files):Unit Description\nPosDefManifold.jl Main module\nriemannianGeometry.jl The fundamental unit collecting all functions acting on the P manifold\nlinearAlgebra.jl Collection of linear algebra routines\nsignalProcessing.jl Collection of signal processing routines\ntest.jl Unit performing all tests"
 },
 
 {
@@ -77,7 +85,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Intro to Riemannian Geometry",
     "title": "Riemannian manifolds",
     "category": "section",
-    "text": "Here are some important definitions:A smooth manifold in differential geometry is a topological space that is locally similar to the Euclidean space and has a globally defined differential structure.The tangent space at point G is the vector space containing the tangent vectors to all curves on the manifold passing through G (Fig. 1).A smooth Riemannian manifold is equipped with an inner product on the tangent space (a Riemannian metric) defined at each point and varying smoothly from point to point. For manifold P the tangent space is the space of symmetric or Hermitian matrices.Thus, a Riemannian metric turns the metric space (P δ^2) into a Riemannian manifold. This is the case, for example, of the Fisher metric, which has a fundamental role in the manifolds of positive definite matrices and of the Wasserstein metric, fundamental in optimal transport theory.(Image: ) Figure 1"
+    "text": "Here are some important definitions:A smooth manifold in differential geometry is a topological space that is locally similar to the Euclidean space and has a globally defined differential structure.The tangent space at point G is the vector space containing the tangent vectors to all curves on the manifold passing through G (Fig. 1).A smooth Riemannian manifold is equipped with an inner product on the tangent space (a Riemannian metric) defined at each point and varying smoothly from point to point. For manifold P the tangent space is the space of symmetric or Hermitian matrices.Thus, a Riemannian metric turns the metric space (P δ^2) into a Riemannian manifold. This is the case, for example, of the Fisher metric, which has a fundamental role in the manifolds of positive definite matrices and of the Wasserstein metric, fundamental in optimal transport theory.(Image: Figure 1) Figure 1. Schematic illustration of the Riemannian manifold of positive definite matrices. Left: geodesic relying points P and Q passing through its-mid-point (mean) G (green curve), tangent space at point G with tangent vectors to geodesic from G to P_1 and from G to P_2 (blue arrowed lines) and distance δ(G P2). Right: the center of mass (also named mean) G of points P1P4 defined as the point minimizing the sum of the four squared distances δ2(G Pi), for i=14."
 },
 
 {
