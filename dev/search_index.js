@@ -353,11 +353,35 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "riemannianGeometry/#PosDefManifold.geodesic",
+    "page": "riemannianGeometry.jl",
+    "title": "PosDefManifold.geodesic",
+    "category": "function",
+    "text": "geodesic(P::ℍ, Q::ℍ, a::Real, metric::Metric=Fisher)\n\nMove along the geodesic from point P to point Q   (two positive definite matrices) with arclegth 0=a=1,  using the specified metric, of type Metric::Enumerated type.  By default de Fisher metric is adopted.\n\nFor all metrics,\n\nwith a=0 we stay at P,\nwith a=1 we move up to Q,\nwith a=12 we move to the mid-point of P and Q (mean).\n\nUsing the Fisher metric argument a can be any real number, for instance:\n\nwith 0a1 we move toward Q (attraction),\nwith a1 we move over and beyond Q (extrapolation),\nwith a0 we move back away from Q (repulsion).\n\nNote that if Q=I, the Fisher geodesic move is simply P^a  (no need to call this funtion then).\n\nFor the logdet zero and Jeffrey metric no closed form expression  for the geodesic is available (to the best of authors\' knowledge),  so in this case the geodesic is found as the weighted mean [meanP(@ref)].  For the Von Neumann not even an expression for the mean is available,  so in this case the geodesic is not provided and a warning is printed.\n\nP and Q must be flagged by julia as Hermitian.  See typecasting matrices.\n\nExamples\n\nusing PosDefManifold\nP=randP(10);\nQ=randP(10);\n# Wasserstein mean\nM=geodesic(P, Q, 0.5, Wasserstein)\n# extrapolate suing the Fisher metric\nE=geodesic(P, Q, 2)\n\nSee also: meanP\n\n\n\nMaths\n\nFor points P, Q and arclength a, letting b=1-a,  the geodesic equations for the supported metrics are:\n\nMetric geodesic equation\nEuclidean bP + aQ\ninvEuclidean big(bP^-1 + aQ^-1big)^-1\nChoEuclidean TT^*, where T=bL_P + aL_Q\nlogEuclidean textexpbig(btextlog(P) + atextlog(Q)big)\nlogCholesky TT^*, where T=S_P+a(S_Q-S_P)+D_Phspace2pttextexpbig(a(textlogD_Q-textlogD_P)big)\nFisher P^12 big(P^-12 Q P^-12big)^a P^12\nlogdet0 uses weighted mean algorithm logdet0Mean\nJeffrey uses weighted mean meanP\nVonNeumann N.A.\nWasserstein b^2P+a^2Q +abbig(PQ)^12 +(QP)^12big\n\nlegend: L_X, S_X and D_X    are the Cholesky lower triangle of X, its strictly lower triangular part    and diagonal part, respectively (hence, S_X+D_X=L_X,  L_XL_X^*=X).\n\n\n\n\n\n"
+},
+
+{
     "location": "riemannianGeometry/#Geodesic-equations-1",
     "page": "riemannianGeometry.jl",
     "title": "Geodesic equations",
     "category": "section",
     "text": "geodesic"
+},
+
+{
+    "location": "riemannianGeometry/#PosDefManifold.distanceSqr",
+    "page": "riemannianGeometry.jl",
+    "title": "PosDefManifold.distanceSqr",
+    "category": "function",
+    "text": "(1) distanceSqr(P::ℍ, metric::Metric=Fisher\n(2) distanceSqr(P::ℍ, Q::ℍ, metric::Metric=Fisher)\n\nalias: distance²\n\n(1) Return δ^2(P I), the square of the distance (or divergence) of positive definite  matrix P from the the identity matrix. See distance from the origin.\n\n(2) Return δ^2(P Q), the square of the distance (or divergence) between two  positive definite matrices P and Q. See distance.\n\nIn both cases the distance function δ is induced by the argument metric of type  Metric::Enumerated type. By default, the Fisher metric is adopted.\n\nThe distance is always real, non-negative and equal to zero if and only if  (1) P=I or (2) P=Q.\n\nP in (1) and P, Q in (2) must be flagged by julia as Hermitian.  See typecasting matrices.\n\nExamples (1)\n\nusing PosDefManifold\nP=randP(10);\nd=distanceSqr(P, Wasserstein)\ne=distanceSqr(P) # uses the default metric (Fisher)\nmetric=Metric(Int(logdet0)) # or metric=logdet0\ns=string(metric) # check what is the current metric\nf=distance²(P, metric) #using the alias distance²\n\nExamples (2)\n\nusing PosDefManifold\nP=randP(10);\nQ=randP(10);\nd=distanceSqr(P, Q, Wasserstein)\ne=distance²(P, Q, Jeffrey)\n\nSee also: distanceSqrMat\n\nMaths\n\nFor point P the squared distances from the identity  for the supported metrics are:\n\nMetric Squared Distance from the identity\nEuclidean P-I^2\ninvEuclidean P^-1-I^2\nChoEuclidean L_P-I^2\nlogEuclidean textrmlogP^2\nlogCholesky S_P^2+textrmlogD_P^2\nFisher textrmlogP^2\nlogdet0 textrmlogdetfrac12(P+I) - frac12textrmlogdet(P)\nJeffrey frac12textrmtr(P+P^-1)-n\nVonNeumann frac12textrmtr(PtextrmlogP-textrmlogP)\nWasserstein textrmtr(P+I) -2textrmtr(P^12)\n\nFor points P and Q their squared distances for the supported metrics are:\n\nMetric Squared Distance\nEuclidean P-Q^2\ninvEuclidean P^-1-Q^-1^2\nChoEuclidean  L_P - L_Q ^2\nlogEuclidean textrmlogP-textrmlogQ^2\nlogCholesky S_P-S_Q^2+textrmlogD_P-textrmlogD_Q^2\nFisher textrmlog(P^-12QP^-12)^2\nlogdet0 textrmlogdetfrac12(P+Q) - frac12textrmlogdet(PQ)\nJeffrey frac12textrmtr(Q^-1P+P^-1Q)-n\nVonNeumann frac12textrmtr(PtextrmlogP-PtextrmlogQ+QtextrmlogQ-QtextrmlogP)\nWasserstein textrmtr(P+Q) -2textrmtr(P^12QP^12)^12\n\nlegend: L_X, S_X and D_X  are the Cholesky lower triangle of X, its strictly lower triangular part  and diagonal part, respectively (hence, S_X+D_X=L_X,  L_XL_X^*=X).\n\n\n\n\n\n"
+},
+
+{
+    "location": "riemannianGeometry/#PosDefManifold.distance",
+    "page": "riemannianGeometry.jl",
+    "title": "PosDefManifold.distance",
+    "category": "function",
+    "text": "(1) distance(P::ℍ, metric::Metric=Fisher\n(2) distance(P::ℍ, Q::ℍ, metric::Metric=Fisher)\n\n(1) Return δ(P I), the distance between positive definite matrix P and  the identity matrix.\n\n(2) Return δ(P Q), the distance between positive definite  matrices P and Q.\n\nThis is the square root of distanceSqr  and is invoked with the same syntax therein.\n\nSee also: distanceMatrix\n\n\n\n\n\n"
 },
 
 {
@@ -369,11 +393,91 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "riemannianGeometry/#PosDefManifold.distanceSqrMat",
+    "page": "riemannianGeometry.jl",
+    "title": "PosDefManifold.distanceSqrMat",
+    "category": "function",
+    "text": "distanceSqrMat(℘, metric::Metric=Fisher)\n\nalias: distance²Mat\n\nGiven a 1d array ℘ of k positive definite matrices  P_1P_k, create the kk real Hermitian matrix comprising  elements δ^2(P_i P_j)textrm for all ij.\n\nThis is the matrix of all squared inter-distances (zero on diagonal), using the  specified metric, of type Metric::Enumerated type,  giving rise to distance function δ. See distanceSqr.  By default, the Fisher metric is adopted.\n\nExamples\n\nusing PosDefManifold\n# Generate a set of 4 random 10x10 SPD matrices\n℘=randP(10, 4)\n# Compute the squared inter-distance matrix according to the log Euclidean metric.\n# This is much faster as compared to the Fisher metric and in general\n# it is a good approximation.\nΔ²=distanceSqrMat(℘, logEuclidean)\n\nSee also: laplacian, laplacianEigenMaps, spectralEmbedding.\n\n\n\n\n\n"
+},
+
+{
+    "location": "riemannianGeometry/#PosDefManifold.distanceMatrix",
+    "page": "riemannianGeometry.jl",
+    "title": "PosDefManifold.distanceMatrix",
+    "category": "function",
+    "text": "distanceMatrix(℘, metric::Metric=Fisher)\n\nalias: distanceMat\n\nGiven a 1d array ℘ of k positive definite matrices  P_1P_k, create the kk real Hermitian matrix comprising elements  δ(P_i P_j)textrm for all ij.\n\nThis is the matrix of all inter-distances (zero on diagonal), using the  specified metric, of type Metric::Enumerated type,  giving rise to distance δ. See distance.  By default, the Fisher metric is adopted.\n\nThe elements of this matrix are the square root of  distanceSqrMat.\n\nExamples\n\nusing PosDefManifold\n# Generate a set of 4 random 10x10 SPD matrices\n℘=randP(10, 4)\nΔ=distanceMatrix(℘)\n\n\n\n\n\n"
+},
+
+{
+    "location": "riemannianGeometry/#PosDefManifold.laplacian",
+    "page": "riemannianGeometry.jl",
+    "title": "PosDefManifold.laplacian",
+    "category": "function",
+    "text": "laplacian(Δ²)\n\nGiven a matrix of squared inter-distances Δ^2,  computed for examples by function distanceSqrMat,  return the normalized Laplacian.\n\nFirst, a Gaussian radial basis functions  is applied to all elements of Δ^2, such as\n\nW_ij = exp(fracdisplaystyle-Δ^2_ijdisplaystyleε),\n\nwhere ε is the Gaussian scale parameter chosen automatically   as the median of the elements Δ^2_ij.\n\nFinally, the normalized Laplacian is defined as\n\nΩ = D^-12WD^-12,\n\nwhere D is the diagonal matrix holding on the main diagonal   the sum of the rows (or columns) of W.\n\nnote: Nota Bene\nThe normalized Laplacian as here defined can be requested for any input matrix of squared inter-distances, for example, those obtained on scalars or on vectors using appropriate metrics.\n\nExamples\n\nusing PosDefManifold\n# Generate a set of 4 random 10x10 SPD matrices\n℘=randP(10, 4)\nΔ²=distanceSqrMat(℘)\nΩ=laplacian(Δ²) # or, equivalently, Ω=RΩ(Δ)\n\nSee also: distanceSqrMat, laplacianEigenMaps, spectralEmbedding.\n\n\n\n\n\n"
+},
+
+{
+    "location": "riemannianGeometry/#PosDefManifold.laplacianEigenMaps",
+    "page": "riemannianGeometry.jl",
+    "title": "PosDefManifold.laplacianEigenMaps",
+    "category": "function",
+    "text": "laplacianEigenMaps(Ω, q::Int; <tol=1e-9, maxiter=300, ⍰=false>)\n\nalias: laplacianEM\n\nGiven a normalized Laplacian Ω (see laplacian ) return  the eigen maps in q dimensions, i.e., the q eigenvectors of  the normalized Laplacian associated with the largest q  eigenvalues, excluding the first (which is always equal to 1.0).\n\nThe eigenvectors of the normalized Laplacian are computed by the  power iterations+modified Gram-Schmidt method,  allowing calling this function even for big Laplacian matrices.\n\nReturn the 4-tuple (Λ U iterations convergence), where:\n\nΛ is a qq diagonal matrix holding on diagonal the eigenvalues corresponding to the q dimensions of the Laplacian eigen maps;\nU holds in columns the eigen maps, that is, the q eigenvectors\niterations is the number of iterations executed by the power method;\nconvergence is the convergence attained by the power method;\n\nThe eigenvectors of U holds the coordinates of the points in the  embedded space. For examples of applications see Ridrigues et al. (2018) 🎓.\n\nnote: Nota Bene\nThe maximum value of q that can be requested is n-1, where n is the size of the Laplacian. In general, q=2 or q=3 is requested.\n\nArguments: (Ω, q; <tol=1e-9, maxiter=300, ⍰=false>):\n\nΩ is a normalized Laplacian obtained by the laplacian function;\nq is the dimension of the Laplacian eigen maps;\nThe following are <optional keyword arguments> for the power method iterative algorithm:\ntol is the tolerance for convergence;\nmaxiter is the maximum number of iterations allowed;\nif ⍰ is true, the convergence at all iterations will be printed.\n\nExamples\n\nusing PosDefManifold\n# Generate a set of 4 random 10x10 SPD matrices\n℘=randP(10, 4)\nevalues, maps, iterations, convergence=laplacianEM(Ω, 2)\nevalues, maps, iterations, convergence=laplacianEM(Ω, 2, maxiter=500)\nevalues, maps, iterations, convergence=laplacianEM(Ω, 2, ⍰=true)\n\nSee also: distanceSqrMat, laplacian, spectralEmbedding.\n\n\n\n\n\n"
+},
+
+{
+    "location": "riemannianGeometry/#PosDefManifold.spectralEmbedding",
+    "page": "riemannianGeometry.jl",
+    "title": "PosDefManifold.spectralEmbedding",
+    "category": "function",
+    "text": "spectralEmbedding(℘, q::Int, metric::Metric=Fisher;\n                    <tol=1e-9, maxiter=300, ⍰=false>)\n\nalias: Rse\n\nGiven a 1d array ℘ of k positive definite matrices P_1P_k,  compute its eigen maps in q dimensions.\n\nThis function runs one after the other the functions:\n\ndistanceSqrMat (compute the squared inter-distance matrix),\nlaplacian (compute the normalized Laplacian),\nlaplacianEigenMaps (get the eigen maps).\n\nReturn the 4-tuple (Λ, U, iterations, convergence), where:\n\nΛ is a qq diagonal matrix holding on diagonal the eigenvalues corresponding to the q dimensions of the Laplacian eigen maps;\nU holds in columns the q eigenvectors, i.e., the q coordinates of the points in the embedded space.\niterations is the number of iterations executed by the power method;\nconvergence is the convergence attained by the power method;\n\nArguments (℘, q, metric, <tol=1e-9, maxiter=300, ⍰=false>):\n\n℘ is a 1d array of k positive matrices;\nq is the dimension of the Laplacian eigen maps;\nmetric is a metric of type Metric::Enumerated type, used for computing the inter-distances. By default, the Fisher metric is adopted.\nThe following are <optional keyword arguments> for the power method iterative algorithm:\ntol is the tolerance for convergence of the power method;\nmaxiter is the maximum number of iterations allowed for the power method;\nif ⍰ is true the convergence at all iterations will be printed.\n\nExamples\n\nusing PosDefManifold\n# Generate a set of 4 random 10x10 SPD matrices\n℘=randP(10, 4)\nevalues, maps, iterations, convergence=spectralEmbedding(℘, 2)\nevalues, maps, iterations, convergence=spectralEmbedding(℘, 2, ⍰=true)\n\nSee also: distanceSqrMat, laplacian, laplacianEigenMaps.\n\n\n\n\n\n"
+},
+
+{
     "location": "riemannianGeometry/#Graphs-and-Laplacians-1",
     "page": "riemannianGeometry.jl",
     "title": "Graphs and Laplacians",
     "category": "section",
     "text": "distanceSqrMat\ndistanceMatrix\nlaplacian\nlaplacianEigenMaps\nspectralEmbedding"
+},
+
+{
+    "location": "riemannianGeometry/#PosDefManifold.generalizedMean",
+    "page": "riemannianGeometry.jl",
+    "title": "PosDefManifold.generalizedMean",
+    "category": "function",
+    "text": "generalizedMean(℘, p::Real; <w::Vector=[], ✓w::Bool=true>)\n\nGiven a 1d array ℘ of k positive definite matricesP_1P_k  and optional non-negative real weights vector w=w_1w_k,  return the weighted generalized mean G with real parameter p, that is,\n\nG=big(sum_i=1^kw_iP_i^pbig)^1p.\n\nIf you don\'t pass a weight vector with <optional keyword argument> w,  return the unweighted generalized mean.\n\nG=big(sum_i=1^kP_i^pbig)^1p.\n\nIf <optional keword argument> ✓w=true (default), the weights are  normalized so as to sum up to 1, otherwise they are used as they are passed.  This option is provided to allow  calling this function repeatedly without normalizing the weights each time.\n\nThe following special cases for parameter p are noteworthy:\n\nFor p=frac12 the generalized mean is the modified Bhattacharyya mean.\nFor p=1 the generalized mean is the Euclidean mean.\nFor p=-1 the generalized mean is the inverse Euclidean mean.\nFor p=0 the generalized mean is the log Euclidean mean, which is the Fisher mean when matrices in ℘ all pair-wise commute.\n\nNotice that when matrices in ℘ all pair-wise commute,  the generalized means coincide with the power means  for any p-1 1 and for p=05 it coincides also with the  Wasserstein mean (see wasMean). For this reason the generalized means are used  as default initialization of both the powerMean and wasMean  algorithm.\n\nExamples\n\nusing LinearAlgebra, Statistics, PosDefManifold\n# Generate a set of 4 random 3x3 SPD matrices\n℘=randP(3, 4)\n\n# weights vector, does not need to be normalized\nweights=[1, 2, 3, 1]\n\n# unweighted mean\nG = generalizedMean(℘, 0.25)\n\n# weighted mean\nG = generalizedMean(℘, 0.5; w=weights)\n\n# with weights previously normalized we can set ✓w=false\nweights=weights./mean(weights)\nG = generalizedMean(℘, 0.5; w=weights, ✓w=false)\n\nSee also: powerMean\n\n\n\n\n\n"
+},
+
+{
+    "location": "riemannianGeometry/#PosDefManifold.logdet0Mean",
+    "page": "riemannianGeometry.jl",
+    "title": "PosDefManifold.logdet0Mean",
+    "category": "function",
+    "text": "logdet0Mean(℘; <w::Vector=[], ✓w::Bool=true, init=nothing,\n                 tol=1e-9, ⍰=false>)\n\nGiven a 1d array  of k positive definite matrices P_1P_k  and optional non-negative real weights vector w=w_1w_k,  return the 3-tuple (G iter conv), where G is the mean according  to the logdet zero metric and iter, conv are the number of iterations  and convergence attained by the algorithm.  Mean G is the unique positive definite matrix satisfying\n\nsum_i=1^kw_ibig(frac12P_i+frac12Gbig)^-1=G^-1.\n\nFor estimating it, this function implements the fixed-point iteration algorithm suggested by (Moakher, 2012, p315)🎓, yielding iterations\n\nG  frac12big(sum_i=1^kw_i(P_i+G)^-1big)^-1.\n\nIf you don\'t pass a weight vector with <optional keyword argument> w,  return the unweighted logdet zero mean.\n\nIf <optional keword argument> ✓w=true (default), the weights are  normalized so as to sum up to 1, otherwise they are used as they are passed  and should be already normalized.  This option is provided to allow  calling this function repeatedly without normalizing the same weights  vector each time.\n\nThe following are more <optional keyword arguments>:\n\ninit is a matrix to be used as initialization for the mean. If no matrix is provided, the log Euclidean mean will be used;\ntol is the tolerance for the convergence. The smaller this number (it must be positive) the closer the algorithm gets to the saddle point;\nif ⍰ is true, the convergence attained at each iteration is printed.\n\nnote: Nota Bene\nIn normal circumstances this algorithm converges monothonically. If the algorithm diverges a warning is printed indicating the iteration when this happened and the algorithm is interrupted.\n\nExamples\n\nusing LinearAlgebra, PosDefManifold\n# Generate a set of 4 random 3x3 SPD matrices\n℘=randP(3, 4)\n\n# unweighted mean\nG, iter, conv = logdet0Mean(℘)\n\n# weights vector, does not need to be normalized\nweights=[1, 2, 3, 1]\n\n# weighted mean\nG, iter, conv = logdet0Mean(℘, w=weights)\n\n# print the convergence at all iterations\nG, iter, conv = logdet0Mean(℘, w=weights, ⍰=true)\n\n# now suppose ℘ has changed a bit, initialize with G to hasten convergence\n℘[1]=ℍ(℘[1]+(randP(3)/100))\nG, iter, conv = logdet0Mean(℘, w=weights, ✓w=false, ⍰=true, init=G)\n\nSee: logdet zero metric, modified Bhattacharyya mean.\n\n\n\n\n\n"
+},
+
+{
+    "location": "riemannianGeometry/#PosDefManifold.wasMean",
+    "page": "riemannianGeometry.jl",
+    "title": "PosDefManifold.wasMean",
+    "category": "function",
+    "text": "wasMean(℘; <w::Vector=[], ✓w::Bool=true, init=nothing,\n             tol=1e-9, ⍰=false>)\n\nGiven a 1d array ℘ of k positive definite matrices P_1P_k  and optional non-negative real weights vector w=w_1w_k,  return the 3-tuple (G iter conv), where G is the mean according  to the Wasserstein metric and iter, conv are the number of iterations  and convergence attained by the algorithm.  Mean G is the unique positive definite matrix satisfying\n\nG=sum_i=1^kw_ibig( G^12  P_i G^12big)^12.\n\nFor estimating it, this function implements the fixed-point iterative algorithm  proposed by (Álvarez-Esteban et al., 2016)🎓:\n\nG  G^-12big(sum_i=1^k w_i(G^12P_i G^12)^12big)^2 G^-12.\n\nIf you don\'t pass a weight vector with <optional keyword argument> w,  return the unweighted Wassertein mean.\n\nIf <optional keword argument> ✓w=true (default), the weights are  normalized so as to sum up to 1, otherwise they are used as they are passed  and Metric::Enumerated type be already normalized.  This option is provided to allow  calling this function repeatedly without normalizing the same weights  vector each time.\n\nThe following are more <optional keyword arguments>:\n\ninit is a matrix to be used as initialization for the mean. If no matrix is provided, the instance of generalized means with p=05 will be used;\ntol is the tolerance for the convergence. The smaller this number (it must be positive) the closer the algorithm gets to the true solution;\nif ⍰ is true, the convergence attained at each iteration is printed.\n\nnote: Nota Bene\nIn normal circumstances this algorithm converges monothonically. If the algorithm diverges a warning is printed indicating the iteration when this happened and the algorithm is interrupted.\n\nExamples\n\nusing LinearAlgebra, PosDefManifold\n# Generate a set of 4 random 3x3 SPD matrices\n℘=randP(3, 4)\n\n# unweighted mean\nG, iter, conv = wasMean(℘)\n\n# weights vector, does not need to be normalized\nweights=[1, 2, 3, 1]\n\n# weighted mean\nG, iter, conv = wasMean(℘, w=weights)\n\n# print the convergence at all iterations\nG, iter, conv = wasMean(℘, w=weights, ⍰=true)\n\n# now suppose ℘ has changed a bit, initialize with G to hasten convergence\n℘[1]=ℍ(℘[1]+(randP(3)/100))\nG, iter, conv = wasMean(℘, w=weights, ⍰=true, init=G)\n\nSee: Wasserstein metric\n\n\n\n\n\n"
+},
+
+{
+    "location": "riemannianGeometry/#PosDefManifold.powerMean",
+    "page": "riemannianGeometry.jl",
+    "title": "PosDefManifold.powerMean",
+    "category": "function",
+    "text": "powerMean(℘, p::Real; <w::Vector=[], ✓w::Bool=true, init=nothing,\n                        tol=1e-9, ⍰=false>)\n\nGiven a 1d array ℘ of k positive definite matrices P_1P_k,  an optional non-negative real weights vector w=w_1w_k and  a real parameter p in-1 1, return the  3-tuple (G iter conv), where G is  Lim and Palfia (2012)\'s power means  of order p and  iter, conv are the number of iterations  and convergence attained by the algorithm, respectively.  Mean G is the unique positive definite matrix satisfying\n\nG=sum_i=1^k(w_iGtextrm_pP_i),\n\nwhere Gtextrm_pP_i is the Fisher geodesic equation.  In particular:\n\nwith p=-1 this is the harmonic mean (see the inverse Euclidean)\nwith p=+1 this is the arithmetic mean (see the Euclidean)\nat the limit of p evaluated at zero from both side this is the geometric mean (see the Fisher metric).\n\nFor estimating power means for pin(-1 1), this function implements  the  fixed-point iterative algorithm of (Congedo et al., 2017b)🎓.  For p=0 (geometric mean)  this algorithm is run two times with a small positive and negative value  of p and the geometric mean of the two  resulting means is returned, as suggested in (Congedo et al., 2017b)🎓.  This way of estimating the geometric mean of  a set of matrices is faster as compared to the usual gradient descent algorithm.\n\nIf you don\'t pass a weight vector with <optional keyword argument> w,  return the unweighted power mean.\n\nIf <optional keword argument> ✓w=true (default), the weights are  normalized so as to sum up to 1, otherwise they are used as they are passed  and Metric::Enumerated type be already normalized.  This option is provided to allow  calling this function repeatedly without normalizing the same weights  vector each time.\n\nThe following are more <optional keyword arguments>:\n\ninit is a matrix to be used as initialization for the mean. If no matrix is provided, the instance of generalized means with parameter p will be used.\ntol is the tolerance for the convergence. The smaller this number (it must be positive) the closer the algorithm gets to the true solution;\nif ⍰ is true, the convergence attained at each iteration is printed.\n\nnote: Nota Bene\n\n\nIn normal circumstances this algorithm converges monothonically.   If the algorithm diverges a warning is printed indicating the iteration   when this happened and the algorithm is interrupted.\n\nExamples\n\nusing LinearAlgebra, PosDefManifold\n# Generate a set of 4 random 3x3 SPD matrices\n℘=randP(3, 4)\n\n# unweighted mean\nG, iter, conv = powerMean(℘, 0.5)\n\n# weights vector, does not need to be normalized\nweights=[1, 2, 3, 1]\n\n# weighted mean\nG, iter, conv = powerMean(℘, 0.5, w=weights)\n\n# print the convergence at all iterations\nG, iter, conv = powerMean(℘, 0.5, w=weights, ⍰=true)\n\n# now suppose ℘ has changed a bit, initialize with G to hasten convergence\n℘[1]=ℍ(℘[1]+(randP(3)/100))\nG, iter, conv = powerMean(℘, 0.5, w=weights, ⍰=true, init=G)\n\nSee: modified Bhattacharyya mean\n\n\n\n\n\n"
+},
+
+{
+    "location": "riemannianGeometry/#PosDefManifold.meanP",
+    "page": "riemannianGeometry.jl",
+    "title": "PosDefManifold.meanP",
+    "category": "function",
+    "text": "(1) meanP(P::ℍ, Q::ℍ, metric::Metric=Fisher)\n(2) meanP(℘, metric::Metric=Fisher; <w::Vector=[], ✓w::Bool=true>)\n\n(1) Mean of two positive definite matrices, passed in arbitrary order as  arguments P and Q, using the specified metric of type  Metric::Enumerated type. By defult the Fisher metric is used.  The order is arbitrary as all metrics implemented in PosDefManifold are symmetric.  This is the midpoint of the geodesic. See mean.  For the weighted mean of two positive definite matrices use instead  the geodesic function.\n\n(2) Fréchet mean of an 1d array  of k positive definite matricesP_1P_k,  with optional non-negative real weights w=w_1w_k using the specified  metricas in (1).\n\nIf you don\'t pass a weight vector with <optional keyword argument> w,  return the unweighted mean.\n\nIf <optional keword argument> ✓w=true (default), the weights are  normalized so as to sum up to 1, otherwise they are used as they are passed  and should be already normalized.  This option is provided to allow  calling this function repeatedly without normalizing the same weights  vector each time.\n\nExamples\n\nusing LinearAlgebra, Statistics, PosDefManifold\n# Generate 2 random 3x3 SPD matrices\nP=randP(3)\nQ=randP(3)\nM=meanP(P, Q, logdet0) # (1)\nM=meanP(P, Q) # (1), uses Fisher metric\n\n# Generate a set of 4 random 3x3 SPD matrices\n℘=randP(3, 4)\n# weights vector, does not need to be normalized\nweights=[1, 2, 3, 1]\nM=meanP(℘, Euclidean, w=weights) # (2) weighted Euclidean mean\nM=meanP(℘, Wasserstein)  # (2) unweighted Wassertein mean\n\nMath\n\nThe Fréchet mean of a set of k matrices P_1 P_2 P_k weighted by  w_1 w_2 w_ksum_i=1^kw_i=1 for the supported metrics are,  for those with closed form expression\n\nMetric weighted Fréchet mean\nEuclidean sum_i=1^kw_i P_i\ninvEuclidean big(sum_i=1^kw_i P_i^-1big)^-1\nChoEuclidean TT^*, where T=bL_P + aL_Q\nlogEuclidean textrmexpbig(sum_i=1^kw_ihspace1pt textrmlogP_i big)\nlogCholesky TT^*, where T=sum_i=1^k(w_kS_k)+sum_i=1^k(w_ktextrmlogD_k)\nJeffrey A^12big(A^-12HA^-12big)^12A^12\n\nand for those that verify an equation\n\nMetric equation verified by the weighted Fréchet mean\nFisher sum_i=1^kw_itextrmlogbig(G^-12 P_k G^-12big)=0\nlogdet0 sum_i=1^kw_ibig(frac12P_i+frac12Gbig)^-1=G^-1\nVonNeumann N.A.\nWasserstein G=sum_i=1^kw_ibig( G^12  P_i G^12big)^12\n\nlegend: L_X, S_X and D_X   are the Cholesky lower triangle of X, its strictly lower triangular part   and diagonal part, respectively (hence, S_X+D_X=L_X,  L_XL_X^*=X).   A and H are the weighted arithmetic and weighted harmonic mean, respectively.\n\n\n\n\n\n"
 },
 
 {
@@ -385,11 +489,51 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "riemannianGeometry/#PosDefManifold.logMap",
+    "page": "riemannianGeometry.jl",
+    "title": "PosDefManifold.logMap",
+    "category": "function",
+    "text": "logMap(P::ℍ, G::ℍ, metric::Metric=Fisher)\n\nLogaritmic Map: map a positive definite matrix P from the SPD or  Hermitian manifold into the tangent space at base-point M using the Fisher metric.\n\nThe map is defined as\n\nLog_G(P)=S=G^12textrmlogbig(G^-12PG^-12big)G^12.\n\nThe result is an Hermitian matrix. The inverse operation is expMap.\n\nArguments (P, G, metric):\n\nP is the positive definite matrix to be projected onto the tangent space,\nG is the tangent space base point,\nmetric is a metric of type Metric::Enumerated type.\n\nCurrently only the Fisher metric is supported for tangent space operations.\n\nSee also: vecP\n\nExamples\n\nusing PosDefManifold\nP=randP(3)\nQ=randP(3)\nG=meanP(P, Q, Fisher)\n# projecting P at the base point given by the geometric mean of P and Q\nS=logMap(P, G)\n\n\n\n\n\n"
+},
+
+{
+    "location": "riemannianGeometry/#PosDefManifold.expMap",
+    "page": "riemannianGeometry.jl",
+    "title": "PosDefManifold.expMap",
+    "category": "function",
+    "text": "expMap(S::ℍ, G::ℍ, metric::Metric=Fisher)\n\nExponential Map: map an Hermitian matrix S from the tangent space at base  point G into the SPD or Hermitian manifold (using the Fisher metric).\n\nThe map is defined as\n\nExp_G(S)=P=G^12textrmexpbig(G^-12SG^-12big)G^12.\n\nThe result is a positive definite matrix.  The inverse operation is logMap.\n\nArguments (S, G, metric):\n\nS is a Hermitian matrix, real or complex, to be projected on the SPD or Hermitian manifold,\nG is the tangent space base point,\nmetric is a metric of type Metric::Enumerated type.\n\nCurrently only the Fisher metric is supported for tangent space operations.\n\nExamples\n\nusing PosDefManifold, LinearAlgebra\nP=randP(3)\nQ=randP(3)\nG=meanP(P, Q, Fisher)\n# projecting P on the tangent space at the Fisher mean base point G\nS=logMap(P, G)\n# adding the identity in the tangent space and reprojecting back onto the manifold\nH=expMap(ℍ(S+I), G)\n\n\n\n\n\n"
+},
+
+{
+    "location": "riemannianGeometry/#PosDefManifold.vecP",
+    "page": "riemannianGeometry.jl",
+    "title": "PosDefManifold.vecP",
+    "category": "function",
+    "text": "vecP(S::ℍ)\n\nVectorize a tangent vector (matrix) S (i.e., an Hermitian matrix):  mat -> vec.\n\nIt gives weight 1 to diagonal elements and √2 to off-diagonal elements  (Barachant et al., 2012)🎓.\n\nThe result is a vector holding n(n+1)2 elements, where n  is the size of S.\n\nThe inverse operation is provided by matP.\n\nExamples\n\nusing PosDefManifold\nP=randP(3)\nQ=randP(3)\nG=meanP(P, Q, Fisher)\n# projecting P at the base point given by the geometric mean of P and Q\nS=logMap(P, G)\n# vectorize S\nς=vecP(S)\n\n\n\n\n\n"
+},
+
+{
+    "location": "riemannianGeometry/#PosDefManifold.matP",
+    "page": "riemannianGeometry.jl",
+    "title": "PosDefManifold.matP",
+    "category": "function",
+    "text": "matP(ς::Vector)\n\nMatrizize a tangent vector (vector) ς :  vec -> mat.\n\nThis is the function reversing the vecP function,  thus the weighting applied therein is reversed as well.\n\nIf ς=vecP(S) and S is a nn Hermitian matrix,  ς  is a tangent vector of size n(n+1)2.  The result of calling matP(ς) is then nn matrix S.\n\nP.S.: This function needs to be rewritten more efficiently\n\nExamples\n\nusing PosDefManifold\nP=randP(3)\nQ=randP(3)\nG=meanP(P, Q, Fisher)\n# projecting P at onto the tangent space at the Fisher mean base point\nS=logMap(P, G)\n# vectorize S\nς=vecP(S)\n# Rotate the vector by an orthogonal matrix\nn=Int(size(S, 1)*(size(S, 1)+1)/2)\nU=randP(n)\nv=U*ς\n# Get the point in the tangent space\nS=matP(v)\n\n\n\n\n\n"
+},
+
+{
     "location": "riemannianGeometry/#Tangent-Space-operations-1",
     "page": "riemannianGeometry.jl",
     "title": "Tangent Space operations",
     "category": "section",
     "text": "logMap\nexpMap\nvecP\nmatP"
+},
+
+{
+    "location": "riemannianGeometry/#PosDefManifold.procrustes",
+    "page": "riemannianGeometry.jl",
+    "title": "PosDefManifold.procrustes",
+    "category": "function",
+    "text": "procrustes(P::ℍ, Q::ℍ, extremum=\"min\")\n\nGiven two positive definite matrices P and Q,  return by default the solution of problem\n\ntextrmargmin_Uδ(PU^*QU),\n\nwhere U varies over the set of unitary matrices 𝐔 and δ() is a  distance or divergence function.  U^*QU is named in physics the unitary orbit of Q.\n\nIf the argument \'extremum\' is passed as \"max\", it returns instead the solution of\n\ntextrmargmax_Uδ(PU^*QU),\n\nAs it has been shown in Bhatia and Congedo (2019)🎓,  using each of the Fisher, logdet zero, Wasserstein  and the Kullback-Leibler divergence (see logdet α),  the best approximant to P from the unitary orbit of Q  commutes with P and, surprisingly, has the same closed-form expression, namely\n\nU_Q^U_P^* for the argmin and U_Q^U_P^* for the argmax,\n\nwhere U^ denotes the eigenvector matrix of the subscript argument with  eigenvectors in columns sorted by decreasing order of corresponding eigenvalues and  U^ denotes the eigenvector matrix of the subscript argument with  eigenvectors in columns sorted by increasing order of corresponding eigenvalues.\n\nThe same solutions are known since a long time also by solving the extremal  problem here above using the Euclidean metric (Umeyama, 1988).\n\nExamples\n\nusing PosDefManifold\nP=randP(3)\nQ=randP(3)\n# argmin problem\nU=procrustes(P, Q)\n# argmax problem\nV=procrustes(P, Q, \"max\")\n\n\n\n\n\n"
 },
 
 {
@@ -417,11 +561,43 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "linearAlgebra/#PosDefManifold.det1",
+    "page": "linearAlgebra.jl",
+    "title": "PosDefManifold.det1",
+    "category": "function",
+    "text": "det1!(P::ℍ)\n\nGiven a positive definite matrix P, return the best approximant to  P from the set of matrices in the special linear group,  i.e., the closer matrix having det=1. See Bhatia and Jain (2014)[🎓].\n\nP must be flagged as Hermitian. See typecasting matrices,  however a catch-all method is defined.\n\nExamples\n\nusing LinearAlgebra, PosDefManifold\nP=randP(5) # generate a random real positive definite matrix 5x5\nQ=det1(P)\ndet(Q) # must be 1\n\nSee: typecasting matrices.\n\nSee also: tr1, det.\n\n\n\n\n\n"
+},
+
+{
+    "location": "linearAlgebra/#PosDefManifold.tr1",
+    "page": "linearAlgebra.jl",
+    "title": "PosDefManifold.tr1",
+    "category": "function",
+    "text": "tr1(P::ℍ)\n\nGiven a positive definite matrix P, return the trace-normalizedP`  (trace=1).\n\nP must be flagged as Hermitian. See typecasting matrices,  however a catch-all method is defined.\n\nExamples\n\nusing LinearAlgebra, PosDefManifold\nP=randP(5) # generate a random real positive definite matrix 5x5\nQ=tr1(P)\ntr(Q)  # must be 1\n\nSee: typecasting matrices.\n\nSee also: det1, tr.\n\n\n\n\n\n"
+},
+
+{
+    "location": "linearAlgebra/#PosDefManifold.normalizeCol!",
+    "page": "linearAlgebra.jl",
+    "title": "PosDefManifold.normalizeCol!",
+    "category": "function",
+    "text": "(1) normalizeCol!(X::Matrix, j::Int)\n(2) normalizeCol!(X::Matrix, j::Int, by::Number)\n(3) normalizeCol!(X::Matrix, range::UnitRange)\n(4) normalizeCol!(X::Matrix, range::UnitRange, by::Number)\n\nGiven a general matrix X comprised of real or complex elements,\n\n(1) normalize the j^thcolumn\n(2) divide the elements of the j^th column by number by\n(3) normalize the columns in range\n(4) divide the elements of columns in range  by number by.\n\nby is a number of abstract supertype Number.  It should be an integer, real or complex number.\n\nrange is a UnitRange type.\n\nNo range check nor type check is performed. A catch-all method is defined.\n\nExamples\n\nusing PosDefManifold\nX=randn(10, 20)\nnormalizeCol!(X, 2)                 # (1) normalize columns 2\nnormalizeCol!(X, 2, 10.0)           # (2) divide columns 2 by 10.0\nnormalizeCol!(X, 2:4)               # (3) normalize columns 2 to 4\nX=randn(ComplexF64, 10, 20)\nnormalizeCol!(X, 3)                 # (1) normalize columns 3\nnormalizeCol!(X, 3:6, (2.0 + 0.5im))# (4) divide columns 3 to 5 by (2.0 + 0.5im)\n\nSee also: colNorm, norm, randn\n\n\n\n\n\n"
+},
+
+{
     "location": "linearAlgebra/#Matrix-normalizations-1",
     "page": "linearAlgebra.jl",
     "title": "Matrix normalizations",
     "category": "section",
     "text": "Function Description\ndet1 Normalize the determinant\ntr1 Normalize the trace\nnormalizeCol! Normalize one or more columns⋅det1\ntr1\nnormalizeCol!"
+},
+
+{
+    "location": "linearAlgebra/#PosDefManifold.ispos",
+    "page": "linearAlgebra.jl",
+    "title": "PosDefManifold.ispos",
+    "category": "function",
+    "text": "(1) ispos(  λ::Vector; <tol::Real=minpos, rev::Bool=true,\n            bell::Bool=true, msg::String=\"\">)\n(2) ispos(  Λ::Diagonal; <tol::Real=minpos, rev::Bool=true,\n            bell::Bool=true, msg::String=\"\">)\n\nReturn true if all numbers in (1) real vector λ or in (2) real diagonal  matrix Λ are not inferior to tol, otherwise return false. This may be used,  for example, in spectral functions to check that all eigenvalues are positive.  The default value for tol is constant minpos declared in the main module  constants.\n\nThe following are <optional keyword arguments>:\n\nIf rev=true the (1) elements in λ or (2) the diagonal elements in Λ will be chacked in reverse order.\n\nThis is done for allowing a very fast  check when the elements are sorted where to start checking.\n\nIf the result is false:\n\nif bell=true a bell character will be printed. In most systems this will ring a bell on the computer.\nif string msg is provided, a warning will print msg followed by:\n\n\"at position pos\", where pos is the position where the  first non-positive element has been found.\n\n ## Examples\n using PosDefManifold\n a=[1, 0, 2, 8];\n ispos(a, msg=\"non-positive element found\")\n\n # it will print:\n # ┌ Warning: non-positive element found at position 2\n # └ @ [here julie will point to the line of code issuing the warning]\n\n\n\n\n\n\n\n"
 },
 
 {
@@ -433,6 +609,54 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "linearAlgebra/#PosDefManifold.colProd",
+    "page": "linearAlgebra.jl",
+    "title": "PosDefManifold.colProd",
+    "category": "function",
+    "text": "colProd(X::Matrix, j::Int, l::Int)\n\nGiven a general matrix X, comprised of real or complex elements,  return the dot product of the j^th and l^th columns, defined as,\n\nsum_i=1^r big(x_ij^*x_ilbig)\n\nwhere r is the number of rows of X and ^* the complex conjugate.\n\nNo range check nor type check is performed. A catch-all method is defined.\n\nArguments j and l must be positive integers in range 1:size(X, 2).\n\nExamples\n\nusing PosDefManifold\nX=randn(10, 20)\np=colProd(X, 1, 3)\n\n\n\n\n\n"
+},
+
+{
+    "location": "linearAlgebra/#PosDefManifold.sumOfSqr",
+    "page": "linearAlgebra.jl",
+    "title": "PosDefManifold.sumOfSqr",
+    "category": "function",
+    "text": "(1) sumOfSqr(A::Array)\n(2) sumOfSqr(X::Matrix, j::Int)\n(3) sumOfSqr(X::Matrix, range::UnitRange)\n\nReturn\n\n(1) the sum of square of the elements in an array A of any dimensions.\n(2) the sum of square of the j^th column of a matrix X.\n(3) the sum of square of the columns of X in a given range.\n\nNo range check nor type check is performed. A catch-all method is defined.\n\nNote that only (1) works for arrays of any dimensions and that  if A is a matrix (1) returns the square of the Frobenius norm:  sum a_ij^2\n\nArguments\n\n(1)  (A):\n\nA is an array of any dimensions (e.g., a vector, matrix or tensor), real or complex.\n\n(2) (X, j):\n\nX is a generic matrix, real or complex;\nj is a positive integer in range 1:size(X, 2).\n\n(3) (X, range):\n\nX is a generic matrix, real or complex;;\nrange is a UnitRange type.\n\nExamples\n\nusing PosDefManifold\nX=randn(10, 20)\nsum²=sumOfSqr(X)        # (1) sum of squares of all elements\nsum²=sumOfSqr(X, 1)     # (2) sum of squares of elements in column 1\nsum²=sumOfSqr(X, 2:4)   # (3) sum of squares of elements in column 2 to 4\n\n\n\n\n\n"
+},
+
+{
+    "location": "linearAlgebra/#PosDefManifold.sumOfSqrDiag",
+    "page": "linearAlgebra.jl",
+    "title": "PosDefManifold.sumOfSqrDiag",
+    "category": "function",
+    "text": "(1) sumOfSqrDiag(X::Matrix)\n(2) sumOfSqrDiag(D::Diagonal)\n\nReturn (1) the sum of squares of the diagonal elements in general matrix X  comprised of real or complex numbers.  If X is rectangular, the main diagonal is considered.\n\nIt also return (2) the sum of squares of real diagonal matrix Λ.\n\nNo range check nor type check is performed. A catch-all method is defined.\n\nExamples\n\nusing LinearAlgebra, PosDefManifold\nX=randn(10, 20)\nsumDiag²=sumOfSqrDiag(X) # (1)\nsumDiag²=sumOfSqrDiag(Diagonal(X)) # (2)\n\n\n\n\n\n"
+},
+
+{
+    "location": "linearAlgebra/#PosDefManifold.colNorm",
+    "page": "linearAlgebra.jl",
+    "title": "PosDefManifold.colNorm",
+    "category": "function",
+    "text": "colNorm(X::Matrix, j::Int)\n\nReturn the Euclidean norm of the j^th column of general matrix X.  No range check nor type check is performed. A catch-all method is defined.\n\nExamples\n\nusing PosDefManifold\nX=randn(10, 20)\nnormOfSecondColumn=colNorm(X, 2)\n\n\n\n\n\n"
+},
+
+{
+    "location": "linearAlgebra/#PosDefManifold.sumOfSqrTril",
+    "page": "linearAlgebra.jl",
+    "title": "PosDefManifold.sumOfSqrTril",
+    "category": "function",
+    "text": "sumOfSqrTril(X::Matrix, k::Int=0)\n\nGiven a general matrix X, return the sum of squares of the elements  in the lower triangle X up to the k^th underdiagonal.\n\nX may be rectangular. k must be in range 1-size(X, 1):0.\n\nSee julia tril(M, k::Integer) function  for numbering of diagonals.   No range check nor type check is performed. A catch-all method is defined.\n\nExamples\n\nusing PosDefManifold\nA=[4. 3.; 2. 5.; 1. 2.]\n#3×2 Array{Float64,2}:\n# 4.0  3.0\n# 2.0  5.0\n# 1.0  2.0\n\ns=sumOfSqrTril(A, -1)\n# 9.0 = 1²+2²+2²\n\ns=sumOfSqrTril(A, 0)\n# 50.0 = 1²+2²+2²+4²+5²\n\n\n\n\n\n"
+},
+
+{
+    "location": "linearAlgebra/#PosDefManifold.fidelity",
+    "page": "linearAlgebra.jl",
+    "title": "PosDefManifold.fidelity",
+    "category": "function",
+    "text": "fidelity(P::ℍ, Q::ℍ)\n\nGiven two positive definte matrices P and Q, return their fidelity:\n\ntrbig(P^12QP^12big)^12\n\nThis is used in quantum physics and is related to the  Wasserstein metric. See for example Bhatia, Jain and Lim (2019b)🎓.\n\nP and Q must be flagged as Hermitian.  See typecasting matrices,  however a catch-all method is defined.\n\nExamples\n\nusing PosDefManifold\nP=randP(5);\nQ=randP(5);\nf=fidelity(P, Q)\n\nSee: typecasting matrices\n\n\n\n\n\n"
+},
+
+{
     "location": "linearAlgebra/#Scalar-functions-of-matrices-1",
     "page": "linearAlgebra.jl",
     "title": "Scalar functions of matrices",
@@ -441,11 +665,27 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "linearAlgebra/#PosDefManifold.fDiagonal",
+    "page": "linearAlgebra.jl",
+    "title": "PosDefManifold.fDiagonal",
+    "category": "function",
+    "text": "fDiagonal(X::Matrix, func::Function, k::Int=0)\n\nApplies function func element-wise to the elements of the k^th diagonal  of generic matrix X (real or complex) of dimension r⋅c  and return a diagonal matrix with these elements.  Note that the dimension of the result depends on the size of X  and the chosen diagonal.\n\nFor example,\n\nr ≠ c and k=0 (main diagonal), the result will be of dimension min(r,c)⋅min(r,c),\nX 3⋅4 and k=-1, the result will be 2⋅2,\nX 3⋅4 and k=1, the result will be 3⋅3, etc.\n\nSee julia tril(M, k::Integer) function  for numbering of diagonals.\n\nArguments (X, func, k)\n\nX is a generic matrix of real or complex elements;\nfunc is a function;\nk is the chosen diagonal (by default k=0, which is the main diagonal).\n\nnote: Nota Bene\nThe function func must support the func. syntax and therefore must be able to apply element-wise to the elements of the chosen diagonal (this includes anonymous functions). If X is complex, the function func must be able to support complex arguments.\n\nA catch-all method is defined.\n\nExamples\n\nusing PosDefManifold\nP=randP(5) # use P=randP(ComplexF64, 5) for generating an Hermitian matrix\n(Λ, U) = evd(P)         # Λ holds the eigenvalues of P, see evd\nΔ=fDiagonal(Λ, log)     # diagonal matrix with the log of the eigenvalues\nΔ=fDiagonal(Λ, x->x^2)  # using an anonymous function for the square of the eigenvalues\n\n\n\n\n\n"
+},
+
+{
     "location": "linearAlgebra/#Diagonal-functions-of-matrices-1",
     "page": "linearAlgebra.jl",
     "title": "Diagonal functions of matrices",
     "category": "section",
     "text": "Function Description\nfDiagonal Elemen-wise functions of matrix diagonals⋅fDiagonal"
+},
+
+{
+    "location": "linearAlgebra/#PosDefManifold.mgs",
+    "page": "linearAlgebra.jl",
+    "title": "PosDefManifold.mgs",
+    "category": "function",
+    "text": "mgs(T::Matrix, numCol::Int=0)\n\nModified (stabilized) Gram-Schmidt orthogonalization  of the columns of square or tall matrix T, which can be comprised of real  or complex elements.  The orthogonalized T is returned by the function.\n\nT is not changed.\n\nAll columns are orthogonalized by default. If instead argument numCol is provided,  then only the first numCol columns of T are orthogonalized.  In this case only the firt `numCol columns will be returned.\n\nExamples\n\nusing LinearAlgebra, PosDefManifold\nX=randn(10, 10);\nU=mgs(X)        # result is 10⋅10\nU=mgs(X, 3)     # result is 10⋅3\nU\'*U ≈ I ? println(\" ⭐ \") : println(\" ⛔ \")\n# julia undertands also:\nU\'U ≈ I ? println(\" ⭐ \") : println(\" ⛔ \")\n\n\n\n\n\n"
 },
 
 {
@@ -465,11 +705,67 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "linearAlgebra/#PosDefManifold.evd",
+    "page": "linearAlgebra.jl",
+    "title": "PosDefManifold.evd",
+    "category": "function",
+    "text": "evd(S::ℍ)\n\nGiven a positive semi-definite matrix S,  returns a 2-tuple (Λ U), where U is the matrix holding in columns  the eigenvectors and Λ is the matrix holding the eigenvalues on the diagonal.  This is the output of Julia eigen function in UΛU=S form.\n\nAs for the eigen function, the eigenvalues and associated  eigenvectors are sorted by increasing values of eigenvalues.\n\nS must be flagged by julia as Hermitian.  See typecasting matrices and typecasting matrices.\n\nExamples\n\nusing PosDefManifold\nA=randn(3, 3);\nS=ℍ(A+A\');\nΛ, U=evd(S); # which is equivalent to (Λ, U)=evd(P)\n(U*Λ*U\') ≈ S ? println(\" ⭐ \") : println(\" ⛔ \")\n# => UΛU\'=S, UΛ=SU, ΛU\'=U\'S\n\n\n\n\n\n"
+},
+
+{
+    "location": "linearAlgebra/#PosDefManifold.spectralFunctions",
+    "page": "linearAlgebra.jl",
+    "title": "PosDefManifold.spectralFunctions",
+    "category": "function",
+    "text": "spectralFunctions(P::ℍ, func)\n\nThis is the mother function for all spectral functions of eigenvalues implemented  in this library, which are:\n\npow     (power),\nisqrt   (inverse square root).\n\nThe function sqr (square) does not use it, as it can be obtained more  efficiently by simple multiplication.\n\nYou can use this function if you need another spectral function of eigenvalues  besides those and those already implemented in the standard package LinearAlgebra.  In general, you won\'t call it directly.\n\nThe definition of spectral functions for a positive definite matrix P  is at it follows:\n\nfbig(Pbig)=Ufbig(Λbig)U\n\nwhere U is the matrix holding in columns the eigenvectors of P,  Λ is the matrix holding on diagonal its eigenvalues and f is  a function applying element-wise to the eigenvalues.\n\nArguments (P, func);\n\nP is a positive matrix.\n`func is the function that will be applied on the eigenvalues\n\nnote: Nota Bene\nThe function func must support the func. syntax and therefore must be able to apply element-wise to the eigenvalues (those include anonymous functions).\n\nExamples\n\nusing LinearAlgebra, PosDefManifold\nn=5\nP=randP(n) # P=randP(ComplexF64, 5) to generate an Hermitian complex matrix\nnoise=0.1;\nQ=spectralFunctions(P, x->x+noise) # add white noise to the eigenvalues\ntr(Q)-tr(P) ≈ noise*n ? println(\" ⭐ \") : println(\" ⛔ \")\n\nSee: typecasting matrices.\n\nSee also: evd.\n\n\n\n\n\n"
+},
+
+{
+    "location": "linearAlgebra/#PosDefManifold.pow",
+    "page": "linearAlgebra.jl",
+    "title": "PosDefManifold.pow",
+    "category": "function",
+    "text": "pow(P::ℍ, p)        # one argument\npow(P::ℍ, args...)  # several arguments\n\nGiven a positive definite matrix P, return the power  P^r_1 P^r_2  for any number of exponents r_1 r_2.  It returns a tuple of as many elements as arguments passed after P.\n\nArguments (P, arg1, arg2,...)\n\nP is a positive matrix.\narg1 arg2 are real numbers.\n\nExamples\n\nusing LinearAlgebra, PosDefManifold\nP=randP(5);     # use P=randP(ComplexF64, 5) for generating an Hermitian matrix\nQ=pow(P, 0.5);            # =>  QQ=P\nQ, W=pow(P, 0.5, -0.5);\nW*P*W ≈ I ? println(\" ⭐ \") : println(\" ⛔ \")\nQ*Q ≈ P ? println(\" ⭐ \") : println(\" ⛔ \")\nR, S=pow(P, 0.3, 0.7);\nR*S ≈ P ? println(\" ⭐ \") : println(\" ⛔ \")\n\nSee: typecasting matrices.\n\nSee also: invsqrt.\n\n\n\n\n\n"
+},
+
+{
+    "location": "linearAlgebra/#PosDefManifold.invsqrt",
+    "page": "linearAlgebra.jl",
+    "title": "PosDefManifold.invsqrt",
+    "category": "function",
+    "text": "invsqrt(P::ℍ)\n\nGiven a positive definite matrix P, compute the inverse of the principal  square root P^-12.\n\nExamples\n\nusing LinearAlgebra, PosDefManifold\nP=randP(ComplexF64, 5);\nQ=invsqrt(P);\nQ*P*Q ≈ I ? println(\" ⭐ \") : println(\" ⛔ \")\n\nSee: typecasting matrices.\n\nSee also: pow.\n\n\n\n\n\n"
+},
+
+{
+    "location": "linearAlgebra/#PosDefManifold.sqr",
+    "page": "linearAlgebra.jl",
+    "title": "PosDefManifold.sqr",
+    "category": "function",
+    "text": "sqr(P::ℍ)\n\nGiven a positive definite matrix P, compute its square P^2.\n\nExamples\n\nusing PosDefManifold\nP=randP(5);\nP²=sqr(P);  # =>  P²=PP\nsqrt(P²)≈ P ? println(\" ⭐ \") : println(\" ⛔ \")\n\nSee: typecasting matrices\n\n\n\n\n\n"
+},
+
+{
+    "location": "linearAlgebra/#PosDefManifold.powerIterations",
+    "page": "linearAlgebra.jl",
+    "title": "PosDefManifold.powerIterations",
+    "category": "function",
+    "text": "powerIterations(S::ℍ, q;\n        <evalues=false, tol=1e-9, maxiter=300, ⍰=false>)\n\nalias: powIter\n\nCompute the q eigenvectors associated to the q largest (real) eigenvalues  of matrix S using the power iterations +  Gram-Schmidt orthogonalization as suggested by Strang.\n\nS must be flagged by julia as Hermitian.  See typecasting matrices.\n\nnote: Nota Bene\nDifferently from the evd function, the eigenvectors and eigenvalues are sorted by decreasing order of eigenvalues.\n\nArguments (S, q; evalues=false, tol=1e-9, maxiter=300, ⍰=false):\n\nS is an Hermitian matrix (real, complex, positive definite or not).\nq is the number of eigenvectors to be found (thus the number of columns of the output).\n\nThe following are <optional keyword arguments>:\n\ntol is the tolerance for the convergence of the power method.\nmaxiter is the maximum number of iterations allowed for the power method\nif =true, the convergence of all iterations will be printed.\nif evalues=true, return the 4-tuple (Λ U iterations covergence)\nif evalues=false return the 3-tuple (U iterations covergence)\n\nExamples\n\nusing LinearAlgebra, PosDefManifold\nS=randP(10);\n# all eigenvectors\nU, iterations, covergence=powIter(S, size(P, 2), ⍰=true)\n# 3 eigenvectors and eigenvalues\nΛ, U, iterations, covergence=powIter(S, 3, evalues=true);\nU\'*U≈ I ? println(\" ⭐ \") : println(\" ⛔ \")\n\nSee also: mgs\n\n\n\n\n\n"
+},
+
+{
     "location": "linearAlgebra/#Spectral-decompositions-of-positive-matrices-1",
     "page": "linearAlgebra.jl",
     "title": "Spectral decompositions of positive matrices",
     "category": "section",
     "text": "Function Description\nevd Eigenvalue-Eigenvector decomposition of a matrix in UΛU=P form\nspectralFunctions Mother function for creating spectral functions of eigenvalues\npow Power of a positive matrix for any number of exponents in one pass\ninvsqrt Principal square root inverse (whitening) of a positive matrix\nsqr Square of a positive matrix\npowerIterations, powIter Power method for estimating any number of eigenvectors and associated eigenvalues\nchoL Lower triangula factor of Cholesky decomposition⋅evd\nspectralFunctions\npow\ninvsqrt\nsqr\npowerIterations"
+},
+
+{
+    "location": "linearAlgebra/#PosDefManifold.choL",
+    "page": "linearAlgebra.jl",
+    "title": "PosDefManifold.choL",
+    "category": "function",
+    "text": "choL(P::ℍ)\nchoL(P::Matrix)\n\nGiven a positive matrix P, return the Cholesky lower triangular factor L  such that LL=P. To obtain L or both L and L, use instead  julia function cholesky(P).\n\nP sould be flagged as Hermitian - see  typecasting matrices - but a method for generic matrices  is also provided.\n\nOn output, L is of type LowerTriangular.\n\nExamples\n\nusing PosDefManifold\nP=randP(5);\nL=choL(P);\nL*L\'≈ P ? println(\" ⭐ \") : println(\" ⛔ \")\n\n\n\n\n\n"
 },
 
 {
@@ -486,6 +782,70 @@ var documenterSearchIndex = {"docs": [
     "title": "signalProcessing.jl",
     "category": "page",
     "text": ""
+},
+
+{
+    "location": "signalProcessing/#PosDefManifold.randChi²",
+    "page": "signalProcessing.jl",
+    "title": "PosDefManifold.randChi²",
+    "category": "function",
+    "text": "randChi²(df::Int)\n\nalias: randχ²\n\nGenerate a random variable distributed as a chi-squared with df  degrees of freedom.\n\nIt uses the Wilson–Hilferty transformation for df>=20 -  see chi-squared distribution.\n\nExamples\n\nusing Plots, PosDefManifold\nchi=[randχ²(2) for i=1:10000]\nhistogram(chi) # needs Plots package. Check your plots back-end.\n\n\n\n\n\n"
+},
+
+{
+    "location": "signalProcessing/#PosDefManifold.randEigvals",
+    "page": "signalProcessing.jl",
+    "title": "PosDefManifold.randEigvals",
+    "category": "function",
+    "text": "randEigvals(n::Int; <df::Int=2, eigvalsSNR::Real=10e3>)\n\nalias: randλ\n\nGenerate an n-vector of random real positive eigenvalues.  The eigenvalues are generated as in function randΛ(randEigvalsMat),  the syntax of which is used.\n\nExamples\n\nusing Plots, PosDefManifold\nλ=sort(randλ(10), rev=true)\nσ=sort(randλ(10, eigvalsSNR=10), rev=true)\nplot(λ) # needs Plots package. Check your plots back-end.\nplot!(σ) # needs Plots package. Check your plots back-end.\n\nSee also: randU (randUnitaryMat), randP (randPosDefMat).\n\n\n\n\n\n"
+},
+
+{
+    "location": "signalProcessing/#PosDefManifold.randEigvalsMat",
+    "page": "signalProcessing.jl",
+    "title": "PosDefManifold.randEigvalsMat",
+    "category": "function",
+    "text": "randEigvalsMat(n::Int; <df::Int=2, eigvalsSNR::Real=10e3>)\n\nalias: randΛ\n\nGenerate an nn diagonal matrix of random real positive eigenvalues.\n\nThe eigenvalues are generated according to model\n\nλ_i=χ_df^2+ηhspace6pttextrmforhspace2pti=1n\n\nwhere\n\nχ_df^2 (signal term) is randomly distributed as a chi-square with df degrees of freedom,\nη is a white noise term, function of <keyword argument> eigvalsSNR, such that\n\ntextrmeigenvalues SNR=mathbbEbig(sum_i=1^nλ_ibig)bignη\n\nThe expected sum mathbbEbig(sum_i=1^nλ_ibig) here above is the  expected variance of the signal term, i.e., n(df), since the expectation  of a random chi-squared variable is equal to its degrees of freedom.\n\nIf eigvalsSNR=Inf is passed as argument, then η is set to zero, i.e.,  no white noise is added. In any case eigvalsSNR must be positive.\n\nNote that with the default value of <keyword argument> df (df=2)  the generating model assumes that the eigenvalues  have exponentially decaying variance, which is often observed on real data.\n\nnote: Nota Bene\nThe <keyword argument> eigvalsSNR expresses the expected eigenvalues SNR (signal-to-noise ratio), not the real one, and is not expressed in decibels, but as the expected SNR variance ratio.\n\nThis function is used by function randP (randPosDefMat) to generate  random positive definite matrices with added white noise in order  to emulate eigenvalues observed in real data and to  improve the conditioning of the generated matrices with respect to inversion.\n\nExamples\n\nusing PosDefManifold\nn=3;\nU=randU(n);\nΛ=randΛ(n, eigvalsSNR=100)\nP=U*Λ*U\' # generate an SPD matrix\nusing LinearAlgebra\nQ=ℍ(U*Λ*U\') # generate an SPD matrix and flag it as \'Hermitian\'\n\nSee also: randλ (randEigvals), randU (randUnitaryMat), randP (randPosDefMat)\n\n\n\n\n\n"
+},
+
+{
+    "location": "signalProcessing/#PosDefManifold.randUnitaryMat",
+    "page": "signalProcessing.jl",
+    "title": "PosDefManifold.randUnitaryMat",
+    "category": "function",
+    "text": "(1) randUnitaryMat(n::Int)\n(2) randUnitaryMat(::Type{Complex{T}}, n::Int)\n\naliases: randOrthMat, randU\n\nGenerate a random nn\n\n(1) orthogonal matrix (real)\n(2) unitary matrix (complex)\n\nThe matrices are generated running the modified (stabilized)  Gram-Schmidt orthogonalization  procedure (mgs) on an nn matrix filled with random Gaussian elements.\n\nExamples\n\nusing PosDefManifold\nn=3;\nX=randU(n)*sqrt(randΛ(n))*randU(n)\'  # (1) generate a random square real matrix\n\nU=randU(ComplexF64, n);\nV=randU(ComplexF64, n);\nY=U*sqrt(randΛ(n))*V\' # (2) generate a random square complex matrix\n\nSee also: randΛ (randEigvals), randP (randPosDefMat).\n\n\n\n\n\n"
+},
+
+{
+    "location": "signalProcessing/#PosDefManifold.randPosDefMat",
+    "page": "signalProcessing.jl",
+    "title": "PosDefManifold.randPosDefMat",
+    "category": "function",
+    "text": "(1) randPosDefMat(n::Int; <df::Int=2, eigvalsSNR::Real=10e3>)\n(2) randPosDefMat(::Type{Complex{T}}, arguments in (1))\n(3) randPosDefMat(n::Int, k::Int; df::Int=2, eigvalsSNR::Real=10e3, SNR::Real=100)\n(4) randPosDefMat(::Type{Complex{T}}, arguments in (3))\n\nalias: randP\n\nGenerate\n\n(1) one random Hermitian positive definite matrix (real) of size nn\n(2) one random Hermitian positive definite matrix (complex) of size nn\n(3) an array 1d of k matrices of type (1)\n(4) an array 1d of k matrices of type (2) .\n\nFor (1) and (2) the matrix is generated according to model\n\nUΛU+ηI,\n\nwhere U is a random orthogonal (1) or unitary (2) matrix generated by  function randU(randUnitaryMat) and Λ, η are a positive definite  diagonal matrix and a non-negative scalar depending on <keywords arguments>  df and eigvalsSNR randomly generated calling function  randΛ(randEigvalsMat).\n\nFor (3) and (4) the k matrices are generated according to model\n\n(UΛ_iU+ηI)+φ(V_iΔ_iV_i+ηI)hspace8pt  Eq.[1]\n\nwhere\n\nU and the V_i are random (3) orthogonal/(4) unitary matrices,\nΛ_i and Δ_i are positive definite diagonal matrices\nη is a non-negative scalar.\n\nAll variables here above are randomly generated as in (1) and (2)\n\nφ is adjusted so as to obtain a desired output SNR (keyword argument) (signal-to-noise ratio), such as\n\nSNR=fracdisplaystylesum_i=1^ktextrmtr(UΛ_kU+ηI)displaystylesum_i=1^ktextrmtrφ(UΔ_kU+ηI).\n\nnote: Nota Bene\nThe keyword arguments SNR is not expressed in decibels, but as the expected SNR variance ratio. It must be a positive number.\n\nA slightly different version of this model for generating positive definite  matrices has been proposed in (Congedo et al., 2017b)[🎓];  in the model of Eq. [1]\n\nUΛ_iU is the signal term, where the signal is supposed sharing the same coordinates for all matrices,\nφ(V_iΔ_iV_i) is a structured noise term, which is different for all matrices\nηI is a white noise term, with same variance for all matrices.\n\nSee also: the aforementioned paper and randΛ (randEigvalsMat).\n\nExamples\n\nusing PosDefManifold\nR=randP(10, df=10, eigvalsSNR=1000) # 1 SDP Matrix of size 10x10 #(1)\nH=randP(ComplexF64, 5, eigvalsSNR=10) # 1 Hermitian Matrix of size 5x5 # (2)\nℛ=randP(10, 1000, eigvalsSNR=100) # 1000 SPD Matrices of size 10x10 # (3)\nusing Plots\nheatmap(Matrix(ℛ[1]), yflip=true, c=:bluesreds)\nℋ=randP(ComplexF64, 20, 1000) # 1000 Hermitian Matrices of size 20x20 # (4)\n\n\n\n\n\n"
+},
+
+{
+    "location": "signalProcessing/#PosDefManifold.regularize!",
+    "page": "signalProcessing.jl",
+    "title": "PosDefManifold.regularize!",
+    "category": "function",
+    "text": "(1) regularize!(P::ℍ; <SNR=10e3>)\n(2) regularize!(℘; <SNR=10e3>)\n\nAdd white noise to either\n\n(1) a positive matrix P of size nn, or\n(2) a 1d array  of k positive matrices of size nn.\n\nThe added noise improves the matrix conditioning with respect to inversion.  This is used to avoid numerical errors when decomposing these matrices  or when evaluating some functions of their eigevalues such as the log.\n\nA constant value is added to all diagonal elements of (1) P  or (2) af all matrices in ,  that is, on output:\n\ntextrm(1)hspace2ptPleftarrow P+ηI\n\ntextrm(2)hspace2pt_ileftarrow _i+ηI hspace2pttextrmforhspace2pt i=1k\n\nThe amount of added noise η is determined by the SNR  <keyword argument>, which by default is 10000. This is  such that\n\ntextrm(1)hspace2ptSNR=fracdisplaystyletextrmtr(P)displaystyletextrmtr(ηI)\n\ntextrm(2)hspace2ptSNR=fracdisplaystylesum_i=1^ktextrmtr(_i)displaystyle khspace1pttextrmtr(ηI)\n\nnote: Nota Bene\nThe keyword argument SNR expresses a SNR (signal-to-noise ratio), and is not expressed in decibels,  but as the SNR variance ratio. It must be a positive number. Differently from function randΛrandEigvalsMat, randλrandEigvals and randPrandPosDefMat, the SNR here is not the expected SNR, but the actual SNR.\n\nExamples\n\n# (1)\nusing LinearAlgebra, Plots, PosDefManifold\nn=3\nU=randU(n)\n# in Q we will write two matrices the unregularized and regularized matrix side by side\nQ=Matrix{Float64}(undef, n, n*2)\nP=ℍ(U*Diagonal(randn(n).^2)*U\') # generate a real 3x3 positive matrix\nfor i=1:n, j=1:n Q[i, j]=P[i, j] end\nregularize!(P, SNR=5)\nfor i=1:n, j=1:n Q[i, j+n]=P[i, j] end # the regularized matrix is on the right\nheatmap(Matrix(Q), yflip=true, c=:bluesreds)\n\n# (2)\n℘=[ℍ(U*Diagonal(randn(3).^2)*U\') for i=1:5] # 5 real 3x3 positive matrices\nregularize!(℘, SNR=1000)\n\nRun a test\n\nusing LinearAlgebra\n℘=randP(10, 100, SNR=1000); # 100 real Hermitian matrices\nsignalVar=sum(tr(P) for P in ℘);\nregularize!(℘, SNR=1000);\nsignalPlusNoiseVar=sum(tr(P) for P in ℘);\noutput_snr=signalVar/(signalPlusNoiseVar-signalVar)\n# output_snr should be approx. equal to 1000\n\n\n\n\n\n"
+},
+
+{
+    "location": "signalProcessing/#PosDefManifold.gram",
+    "page": "signalProcessing.jl",
+    "title": "PosDefManifold.gram",
+    "category": "function",
+    "text": "gram(X::Matrix{T}) omissis\n\nGiven a generic data matrix X, comprised of real or complex elements,  return the normalized Gram matrix, that is,  the covariance matrix of X  corrected by sample size, but without subtracting the mean.\n\nThe result is flagged as Hermitian.  See typecasting matrices.\n\nnote: Nota Bene\nIf X is wide or square (r<=c) return XXc. If X is tall (r>c)            return XXr.\n\nExamples\n\nusing PosDefManifold\nX=randn(5, 150);\nG=gram(X) # => G=X*X\'/150\nX=randn(100, 2);\nF=gram(X); # => G=X\'*X/100\n\n\n\n\n\n"
+},
+
+{
+    "location": "signalProcessing/#PosDefManifold.trade",
+    "page": "signalProcessing.jl",
+    "title": "PosDefManifold.trade",
+    "category": "function",
+    "text": "trade(P::ℍ)\n\nGiven a positive definite matrix P, return as a 2-tuple the  trace and the determinant of P.  This is used to plot positive matrices in two dimensions  (TraDe plots: log(trace/n) vs. log(determinant), see exemple here below).\n\nP must be flagged by julia as Hermitian.   See typecasting matrices.\n\nExamples\n\nusing PosDefManifold\nP=randP(3)\nt, d=trade(P)  # equivalent to (t, d)=trade(P)\n\n# TraDe plot\nusing Plots\nk=100\nn=10\n℘=randP(n, k, SNR=1000); # 100 real Hermitian matrices\nx=Vector{Float64}(undef, k)\ny=Vector{Float64}(undef, k)\nfor i=1:k\n    x[i], y[i] = trade(℘[i])\nend\nx=log.(x./n)\ny=log.(y)\nplot(x, y, seriestype=:scatter)\n\n\n\n\n\n"
 },
 
 {
