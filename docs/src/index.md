@@ -6,9 +6,10 @@ Julia v1.0.3 or higher
 
 ## Installation
 
-The package is not registered yet. Use the [github
-url](https://github.com/Marco-Congedo/PosDefManifold.jl/tree/master/src) for
-adding the **PosDefManifold** package.
+The package is not registered yet. Execute the following command
+in Julia's REPL:
+
+]add https://github.com/Marco-Congedo/PosDefManifold.jl
 
 ## Overview
 
