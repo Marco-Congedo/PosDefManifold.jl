@@ -1,8 +1,8 @@
 # PosDefManifold Documentation
 
-## Requirement
+## Requirements
 
-Julia v1.0.3 or higher
+Julia version ≥ 1.0.3
 
 ## Installation
 
