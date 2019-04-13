@@ -17,11 +17,11 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "#Requirement-1",
+    "location": "#Requirements-1",
     "page": "PosDefManifold Documentation",
-    "title": "Requirement",
+    "title": "Requirements",
     "category": "section",
-    "text": "Julia v1.0.3 or higher"
+    "text": "Julia version ≥ 1.0.3"
 },
 
 {
