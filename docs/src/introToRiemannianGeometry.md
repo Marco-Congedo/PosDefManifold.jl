@@ -6,7 +6,7 @@ The study of appropriate *distance* measures for
 
 In many applications the observed data can be conveniently summarized
 by positive definite matrices, which are either
-[symmetric positive definite] (https://bit.ly/2HJx3pJ) (SPD: real) or
+[symmetric positive definite](https://bit.ly/2HJx3pJ) (SPD: real) or
 [Hermitian Positive Definite](https://bit.ly/2Y9AfAI) (HPD: complex).
 For example, those may be some form of the data [covariance matrix](https://bit.ly/2IJEWcc)
 in the time, frequency or time-frequency domain, or autocorrelation matrices, kernels, slices of tensors, density matrices, elements of a search space, etc.
