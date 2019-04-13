@@ -14,7 +14,7 @@ Positive definite matrices are naturally treated as points on a
 *smooth Riemannian manifold* allowing useful operations such as interpolation, smoothing, filtering, approximation, averaging, signal detection and classification.
 Such operations are the object of the present *PosDefManifold* library.
 
-More formally, this [Julia](https://julialang.org/) library treats operations on the metric space ``(``**P**``, δ^2)`` of *n・n* positive definite matrices endowed with a distance or symmetric divergence ``\delta(``**P** *x* **P**``)→[0, ∞] ``. Several matrix distances or matrix divergences ``δ`` are considered.
+More formally, this [Julia](https://julialang.org/) library treats operations on the metric space ``(``**P**``, δ^2)`` of *n・n* positive definite matrices endowed with a distance or symmetric divergence ``δ(``**P** *x* **P**``)→[0, ∞] ``. Several matrix distances or matrix divergences ``δ`` are considered.
 Using some of them, the most important one being the **Fisher metric**,
 we define a [Riemannian manifold](https://bit.ly/2CrHr1O).
 In mathematics, this is the subject of [Riemannian geometry](https://bit.ly/2Y9rfLU)
