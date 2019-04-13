@@ -4,7 +4,7 @@
 
 **PosDefManifold** is a [**Julia**](https://julialang.org/) package for manipulating data in the manifold **P** of real or complex [**positive definite matrices**](https://en.wikipedia.org/wiki/Definiteness_of_a_matrix). The package supports **10 metrics** acting on **P**, two of which define [**Riemannian manifolds**](https://en.wikipedia.org/wiki/Riemannian_manifold). 
 
-It computes **distances**, **geodesics** and **weighted Fréchet means** for the supported metrics, **graph Laplacians**, **Lapacian eigen maps** and a special solution of the [**Procrustes problem**](https://en.wikipedia.org/wiki/Orthogonal_Procrustes_problem) in **P**.
+This package computes **distances**, **geodesics** and **weighted Fréchet means** for the supported metrics, **graph Laplacians**, **Lapacian eigen maps** and a special solution of the [**Procrustes problem**](https://en.wikipedia.org/wiki/Orthogonal_Procrustes_problem) in **P**.
 
 The documentation is rich and gives all mathematical details pertaining to the implemented functions.
 
