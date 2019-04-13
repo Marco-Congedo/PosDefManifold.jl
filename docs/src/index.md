@@ -25,7 +25,7 @@ For a formal introduction to the **P** manifold the reader is referred to Bhatia
 
 For an introduction to Riemannian geometry and an overview of mathematical tools implemented in this package, see [Intro To Riemannian Geometry](introToRiemannianGeometry/index.html) in this documentation.
 
-For starting using this package, browse the code units listed here below and execute the many **example code** you will find therein.
+For starting using this package, browse the code units listed here below and execute the many **example code** you will find therein. The core functions are contained in unit *riemannianGeometry.jl*.
 
 ## Code units
 
