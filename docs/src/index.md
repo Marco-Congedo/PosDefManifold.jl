@@ -23,7 +23,7 @@ In several fields of research such as *computer vision* and *brain-computer inte
 
 For a formal introduction to the **P** manifold the reader is referred to Bhatia (2007)[🎓](@ref).
 
-For an introduction to Riemannian geometry and an overview of mathematical tools implemented in this package, see [Intro To Riemannian Geometry](introToRiemannianGeometry/index.html) in this documentation.
+For an introduction to Riemannian geometry and an overview of mathematical tools implemented in this package, see [Intro to Riemannian Geometry](@ref) in this documentation.
 
 For starting using this package, browse the code units listed here below and execute the many **example code** you will find therein. The core functions are contained in unit *riemannianGeometry.jl*.
 
@@ -36,7 +36,7 @@ For starting using this package, browse the code units listed here below and exe
 | [MainModule (PosDefManifold.jl)](@ref) | Main module |
 | [riemannianGeometry.jl](@ref) | The fundamental unit collecting all functions acting on the **P** manifold |
 | [linearAlgebra.jl](@ref) | Collection of linear algebra routines |
-| [signalProcessing.jl](@ef) | Collection of signal processing routines |
+| [signalProcessing.jl](@ref) | Collection of signal processing routines |
 | [test.jl](@ref) | Unit performing all tests |
 
 ## Contents

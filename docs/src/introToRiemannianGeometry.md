@@ -57,7 +57,7 @@ Furthermore, as we will see, using the [Fisher](@ref) metric those geodesics ext
 
 ## distance
 
-The length of the geodesic (at constant velocity) between two points gives the **distance** ``δ(P, Q)``.
+The length of the geodesic (at constant velocity) between two points gives the **distance** ``δ(P, Q)``.  The distance is always real, non-negative and equal to zero if and only if ``P=Q``.
 
 ## distance from the origin
 

@@ -150,9 +150,6 @@ end # function
  In both cases the distance function ``δ`` is induced by the argument `metric` of type
  [Metric::Enumerated type](@ref). By default, the [Fisher](@ref) metric is adopted.
 
- The distance is always real, non-negative and equal to zero if and only if
- (1) ``P=I`` or (2) ``P=Q``.
-
  ``P`` in (1) and ``P``, ``Q`` in (2) must be flagged by julia as `Hermitian`.
  See [typecasting matrices](@ref).
 
@@ -383,6 +380,8 @@ end #function
  giving rise to distance function ``δ``. See [`distanceSqr`](@ref).
  By default, the [Fisher](@ref) metric is adopted.
 
+ **See**: [distance](@ref).
+
  **See also**: [`laplacian`](@ref), [`laplacianEigenMaps`](@ref), [`spectralEmbedding`](@ref).
 
  ## Examples
@@ -415,6 +414,8 @@ distance²Mat=distanceSqrMat
 
  The elements of this matrix are the square root of
  [`distanceSqrMat`](@ref).
+
+ **See**: [distance](@ref).
 
  ## Examples
     using PosDefManifold
@@ -630,6 +631,8 @@ end
  *Wasserstein* mean (see [`wasMean`](@ref)). For this reason the generalized means are used
  as default initialization of both the [`powerMean`](@ref) and [`wasMean`](@ref)
  algorithm.
+
+ **See**: [generalized means](@ref).
 
  **See also**: [`powerMean`](@ref)
 
@@ -901,7 +904,7 @@ end
   If the algorithm diverges a **warning** is printed indicating the iteration
   when this happened and the algorithm is interrupted.
 
- **See**: [modified Bhattacharyya mean](@ref)
+ **See**: [power means](@ref), [generalized means](@ref), [modified Bhattacharyya mean](@ref).
 
  ## Examples
     using LinearAlgebra, PosDefManifold
@@ -1033,7 +1036,7 @@ end
   and diagonal part, respectively (hence, ``S_X+D_X=L_X``,  ``L_XL_X^*=X``).
   ``A`` and ``H`` are the weighted arithmetic and weighted harmonic mean, respectively.
 
- **See**: [geodesic](@ref), [mean](@ref).
+ **See**: [geodesic](@ref), [mean](@ref), [Fréchet mean](@ref).
 
  ## Examples
     using LinearAlgebra, Statistics, PosDefManifold
