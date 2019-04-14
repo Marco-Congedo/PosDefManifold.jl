@@ -1,5 +1,5 @@
 #    Unit riemannianGeometry.jl, part of PosDefManifold Package for julia language
-#    v 0.1.0 - last update 10th of April 2019
+#    v 0.1.0 - last update 14th of April 2019
 #
 #    MIT License
 #    Copyright (c) 2019, Marco Congedo, CNRS, Grenobe, France:
@@ -496,8 +496,12 @@ end
  - ``iterations`` is the number of iterations executed by the power method;
  - ``convergence`` is the convergence attained by the power method;
 
- The eigenvectors of ``U`` holds the coordinates of the points in the
- embedded space. For examples of applications see Ridrigues et al. (2018) [🎓](@ref).
+ The eigenvectors of ``U`` holds the coordinates of the points in a
+ low-dimension Euclidean space (typically two or three).
+ This is done for, among other purposes, classifying them and
+ following their trajectories over time or other dimensions.
+ For examples of applications see Ridrigues et *al.* (2018) [🎓](@ref)
+ and references therein.
 
 !!! note "Nota Bene"
     The maximum value of ``q`` that can be requested is ``n-1``,
@@ -1215,7 +1219,7 @@ end
  *Vectorize* a tangent vector (matrix) ``S`` (*i.e.*, an `Hermitian` matrix):  mat -> vec.
 
  It gives weight ``1`` to diagonal elements and √2 to off-diagonal elements
- (Barachant et al., 2012)[🎓](@ref).
+ (Barachant et *al.*, 2012)[🎓](@ref).
 
  The result is a vector holding ``n(n+1)/2`` elements, where ``n``
  is the size of ``S``.

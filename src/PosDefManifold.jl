@@ -1,8 +1,9 @@
+#    Main Module of the  PosDefManifold Package for julia language
+#    v 0.1.0 - last update 14th of April 2019
 #
-#   MIT License
-#   Copyright (c) 2019, Marco Congedo, CNRS, Grenobe, France:
-#   https://sites.google.com/site/marcocongedo/home
-#
+#    MIT License
+#    Copyright (c) 2019, Marco Congedo, CNRS, Grenobe, France:
+#    https://sites.google.com/site/marcocongedo/home
 
 
 # __precompile__()

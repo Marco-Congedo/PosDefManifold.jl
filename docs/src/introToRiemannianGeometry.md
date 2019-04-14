@@ -163,7 +163,7 @@ lower triangular [Cholesky factor](https://bit.ly/1KFkeCN) of ``P``, then
 
 ### log Euclidean
 If matrices ``\{P_1,...,P_k\}`` all pair-wise commute, then this metric coincides
-with the Fisher metric. See (Arsigny et al., 2007 ; Bhatia et *al.*, 2019a)[🎓](@ref).
+with the Fisher metric. See (Arsigny et *al.*, 2007 ; Bhatia et *al.*, 2019a)[🎓](@ref).
 It enjoys the rotation and inversion invariance.
 The log-Euclidean distance to ``I`` is the same as per the Fisher metric.
 This mean has the same determinant as the [Fisher](@ref) mean,
@@ -230,7 +230,7 @@ denoted shortly as ``P\textrm{#}Q``. Currently it is an object
 of intense study because of its interesting mathematical properties.
 For instance,
 - it is the unique solution to Riccati equation ``GQ^{-1}G=P``
-- it is equal to ``F^{-*}D_1^{1/2}D_2^{1/2}F^{-1}`` for whatever joint diagonalizer ``F`` of ``P`` and ``Q``, *i.e.*, for whatever matrix ``F`` satisfying ``F^*PF=D_1`` and ``F^*QF=D_2``, with ``D_1``, ``D_1`` non-singular diagonal matrices (Congedo et al., 2015)[🎓](@ref).
+- it is equal to ``F^{-*}D_1^{1/2}D_2^{1/2}F^{-1}`` for whatever joint diagonalizer ``F`` of ``P`` and ``Q``, *i.e.*, for whatever matrix ``F`` satisfying ``F^*PF=D_1`` and ``F^*QF=D_2``, with ``D_1``, ``D_1`` non-singular diagonal matrices (Congedo et *al.*, 2015)[🎓](@ref).
 - it enjoys all 10 properties of means postulated in the seminal work of Ando et *al.* (2010)[🎓](@ref).
 
 When ``P`` and ``Q`` commutes, the Fisher mean of two matrices reduces to
@@ -327,7 +327,7 @@ enjoying all three [invariances](@ref) we have listed.
 Its square root has been shown to be a distance (Sra, 2016)[🎓](@ref).
 It behaves very similarly to the [Fisher](@ref) metric at short distances
 (Moakher, 2012; Sra, 2016; Cichocki et *al.*, 2015; Harandi et *al.*, 2016) [🎓](@ref)
-and the mean of two matrices in **P** is the same as the Fisher mean  (Harandi et al., 2016) [🎓](@ref).
+and the mean of two matrices in **P** is the same as the Fisher mean  (Harandi et *al.*, 2016) [🎓](@ref).
 Thus, it has often been used instead of the Fisher metric because it allows more
 efficient calculations. In fact, the calculation of this distance requires only
 three Cholesky decompositions, whereas the computation of the Fisher distance
