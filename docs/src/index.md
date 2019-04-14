@@ -33,11 +33,11 @@ For starting using this package, browse the code units listed here below and exe
 
 | Unit   | Description |
 |:----------:| ----------- |
-| [PosDefManifold.jl](MainModule/index.html) | Main module |
-| [riemannianGeometry.jl](riemannianGeometry/index.html) | The fundamental unit collecting all functions acting on the **P** manifold |
-| [linearAlgebra.jl](linearAlgebra/index.html) | Collection of linear algebra routines |
-| [signalProcessing.jl](signalProcessing/index.html) | Collection of signal processing routines |
-| [test.jl](test/index.html) | Unit performing all tests |
+| [MainModule (PosDefManifold.jl)](@ref) | Main module |
+| [riemannianGeometry.jl](@ref) | The fundamental unit collecting all functions acting on the **P** manifold |
+| [linearAlgebra.jl](@ref) | Collection of linear algebra routines |
+| [signalProcessing.jl](@ef) | Collection of signal processing routines |
+| [test.jl](@ref) | Unit performing all tests |
 
 ## Contents
 

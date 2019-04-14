@@ -67,7 +67,7 @@ of dimension *n・n*. The distance between a point ``P`` and the origin,
 *i.e.*, ``δ(P, I)``, is analogous therein to the length of vectors in
 Euclidean space. This Riemannian manifold is symmetric around ``I_n``,
 *i.e.*, ``δ(P, I)=δ(P^{-1}, I)`` and ``δ(P, Q)=δ(P^{-1}, Q^{-1})``.
-This will be made more precise when we talk about [invariances](ref@).
+This will be made more precise when we talk about [invariances](@ref).
 
 ## mean
 
