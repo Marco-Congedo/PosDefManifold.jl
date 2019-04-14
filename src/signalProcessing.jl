@@ -39,6 +39,8 @@ randχ²=randChi²
  The eigenvalues are generated as in function `randΛ`([`randEigvalsMat`](@ref)),
  the syntax of which is used.
 
+ **See also**: `randU` ([`randUnitaryMat`](@ref)), `randP` ([`randPosDefMat`](@ref)).
+
  ## Examples
     using Plots, PosDefManifold
     λ=sort(randλ(10), rev=true)
@@ -46,7 +48,6 @@ randχ²=randChi²
     plot(λ) # needs Plots package. Check your plots back-end.
     plot!(σ) # needs Plots package. Check your plots back-end.
 
-  **See also**: `randU` ([`randUnitaryMat`](@ref)), `randP` ([`randPosDefMat`](@ref)).
 """
 randEigvals(n::Int; df::Int=2, eigvalsSNR::Real=10e3) =
     eigvalsSNR==Inf ? λ=[randχ²(df) for i in 1:n] : λ=[randχ²(df)+(df/eigvalsSNR) for i in 1:n]
@@ -91,6 +92,9 @@ randλ=randEigvals
  to emulate eigenvalues observed in real data and to
  improve the conditioning of the generated matrices with respect to inversion.
 
+ **See also**: `randλ` ([`randEigvals`](@ref)), `randU` ([`randUnitaryMat`](@ref)),
+ `randP` ([`randPosDefMat`](@ref)), `randχ²` ([`randChi²`](@ref)).
+
  ## Examples
     using PosDefManifold
     n=3;
@@ -100,7 +104,6 @@ randλ=randEigvals
     using LinearAlgebra
     Q=ℍ(U*Λ*U') # generate an SPD matrix and flag it as 'Hermitian'
 
-  **See also**: `randλ` ([`randEigvals`](@ref)), `randU` ([`randUnitaryMat`](@ref)), `randP` ([`randPosDefMat`](@ref))
 """
 randEigvalsMat(n::Int; df::Int=2, eigvalsSNR::Real=10e3)=Diagonal(randλ(n, df=df, eigvalsSNR=eigvalsSNR))
 randΛ=randEigvalsMat
@@ -120,6 +123,8 @@ randΛ=randEigvalsMat
  [Gram-Schmidt orthogonalization](https://bit.ly/2YE6zvy)
  procedure ([`mgs`](@ref)) on an ``n⋅n`` matrix filled with random Gaussian elements.
 
+ **See also**: `randΛ` ([`randEigvals`](@ref)), `randP` ([`randPosDefMat`](@ref)).
+
  ## Examples
     using PosDefManifold
     n=3;
@@ -129,13 +134,11 @@ randΛ=randEigvalsMat
     V=randU(ComplexF64, n);
     Y=U*sqrt(randΛ(n))*V' # (2) generate a random square complex matrix
 
- **See also**: `randΛ` ([`randEigvals`](@ref)), `randP` ([`randPosDefMat`](@ref)).
 """
 randUnitaryMat(n::Int)=mgs(randn(Float64, n, n))
 randOrthMat(n::Int)=mgs(randn(Float64, n, n))
 randUnitaryMat(::Type{Complex{T}}, n::Int) where {T<:AbstractFloat} = mgs(randn(ComplexF64, n, n))
 randU=randUnitaryMat
-
 
 
 """
@@ -263,6 +266,8 @@ randP=randPosDefMat
 
  ``\\textrm{(2)}\\hspace{2pt}SNR=\\frac{\\displaystyle\\sum_{i=1}^{k}\\textrm{tr}(℘_i)}{\\displaystyle k\\hspace{1pt}\\textrm{tr}(ηI)}.``
 
+ ``P`` in (1) must be flagged as Hermitian. See [typecasting matrices](@ref).
+
 !!! note "Nota Bene"
     The keyword argument `SNR` expresses a SNR ([signal-to-noise ratio](https://bit.ly/1VvpvnQ)),
     and is not expressed in decibels,  but as the SNR variance ratio.
@@ -270,6 +275,8 @@ randP=randPosDefMat
     `randΛ`[`randEigvalsMat`](@ref), `randλ`[`randEigvals`](@ref) and
     `randP`[`randPosDefMat`](@ref), the SNR here is not the expected SNR,
     but the actual SNR.
+
+**See also**: `randP` ([`randPosDefMat`](@ref))
 
  ## Examples
     # (1)

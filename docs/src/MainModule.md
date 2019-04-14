@@ -12,7 +12,7 @@ It uses the following standard Julia packages:
 Examples in some units of **PosDefManifold** also uses the `Plots` package.
 
 The main module does not contains functions, but it declares all **constant**,
-**types** and **aliases** of Julia functions used in all units.
+**types** and **aliases** of Julia functions and types used in all units.
 
 | Contents  |
 |:----------:|

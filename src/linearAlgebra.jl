@@ -34,15 +34,16 @@
  ``P`` must be flagged as Hermitian. See [typecasting matrices](@ref),
  however a catch-all method is defined.
 
+ **See** [det](https://bit.ly/2Y4MnTF)
+
+ **See also**: [`tr1`](@ref).
+
  ## Examples
     using LinearAlgebra, PosDefManifold
     P=randP(5) # generate a random real positive definite matrix 5x5
     Q=det1(P)
     det(Q) # must be 1
 
- **See**: [typecasting matrices](@ref).
-
- **See also**: [`tr1`](@ref), [det](https://bit.ly/2Y4MnTF).
 """
 det1(P::ℍ) = ℍ(triu(P)/det(P)^(1/size(P, 1)))
 det1(P) = P/det(P)^(1/size(P, 1))
@@ -57,15 +58,16 @@ det1(P) = P/det(P)^(1/size(P, 1))
  ``P`` must be flagged as Hermitian. See [typecasting matrices](@ref),
  however a catch-all method is defined.
 
+ **See**: [tr](https://bit.ly/2HoOLiM).
+
+ **See also**: [`det1`](@ref).
+
  ## Examples
     using LinearAlgebra, PosDefManifold
     P=randP(5) # generate a random real positive definite matrix 5x5
     Q=tr1(P)
     tr(Q)  # must be 1
 
- **See**: [typecasting matrices](@ref).
-
- **See also**: [`det1`](@ref), [tr](https://bit.ly/2HoOLiM).
 """
 tr1(P::ℍ) = ℍ(triu(P)/tr(P))
 tr1(P) = P/tr(P)
@@ -90,7 +92,11 @@ tr1(P) = P/tr(P)
 
   No range check nor type check is performed. A catch-all method is defined.
 
- ## Examples
+  **See** [norm](https://bit.ly/2TaAkR0) and [randn](https://bit.ly/2I1Vgrg) for the example
+
+  **See also**: [`colNorm`](@ref), [`colProd`](@ref).
+
+  ## Examples
     using PosDefManifold
     X=randn(10, 20)
     normalizeCol!(X, 2)                 # (1) normalize columns 2
@@ -100,7 +106,6 @@ tr1(P) = P/tr(P)
     normalizeCol!(X, 3)                 # (1) normalize columns 3
     normalizeCol!(X, 3:6, (2.0 + 0.5im))# (4) divide columns 3 to 5 by (2.0 + 0.5im)
 
- **See also**: [`colNorm`](@ref), [norm](https://bit.ly/2TaAkR0), [randn](https://bit.ly/2I1Vgrg)
 """
 function normalizeCol!(X::Matrix{T}, j::Int) where T<:RealOrComplex
     w=colNorm(X, j)
@@ -207,6 +212,8 @@ end
 
   Arguments ``j`` and ``l`` must be positive integers in range `1:size(X, 2)`.
 
+ **See also**: [`normalizeCol!`](@ref), [`colNorm`](@ref).
+
  ## Examples
     using PosDefManifold
     X=randn(10, 20)
@@ -219,10 +226,27 @@ colProd(X, j::Int, l::Int)=𝚺(conj(x1)*x2 for (x1, x2) in zip(X[:, j], X[:, l]
 
 
 """
+    colNorm(X::Matrix, j::Int)
+
+ Return the Euclidean norm of the ``j^{th}`` column of general matrix ``X``.
+ No range check nor type check is performed. A catch-all method is defined.
+
+ **See also**: [`normalizeCol!`](@ref), [`colProd`](@ref).
+
+ ## Examples
+    using PosDefManifold
+    X=randn(10, 20)
+    normOfSecondColumn=colNorm(X, 2)
+
+"""
+colNorm(X::Matrix{T}, j::Int) where T<:RealOrComplex= √sumOfSqr(X, j)
+colNorm(X, j::Int) = √sumOfSqr(X, j)
+
+
+"""
     (1) sumOfSqr(A::Array)
     (2) sumOfSqr(X::Matrix, j::Int)
     (3) sumOfSqr(X::Matrix, range::UnitRange)
-
 
  Return
  - (1) the sum of square of the elements in an array ``A`` of any dimensions.
@@ -246,6 +270,8 @@ colProd(X, j::Int, l::Int)=𝚺(conj(x1)*x2 for (x1, x2) in zip(X[:, j], X[:, l]
  (3) `(X, range)`:
  - ``X`` is a generic matrix, real or complex;;
  - ``range`` is a [UnitRange type](https://bit.ly/2HDoFbk).
+
+ **See also**: [`sumOfSqrDiag`](@ref), [`sumOfSqrTril`](@ref).
 
  ## Examples
     using PosDefManifold
@@ -279,6 +305,8 @@ sumOfSqr(X, range::UnitRange) = @inbounds 𝚺(sumOfSqr(X, j) for j in range)
 
  No range check nor type check is performed. A catch-all method is defined.
 
+ **See also**: [`sumOfSqr`](@ref), [`sumOfSqrTril`](@ref).
+
  ## Examples
     using LinearAlgebra, PosDefManifold
     X=randn(10, 20)
@@ -292,24 +320,6 @@ sumOfSqrDiag(Λ::Diagonal) = @inbounds 𝚺(Λ[i, i]^2 for i=1:size(Λ, 1))
 sumOfSqrDiag(X) = @inbounds 𝚺(abs2(X[i, i]) for i=1:minimum(size(X)))
 
 
-
-"""
-    colNorm(X::Matrix, j::Int)
-
- Return the Euclidean norm of the ``j^{th}`` column of general matrix ``X``.
- No range check nor type check is performed. A catch-all method is defined.
-
- ## Examples
-    using PosDefManifold
-    X=randn(10, 20)
-    normOfSecondColumn=colNorm(X, 2)
-
-"""
-colNorm(X::Matrix{T}, j::Int) where T<:RealOrComplex= √sumOfSqr(X, j)
-colNorm(X, j::Int) = √sumOfSqr(X, j)
-
-
-
 """
     sumOfSqrTril(X::Matrix, k::Int=0)
 
@@ -321,6 +331,8 @@ colNorm(X, j::Int) = √sumOfSqr(X, j)
   See julia [tril(M, k::Integer)](https://bit.ly/2Tbx8o7) function
  for numbering of diagonals.
   No range check nor type check is performed. A catch-all method is defined.
+
+ **See also**: [`sumOfSqr`](@ref), [`sumOfSqrDiag`](@ref).
 
  ## Examples
     using PosDefManifold
@@ -387,7 +399,6 @@ end
     Q=randP(5);
     f=fidelity(P, Q)
 
-**See**: [typecasting matrices](@ref)
 """
 function fidelity(P::ℍ, Q::ℍ)
     A = √(P)
@@ -503,8 +514,10 @@ end # mgs function
  As for the `eigen` function, the eigenvalues and associated
  eigenvectors are sorted by increasing values of eigenvalues.
 
- ``S`` must be flagged by julia as `Hermitian`.
- See [typecasting matrices](@ref) and [typecasting matrices](@ref).
+ ``S`` must be flagged by Julia as `Hermitian`.
+ See [typecasting matrices](@ref).
+
+ **See also**: [`spectralFunctions`](@ref)
 
  ## Examples
     using PosDefManifold
@@ -513,7 +526,6 @@ end # mgs function
     Λ, U=evd(S); # which is equivalent to (Λ, U)=evd(P)
     (U*Λ*U') ≈ S ? println(" ⭐ ") : println(" ⛔ ")
     # => UΛU'=S, UΛ=SU, ΛU'=U'S
-
 """
 function evd(S::ℍ) # returns tuple (Λ, U)
     F = eigen(S)
@@ -536,6 +548,8 @@ end
  besides those and those already implemented in the standard package `LinearAlgebra`.
  In general, you won't call it directly.
 
+ ``P`` must be flagged as Hermitian. See [typecasting matrices](@ref).
+
  The definition of spectral functions for a positive definite matrix ``P``
  is at it follows:
 
@@ -555,6 +569,8 @@ end
     must be able to apply element-wise to the eigenvalues
     (those include anonymous functions).
 
+ **See also**: [`evd`](@ref).
+
  ## Examples
     using LinearAlgebra, PosDefManifold
     n=5
@@ -563,9 +579,6 @@ end
     Q=spectralFunctions(P, x->x+noise) # add white noise to the eigenvalues
     tr(Q)-tr(P) ≈ noise*n ? println(" ⭐ ") : println(" ⛔ ")
 
-**See**: [typecasting matrices](@ref).
-
-**See also**: [`evd`](@ref).
 """
 function spectralFunctions(P::ℍ, func::Function)
     F = eigen(P)
@@ -584,9 +597,13 @@ end
  for any number of exponents ``r_1, r_2,...``.
  It returns a tuple of as many elements as arguments passed after ``P``.
 
+ ``P`` must be flagged as Hermitian. See [typecasting matrices](@ref).
+
  **Arguments** `(P, arg1, arg2,...)`
  - ``P`` is a positive matrix.
  - ``arg1, arg2,...`` are real numbers.
+
+ **See also**: [`invsqrt`](@ref).
 
  ## Examples
     using LinearAlgebra, PosDefManifold
@@ -598,9 +615,6 @@ end
     R, S=pow(P, 0.3, 0.7);
     R*S ≈ P ? println(" ⭐ ") : println(" ⛔ ")
 
-**See**: [typecasting matrices](@ref).
-
-**See also**: [`invsqrt`](@ref).
 """
 pow(P::ℍ, p)=spectralFunctions(P, x->x^p) # one argument
 function pow(P::ℍ, args...)               # several arguments
@@ -618,15 +632,18 @@ end
  Given a positive definite matrix ``P``, compute the inverse of the principal
  square root ``P^{-1/2}``.
 
+ ``P`` must be flagged as Hermitian. See [typecasting matrices](@ref).
+
+ **See**: [typecasting matrices](@ref).
+
+ **See also**: [`pow`](@ref).
+
  ## Examples
     using LinearAlgebra, PosDefManifold
     P=randP(ComplexF64, 5);
     Q=invsqrt(P);
     Q*P*Q ≈ I ? println(" ⭐ ") : println(" ⛔ ")
 
-**See**: [typecasting matrices](@ref).
-
-**See also**: [`pow`](@ref).
 """
 invsqrt(P::ℍ) = spectralFunctions(P, x->1/sqrt(x));
 
@@ -636,13 +653,16 @@ invsqrt(P::ℍ) = spectralFunctions(P, x->1/sqrt(x));
 
  Given a positive definite matrix ``P``, compute its square ``P^{2}``.
 
+ ``P`` must be flagged as Hermitian. See [typecasting matrices](@ref).
+
+ **See also**: [`pow`](@ref).
+
  ## Examples
     using PosDefManifold
     P=randP(5);
     P²=sqr(P);  # =>  P²=PP
     sqrt(P²)≈ P ? println(" ⭐ ") : println(" ⛔ ")
 
-**See**: [typecasting matrices](@ref)
 """
 sqr(P::ℍ) = ℍ(P*P')
 
@@ -675,6 +695,8 @@ sqr(P::ℍ) = ℍ(P*P')
  - if ``evalues=true``, return the 4-tuple ``(Λ, U, iterations, covergence)``
  - if ``evalues=false`` return the 3-tuple ``(U, iterations, covergence)``
 
+**See also**: [`mgs`](@ref)
+
  ## Examples
     using LinearAlgebra, PosDefManifold
     S=randP(10);
@@ -684,7 +706,6 @@ sqr(P::ℍ) = ℍ(P*P')
     Λ, U, iterations, covergence=powIter(S, 3, evalues=true);
     U'*U≈ I ? println(" ⭐ ") : println(" ⛔ ")
 
-**See also**: [`mgs`](@ref)
 """
 function powerIterations(S::ℍ, q::Int;
                      evalues=false, tol=1e-9, maxiter=300, ⍰=false)

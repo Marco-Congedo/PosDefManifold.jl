@@ -51,25 +51,10 @@
  ``P`` and ``Q`` must be flagged by julia as `Hermitian`.
  See [typecasting matrices](@ref).
 
- ## Examples
-    using PosDefManifold
-    P=randP(10);
-    Q=randP(10);
-    # Wasserstein mean
-    M=geodesic(P, Q, 0.5, Wasserstein)
-    # extrapolate suing the Fisher metric
-    E=geodesic(P, Q, 2)
-
-
- **See also**: [`meanP`](@ref)
-
- -
-
  **Maths**
 
  For points ``P``, ``Q`` and arclength ``a``, letting ``b=1-a``,
  the geodesic equations for the supported metrics are:
-
 
 | Metric   | geodesic equation |
 |:----------:|:----------- |
@@ -88,6 +73,16 @@
    are the Cholesky lower triangle of ``X``, its strictly lower triangular part
    and diagonal part, respectively (hence, ``S_X+D_X=L_X``,  ``L_XL_X^*=X``).
 
+ **See also**: [`meanP`](@ref)
+
+ ## Examples
+    using PosDefManifold
+    P=randP(10);
+    Q=randP(10);
+    # Wasserstein mean
+    M=geodesic(P, Q, 0.5, Wasserstein)
+    # extrapolate suing the Fisher metric
+    E=geodesic(P, Q, 2)
 
 """
 function geodesic(P::ℍ, Q::ℍ, a::Real, metric::Metric=Fisher)
@@ -161,24 +156,6 @@ end # function
  ``P`` in (1) and ``P``, ``Q`` in (2) must be flagged by julia as `Hermitian`.
  See [typecasting matrices](@ref).
 
- ## Examples (1)
-    using PosDefManifold
-    P=randP(10);
-    d=distanceSqr(P, Wasserstein)
-    e=distanceSqr(P) # uses the default metric (Fisher)
-    metric=Metric(Int(logdet0)) # or metric=logdet0
-    s=string(metric) # check what is the current metric
-    f=distance²(P, metric) #using the alias distance²
-
- ## Examples (2)
-    using PosDefManifold
-    P=randP(10);
-    Q=randP(10);
-    d=distanceSqr(P, Q, Wasserstein)
-    e=distance²(P, Q, Jeffrey)
-
- **See also**: [`distanceSqrMat`](@ref)
-
  **Maths**
 
  For point ``P`` the *squared distances from the identity*
@@ -212,9 +189,28 @@ end # function
 |VonNeumann | ``\\frac{1}{2}\\textrm{tr}(P\\textrm{log}P-P\\textrm{log}Q+Q\\textrm{log}Q-Q\\textrm{log}P)``|
 |Wasserstein| ``\\textrm{tr}(P+Q) -2\\textrm{tr}(P^{1/2}QP^{1/2})^{1/2}`` | ``\\textrm{tr}(P+Q) -2\\textrm{tr}(P^{1/2}QP^{1/2})^{1/2}`` |
 
-**legend:** ``L_X``, ``S_X`` and ``D_X``
- are the Cholesky lower triangle of ``X``, its strictly lower triangular part
- and diagonal part, respectively (hence, ``S_X+D_X=L_X``,  ``L_XL_X^*=X``).
+  **legend:** ``L_X``, ``S_X`` and ``D_X``
+  are the Cholesky lower triangle of ``X``, its strictly lower triangular part
+  and diagonal part, respectively (hence, ``S_X+D_X=L_X``,  ``L_XL_X^*=X``).
+
+ **See also**: [`distanceSqrMat`](@ref)
+
+ ## Examples (1)
+    using PosDefManifold
+    P=randP(10);
+    d=distanceSqr(P, Wasserstein)
+    e=distanceSqr(P) # uses the default metric (Fisher)
+    metric=Metric(Int(logdet0)) # or metric=logdet0
+    s=string(metric) # check what is the current metric
+    f=distance²(P, metric) #using the alias distance²
+
+ ## Examples (2)
+    using PosDefManifold
+    P=randP(10);
+    Q=randP(10);
+    d=distanceSqr(P, Q, Wasserstein)
+    e=distance²(P, Q, Jeffrey)
+
 """
 function distanceSqr(P::ℍ, metric::Metric=Fisher)
     if      metric==Euclidean
@@ -387,6 +383,8 @@ end #function
  giving rise to distance function ``δ``. See [`distanceSqr`](@ref).
  By default, the [Fisher](@ref) metric is adopted.
 
+ **See also**: [`laplacian`](@ref), [`laplacianEigenMaps`](@ref), [`spectralEmbedding`](@ref).
+
  ## Examples
     using PosDefManifold
     # Generate a set of 4 random 10x10 SPD matrices
@@ -396,7 +394,6 @@ end #function
     # it is a good approximation.
     Δ²=distanceSqrMat(℘, logEuclidean)
 
- **See also**: [`laplacian`](@ref), [`laplacianEigenMaps`](@ref), [`spectralEmbedding`](@ref).
 """
 distanceSqrMat(℘, metric::Metric=Fisher)=ℍ(GetdistanceSqrMat(℘, metric), :L)
 distance²Mat=distanceSqrMat
@@ -456,6 +453,8 @@ distanceMat=distanceMatrix
     input matrix of squared inter-distances, for example,
     those obtained on scalars or on vectors using appropriate metrics.
 
+ **See also**: [`distanceSqrMat`](@ref), [`laplacianEigenMaps`](@ref), [`spectralEmbedding`](@ref).
+
  ## Examples
     using PosDefManifold
     # Generate a set of 4 random 10x10 SPD matrices
@@ -463,8 +462,7 @@ distanceMat=distanceMatrix
     Δ²=distanceSqrMat(℘)
     Ω=laplacian(Δ²) # or, equivalently, Ω=RΩ(Δ)
 
- **See also**: [`distanceSqrMat`](@ref), [`laplacianEigenMaps`](@ref), [`spectralEmbedding`](@ref).
-"""
+ """
 function laplacian(Δ²)
     (r, c)=size(Δ²)
     epsilon=median([Δ²[i, j] for j=1:c-1 for i=j+1:r]) # use geometric mean instead
@@ -514,6 +512,8 @@ end
    * `maxiter` is the maximum number of iterations allowed;
    * if `⍰` is true, the convergence at all iterations will be printed.
 
+ **See also**: [`distanceSqrMat`](@ref), [`laplacian`](@ref), [`spectralEmbedding`](@ref).
+
  ## Examples
     using PosDefManifold
     # Generate a set of 4 random 10x10 SPD matrices
@@ -522,7 +522,6 @@ end
     evalues, maps, iterations, convergence=laplacianEM(Ω, 2, maxiter=500)
     evalues, maps, iterations, convergence=laplacianEM(Ω, 2, ⍰=true)
 
-**See also**: [`distanceSqrMat`](@ref), [`laplacian`](@ref), [`spectralEmbedding`](@ref).
 """
 function laplacianEigenMaps(Ω, q::Int; tol=1e-9, maxiter=300, ⍰=false)
     (Λ, U, iter, conv) =
@@ -562,6 +561,8 @@ laplacianEM=laplacianEigenMaps
    * `maxiter` is the maximum number of iterations allowed for the power method;
    * if `⍰` is true the convergence at all iterations will be printed.
 
+ **See also**: [`distanceSqrMat`](@ref), [`laplacian`](@ref), [`laplacianEigenMaps`](@ref).
+
  ## Examples
     using PosDefManifold
     # Generate a set of 4 random 10x10 SPD matrices
@@ -569,7 +570,6 @@ laplacianEM=laplacianEigenMaps
     evalues, maps, iterations, convergence=spectralEmbedding(℘, 2)
     evalues, maps, iterations, convergence=spectralEmbedding(℘, 2, ⍰=true)
 
-**See also**: [`distanceSqrMat`](@ref), [`laplacian`](@ref), [`laplacianEigenMaps`](@ref).
 """
 function spectralEmbedding(℘, q::Int, metric::Metric=Fisher;
                             tol=1e-9, maxiter=300, ⍰=false)
@@ -631,6 +631,7 @@ end
  as default initialization of both the [`powerMean`](@ref) and [`wasMean`](@ref)
  algorithm.
 
+ **See also**: [`powerMean`](@ref)
 
  ## Examples
     using LinearAlgebra, Statistics, PosDefManifold
@@ -650,7 +651,6 @@ end
     weights=weights./mean(weights)
     G = generalizedMean(℘, 0.5; w=weights, ✓w=false)
 
- **See also**: [`powerMean`](@ref)
 """
 function generalizedMean(℘, p::Real; w::Vector=[], ✓w::Bool=true)
     if     p == -1 return meanP(℘, invEuclidean; w=w, ✓w=✓w)
@@ -706,6 +706,8 @@ suggested by (Moakher, 2012, p315)[🎓](@ref), yielding iterations
     If the algorithm diverges a **warning** is printed indicating the iteration
     when this happened and the algorithm is interrupted.
 
+ **See**: [logdet zero](@ref) metric, [modified Bhattacharyya mean](@ref).
+
  ## Examples
     using LinearAlgebra, PosDefManifold
     # Generate a set of 4 random 3x3 SPD matrices
@@ -727,7 +729,6 @@ suggested by (Moakher, 2012, p315)[🎓](@ref), yielding iterations
     ℘[1]=ℍ(℘[1]+(randP(3)/100))
     G, iter, conv = logdet0Mean(℘, w=weights, ✓w=false, ⍰=true, init=G)
 
- **See**: [logdet zero](@ref) metric, [modified Bhattacharyya mean](@ref).
 """
 function logdet0Mean(℘;    w::Vector=[], ✓w::Bool=true, init=nothing,
                             tol=1e-9, ⍰=false)
@@ -796,6 +797,8 @@ end
     If the algorithm diverges a **warning** is printed indicating the iteration
     when this happened and the algorithm is interrupted.
 
+ **See**: [Wasserstein](@ref) metric
+
  ## Examples
     using LinearAlgebra, PosDefManifold
     # Generate a set of 4 random 3x3 SPD matrices
@@ -817,7 +820,6 @@ end
     ℘[1]=ℍ(℘[1]+(randP(3)/100))
     G, iter, conv = wasMean(℘, w=weights, ⍰=true, init=G)
 
- **See**: [Wasserstein](@ref) metric
 """
 function wasMean(℘;    w::Vector=[], ✓w::Bool=true, init=nothing,
                         tol=1e-9, ⍰=false)
@@ -899,6 +901,8 @@ end
   If the algorithm diverges a **warning** is printed indicating the iteration
   when this happened and the algorithm is interrupted.
 
+ **See**: [modified Bhattacharyya mean](@ref)
+
  ## Examples
     using LinearAlgebra, PosDefManifold
     # Generate a set of 4 random 3x3 SPD matrices
@@ -920,7 +924,6 @@ end
     ℘[1]=ℍ(℘[1]+(randP(3)/100))
     G, iter, conv = powerMean(℘, 0.5, w=weights, ⍰=true, init=G)
 
- **See**: [modified Bhattacharyya mean](@ref)
 """
 function powerMean(℘, p::Real;     w::Vector=[], ✓w::Bool=true, init=nothing,
                                     tol=1e-9, ⍰=false)
@@ -983,9 +986,10 @@ end
  arguments ``P`` and ``Q``, using the specified `metric` of type
  [Metric::Enumerated type](@ref). By defult the [Fisher](@ref) metric is used.
  The order is arbitrary as all metrics implemented in **PosDefManifold** are symmetric.
- This is the midpoint of the [geodesic](@ref). See [mean](@ref).
+ This is the midpoint of the geodesic.
  For the weighted mean of two positive definite matrices use instead
  the [`geodesic`](@ref) function.
+ ``P`` and ``Q`` must be flagged as `Hermitian`. See [typecasting matrices](@ref).
 
  (2) [Fréchet mean](@ref) of an 1d array ``℘`` of ``k`` positive definite matrices``{P_1,...,P_k}``,
  with optional non-negative real weights ``w={w_1,...,w_k}`` using the specified
@@ -999,6 +1003,37 @@ end
  and should be already normalized.  This option is provided to allow
  calling this function repeatedly without normalizing the same weights
  vector each time.
+
+ ## Math
+
+ The Fréchet mean of a set of ``k`` matrices ``{P_1, P_2,..., P_k}`` weighted by
+ ``{w_1, w_2,..., w_k}:\\sum_{i=1}^{k}w_i=1`` for the supported metrics are,
+ for those with closed form expression:
+
+| Metric   | weighted Fréchet mean |
+|:----------:|:----------- |
+|Euclidean | ``\\sum_{i=1}^{k}w_i P_i`` |
+|invEuclidean| ``\\big(\\sum_{i=1}^{k}w_i P_i^{-1}\\big)^{-1}``|
+|ChoEuclidean| ``TT^*``, where ``T=bL_P + aL_Q`` |
+|logEuclidean| ``\\textrm{exp}\\big(\\sum_{i=1}^{k}w_i\\hspace{1pt} \\textrm{log}P_i \\big)``|
+|logCholesky| ``TT^*``, where `` T=\\sum_{i=1}^{k}(w_kS_k)+\\sum_{i=1}^{k}(w_k\\textrm{log}D_k)``|
+|Jeffrey | ``A^{1/2}\\big(A^{-1/2}HA^{-1/2}\\big)^{1/2}A^{1/2}`` |
+
+ and for those that verify an equation:
+
+| Metric   | equation verified by the weighted Fréchet mean |
+|:----------:|:----------- |
+|Fisher | ``\\sum_{i=1}^{k}w_i\\textrm{log}\\big(G^{-1/2} P_k G^{-1/2}\\big)=0.``|
+|logdet0| ``\\sum_{i=1}^{k}w_i\\big(\\frac{1}{2}P_i+\\frac{1}{2}G\\big)^{-1}=G^{-1}`` |
+|VonNeumann | N.A.|
+|Wasserstein| ``G=\\sum_{i=1}^{k}w_i\\big( G^{1/2}  P_i G^{1/2}\\big)^{1/2}`` |
+
+ **legend:** ``L_X``, ``S_X`` and ``D_X``
+  are the Cholesky lower triangle of ``X``, its strictly lower triangular part
+  and diagonal part, respectively (hence, ``S_X+D_X=L_X``,  ``L_XL_X^*=X``).
+  ``A`` and ``H`` are the weighted arithmetic and weighted harmonic mean, respectively.
+
+ **See**: [geodesic](@ref), [mean](@ref).
 
  ## Examples
     using LinearAlgebra, Statistics, PosDefManifold
@@ -1015,36 +1050,6 @@ end
     M=meanP(℘, Euclidean, w=weights) # (2) weighted Euclidean mean
     M=meanP(℘, Wasserstein)  # (2) unweighted Wassertein mean
 
-
- ## Math
-
- The Fréchet mean of a set of ``k`` matrices ``{P_1, P_2,..., P_k}`` weighted by
- ``{w_1, w_2,..., w_k}:\\sum_{i=1}^{k}w_i=1`` for the supported metrics are,
- for those with closed form expression
-
-| Metric   | weighted Fréchet mean |
-|:----------:|:----------- |
-|Euclidean | ``\\sum_{i=1}^{k}w_i P_i`` |
-|invEuclidean| ``\\big(\\sum_{i=1}^{k}w_i P_i^{-1}\\big)^{-1}``|
-|ChoEuclidean| ``TT^*``, where ``T=bL_P + aL_Q`` |
-|logEuclidean| ``\\textrm{exp}\\big(\\sum_{i=1}^{k}w_i\\hspace{1pt} \\textrm{log}P_i \\big)``|
-|logCholesky| ``TT^*``, where `` T=\\sum_{i=1}^{k}(w_kS_k)+\\sum_{i=1}^{k}(w_k\\textrm{log}D_k)``|
-|Jeffrey | ``A^{1/2}\\big(A^{-1/2}HA^{-1/2}\\big)^{1/2}A^{1/2}`` |
-
-
- and for those that verify an equation
-
-| Metric   | equation verified by the weighted Fréchet mean |
-|:----------:|:----------- |
-|Fisher | ``\\sum_{i=1}^{k}w_i\\textrm{log}\\big(G^{-1/2} P_k G^{-1/2}\\big)=0.``|
-|logdet0| ``\\sum_{i=1}^{k}w_i\\big(\\frac{1}{2}P_i+\\frac{1}{2}G\\big)^{-1}=G^{-1}`` |
-|VonNeumann | N.A.|
-|Wasserstein| ``G=\\sum_{i=1}^{k}w_i\\big( G^{1/2}  P_i G^{1/2}\\big)^{1/2}`` |
-
- **legend:** ``L_X``, ``S_X`` and ``D_X``
-  are the Cholesky lower triangle of ``X``, its strictly lower triangular part
-  and diagonal part, respectively (hence, ``S_X+D_X=L_X``,  ``L_XL_X^*=X``).
-  ``A`` and ``H`` are the weighted arithmetic and weighted harmonic mean, respectively.
 """
 meanP(P::ℍ, Q::ℍ, metric::Metric=Fisher) = geodesic(P, Q, 0.5, metric)
 
@@ -1121,13 +1126,16 @@ end # function
     logMap(P::ℍ, G::ℍ, metric::Metric=Fisher)
 
  *Logaritmic Map:* map a positive definite matrix ``P`` from the SPD or
- Hermitian manifold into the tangent space at base-point ``M`` using the [Fisher](@ref) metric.
+ Hermitian manifold into the tangent space at base-point ``G`` using the [Fisher](@ref) metric.
+
+ ``P`` and ``G`` must be flagged as `Hermitian`. See [typecasting matrices](@ref).
 
  The map is defined as
 
  `` Log_G(P)=S=G^{1/2}\\textrm{log}\\big(G^{-1/2}PG^{-1/2}\\big)G^{1/2}``.
 
- The result is an `Hermitian` matrix. The inverse operation is [`expMap`](@ref).
+ The result is an `Hermitian` matrix.
+ The inverse operation is [`expMap`](@ref).
 
  **Arguments** `(P, G, metric)`:
  - ``P`` is the positive definite matrix to be projected onto the tangent space,
@@ -1142,7 +1150,7 @@ end # function
     using PosDefManifold
     P=randP(3)
     Q=randP(3)
-    G=meanP(P, Q, Fisher)
+    G=meanP(P, Q)
     # projecting P at the base point given by the geometric mean of P and Q
     S=logMap(P, G)
 """
@@ -1161,6 +1169,8 @@ end
 
  *Exponential Map:* map an `Hermitian` matrix ``S`` from the tangent space at base
  point ``G`` into the SPD or Hermitian manifold (using the [Fisher](@ref) metric).
+
+ ``S`` and ``G`` must be flagged as `Hermitian`. See [typecasting matrices](@ref).
 
  The map is defined as
 
@@ -1206,6 +1216,8 @@ end
 
  The result is a vector holding ``n(n+1)/2`` elements, where ``n``
  is the size of ``S``.
+
+ ``S`` must be flagged as Hermitian. See [typecasting matrices](@ref).
 
  The inverse operation is provided by [`matP`](@ref).
 
@@ -1288,7 +1300,9 @@ end
 
  If the argument 'extremum' is passed as "max", it returns instead the solution of
 
- ``\\textrm{argmax}_Uδ(P,U^*QU)``,
+ ``\\textrm{argmax}_Uδ(P,U^*QU)``.
+
+  ``P`` and ``Q`` must be flagged as `Hermitian`. See [typecasting matrices](@ref).
 
  As it has been shown in Bhatia and Congedo (2019)[🎓](@ref),
  using each of the [Fisher](@ref), [logdet zero](@ref), [Wasserstein](@ref)
