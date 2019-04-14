@@ -34,7 +34,7 @@
  ``P`` must be flagged as Hermitian. See [typecasting matrices](@ref),
  however a catch-all method is defined.
 
- **See** [det](https://bit.ly/2Y4MnTF)
+ **See** [det](https://bit.ly/2Y4MnTF).
 
  **See also**: [`tr1`](@ref).
 
@@ -58,7 +58,7 @@ det1(P) = P/det(P)^(1/size(P, 1))
  ``P`` must be flagged as Hermitian. See [typecasting matrices](@ref),
  however a catch-all method is defined.
 
- **See**: [tr](https://bit.ly/2HoOLiM).
+ **See**: [trace](https://bit.ly/2HoOLiM).
 
  **See also**: [`det1`](@ref).
 
@@ -517,7 +517,7 @@ end # mgs function
  ``S`` must be flagged by Julia as `Hermitian`.
  See [typecasting matrices](@ref).
 
- **See also**: [`spectralFunctions`](@ref)
+ **See also**: [`spectralFunctions`](@ref).
 
  ## Examples
     using PosDefManifold
@@ -695,7 +695,7 @@ sqr(P::ℍ) = ℍ(P*P')
  - if ``evalues=true``, return the 4-tuple ``(Λ, U, iterations, covergence)``
  - if ``evalues=false`` return the 3-tuple ``(U, iterations, covergence)``
 
-**See also**: [`mgs`](@ref)
+**See also**: [`mgs`](@ref).
 
  ## Examples
     using LinearAlgebra, PosDefManifold

@@ -73,7 +73,7 @@
    are the Cholesky lower triangle of ``X``, its strictly lower triangular part
    and diagonal part, respectively (hence, ``S_X+D_X=L_X``,  ``L_XL_X^*=X``).
 
- **See also**: [`meanP`](@ref)
+ **See also**: [`meanP`](@ref).
 
  ## Examples
     using PosDefManifold
@@ -190,7 +190,7 @@ end # function
   are the Cholesky lower triangle of ``X``, its strictly lower triangular part
   and diagonal part, respectively (hence, ``S_X+D_X=L_X``,  ``L_XL_X^*=X``).
 
- **See also**: [`distanceSqrMat`](@ref)
+ **See also**: [`distanceSqrMat`](@ref).
 
  ## Examples (1)
     using PosDefManifold
@@ -301,7 +301,7 @@ distance²=distanceSqr # alias
  This is the square root of [`distanceSqr`](@ref)
  and is invoked with the same syntax therein.
 
- **See also**: [`distanceMatrix`](@ref)
+ **See also**: [`distanceMatrix`](@ref).
 """
 distance(P::ℍ, metric::Metric=Fisher) = √(distanceSqr(P, metric))
 distance(P::ℍ, Q::ℍ, metric::Metric=Fisher) = √(distanceSqr(P, Q, metric))
@@ -634,7 +634,7 @@ end
 
  **See**: [generalized means](@ref).
 
- **See also**: [`powerMean`](@ref)
+ **See also**: [`powerMean`](@ref).
 
  ## Examples
     using LinearAlgebra, Statistics, PosDefManifold
@@ -800,7 +800,7 @@ end
     If the algorithm diverges a **warning** is printed indicating the iteration
     when this happened and the algorithm is interrupted.
 
- **See**: [Wasserstein](@ref) metric
+ **See**: [Wasserstein](@ref) metric.
 
  ## Examples
     using LinearAlgebra, PosDefManifold
@@ -1147,7 +1147,7 @@ end # function
 
  Currently only the [Fisher](@ref) metric is supported for tangent space operations.
 
- **See also**: [`vecP`](@ref)
+ **See also**: [`vecP`](@ref).
 
  ## Examples
     using PosDefManifold

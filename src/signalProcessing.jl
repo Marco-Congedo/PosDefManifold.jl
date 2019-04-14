@@ -276,7 +276,7 @@ randP=randPosDefMat
     `randP`[`randPosDefMat`](@ref), the SNR here is not the expected SNR,
     but the actual SNR.
 
-**See also**: `randP` ([`randPosDefMat`](@ref))
+**See also**: `randP` ([`randPosDefMat`](@ref)).
 
  ## Examples
     # (1)
