@@ -45,7 +45,7 @@ var documenterSearchIndex = {"docs": [
     "page": "PosDefManifold Documentation",
     "title": "Code units",
     "category": "section",
-    "text": "PosDefManifold includes five code units (.jl files):Unit Description\nPosDefManifold.jl Main module\nriemannianGeometry.jl The fundamental unit collecting all functions acting on the P manifold\nlinearAlgebra.jl Collection of linear algebra routines\nsignalProcessing.jl Collection of signal processing routines\ntest.jl Unit performing all tests"
+    "text": "PosDefManifold includes five code units (.jl files):Unit Description\nMainModule (PosDefManifold.jl) Main module\nriemannianGeometry.jl The fundamental unit collecting all functions acting on the P manifold\nlinearAlgebra.jl Collection of linear algebra routines\nsignalProcessing.jl Collection of signal processing routines\ntest.jl Unit performing all tests"
 },
 
 {
