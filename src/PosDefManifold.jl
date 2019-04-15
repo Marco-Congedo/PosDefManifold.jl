@@ -44,8 +44,6 @@ end
 ⋱ = Diagonal     # alias for Diagonal, tab-completition: ⋱\ddots
 ℍ = Hermitian   # alias for Hermitian, tab completion \bbH
 
-#import Base: +, -, *
-
 export
     # From this module
 
