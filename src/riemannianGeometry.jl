@@ -94,14 +94,14 @@ function geodesic(P::ℍ, Q::ℍ, a::Real, metric::Metric=Fisher)
     return  ℍ(P*b + Q*a)
 
     elseif  metric==invEuclidean
-    return  ℍ( inv( ℍ(inv(P)*b + inv(Q)*a) ) )
+    return  inv( ℍ(inv(P)*b + inv(Q)*a) )
 
     elseif  metric==logEuclidean
     return  ℍ( exp( ℍ(log(P)*b + log(Q)*a) ) )
 
     elseif  metric==Fisher
             P½, P⁻½ = pow(P, 0.5, -0.5)
-    return  ℍ( P½ * ℍ((P⁻½ * Q * P⁻½)^a) * P½ )
+    return  ℍ( P½ * (P⁻½ * Q * P⁻½)^a * P½ )
 
     elseif  metric in (logdet0, Jeffrey)
     return  meanP([P, Q], metric, w=[b, a], ✓w=false) #! 2
