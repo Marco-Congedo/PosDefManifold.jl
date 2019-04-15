@@ -23,9 +23,6 @@ const maxpos=1e15
 # types
 
 RealOrComplex=Union{Real, Complex}
-#MatVector=Vector{Hermitian}
-#HermOrSym=Union{Symmetric, Hermitian}
-#VectorOrMatrix=Union{Vector{RealOrComplex}, Matrix{RealOrComplex}}
 
 @enum Metric begin
     Euclidean    =1  # distance: δ_e; mean: Arithmetic
@@ -45,9 +42,7 @@ end
 𝚺 = sum          # alias for sum, tab-completition: \bfSigma
 𝛍 = mean         # alias for mean, tab-completition: \bfmu
 ⋱ = Diagonal     # alias for Diagonal, tab-completition: ⋱\ddots
-#ℂ = ComplexF64   # alias for ComplexF64 concrete type, tab completion \bbC
 ℍ = Hermitian   # alias for Hermitian, tab completion \bbH
-#𝕊 = Symmetric   # alias for Symmetric, tab completion \bbS
 
 #import Base: +, -, *
 
@@ -79,11 +74,9 @@ export
     𝚺,
     𝛍,
     ⋱,
-    #ℂ,
     ℍ,
-    #𝕊,
 
-    # from LinearAlgebraP.jl
+    # from LinearAlgebra.jl
     det1,
     tr1,
     normalizeCol!,
@@ -104,7 +97,7 @@ export
     powerIterations, powIter,
     choL,
 
-    # from SignalProcessingP.jl
+    # from SignalProcessing.jl
     randChi², randχ²,
     randEigvals, randλ,
     randEigvalsMat, randΛ,
@@ -114,7 +107,7 @@ export
     gram,
     trade,
 
-    # from RiemannianGeometryP.jl
+    # from RiemannianGeometry.jl
     distanceSqr, distance²,
     distance,
     geodesic,
@@ -143,6 +136,6 @@ include("signalProcessing.jl")
 include("riemannianGeometry.jl")
 include("test.jl")
 
-println("\n⭐  "," Welcome to the PosDefManifold package v.0.1.0", "⭐\n")
+println("\n⭐  "," Welcome to the PosDefManifold package v.dev", "⭐\n")
 
-end # module end
+end # module

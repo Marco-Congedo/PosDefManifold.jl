@@ -83,7 +83,6 @@ To know what is the current metric, get it as a string as:
 |:----------:| ----------- | ----------- | ----------- | ----------- |
 |`𝚺` |[`sum`](https://bit.ly/2FcsAJg)|Base| \bfSigma | ⛔ |
 |`𝛍`|[`mean`](https://bit.ly/2TOakA0)|Statistics| \bfmu | ⛔ |
-|`ℂ`|[`ComplexF64`](https://bit.ly/2CC42bU)|Base| \bbC | ✓ |
 |`⋱`|[`Diagonal`](https://bit.ly/2Jovxf8)|LinearAlgebra| \ddots | ✓ |
 |`ℍ`|[`Hermitian`](https://bit.ly/2JOiROX)|LinearAlgebra| \bbH | ✓ |
 
