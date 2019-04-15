@@ -666,10 +666,10 @@ function generalizedMean(℘, p::Real; w::Vector=[], ✓w::Bool=true)
     else
         n, k=Attributes(℘)
         if isempty(w)
-            return ℍ(ℍ(𝛍(P^p for P in ℘))^(1/p))
+            return ℍ(𝛍(P^p for P in ℘))^(1/p)
         else
             v=GetWeights(w, ✓w, k)
-            return ℍ(ℍ(𝚺(ω*P^p for (ω, P) in zip(v, ℘)))^(1/p))
+            return ℍ(𝚺(ω*P^p for (ω, P) in zip(v, ℘)))^(1/p)
         end # if w
     end # if p
 end # function
@@ -751,9 +751,9 @@ function logdet0Mean(℘;    w::Vector=[], ✓w::Bool=true, init=nothing,
 
     @inbounds while true
         if isempty(w)
-            M◇ = ℍ(l * inv(ℍ(𝚺(inv(ℍ(P+M)) for P in ℘))))
+            M◇ = l * inv(ℍ(𝚺(inv(ℍ(P+M)) for P in ℘)))
         else
-            M◇ = ℍ(0.5 * inv(ℍ(𝚺(ω * inv(ℍ(P+M)) for (ω, P) in zip(v, ℘)))))
+            M◇ = 0.5 * inv(ℍ(𝚺(ω * inv(ℍ(P+M)) for (ω, P) in zip(v, ℘))))
         end
         conv = norm(M◇-M)/norm(M)
         ⍰ && println("iteration: ", iter, "; convergence: ", conv)
@@ -957,7 +957,7 @@ function powerMean(℘, p::Real;     w::Vector=[], ✓w::Bool=true, init=nothing
         p<0 ? X=ℍ(M^(0.5)) : X=ℍ(M^(-0.5))
         X◇, H = similar(X, eltype(X))
         𝒫=similar(℘, eltype(℘))
-        if p<0 𝒫=[ℍ(inv(P)) for P in ℘] else 𝒫=℘ end
+        if p<0 𝒫=[inv(P) for P in ℘] else 𝒫=℘ end
         iter = 1
         conv = 0.; oldconv=maxpos
         ⍰ && @info("Iterating powerMean Fixed-Point...")
@@ -979,7 +979,7 @@ function powerMean(℘, p::Real;     w::Vector=[], ✓w::Bool=true, init=nothing
     end # if
 
     if p<0  return ( ℍ((X◇)'*X◇), iter, conv )
-    else    return ( ℍ(inv((X◇)'*X◇)), iter, conv ) end
+    else    return ( inv(ℍ((X◇)'*X◇)), iter, conv ) end
   end # if !(-1<=p<=1)
 end
 
@@ -1082,8 +1082,8 @@ function meanP(℘, metric::Metric=Fisher;    w::Vector=[], ✓w::Bool=true)
         end
 
     elseif metric == invEuclidean
-        if isempty(w)   return ℍ(inv(ℍ(𝛍(inv(P) for P in ℘))))
-        else            return ℍ(inv(ℍ(𝚺(ω*inv(P) for (ω, P) in zip(v, ℘)))))
+        if isempty(w)   return inv(ℍ(𝛍(inv(P) for P in ℘)))
+        else            return inv(ℍ(𝚺(ω*inv(P) for (ω, P) in zip(v, ℘))))
         end
 
     elseif metric == logEuclidean
