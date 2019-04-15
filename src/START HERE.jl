@@ -45,7 +45,8 @@ begin
     #1) run the following three lines
     push!(LOAD_PATH, srcDir)
 
-    using Documenter, DocumenterTools, Statistics, Revise, PosDefManifold
+    using Documenter, DocumenterTools, Statistics, Revise,
+    PosDefManifold, LinearAlgebra
     cd(docsDir)
 
     #2) copy and run the following line from the REPL

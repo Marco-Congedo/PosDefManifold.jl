@@ -621,6 +621,7 @@ function pow(P::ℍ, args...)               # several arguments
     (Λ, U) = evd(P)
     ispos(Λ, msg="function Rpow: at least one eigenvalue is smaller than the chosen tolerance")
     # optimize by computing only the upper trinagular part
+    println("yes")
     return  (ℍ(U * Λ^p * U') for p in args)
 end
 
@@ -646,6 +647,30 @@ end
 
 """
 invsqrt(P::ℍ) = spectralFunctions(P, x->1/sqrt(x));
+
+"""
+    invsqrt(P::ℍ)
+
+ Given a positive definite matrix ``P``, compute the exponential
+ ``e^P``. The `exp` Julia function is overwritten here to make sure
+ the result is Hermitian.
+
+ ``P`` must be flagged as Hermitian. See [typecasting matrices](@ref).
+
+ **See**: [typecasting matrices](@ref).
+
+ **See also**: [`pow`](@ref).
+
+ ## Examples
+    using LinearAlgebra, PosDefManifold
+    P=randP(ComplexF64, 5);
+    Q=log(exp(P));
+    Q ≈ P ? println(" ⭐ ") : println(" ⛔ ")
+
+"""
+exp(P::ℍ) = spectralFunctions(P, x->exp(x));
+
+expo(P::ℍ) = spectralFunctions(P, x->exp(x));
 
 
 """

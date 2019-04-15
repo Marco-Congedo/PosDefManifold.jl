@@ -121,6 +121,7 @@ evd
 spectralFunctions
 pow
 invsqrt
+exp
 sqr
 powerIterations
 ```

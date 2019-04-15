@@ -44,6 +44,8 @@ end
 ⋱ = Diagonal     # alias for Diagonal, tab-completition: ⋱\ddots
 ℍ = Hermitian   # alias for Hermitian, tab completion \bbH
 
+import Base.exp, LinearAlgebra.exp
+
 export
     # From this module
 
@@ -92,6 +94,8 @@ export
     pow,
     invsqrt,
     sqr,
+    exp,
+    expo,
     powerIterations, powIter,
     choL,
 
