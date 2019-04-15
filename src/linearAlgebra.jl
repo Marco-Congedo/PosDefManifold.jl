@@ -648,30 +648,6 @@ end
 """
 invsqrt(P::ℍ) = spectralFunctions(P, x->1/sqrt(x));
 
-"""
-    invsqrt(P::ℍ)
-
- Given a positive definite matrix ``P``, compute the exponential
- ``e^P``. The `exp` Julia function is overwritten here to make sure
- the result is Hermitian.
-
- ``P`` must be flagged as Hermitian. See [typecasting matrices](@ref).
-
- **See**: [typecasting matrices](@ref).
-
- **See also**: [`pow`](@ref).
-
- ## Examples
-    using LinearAlgebra, PosDefManifold
-    P=randP(ComplexF64, 5);
-    Q=log(exp(P));
-    Q ≈ P ? println(" ⭐ ") : println(" ⛔ ")
-
-"""
-exp(P::ℍ) = spectralFunctions(P, x->exp(x));
-
-expo(P::ℍ) = spectralFunctions(P, x->exp(x));
-
 
 """
     sqr(P::ℍ)
