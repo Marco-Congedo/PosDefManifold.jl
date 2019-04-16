@@ -105,7 +105,7 @@ randλ=randEigvals
     Q=ℍ(U*Λ*U') # generate an SPD matrix and flag it as 'Hermitian'
 
 """
-randEigvalsMat(n::Int; df::Int=2, eigvalsSNR::Real=10e3)=Diagonal(randλ(n, df=df, eigvalsSNR=eigvalsSNR))
+randEigvalsMat(n::Int; df::Int=2, eigvalsSNR::Real=10e3)=⋱(randλ(n, df=df, eigvalsSNR=eigvalsSNR))
 randΛ=randEigvalsMat
 
 
@@ -218,7 +218,7 @@ function randPosDefMat(n::Int, k::Int; df::Int=2, eigvalsSNR::Real=10e3, SNR::Re
     for j in 1:k
         V=randU(n)
         ℘[j]=ℍ( U*randΛ(n, df=df, eigvalsSNR=eigvalsSNR)*U'
-              + V*(φ*randΛ(n, df=df, eigvalsSNR=eigvalsSNR))*V' )
+                 + V*(φ*randΛ(n, df=df, eigvalsSNR=eigvalsSNR))*V' )
     end
     return ℘
 end
@@ -231,7 +231,7 @@ function randPosDefMat(::Type{Complex{T}}, n::Int, k::Int; df::Int=2, eigvalsSNR
     for j in 1:k
         V=randU(ComplexF64, n)
         ℘[j]=ℍ( U*randΛ(n, df=df, eigvalsSNR=eigvalsSNR)*U'
-              + V*(φ*randΛ(n, df=df, eigvalsSNR=eigvalsSNR))*V' )
+                 + V*(φ*randΛ(n, df=df, eigvalsSNR=eigvalsSNR))*V' )
     end
     return ℘
 end
@@ -342,8 +342,7 @@ end
     F=gram(X); # => G=X'*X/100
 """
 function gram(X::Matrix)
-    r=size(X, 1)
-    c=size(X, 2)
+    (r, c)=size(X)
     r<c ? ℍ((X*X')/c) : ℍ((X'*X)/r)
 end # function gram
 

@@ -169,7 +169,7 @@ normalizeCol!(X, range::UnitRange, by::Number) = for j in range @inbounds normal
  """
 function ispos( λ::Vector; tol::Real=minpos, rev::Bool=true,
                 bell::Bool=true, msg::String="")
-    rev ? ind=(length(λ):-1:1) : ind=(1:length(λ))
+    rev ? ind = (length(λ):-1:1) : ind=(1:length(λ))
     for i in ind
         if λ[i]<tol
             bell && print('\a')
@@ -281,16 +281,16 @@ colNorm(X, j::Int) = √sumOfSqr(X, j)
     sum²=sumOfSqr(X, 2:4)   # (3) sum of squares of elements in column 2 to 4
 
 """
-sumOfSqr(A::Array{T}) where T<:Real = @inbounds 𝚺(a^2 for a in A)
-sumOfSqr(A::Array{T}) where T<:Complex = @inbounds 𝚺(abs2(a) for a in A)
-sumOfSqr(A) = @inbounds 𝚺(abs2(a) for a in A)
+sumOfSqr(A::Array{T}) where T<:Real = 𝚺(a^2 for a in A)
+sumOfSqr(A::Array{T}) where T<:Complex = 𝚺(abs2(a) for a in A)
+sumOfSqr(A) = 𝚺(abs2(a) for a in A)
 
-sumOfSqr(X::Matrix{T}, j::Int) where T<:Real = @inbounds 𝚺(X[:, j].^2)
-sumOfSqr(X::Matrix{T}, j::Int) where T<:Complex = @inbounds 𝚺(abs2.(X[:, j]))
-sumOfSqr(X, j::Int) = @inbounds 𝚺(abs2.(X[:, j]))
+sumOfSqr(X::Matrix{T}, j::Int) where T<:Real = 𝚺(X[:, j].^2)
+sumOfSqr(X::Matrix{T}, j::Int) where T<:Complex = 𝚺(abs2.(X[:, j]))
+sumOfSqr(X, j::Int) = 𝚺(abs2.(X[:, j]))
 
-sumOfSqr(X::Matrix{T}, range::UnitRange) where T<:RealOrComplex = @inbounds 𝚺(sumOfSqr(X, j) for j in range)
-sumOfSqr(X, range::UnitRange) = @inbounds 𝚺(sumOfSqr(X, j) for j in range)
+sumOfSqr(X::Matrix{T}, range::UnitRange) where T<:RealOrComplex = 𝚺(sumOfSqr(X, j) for j in range)
+sumOfSqr(X, range::UnitRange) = 𝚺(sumOfSqr(X, j) for j in range)
 
 
 """
@@ -314,10 +314,10 @@ sumOfSqr(X, range::UnitRange) = @inbounds 𝚺(sumOfSqr(X, j) for j in range)
     sumDiag²=sumOfSqrDiag(Diagonal(X)) # (2)
 
 """
-sumOfSqrDiag(X::Matrix{T}) where T<:Real = @inbounds 𝚺(X[i, i]^2 for i=1:minimum(size(X)))
-sumOfSqrDiag(X::Matrix{T}) where T<:Complex = @inbounds 𝚺(abs2(X[i, i]) for i=1:minimum(size(X)))
-sumOfSqrDiag(Λ::Diagonal) = @inbounds 𝚺(Λ[i, i]^2 for i=1:size(Λ, 1))
-sumOfSqrDiag(X) = @inbounds 𝚺(abs2(X[i, i]) for i=1:minimum(size(X)))
+sumOfSqrDiag(X::Matrix{T}) where T<:Real = 𝚺(X[i, i]^2 for i=1:minimum(size(X)))
+sumOfSqrDiag(X::Matrix{T}) where T<:Complex = 𝚺(abs2(X[i, i]) for i=1:minimum(size(X)))
+sumOfSqrDiag(Λ::Diagonal) = 𝚺(Λ[i, i]^2 for i=1:size(Λ, 1))
+sumOfSqrDiag(X) = 𝚺(abs2(X[i, i]) for i=1:minimum(size(X)))
 
 
 """
@@ -447,8 +447,8 @@ end
     Δ=fDiagonal(Λ, x->x^2)  # using an anonymous function for the square of the eigenvalues
 
 """
-fDiagonal(X::Matrix, func::Function, k::Int=0) = Diagonal(func.(diag(X, k)));
-fDiagonal(X, func::Function, k::Int=0) = Diagonal(func.(diag(X, k)));
+fDiagonal(X::Matrix, func::Function, k::Int=0) = ⋱(func.(diag(X, k)));
+fDiagonal(X, func::Function, k::Int=0) = ⋱(func.(diag(X, k)));
 
 
 
@@ -529,7 +529,7 @@ end # mgs function
 """
 function evd(S::ℍ) # returns tuple (Λ, U)
     F = eigen(S)
-    return  Diagonal(F.values), F.vectors # ⋱=LinearAlgebra.Diagonal
+    return  ⋱(F.values), F.vectors # ⋱=LinearAlgebra.Diagonal
 end
 
 
@@ -584,7 +584,7 @@ function spectralFunctions(P::ℍ, func::Function)
     F = eigen(P)
     ispos(F.values, msg="function spectralFunctions: at least one eigenvalue is smaller than the chosen tolerance")
     # optimize by computing only the upper trinagular part
-    return ℍ(F.vectors * Diagonal(func.(F.values)) * F.vectors')
+    return ℍ(F.vectors * ⋱(func.(F.values)) * F.vectors')
 end
 
 
@@ -712,7 +712,7 @@ function powerIterations(S::ℍ, q::Int;
     U=randn(eltype(S), size(S, 1), q) # initialization
     normalizeCol!(U, 1:q)
     U◇=similar(U, eltype(U))
-    iter=1; conv=0
+    (iter, conv) = 1, 0.
     if ⍰ @info("Running Power Iterations...") end
     while true
         # power iteration of q vectors and their Gram-Schmidt Orthogonalization
@@ -729,7 +729,7 @@ function powerIterations(S::ℍ, q::Int;
     else
         D=zeros(eltype(U), q, q)
         for i=1:q D[i, i] = U◇[:, i]' * S * U◇[:, i] end
-        return (Diagonal(real(D)), U◇, iter, conv)
+        return (⋱(real(D)), U◇, iter, conv)
     end
 end
 powIter=powerIterations

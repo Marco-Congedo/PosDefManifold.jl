@@ -1,5 +1,5 @@
 #    Unit riemannianGeometry.jl, part of PosDefManifold Package for julia language
-#    v 0.1.0 - last update 14th of April 2019
+#    v 0.1.1 - last update 16th of April 2019
 #
 #    MIT License
 #    Copyright (c) 2019, Marco Congedo, CNRS, Grenobe, France:
@@ -24,8 +24,8 @@
 """
     geodesic(P::ℍ, Q::ℍ, a::Real, metric::Metric=Fisher)
 
-  Move along the [geodesic](@ref) from point ``P`` to point ``Q``
-  (two positive definite matrices) with *arclegth* ``0<=a<=1``,
+ Move along the [geodesic](@ref) from point ``P`` to point ``Q``
+ (two positive definite matrices) with *arclegth* ``0<=a<=1``,
  using the specified metric, of type [Metric::Enumerated type](@ref).
  By default de [Fisher](@ref) metric is adopted.
 
@@ -104,7 +104,7 @@ function geodesic(P::ℍ, Q::ℍ, a::Real, metric::Metric=Fisher)
     return  ℍ( P½ * (P⁻½ * Q * P⁻½)^a * P½ )
 
     elseif  metric in (logdet0, Jeffrey)
-    return  meanP(ℍVector([P, Q]), metric, w=[b, a], ✓w=false) #! 2
+    return  meanP(ℍVector([P, Q]), metric, w=[b, a], ✓w=false)
 
     elseif  metric==VonNeumann
             @warn("An expression for the geodesic is not available for the Von neumann metric")
@@ -210,6 +210,7 @@ end # function
 
 """
 function distanceSqr(P::ℍ, metric::Metric=Fisher)
+
     if      metric==Euclidean
     return  sumOfSqr(P-I)
 
@@ -227,8 +228,8 @@ function distanceSqr(P::ℍ, metric::Metric=Fisher)
 
     elseif  metric==logCholesky
             LP=choL(P)
-            n=size(P, 1)
-    return  sumOfSqrTril(tril(LP,-1), -1) + 𝚺(log(LP[i, i])^2 for i in 1:n)
+    return  sumOfSqrTril(tril(LP,-1), -1)
+                + 𝚺(log(LP[i, i])^2 for i in 1:size(P, 1))
 
     elseif  metric==Jeffrey
     return  tr(P)/2 + tr(inv(P))/2 - size(P, 1)
@@ -267,8 +268,8 @@ function distanceSqr(P::ℍ, Q::ℍ, metric::Metric=Fisher)
     elseif  metric==logCholesky
             LP = choL(P)
             LQ = choL(Q)
-            n=size(P, 1)
-    return  sumOfSqrTril(tril(LP,-1)-tril(LQ,-1), -1)+𝚺((log(LP[i, i])-log(LQ[i, i]))^2 for i in 1:n)
+    return  sumOfSqrTril(tril(LP,-1)-tril(LQ,-1), -1)
+                + 𝚺((log(LP[i, i])-log(LQ[i, i]))^2 for i in 1:size(P, 1))
 
     elseif  metric==Jeffrey
     return  real(tr(inv(Q)*P)/2 + tr(inv(P)*Q)/2) - size(P, 1)
@@ -312,8 +313,7 @@ distance(P::ℍ, Q::ℍ, metric::Metric=Fisher) = √(distanceSqr(P, Q, metric))
 
 # Internal Function for fast computation of inter_distance matrices
 function GetdistSqrMat(℘::ℍVector, metric::Metric=Fisher)
-    k=length(℘)
-    n=size(℘[1], 1)
+    n, k=Attributes(℘)
     △=zeros(k,  k)
 
     if      metric==invEuclidean
@@ -472,8 +472,8 @@ function laplacian(Δ²)
     for i=1:r L[i, i]=1.0 end
     for j=1:c-1, i=j+1:r L[i, j]=exp(-Δ²[i, j]/epsilon)  end
     W=ℍ(L, :L)
-    Dnorms=Diagonal([1/(√(𝚺(W[:, j]))) for j=1:c])
-    return ℍ(Dnorms * W * Dnorms) # Ω
+    Dnorms=⋱([1/(√(𝚺(W[:, j]))) for j=1:c])
+    return ℍ(Dnorms * W * Dnorms) # Ω, see laplacianEigenMaps
 end
 
 
@@ -532,7 +532,7 @@ end
 function laplacianEigenMaps(Ω, q::Int; tol=1e-9, maxiter=300, ⍰=false)
     (Λ, U, iter, conv) =
         powIter(Ω, q+1; evalues=true, tol=tol, maxiter=maxiter, ⍰=⍰)
-    return Diagonal(Λ[2:q+1, 2:q+1]), U[1:size(U, 1), 2:q+1], iter, conv
+    return ⋱(Λ[2:q+1, 2:q+1]), U[1:size(U, 1), 2:q+1], iter, conv
 end;
 laplacianEM=laplacianEigenMaps
 
@@ -599,7 +599,7 @@ function GetWeights(w::Vector, ✓w::Bool, k::Int)
         s=𝚺(w)
         if s ≉  1.0 return w./s else return w end
     else return w
-    end
+    end # if
 end
 # end Internal functions
 
@@ -744,8 +744,7 @@ function logdet0Mean(℘::ℍVector;  w::Vector=[], ✓w::Bool=true, init=nothin
     isempty(w) ? v=[] : v = GetWeights(w, ✓w, k)
     init == nothing ? M = meanP(℘, logEuclidean, w=w, ✓w=false) : M = ℍ(init)
     M◇ = similar(M, eltype(M))
-    iter = 1
-    conv = 0.; oldconv=maxpos
+    (iter, conv, oldconv) = 1, 0., maxpos
     ⍰ && @info("Iterating RlogDetMean Fixed-Point...")
 
     @inbounds while true
@@ -834,8 +833,7 @@ function wasMean(℘::ℍVector;    w::Vector=[], ✓w::Bool=true, init=nothing,
     isempty(w) ? v=[] : v = GetWeights(w, ✓w, k)
     init == nothing ? M = generalizedMean(℘, 0.5; w=v, ✓w=false) : M = ℍ(init)
     M◇ = similar(M, eltype(M))
-    iter = 1
-    conv = 0.; oldconv=maxpos
+    (iter, conv, oldconv) = 1, 0., maxpos
     ⍰ && @info("Iterating wasMean Fixed-Point...")
 
     @inbounds while true
@@ -958,8 +956,7 @@ function powerMean(℘::ℍVector, p::Real;     w::Vector=[], ✓w::Bool=true, i
         X◇, H = similar(X, eltype(X))
         𝒫=similar(℘, eltype(℘))
         if p<0 𝒫=[inv(P) for P in ℘] else 𝒫=℘ end
-        iter = 1
-        conv = 0.; oldconv=maxpos
+        (iter, conv, oldconv) = 1, 0., maxpos
         ⍰ && @info("Iterating powerMean Fixed-Point...")
 
         @inbounds while true
@@ -1165,7 +1162,7 @@ end # function
 function logMap(P::ℍ, G::ℍ, metric::Metric=Fisher)
     if   metric==Fisher
          G½, G⁻½=pow(G, 0.5, -0.5)
-         return ℍ(G½ * log(G⁻½ * P * G⁻½') * G½')
+         return ℍ(G½ * log(ℍ(G⁻½ * P * G⁻½)) * G½)
     else @warn "in RiemannianGeometryP.logMap function:
                  only the Fisher metric is supported for the logarithmic map."
     end
@@ -1207,7 +1204,7 @@ end
 function expMap(S::ℍ, G::ℍ, metric::Metric=Fisher)
     if   metric==Fisher
          G½, G⁻½=pow(G, 0.5, -0.5)
-         return ℍ(G½ * exp(G⁻½ * S * G⁻½') * G½')
+         return ℍ(G½ * exp(ℍ(G⁻½ * S * G⁻½')) * G½')
     else @warn "in RiemannianGeometryP.expMap function:
               only the Fisher metric is supported for the exponential map"
     end
@@ -1276,12 +1273,12 @@ function matP(ς::Vector)
   n=Int((-1+√(1+8*length(ς)))/2) # Size of the matrix whose vectorization vector v has size length(v)
   S=Matrix{eltype(ς)}(undef, n, n)
   l=0;
-  for j in 1:n-1
+  @inbounds for j in 1:n-1
     l=l+1
-    @inbounds S[j, j]=ς[l]
+    S[j, j]=ς[l]
     for i in j+1:n
       l=l+1
-      @inbounds S[i, j]=invsqrt2*ς[l];  S[j, i]=S[i, j]
+       S[i, j]=invsqrt2*ς[l];  S[j, i]=S[i, j]
     end
   end
   S[n, n]=ς[end]

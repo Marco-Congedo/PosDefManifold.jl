@@ -1,5 +1,5 @@
 #    Main Module of the  PosDefManifold Package for julia language
-#    v 0.1.0 - last update 14th of April 2019
+#    v 0.1.1 - last update 16th of April 2019
 #
 #    MIT License
 #    Copyright (c) 2019, Marco Congedo, CNRS, Grenobe, France:
@@ -13,7 +13,6 @@ module PosDefManifold
 using LinearAlgebra, Statistics
 
 # constants
-
 const sqrt2=√2
 const invsqrt2=1/sqrt2
 const minpos=1e-15
@@ -39,7 +38,7 @@ RealOrComplex=Union{Real, Complex}
     logCholesky  =5  # distance: δ_c; mean: Log-Cholesky
     Fisher       =6  # distance: δ_f; mean: Fisher (Cartan, Karcher, Pusz-Woronowicz,...)
     logdet0      =7  # distance: δ_s; mean: LogDet (S, α, Bhattacharyya, Jensen,...)
-    Jeffrey      =8  # distance: δ_j; mean: Jeffrey (symmetrizes Kullback-Leibler)
+    Jeffrey      =8  # distance: δ_j; mean: Jeffrey (symmetrized Kullback-Leibler)
     VonNeumann   =9  # distance: δ_v; mean: Not Availale
     Wasserstein  =10 # distance: δ_w; mean: Wasserstein (Bures, Hellinger, ...)
     #...
