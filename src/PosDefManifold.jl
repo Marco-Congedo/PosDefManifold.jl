@@ -64,7 +64,7 @@ export
 
     #types
     RealOrComplex,
-    ℍVector
+    ℍVector,
     Metric,
         Euclidean,
         invEuclidean,
