@@ -17,8 +17,8 @@ The main module does not contains functions, but it declares all **constant**,
 | Contents  |
 |:----------:|
 | [constants](@ref) |
-| [types](@ref) |
 | [aliases](@ref) |
+| [types](@ref) |
 | [tips & tricks](@ref) |
 
 ## constants
@@ -28,6 +28,17 @@ The main module does not contains functions, but it declares all **constant**,
 |`invsqrt2`|1/√2 | 0.7071067811865475 |
 |`minpos`| 1e-15 | 0.000000000000001|
 |`maxpos`| 1e15 | 100000000000000|
+
+## aliases
+
+| alias   | Julia function | in Package | tab-completition | REPL support |
+|:----------:| ----------- | ----------- | ----------- | ----------- |
+|`𝚺` |[`sum`](https://bit.ly/2FcsAJg)|Base| \bfSigma | ⛔ |
+|`𝛍`|[`mean`](https://bit.ly/2TOakA0)|Statistics| \bfmu | ⛔ |
+|`⋱`|[`Diagonal`](https://bit.ly/2Jovxf8)|LinearAlgebra| \ddots | ✓ |
+|`ℍ`|[`Hermitian`](https://bit.ly/2JOiROX)|LinearAlgebra| \bbH | ✓ |
+
+All packages above are built-in julia packages.
 
 ## types
 
@@ -77,16 +88,10 @@ To know what is the current metric, get it as a string as:
 ### RealOrComplex type
  `RealOrComplex=Union{Real, Complex}` is the Union of Real and Complex Types.
 
-## aliases
-
-| alias   | Julia function | in Package | tab-completition | REPL support |
-|:----------:| ----------- | ----------- | ----------- | ----------- |
-|`𝚺` |[`sum`](https://bit.ly/2FcsAJg)|Base| \bfSigma | ⛔ |
-|`𝛍`|[`mean`](https://bit.ly/2TOakA0)|Statistics| \bfmu | ⛔ |
-|`⋱`|[`Diagonal`](https://bit.ly/2Jovxf8)|LinearAlgebra| \ddots | ✓ |
-|`ℍ`|[`Hermitian`](https://bit.ly/2JOiROX)|LinearAlgebra| \bbH | ✓ |
-
-All packages above are built-in julia packages.
+### ℍVector type
+ `ℍVector=Vector{ℍ}` is a vector of Hermitian matrices. See [aliases](@def) for
+ the ℍ symbol and [typecasting matrices](@def) for the use of Hermitian matrices
+ in **PosDefManifold**.
 
 ## tips & tricks
 
@@ -97,7 +102,7 @@ All packages above are built-in julia packages.
  on positive definite matrices only.
  Those matrices must therefore be either
  *symmetric positive definite (real)* or *Hermitian (complex)*.
- Such matrices are identified in as being of the `Hermitian`type, using the standard [LinearAlgebra](https://bit.ly/2JOiROX) package.
+ Such matrices are uniformly identified in **PosDefManifold** as being of the `Hermitian`type, using the standard [LinearAlgebra](https://bit.ly/2JOiROX) package.
  The alias `ℍ` is used consistently in the code (see [aliases](@ref)).
  If the input is not flagged, the functions restricting the input to
  *positive definite matrices* will give an error.
@@ -137,7 +142,10 @@ All packages above are built-in julia packages.
      3.74948  6.4728   6.21635
      4.54381  6.21635  8.91504
 
- Finally, other functions act on generic matrices (of type `Matrix`).
+ Similarly, if you want to construct an [ℍVector type] from, say, two Hermitian
+ matrices `P` and `Q`, don't write `A=[P, Q]`, but rather `A=ℍVector([P, Q])`.
+
+ Other functions act on generic matrices (of type [Matrix](https://docs.julialang.org/en/v1/base/arrays/#Base.Matrix)).
  To those functions you can pass any matrix.
  However, keep in mind that the functions writing on the argument matrix such as
  [`normalizeCol!`](@ref) will give an error if you pass an `Hermitian` matrix,
@@ -169,4 +177,4 @@ All packages above are built-in julia packages.
  Another example: here is how to get an Hermitian matrix out of the
  diagonal part of an Hermitian matrix H:
 
-    Hermitian(Matrix(Diagonal(H)))
+    Hermitian(Matrix(Diagonal(H))).

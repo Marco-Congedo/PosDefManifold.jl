@@ -20,9 +20,16 @@ const minpos=1e-15
 const maxpos=1e15
 #const ghostMat=Matrix{Nothing}(undef, 1, 1)
 
+# aliases
+𝚺 = sum          # alias for sum, tab-completition: \bfSigma
+𝛍 = mean         # alias for mean, tab-completition: \bfmu
+⋱ = Diagonal     # alias for Diagonal, tab-completition: ⋱\ddots
+ℍ = Hermitian   # alias for Hermitian, tab completion \bbH
+
 # types
 
 RealOrComplex=Union{Real, Complex}
+ℍVector=Vector{ℍ}
 
 @enum Metric begin
     Euclidean    =1  # distance: δ_e; mean: Arithmetic
@@ -38,11 +45,6 @@ RealOrComplex=Union{Real, Complex}
     #...
 end
 
-# aliases
-𝚺 = sum          # alias for sum, tab-completition: \bfSigma
-𝛍 = mean         # alias for mean, tab-completition: \bfmu
-⋱ = Diagonal     # alias for Diagonal, tab-completition: ⋱\ddots
-ℍ = Hermitian   # alias for Hermitian, tab completion \bbH
 
 export
     # From this module
@@ -54,8 +56,15 @@ export
     maxpos,
     ghostMat,
 
+    #aliases
+    𝚺,
+    𝛍,
+    ⋱,
+    ℍ,
+
     #types
     RealOrComplex,
+    ℍVector
     Metric,
         Euclidean,
         invEuclidean,
@@ -67,12 +76,6 @@ export
         Jeffrey,
         VonNeumann,
         Wasserstein,
-
-    #aliases
-    𝚺,
-    𝛍,
-    ⋱,
-    ℍ,
 
     # from LinearAlgebra.jl
     det1,

@@ -621,7 +621,6 @@ function pow(P::ℍ, args...)               # several arguments
     (Λ, U) = evd(P)
     ispos(Λ, msg="function Rpow: at least one eigenvalue is smaller than the chosen tolerance")
     # optimize by computing only the upper trinagular part
-    println("yes")
     return  (ℍ(U * Λ^p * U') for p in args)
 end
 
