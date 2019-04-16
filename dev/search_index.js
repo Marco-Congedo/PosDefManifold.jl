@@ -133,7 +133,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Intro to Riemannian Geometry",
     "title": "invariances",
     "category": "section",
-    "text": "An important characteristic of metrics is that they may induce invariance properties on the distance, which are in turn inherited by the mean.Let us denote shortly by P_i the set P_1P_k, where i=1k  and by GP_i the Fréchet mean of the set (in this section we drop the weights here for keeping the notation short). The most important invariance properties are:invariance effect on distance δ(PQ) effect on mean GP_i\nrotation δ(PQ)=δ(U^*PUU^*QU) GU^*P_iU=U^*GP_iU\naffinty δ(PQ)=δ(B^*PB^*B^*QB) GB^*P_iB=B^*GP_iB\ninversion δ(PQ)=δ(P^-1Q^-1) GP_i^-1=G^-1P_ifor any unitary U unitary and non-singular B.The affine invariance implies the rotation invariance and is also named congruence invariance."
+    "text": "An important characteristic of metrics is that they may induce invariance properties on the distance, which are in turn inherited by the mean.Let us denote shortly by P_i the set P_1P_k, where i=1k  and by GP_i the Fréchet mean of the set (in this section we drop the weights here for keeping the notation short). The most important invariance properties are:invariance effect on distance δ(PQ) effect on mean GP_i\nrotation δ(PQ)=δ(U^*PUU^*QU) GU^*P_iU=U^*GP_iU\naffinty δ(PQ)=δ(B^*PBB^*QB) GB^*P_iB=B^*GP_iB\ninversion δ(PQ)=δ(P^-1Q^-1) GP_i^-1=G^-1P_ifor any unitary U unitary and non-singular B.The affine invariance implies the rotation invariance and is also named congruence invariance."
 },
 
 {
