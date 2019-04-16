@@ -101,7 +101,7 @@ The most important invariance properties are:
 | invariance | effect on distance ``δ(P,Q)`` | effect on mean ``G\{P_i\}``|
 |:----------:| ----------- | ----------- |
 |rotation|``δ(P,Q)=δ(U^*PU,U^*QU)``|``G\{U^*P_iU\}=U^*G\{P_i\}U``|
-|affinty|``δ(P,Q)=δ(B^*PB^*,B^*QB)``|``G\{B^*P_iB\}=B^*G\{P_i\}B``|
+|affinty|``δ(P,Q)=δ(B^*PB,B^*QB)``|``G\{B^*P_iB\}=B^*G\{P_i\}B``|
 |inversion|``δ(P,Q)=δ(P^{-1},Q^{-1})``|``G\{P_i^{-1}\}=G^{-1}\{P_i\}``|
 for any unitary ``U`` unitary and non-singular ``B``.
 
