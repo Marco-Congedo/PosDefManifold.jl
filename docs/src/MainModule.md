@@ -102,10 +102,9 @@ To know what is the current metric, get it as a string as:
  on positive definite matrices only.
  Those matrices must therefore be either
  *symmetric positive definite (real)* or *Hermitian (complex)*.
- Such matrices are uniformly identified in **PosDefManifold** as being of the `Hermitian`type, using the standard [LinearAlgebra](https://bit.ly/2JOiROX) package.
+ Such matrices are uniformly identified in **PosDefManifold** as being of the `Hermitian` type, using the standard [LinearAlgebra](https://bit.ly/2JOiROX) package.
  The alias `ℍ` is used consistently in the code (see [aliases](@ref)).
- If the input is not flagged, the functions restricting the input to
- *positive definite matrices* will give an error.
+ If the input is not flagged, the functions restricting the input to *positive definite matrices* will give an error.
 
  **Example**
 
