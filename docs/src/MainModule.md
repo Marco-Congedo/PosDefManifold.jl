@@ -150,7 +150,7 @@ To know what is the current metric, get it as a string as:
  [`normalizeCol!`](@ref) will give an error if you pass an `Hermitian` matrix,
  since Julia does not allow writing on non-diagonal elements of those matrices.
  In this case typecast it in another object using the `Matrix` type;
- Suppose `H` is `Hermitian`, you would use for example:
+ suppose `H` is `Hermitian`, you would use for example:
 
     julia> X=Matrix(H)
     julia> normalizeCol!(X, 1)
