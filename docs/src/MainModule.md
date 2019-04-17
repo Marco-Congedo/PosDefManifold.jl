@@ -89,8 +89,8 @@ To know what is the current metric, get it as a string as:
  `RealOrComplex=Union{Real, Complex}` is the Union of Real and Complex Types.
 
 ### ℍVector type
- `ℍVector=Vector{ℍ}` is a vector of Hermitian matrices. See [aliases](@def) for
- the ℍ symbol and [typecasting matrices](@def) for the use of Hermitian matrices
+ `ℍVector=Vector{ℍ}` is a vector of Hermitian matrices. See [aliases](@ref) for
+ the ℍ symbol and [typecasting matrices](@ref) for the use of Hermitian matrices
  in **PosDefManifold**.
 
 ## tips & tricks
