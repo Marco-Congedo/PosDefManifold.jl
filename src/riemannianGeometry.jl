@@ -1,5 +1,5 @@
 #    Unit riemannianGeometry.jl, part of PosDefManifold Package for julia language
-#    v 0.1.0 - last update 14th of April 2019
+#    v 0.1.1 - last update 16th of April 2019
 #
 #    MIT License
 #    Copyright (c) 2019, Marco Congedo, CNRS, Grenobe, France:
@@ -10,6 +10,7 @@
 #    of Symmetric Positive Definite (SPD) or Hermitian matrices
 #
 #    CONTENT
+#    0. Internal Functions
 #    1. Geodesic Equations
 #    2. Distances
 #    3. Inter-distance matrices, Laplacian and Spectral Embedding
@@ -18,14 +19,33 @@
 #    6. Procrustes Problems
 
 # -----------------------------------------------------------
+# 0. Internal Functions
+#    By convention their name begin with underscore char
+# -----------------------------------------------------------
+_attributes(℘::ℍVector)=( size(℘[1], 1), length(℘))
+
+function _doNothing end
+
+# Given a non-negative weight vector normalize the weights so as to sum up to 1
+# if ✓w == true and if they are not already normalized
+function _getWeights(w::Vector, ✓w::Bool, k::Int)
+    if ✓w==true
+        s=𝚺(w)
+        if s ≉  1.0 return w./s else return w end
+    else return w
+    end # if
+end
+
+
+# -----------------------------------------------------------
 # 1. Geodesic Equations
 # -----------------------------------------------------------
 
 """
     geodesic(P::ℍ, Q::ℍ, a::Real, metric::Metric=Fisher)
 
-  Move along the [geodesic](@ref) from point ``P`` to point ``Q``
-  (two positive definite matrices) with *arclegth* ``0<=a<=1``,
+ Move along the [geodesic](@ref) from point ``P`` to point ``Q``
+ (two positive definite matrices) with *arclegth* ``0<=a<=1``,
  using the specified metric, of type [Metric::Enumerated type](@ref).
  By default de [Fisher](@ref) metric is adopted.
 
@@ -44,7 +64,7 @@
 
  For the [logdet zero](@ref) and [Jeffrey](@ref) metric no closed form expression
  for the geodesic is available (to the best of authors' knowledge),
- so in this case the geodesic is found as the weighted mean [`meanP(@ref)`].
+ so in this case the geodesic is found as the weighted mean using [`meanP(@ref)`].
  For the [Von Neumann](@ref) not even an expression for the mean is available,
  so in this case the geodesic is not provided and a *warning* is printed.
 
@@ -91,20 +111,20 @@ function geodesic(P::ℍ, Q::ℍ, a::Real, metric::Metric=Fisher)
     b = 1-a
 
     if      metric==Euclidean
-    return  ℍ(P*b + Q*a)
+    return  P*b + Q*a
 
     elseif  metric==invEuclidean
-    return  ℍ( inv( ℍ(inv(P)*b + inv(Q)*a) ) )
+    return  inv( ℍ(inv(P)*b + inv(Q)*a) )
 
     elseif  metric==logEuclidean
     return  ℍ( exp( ℍ(log(P)*b + log(Q)*a) ) )
 
     elseif  metric==Fisher
             P½, P⁻½ = pow(P, 0.5, -0.5)
-    return  ℍ( P½ * ℍ((P⁻½ * Q * P⁻½)^a) * P½ )
+    return  ℍ( P½ * (P⁻½ * Q * P⁻½)^a * P½ )
 
     elseif  metric in (logdet0, Jeffrey)
-    return  meanP([P, Q], metric, w=[b, a], ✓w=false) #! 2
+    return  meanP(ℍVector([P, Q]), metric, w=[b, a], ✓w=false)
 
     elseif  metric==VonNeumann
             @warn("An expression for the geodesic is not available for the Von neumann metric")
@@ -210,6 +230,7 @@ end # function
 
 """
 function distanceSqr(P::ℍ, metric::Metric=Fisher)
+
     if      metric==Euclidean
     return  sumOfSqr(P-I)
 
@@ -227,8 +248,8 @@ function distanceSqr(P::ℍ, metric::Metric=Fisher)
 
     elseif  metric==logCholesky
             LP=choL(P)
-            n=size(P, 1)
-    return  sumOfSqrTril(tril(LP,-1), -1) + 𝚺(log(LP[i, i])^2 for i in 1:n)
+    return  sumOfSqrTril(tril(LP,-1), -1)
+                + 𝚺(log(LP[i, i])^2 for i in 1:size(P, 1))
 
     elseif  metric==Jeffrey
     return  tr(P)/2 + tr(inv(P))/2 - size(P, 1)
@@ -267,8 +288,8 @@ function distanceSqr(P::ℍ, Q::ℍ, metric::Metric=Fisher)
     elseif  metric==logCholesky
             LP = choL(P)
             LQ = choL(Q)
-            n=size(P, 1)
-    return  sumOfSqrTril(tril(LP,-1)-tril(LQ,-1), -1)+𝚺((log(LP[i, i])-log(LQ[i, i]))^2 for i in 1:n)
+    return  sumOfSqrTril(tril(LP,-1)-tril(LQ,-1), -1)
+                + 𝚺((log(LP[i, i])-log(LQ[i, i]))^2 for i in 1:size(P, 1))
 
     elseif  metric==Jeffrey
     return  real(tr(inv(Q)*P)/2 + tr(inv(P)*Q)/2) - size(P, 1)
@@ -311,9 +332,8 @@ distance(P::ℍ, Q::ℍ, metric::Metric=Fisher) = √(distanceSqr(P, Q, metric))
 # -----------------------------------------------------------
 
 # Internal Function for fast computation of inter_distance matrices
-function GetdistanceSqrMat(℘, metric::Metric=Fisher)
-    k=length(℘)
-    n=size(℘[1], 1)
+function GetdistSqrMat(℘::ℍVector, metric::Metric=Fisher)
+    n, k=_attributes(℘)
     △=zeros(k,  k)
 
     if      metric==invEuclidean
@@ -334,7 +354,8 @@ function GetdistanceSqrMat(℘, metric::Metric=Fisher)
     elseif  metric==logCholesky
             ℘L=[choL(P)     for P in ℘]
             for j in 1:k-1, i in j+1:k
-                △[i, j]=sumOfSqrTril(℘L[i]-℘L[j], -1) + 𝚺((log(℘L[i][l, l])-log(℘L[j][l, l]))^2 for l in 1:n) end
+                △[i, j]=sumOfSqrTril(tril(℘L[i], -1)-tril(℘L[j], -1), -1)
+                        + 𝚺((log(℘L[i][l, l])-log(℘L[j][l, l]))^2 for l in 1:n) end
 
     elseif  metric==Jeffrey
             ℘𝓲=[inv(P) for P in ℘]
@@ -367,13 +388,13 @@ end #function
 
 
 """
-    distanceSqrMat(℘, metric::Metric=Fisher)
+    distanceSqrMat(℘::ℍVector, metric::Metric=Fisher)
 
  **alias**: `distance²Mat`
 
  Given a 1d array `℘` of ``k`` positive definite matrices
- ``{P_1,...,P_k}``, create the ``k⋅k`` real `Hermitian` matrix comprising
- elements ``δ^2(P_i, P_j)\\textrm{, for all }i≠j``.
+ ``{P_1,...,P_k}`` of [ℍVector type](@ref), create the ``k⋅k`` real `Hermitian`
+ matrix comprising elements ``δ^2(P_i, P_j)\\textrm{, for all }i≠j``.
 
  This is the matrix of all *squared inter-distances* (zero on diagonal), using the
  specified `metric`, of type [Metric::Enumerated type](@ref),
@@ -394,17 +415,18 @@ end #function
     Δ²=distanceSqrMat(℘, logEuclidean)
 
 """
-distanceSqrMat(℘, metric::Metric=Fisher)=ℍ(GetdistanceSqrMat(℘, metric), :L)
+distanceSqrMat(℘::ℍVector, metric::Metric=Fisher)=ℍ(GetdistSqrMat(℘, metric), :L)
 distance²Mat=distanceSqrMat
 
 
 """
-    distanceMatrix(℘, metric::Metric=Fisher)
+    distanceMatrix(℘::ℍVector, metric::Metric=Fisher)
 
  **alias**: `distanceMat`
 
  Given a 1d array `℘` of ``k`` positive definite matrices
- ``{P_1,...,P_k}``, create the ``k⋅k`` real `Hermitian` matrix comprising elements
+ ``{P_1,...,P_k}`` of [ℍVector type](@ref), create the ``k⋅k`` real `Hermitian`
+ matrix comprising elements
  ``δ(P_i, P_j)\\textrm{, for all }i≠j``.
 
  This is the matrix of all *inter-distances* (zero on diagonal), using the
@@ -423,7 +445,7 @@ distance²Mat=distanceSqrMat
     ℘=randP(10, 4)
     Δ=distanceMatrix(℘)
 """
-distanceMatrix(℘, metric::Metric=Fisher)=ℍ(sqrt.(GetdistanceSqrMat(℘, metric)), :L)
+distanceMatrix(℘::ℍVector, metric::Metric=Fisher)=ℍ(sqrt.(GetdistSqrMat(℘, metric)), :L)
 distanceMat=distanceMatrix
 
 
@@ -471,8 +493,8 @@ function laplacian(Δ²)
     for i=1:r L[i, i]=1.0 end
     for j=1:c-1, i=j+1:r L[i, j]=exp(-Δ²[i, j]/epsilon)  end
     W=ℍ(L, :L)
-    Dnorms=Diagonal([1/(√(𝚺(W[:, j]))) for j=1:c])
-    return ℍ(Dnorms * W * Dnorms) # Ω
+    Dnorms=⋱([1/(√(𝚺(W[:, j]))) for j=1:c])
+    return ℍ(Dnorms * W * Dnorms) # Ω, see laplacianEigenMaps
 end
 
 
@@ -531,13 +553,13 @@ end
 function laplacianEigenMaps(Ω, q::Int; tol=1e-9, maxiter=300, ⍰=false)
     (Λ, U, iter, conv) =
         powIter(Ω, q+1; evalues=true, tol=tol, maxiter=maxiter, ⍰=⍰)
-    return Diagonal(Λ[2:q+1, 2:q+1]), U[1:size(U, 1), 2:q+1], iter, conv
+    return ⋱(Λ[2:q+1, 2:q+1]), U[1:size(U, 1), 2:q+1], iter, conv
 end;
 laplacianEM=laplacianEigenMaps
 
 
 """
-    spectralEmbedding(℘, q::Int, metric::Metric=Fisher;
+    spectralEmbedding(℘::ℍVector, q::Int, metric::Metric=Fisher;
                         <tol=1e-9, maxiter=300, ⍰=false>)
 
  **alias**: `Rse`
@@ -557,7 +579,7 @@ laplacianEM=laplacianEigenMaps
  - ``convergence`` is the convergence attained by the power method;
 
  **Arguments** `(℘, q, metric, <tol=1e-9, maxiter=300, ⍰=false>)`:
- - `℘` is a 1d array of ``k`` positive matrices;
+ - `℘` is a 1d array of ``k`` positive matrices of [ℍVector type](@ref);
  - ``q`` is the dimension of the Laplacian eigen maps;
  - `metric` is a metric of type [Metric::Enumerated type](@ref),
    used for computing the inter-distances. By default, the [Fisher](@ref) metric is adopted.
@@ -576,10 +598,10 @@ laplacianEM=laplacianEigenMaps
     evalues, maps, iterations, convergence=spectralEmbedding(℘, 2, ⍰=true)
 
 """
-function spectralEmbedding(℘, q::Int, metric::Metric=Fisher;
+function spectralEmbedding(℘::ℍVector, q::Int, metric::Metric=Fisher;
                             tol=1e-9, maxiter=300, ⍰=false)
     return (Λ, U, iter, conv) =
-            laplacianEM(laplacian(distance²Mat(℘, metric)), q; tol=tol, maxiter=maxiter, ⍰=⍰)
+      laplacianEM(laplacian(distance²Mat(℘::ℍVector, metric)), q; tol=tol, maxiter=maxiter, ⍰=⍰)
 end
 
 
@@ -587,28 +609,11 @@ end
 # 4. Means (centers of mass, barycenters, ...)
 # -----------------------------------------------------------
 
-# Internal functions
-Attributes(℘)=( size(℘[1], 1), length(℘))
-#Attributes(℘)=(℘[1] isa Hermitian ? Hermitian : Symmetric, size(℘[1], 1), length(℘))
-#Attributes(P::HermOrSym)=(P isa Hermitian ? Hermitian : Symmetric, size(P, 1))
-
-
-function DoNothing
-end
-
-function GetWeights(w::Vector, ✓w::Bool, k::Int)
-    if ✓w==true
-        s=𝚺(w)
-        if s ≉  1.0 return w./s else return w end
-    else return w
-    end
-end
-
 """
-    generalizedMean(℘, p::Real; <w::Vector=[], ✓w::Bool=true>)
+    generalizedMean(℘::ℍVector, p::Real; <w::Vector=[], ✓w::Bool=true>)
 
  Given a 1d array `℘` of ``k`` positive definite matrices``{P_1,...,P_k}``
- and optional non-negative real weights vector ``w={w_1,...,w_k}``,
+ of [ℍVector type](@ref) and optional non-negative real weights vector ``w={w_1,...,w_k}``,
  return the *weighted generalized mean* ``G`` with real parameter ``p``, that is,
 
  ``G=\\big(\\sum_{i=1}^{k}w_iP_i^p\\big)^{1/p}``.
@@ -659,17 +664,17 @@ end
     G = generalizedMean(℘, 0.5; w=weights, ✓w=false)
 
 """
-function generalizedMean(℘, p::Real; w::Vector=[], ✓w::Bool=true)
+function generalizedMean(℘::ℍVector, p::Real; w::Vector=[], ✓w::Bool=true)
     if     p == -1 return meanP(℘, invEuclidean; w=w, ✓w=✓w)
     elseif p ==  0 return meanP(℘, logEuclidean; w=w, ✓w=✓w)
     elseif p ==  1 return meanP(℘, Euclidean;    w=w, ✓w=✓w)
     else
-        n, k=Attributes(℘)
+        n, k=_attributes(℘)
         if isempty(w)
-            return ℍ(ℍ(𝛍(P^p for P in ℘))^(1/p))
+            return ℍ(𝛍(P^p for P in ℘))^(1/p)
         else
-            v=GetWeights(w, ✓w, k)
-            return ℍ(ℍ(𝚺(ω*P^p for (ω, P) in zip(v, ℘)))^(1/p))
+            v=_getWeights(w, ✓w, k)
+            return ℍ(𝚺(ω*P^p for (ω, P) in zip(v, ℘)))^(1/p)
         end # if w
     end # if p
 end # function
@@ -677,11 +682,11 @@ end # function
 
 """
 
-    logdet0Mean(℘; <w::Vector=[], ✓w::Bool=true, init=nothing,
+    logdet0Mean(℘::ℍVector; <w::Vector=[], ✓w::Bool=true, init=nothing,
                      tol=1e-9, ⍰=false>)
 
  Given a 1d array ``℘`` of ``k`` positive definite matrices ``{P_1,...,P_k}``
- and optional non-negative real weights vector ``w={w_1,...,w_k}``,
+ of [ℍVector type](@ref) and optional non-negative real weights vector ``w={w_1,...,w_k}``,
  return the 3-tuple ``(G, iter, conv)``, where ``G`` is the mean according
  to the [logdet zero](@ref) metric and ``iter``, ``conv`` are the number of iterations
  and convergence attained by the algorithm.
@@ -737,23 +742,22 @@ suggested by (Moakher, 2012, p315)[🎓](@ref), yielding iterations
     G, iter, conv = logdet0Mean(℘, w=weights, ✓w=false, ⍰=true, init=G)
 
 """
-function logdet0Mean(℘;    w::Vector=[], ✓w::Bool=true, init=nothing,
+function logdet0Mean(℘::ℍVector;  w::Vector=[], ✓w::Bool=true, init=nothing,
                             tol=1e-9, ⍰=false)
     maxIter=500
-    n, k = Attributes(℘)
+    n, k = _attributes(℘)
     l=k/2
-    isempty(w) ? v=[] : v = GetWeights(w, ✓w, k)
+    isempty(w) ? v=[] : v = _getWeights(w, ✓w, k)
     init == nothing ? M = meanP(℘, logEuclidean, w=w, ✓w=false) : M = ℍ(init)
     M◇ = similar(M, eltype(M))
-    iter = 1
-    conv = 0.; oldconv=maxpos
+    iter, conv, oldconv = 1, 0., maxpos
     ⍰ && @info("Iterating RlogDetMean Fixed-Point...")
 
     @inbounds while true
         if isempty(w)
-            M◇ = ℍ(l * inv(ℍ(𝚺(inv(ℍ(P+M)) for P in ℘))))
+            M◇ = l * inv(ℍ(𝚺(inv(ℍ(P+M)) for P in ℘)))
         else
-            M◇ = ℍ(0.5 * inv(ℍ(𝚺(ω * inv(ℍ(P+M)) for (ω, P) in zip(v, ℘)))))
+            M◇ = 0.5 * inv(ℍ(𝚺(ω * inv(ℍ(P+M)) for (ω, P) in zip(v, ℘))))
         end
         conv = norm(M◇-M)/norm(M)
         ⍰ && println("iteration: ", iter, "; convergence: ", conv)
@@ -768,11 +772,11 @@ end
 
 
 """
-    wasMean(℘; <w::Vector=[], ✓w::Bool=true, init=nothing,
+    wasMean(℘::ℍVector; <w::Vector=[], ✓w::Bool=true, init=nothing,
                  tol=1e-9, ⍰=false>)
 
  Given a 1d array `℘` of ``k`` positive definite matrices ``{P_1,...,P_k}``
- and optional non-negative real weights vector ``w={w_1,...,w_k}``,
+ of [ℍVector type](@ref) and optional non-negative real weights vector ``w={w_1,...,w_k}``,
  return the 3-tuple ``(G, iter, conv)``, where ``G`` is the mean according
  to the [Wasserstein](@ref) metric and ``iter``, ``conv`` are the number of iterations
  and convergence attained by the algorithm.
@@ -828,15 +832,13 @@ end
     G, iter, conv = wasMean(℘, w=weights, ⍰=true, init=G)
 
 """
-function wasMean(℘;    w::Vector=[], ✓w::Bool=true, init=nothing,
-                        tol=1e-9, ⍰=false)
-    maxIter=500
-    n, k = Attributes(℘)
-    isempty(w) ? v=[] : v = GetWeights(w, ✓w, k)
+function wasMean(℘::ℍVector; w::Vector=[], ✓w::Bool=true,
+                 init=nothing, tol=1e-9, ⍰=false)
+
+    iter, conv, oldconv, maxIter, (n, k) = 1, 0., maxpos, 500, _attributes(℘)
+    isempty(w) ? v=[] : v = _getWeights(w, ✓w, k)
     init == nothing ? M = generalizedMean(℘, 0.5; w=v, ✓w=false) : M = ℍ(init)
     M◇ = similar(M, eltype(M))
-    iter = 1
-    conv = 0.; oldconv=maxpos
     ⍰ && @info("Iterating wasMean Fixed-Point...")
 
     @inbounds while true
@@ -859,10 +861,11 @@ end
 
 
 """
-    powerMean(℘, p::Real; <w::Vector=[], ✓w::Bool=true, init=nothing,
+    powerMean(℘::ℍVector, p::Real; <w::Vector=[], ✓w::Bool=true, init=nothing,
                             tol=1e-9, ⍰=false>)
 
- Given a 1d array `℘` of ``k`` positive definite matrices ``{P_1,...,P_k}``,
+ Given a 1d array `℘` of ``k`` positive definite matrices ``{P_1,...,P_k}``
+ of [ℍVector type](@ref),
  an optional non-negative real weights vector ``w={w_1,...,w_k}`` and
  a real parameter `p` ``\\in[-1, 1]``, return the
  3-tuple ``(G, iter, conv)``, where ``G`` is
@@ -932,7 +935,7 @@ end
     G, iter, conv = powerMean(℘, 0.5, w=weights, ⍰=true, init=G)
 
 """
-function powerMean(℘, p::Real;     w::Vector=[], ✓w::Bool=true, init=nothing,
+function powerMean(℘::ℍVector, p::Real;     w::Vector=[], ✓w::Bool=true, init=nothing,
                                     tol=1e-9, ⍰=false)
   if !(-1<=p<=1) @error("The parameter p for power means must be in range [-1...1]")
   else
@@ -948,18 +951,17 @@ function powerMean(℘, p::Real;     w::Vector=[], ✓w::Bool=true, init=nothing
     else
         # Set Parameters
         maxIter=500
-        n, k = Attributes(℘)
+        n, k = _attributes(℘)
         sqrtn=√n
         absp=abs(p)
         r=-0.375/absp
-        w≠[] ? v = GetWeights(w, ✓w, k) : v=[]
+        w≠[] ? v = _getWeights(w, ✓w, k) : v=[]
         init == nothing ? M = generalizedMean(℘, p; w=v, ✓w=false) : M = ℍ(init)
         p<0 ? X=ℍ(M^(0.5)) : X=ℍ(M^(-0.5))
         X◇, H = similar(X, eltype(X))
         𝒫=similar(℘, eltype(℘))
-        if p<0 𝒫=[ℍ(inv(P)) for P in ℘] else 𝒫=℘ end
-        iter = 1
-        conv = 0.; oldconv=maxpos
+        if p<0 𝒫=[inv(P) for P in ℘] else 𝒫=℘ end
+        iter, conv, oldconv = 1, 0., maxpos
         ⍰ && @info("Iterating powerMean Fixed-Point...")
 
         @inbounds while true
@@ -979,7 +981,7 @@ function powerMean(℘, p::Real;     w::Vector=[], ✓w::Bool=true, init=nothing
     end # if
 
     if p<0  return ( ℍ((X◇)'*X◇), iter, conv )
-    else    return ( ℍ(inv((X◇)'*X◇)), iter, conv ) end
+    else    return ( inv(ℍ((X◇)'*X◇)), iter, conv ) end
   end # if !(-1<=p<=1)
 end
 
@@ -987,7 +989,7 @@ end
 
 """
     (1) meanP(P::ℍ, Q::ℍ, metric::Metric=Fisher)
-    (2) meanP(℘, metric::Metric=Fisher; <w::Vector=[], ✓w::Bool=true>)
+    (2) meanP(℘::ℍVector, metric::Metric=Fisher; <w::Vector=[], ✓w::Bool=true>)
 
  (1) Mean of two positive definite matrices, passed in arbitrary order as
  arguments ``P`` and ``Q``, using the specified `metric` of type
@@ -998,9 +1000,10 @@ end
  the [`geodesic`](@ref) function.
  ``P`` and ``Q`` must be flagged as `Hermitian`. See [typecasting matrices](@ref).
 
- (2) [Fréchet mean](@ref) of an 1d array ``℘`` of ``k`` positive definite matrices``{P_1,...,P_k}``,
- with optional non-negative real weights ``w={w_1,...,w_k}`` using the specified
- `metric`as in (1).
+ (2) [Fréchet mean](@ref) of an 1d array ``℘`` of ``k`` positive definite
+ matrices``{P_1,...,P_k}`` of [ℍVector type](@ref),
+ with optional non-negative real weights ``w={w_1,...,w_k}`` and using the
+ specified `metric`as in (1).
 
  If you don't pass a weight vector with *<optional keyword argument>* ``w``,
  return the *unweighted mean*.
@@ -1060,7 +1063,7 @@ end
 """
 meanP(P::ℍ, Q::ℍ, metric::Metric=Fisher) = geodesic(P, Q, 0.5, metric)
 
-function meanP(℘, metric::Metric=Fisher;    w::Vector=[], ✓w::Bool=true)
+function meanP(℘::ℍVector, metric::Metric=Fisher;    w::Vector=[], ✓w::Bool=true)
     # iterative solutions
     if      metric == Fisher
             (G, iter, conv)=powerMean(℘, 0; w=w, ✓w=✓w)
@@ -1074,16 +1077,16 @@ function meanP(℘, metric::Metric=Fisher;    w::Vector=[], ✓w::Bool=true)
     end
 
     # closed-form expressions
-    n, k = Attributes(℘)
-    isempty(w) ? DoNothing : v = GetWeights(w, ✓w, k)
+    n, k = _attributes(℘)
+    isempty(w) ? _doNothing : v = _getWeights(w, ✓w, k)
     if  metric == Euclidean
         if isempty(w)   return ℍ(𝛍(P for P in ℘))
         else            return ℍ(𝚺(ω*P for (ω, P) in zip(v, ℘)))
         end
 
     elseif metric == invEuclidean
-        if isempty(w)   return ℍ(inv(ℍ(𝛍(inv(P) for P in ℘))))
-        else            return ℍ(inv(ℍ(𝚺(ω*inv(P) for (ω, P) in zip(v, ℘)))))
+        if isempty(w)   return inv(ℍ(𝛍(inv(P) for P in ℘)))
+        else            return inv(ℍ(𝚺(ω*inv(P) for (ω, P) in zip(v, ℘))))
         end
 
     elseif metric == logEuclidean
@@ -1164,7 +1167,7 @@ end # function
 function logMap(P::ℍ, G::ℍ, metric::Metric=Fisher)
     if   metric==Fisher
          G½, G⁻½=pow(G, 0.5, -0.5)
-         return ℍ(G½ * log(G⁻½ * P * G⁻½') * G½')
+         return ℍ(G½ * log(ℍ(G⁻½ * P * G⁻½)) * G½)
     else @warn "in RiemannianGeometryP.logMap function:
                  only the Fisher metric is supported for the logarithmic map."
     end
@@ -1206,7 +1209,7 @@ end
 function expMap(S::ℍ, G::ℍ, metric::Metric=Fisher)
     if   metric==Fisher
          G½, G⁻½=pow(G, 0.5, -0.5)
-         return ℍ(G½ * exp(G⁻½ * S * G⁻½') * G½')
+         return ℍ(G½ * exp(ℍ(G⁻½ * S * G⁻½)) * G½)
     else @warn "in RiemannianGeometryP.expMap function:
               only the Fisher metric is supported for the exponential map"
     end
@@ -1275,12 +1278,12 @@ function matP(ς::Vector)
   n=Int((-1+√(1+8*length(ς)))/2) # Size of the matrix whose vectorization vector v has size length(v)
   S=Matrix{eltype(ς)}(undef, n, n)
   l=0;
-  for j in 1:n-1
+  @inbounds for j in 1:n-1
     l=l+1
-    @inbounds S[j, j]=ς[l]
+    S[j, j]=ς[l]
     for i in j+1:n
       l=l+1
-      @inbounds S[i, j]=invsqrt2*ς[l];  S[j, i]=S[i, j]
+       S[i, j]=invsqrt2*ς[l];  S[j, i]=S[i, j]
     end
   end
   S[n, n]=ς[end]

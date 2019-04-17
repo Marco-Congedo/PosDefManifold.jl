@@ -1,4 +1,4 @@
-# Unit test.jl, part of PosDefManifold Package for julia language
+# Unit runtest.jl, part of PosDefManifold Package for julia language
 # v 0.1.0 - last update 1th of April 2019
 #
 # MIT License
@@ -7,19 +7,18 @@
 #
 # DESCRIPTION
 # This Unit tests all functions in PosDefManifold.
-# Unce you ran it, for each method of each function,
+# For each method of each function,
 # a star is printed if the test is succesful,
 # a no_entry sign is printed if the test is not succesful.
 # If there are fails, the concerned functions will be listed as Warnings
 # and returned by the testall() function as an array of strings
 
 # RUN TESTS
-# just hit CRTL+A (seect all) and Shift+Enter (run),
-# then invoke 'testall()' in the REPL
+# once the package is added, in the REPL run this command line:
+# ] test PosDefManifold
 
 # USE IT FOR TESTING YOUR OWN PACKAGES
-# - Copy this unit in the same directory where the Main
-#     module of your library is.
+# - Copy this unit in your 'test' directory.
 # - Replace 'PosDefManifold' by the name of your module(s) in the
 #    'using' command here below.
 # - Overwrite the tests() function with your own tests.
@@ -267,7 +266,7 @@ function tests();
 
 
     name="function generalizedMean"; newTest(name);
-    ℘=ℍVector([P_, Q_])
+    ℘=[P_, Q_]
     w=[0.2, 0.8]
     p=0.5
     ℍ( (P_^p+Q_^p)/2) ^(1/p) ≈ generalizedMean(℘, p) ? OK() : OH(name*" Real Input 1")
@@ -276,7 +275,7 @@ function tests();
     ℍ( (ℍ(0.2*P_^p)+ℍ(0.8*Q_^p))  )^(1/p) ≈ generalizedMean(℘, p, w=w) ? OK() : OH(name*" Real Input 3")
     ℍ( (ℍ(0.2*P_^p)+ℍ(0.8*Q_^p))  )^(1/p) ≉ generalizedMean(℘, p, w=w, ✓w=false) ? OK() : OH(name*" Real Input 4")
     ℍ( (ℍ(0.4*P_^p)+ℍ(1.6*Q_^p))  )^(1/p) ≈ generalizedMean(℘, p, w=w, ✓w=false) ? OK() : OH(name*" Real Input 5")
-    ℘=ℍVector([PC_, QC_])
+    ℘=[PC_, QC_]
     w=[0.2, 0.8]
     ℍ( (PC_^p+QC_^p)/2) ^(1/p) ≈ generalizedMean(℘, p) ? OK() : OH(name*" Complex Input 1")
     ℍ( (ℍ(0.2*PC_^p)+ℍ(0.8*QC_^p))  )^(1/p) ≈ generalizedMean(℘, p, w=w, ✓w=false) ? OK() : OH(name*" Complex Input 2")
@@ -287,7 +286,7 @@ function tests();
 
 
     name="function logdet0Mean"; newTest(name);
-    ℘=ℍVector([P_, Q_])
+    ℘=[P_, Q_]
     w=[0.5, 0.5]
     P½, P½ⁱ=pow(P_, 0.5, -0.5)
     GM=P½*(P½ⁱ*Q_*P½ⁱ)^0.5*P½  # Fisher mean for k=2
@@ -295,7 +294,7 @@ function tests();
     GM ≈ ldG ? OK() : OH(name*" Real Input 1")
     ldG, iter, conv = logdet0Mean(℘, w=w) # weighted logdet0 mean for k=2
     GM ≈ ldG ? OK() : OH(name*" Real Input 2")
-    ℘=℘=ℍVector([PC_, QC_])
+    ℘=[PC_, QC_]
     P½, P½ⁱ=pow(PC_, 0.5, -0.5)
     GM=P½*(P½ⁱ*QC_*P½ⁱ)^0.5*P½  # Fisher mean for k=2
     ldG, iter, conv = logdet0Mean(℘) # logdet0 mean for k=2
@@ -338,6 +337,4 @@ function testall()
     end
 end # function testall
 
-#clipboard("testall()")
-#@info("\nhit CTRL+V+ENTER on the REPL for running the tests of PosDefManifold.")
-#fails=testAll()
+testall()

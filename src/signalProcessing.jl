@@ -1,5 +1,5 @@
 #    Unit signalProcessing.jl, part of PosDefManifold Package for julia language
-#    v 0.1.0 - last update 14th of April 2019
+#    v 0.1.1 - last update 16th of April 2019
 #
 #    MIT License
 #    Copyright (c) 2019, Marco Congedo, CNRS, Grenobe, France:
@@ -105,7 +105,7 @@ randλ=randEigvals
     Q=ℍ(U*Λ*U') # generate an SPD matrix and flag it as 'Hermitian'
 
 """
-randEigvalsMat(n::Int; df::Int=2, eigvalsSNR::Real=10e3)=Diagonal(randλ(n, df=df, eigvalsSNR=eigvalsSNR))
+randEigvalsMat(n::Int; df::Int=2, eigvalsSNR::Real=10e3)=⋱(randλ(n, df=df, eigvalsSNR=eigvalsSNR))
 randΛ=randEigvalsMat
 
 
@@ -152,8 +152,8 @@ randU=randUnitaryMat
  Generate
  - (1) one random `Hermitian` positive definite matrix (real) of size ``n⋅n``
  - (2) one random `Hermitian` positive definite matrix (complex) of size ``n⋅n``
- - (3) an array 1d of ``k`` matrices of type (1)
- - (4) an array 1d of ``k`` matrices of type (2) .
+ - (3) an array 1d (of [ℍVector type](@ref)) of ``k`` matrices of the kind in (1)
+ - (4) an array 1d (of [ℍVector type](@ref)) of ``k`` matrices of the kind in (2).
 
  For (1) and (2) the matrix is generated according to model
 
@@ -213,12 +213,12 @@ end
 
 function randPosDefMat(n::Int, k::Int; df::Int=2, eigvalsSNR::Real=10e3, SNR::Real=100)
     U=randU(n)
-    ℘=Array{ℍ}(undef, k)
+    ℘=ℍVector(undef, k)
     φ=1/SNR
     for j in 1:k
         V=randU(n)
         ℘[j]=ℍ( U*randΛ(n, df=df, eigvalsSNR=eigvalsSNR)*U'
-              + V*(φ*randΛ(n, df=df, eigvalsSNR=eigvalsSNR))*V' )
+                 + V*(φ*randΛ(n, df=df, eigvalsSNR=eigvalsSNR))*V' )
     end
     return ℘
 end
@@ -226,12 +226,12 @@ end
 
 function randPosDefMat(::Type{Complex{T}}, n::Int, k::Int; df::Int=2, eigvalsSNR::Real=10e3, SNR::Real=100) where {T<:AbstractFloat}
     U=randU(ComplexF64, n)
-    ℘=Array{ℍ}(undef, k)
+    ℘=ℍVector(undef, k)
     φ=1/SNR
     for j in 1:k
         V=randU(ComplexF64, n)
         ℘[j]=ℍ( U*randΛ(n, df=df, eigvalsSNR=eigvalsSNR)*U'
-              + V*(φ*randΛ(n, df=df, eigvalsSNR=eigvalsSNR))*V' )
+                 + V*(φ*randΛ(n, df=df, eigvalsSNR=eigvalsSNR))*V' )
     end
     return ℘
 end
@@ -240,11 +240,11 @@ randP=randPosDefMat
 
 """
     (1) regularize!(P::ℍ; <SNR=10e3>)
-    (2) regularize!(℘; <SNR=10e3>)
+    (2) regularize!(℘::ℍVector; <SNR=10e3>)
 
  Add [white noise](https://bit.ly/2TN8472) to either
- - (1) a positive matrix ``P`` of size ``n⋅n``, or
- - (2) a 1d array ``℘`` of ``k`` positive matrices of size ``n⋅n``.
+ - (1) a positive definite matrix ``P`` of size ``n⋅n``, or
+ - (2) a 1d array ``℘`` of ``k`` positive definite matrices of size ``n⋅n``, of [ℍVector type](@ref).
 
  The added noise improves the matrix conditioning with respect to inversion.
  This is used to avoid numerical errors when decomposing these matrices
@@ -311,7 +311,7 @@ function regularize!(P::ℍ; SNR=10e3)
     for i in 1:n P[i, i]+=η  end
 end
 
-function regularize!(℘; SNR=10e3)
+function regularize!(℘::ℍVector; SNR=10e3)
     k=length(℘)
     n=size(℘[1], 1)
     η=sum(tr(P) for P in ℘)/(SNR*n*k)
@@ -342,8 +342,7 @@ end
     F=gram(X); # => G=X'*X/100
 """
 function gram(X::Matrix)
-    r=size(X, 1)
-    c=size(X, 2)
+    (r, c)=size(X)
     r<c ? ℍ((X*X')/c) : ℍ((X'*X)/r)
 end # function gram
 

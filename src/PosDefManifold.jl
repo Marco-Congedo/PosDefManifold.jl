@@ -1,5 +1,5 @@
 #    Main Module of the  PosDefManifold Package for julia language
-#    v 0.1.0 - last update 14th of April 2019
+#    v 0.1.1 - last update 16th of April 2019
 #
 #    MIT License
 #    Copyright (c) 2019, Marco Congedo, CNRS, Grenobe, France:
@@ -13,19 +13,22 @@ module PosDefManifold
 using LinearAlgebra, Statistics
 
 # constants
-
 const sqrt2=√2
 const invsqrt2=1/sqrt2
 const minpos=1e-15
 const maxpos=1e15
 #const ghostMat=Matrix{Nothing}(undef, 1, 1)
 
+# aliases
+𝚺 = sum          # alias for sum, tab-completition: \bfSigma
+𝛍 = mean         # alias for mean, tab-completition: \bfmu
+⋱ = Diagonal     # alias for Diagonal, tab-completition: ⋱\ddots
+ℍ = Hermitian   # alias for Hermitian, tab completion \bbH
+
 # types
 
 RealOrComplex=Union{Real, Complex}
-#MatVector=Vector{Hermitian}
-#HermOrSym=Union{Symmetric, Hermitian}
-#VectorOrMatrix=Union{Vector{RealOrComplex}, Matrix{RealOrComplex}}
+ℍVector=Vector{ℍ}
 
 @enum Metric begin
     Euclidean    =1  # distance: δ_e; mean: Arithmetic
@@ -35,21 +38,12 @@ RealOrComplex=Union{Real, Complex}
     logCholesky  =5  # distance: δ_c; mean: Log-Cholesky
     Fisher       =6  # distance: δ_f; mean: Fisher (Cartan, Karcher, Pusz-Woronowicz,...)
     logdet0      =7  # distance: δ_s; mean: LogDet (S, α, Bhattacharyya, Jensen,...)
-    Jeffrey      =8  # distance: δ_j; mean: Jeffrey (symmetrizes Kullback-Leibler)
+    Jeffrey      =8  # distance: δ_j; mean: Jeffrey (symmetrized Kullback-Leibler)
     VonNeumann   =9  # distance: δ_v; mean: Not Availale
     Wasserstein  =10 # distance: δ_w; mean: Wasserstein (Bures, Hellinger, ...)
     #...
 end
 
-# aliases
-𝚺 = sum          # alias for sum, tab-completition: \bfSigma
-𝛍 = mean         # alias for mean, tab-completition: \bfmu
-⋱ = Diagonal     # alias for Diagonal, tab-completition: ⋱\ddots
-#ℂ = ComplexF64   # alias for ComplexF64 concrete type, tab completion \bbC
-ℍ = Hermitian   # alias for Hermitian, tab completion \bbH
-#𝕊 = Symmetric   # alias for Symmetric, tab completion \bbS
-
-#import Base: +, -, *
 
 export
     # From this module
@@ -61,8 +55,15 @@ export
     maxpos,
     ghostMat,
 
+    #aliases
+    𝚺,
+    𝛍,
+    ⋱,
+    ℍ,
+
     #types
     RealOrComplex,
+    ℍVector,
     Metric,
         Euclidean,
         invEuclidean,
@@ -75,15 +76,7 @@ export
         VonNeumann,
         Wasserstein,
 
-    #aliases
-    𝚺,
-    𝛍,
-    ⋱,
-    #ℂ,
-    ℍ,
-    #𝕊,
-
-    # from LinearAlgebraP.jl
+    # from LinearAlgebra.jl
     det1,
     tr1,
     normalizeCol!,
@@ -104,7 +97,7 @@ export
     powerIterations, powIter,
     choL,
 
-    # from SignalProcessingP.jl
+    # from SignalProcessing.jl
     randChi², randχ²,
     randEigvals, randλ,
     randEigvalsMat, randΛ,
@@ -114,7 +107,7 @@ export
     gram,
     trade,
 
-    # from RiemannianGeometryP.jl
+    # from RiemannianGeometry.jl
     distanceSqr, distance²,
     distance,
     geodesic,
@@ -143,6 +136,6 @@ include("signalProcessing.jl")
 include("riemannianGeometry.jl")
 include("test.jl")
 
-println("\n⭐  "," Welcome to the PosDefManifold package v.0.1.0", "⭐\n")
+println("\n⭐ "," Welcome to the PosDefManifold package v0.1.1",  "⭐\n")
 
-end # module end
+end # module
