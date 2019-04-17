@@ -172,7 +172,7 @@ function ispos( λ::Vector; tol::Real=minpos, rev::Bool=true,
     rev ? ind = (length(λ):-1:1) : ind=(1:length(λ))
     for i in ind
         if λ[i]<tol
-            bell && print('\a')
+            bell && print('\a') # print('\a') sounds a bell
             length(msg)>0 && @warn(msg* " at position $i")
             return false; break
         end

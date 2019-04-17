@@ -744,7 +744,7 @@ function logdet0Mean(℘::ℍVector;  w::Vector=[], ✓w::Bool=true, init=nothin
     isempty(w) ? v=[] : v = GetWeights(w, ✓w, k)
     init == nothing ? M = meanP(℘, logEuclidean, w=w, ✓w=false) : M = ℍ(init)
     M◇ = similar(M, eltype(M))
-    (iter, conv, oldconv) = 1, 0., maxpos
+    iter, conv, oldconv = 1, 0., maxpos
     ⍰ && @info("Iterating RlogDetMean Fixed-Point...")
 
     @inbounds while true
@@ -826,14 +826,13 @@ end
     G, iter, conv = wasMean(℘, w=weights, ⍰=true, init=G)
 
 """
-function wasMean(℘::ℍVector;    w::Vector=[], ✓w::Bool=true, init=nothing,
-                        tol=1e-9, ⍰=false)
-    maxIter=500
-    n, k = Attributes(℘)
+function wasMean(℘::ℍVector; w::Vector=[], ✓w::Bool=true,
+                 init=nothing, tol=1e-9, ⍰=false)
+
+    iter, conv, oldconv, maxIter, (n, k) = 1, 0., maxpos, 500, Attributes(℘)
     isempty(w) ? v=[] : v = GetWeights(w, ✓w, k)
     init == nothing ? M = generalizedMean(℘, 0.5; w=v, ✓w=false) : M = ℍ(init)
     M◇ = similar(M, eltype(M))
-    (iter, conv, oldconv) = 1, 0., maxpos
     ⍰ && @info("Iterating wasMean Fixed-Point...")
 
     @inbounds while true
@@ -956,7 +955,7 @@ function powerMean(℘::ℍVector, p::Real;     w::Vector=[], ✓w::Bool=true, i
         X◇, H = similar(X, eltype(X))
         𝒫=similar(℘, eltype(℘))
         if p<0 𝒫=[inv(P) for P in ℘] else 𝒫=℘ end
-        (iter, conv, oldconv) = 1, 0., maxpos
+        iter, conv, oldconv = 1, 0., maxpos
         ⍰ && @info("Iterating powerMean Fixed-Point...")
 
         @inbounds while true
