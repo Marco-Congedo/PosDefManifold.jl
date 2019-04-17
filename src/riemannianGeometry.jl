@@ -10,12 +10,32 @@
 #    of Symmetric Positive Definite (SPD) or Hermitian matrices
 #
 #    CONTENT
+#    0. Internal Functions
 #    1. Geodesic Equations
 #    2. Distances
 #    3. Inter-distance matrices, Laplacian and Spectral Embedding
 #    4. Means (center of mass, barycenters, ...)
 #    5. Tangent Space
 #    6. Procrustes Problems
+
+# -----------------------------------------------------------
+# 0. Internal Functions
+#    By convention their name begin with underscore char
+# -----------------------------------------------------------
+_attributes(℘::ℍVector)=( size(℘[1], 1), length(℘))
+
+function _doNothing end
+
+# Given a non-negative weight vector normalize the weights so as to sum up to 1
+# if ✓w == true and if they are not already normalized
+function _getWeights(w::Vector, ✓w::Bool, k::Int)
+    if ✓w==true
+        s=𝚺(w)
+        if s ≉  1.0 return w./s else return w end
+    else return w
+    end # if
+end
+
 
 # -----------------------------------------------------------
 # 1. Geodesic Equations
@@ -44,7 +64,7 @@
 
  For the [logdet zero](@ref) and [Jeffrey](@ref) metric no closed form expression
  for the geodesic is available (to the best of authors' knowledge),
- so in this case the geodesic is found as the weighted mean [`meanP(@ref)`].
+ so in this case the geodesic is found as the weighted mean using [`meanP(@ref)`].
  For the [Von Neumann](@ref) not even an expression for the mean is available,
  so in this case the geodesic is not provided and a *warning* is printed.
 
@@ -313,7 +333,7 @@ distance(P::ℍ, Q::ℍ, metric::Metric=Fisher) = √(distanceSqr(P, Q, metric))
 
 # Internal Function for fast computation of inter_distance matrices
 function GetdistSqrMat(℘::ℍVector, metric::Metric=Fisher)
-    n, k=Attributes(℘)
+    n, k=_attributes(℘)
     △=zeros(k,  k)
 
     if      metric==invEuclidean
@@ -334,7 +354,8 @@ function GetdistSqrMat(℘::ℍVector, metric::Metric=Fisher)
     elseif  metric==logCholesky
             ℘L=[choL(P)     for P in ℘]
             for j in 1:k-1, i in j+1:k
-                △[i, j]=sumOfSqrTril(℘L[i]-℘L[j], -1) + 𝚺((log(℘L[i][l, l])-log(℘L[j][l, l]))^2 for l in 1:n) end
+                △[i, j]=sumOfSqrTril(tril(℘L[i], -1)-tril(℘L[j], -1), -1)
+                        + 𝚺((log(℘L[i][l, l])-log(℘L[j][l, l]))^2 for l in 1:n) end
 
     elseif  metric==Jeffrey
             ℘𝓲=[inv(P) for P in ℘]
@@ -588,21 +609,6 @@ end
 # 4. Means (centers of mass, barycenters, ...)
 # -----------------------------------------------------------
 
-# begin Internal functions
-Attributes(℘::ℍVector)=( size(℘[1], 1), length(℘))
-
-function DoNothing
-end
-
-function GetWeights(w::Vector, ✓w::Bool, k::Int)
-    if ✓w==true
-        s=𝚺(w)
-        if s ≉  1.0 return w./s else return w end
-    else return w
-    end # if
-end
-# end Internal functions
-
 """
     generalizedMean(℘::ℍVector, p::Real; <w::Vector=[], ✓w::Bool=true>)
 
@@ -663,11 +669,11 @@ function generalizedMean(℘::ℍVector, p::Real; w::Vector=[], ✓w::Bool=true)
     elseif p ==  0 return meanP(℘, logEuclidean; w=w, ✓w=✓w)
     elseif p ==  1 return meanP(℘, Euclidean;    w=w, ✓w=✓w)
     else
-        n, k=Attributes(℘)
+        n, k=_attributes(℘)
         if isempty(w)
             return ℍ(𝛍(P^p for P in ℘))^(1/p)
         else
-            v=GetWeights(w, ✓w, k)
+            v=_getWeights(w, ✓w, k)
             return ℍ(𝚺(ω*P^p for (ω, P) in zip(v, ℘)))^(1/p)
         end # if w
     end # if p
@@ -739,9 +745,9 @@ suggested by (Moakher, 2012, p315)[🎓](@ref), yielding iterations
 function logdet0Mean(℘::ℍVector;  w::Vector=[], ✓w::Bool=true, init=nothing,
                             tol=1e-9, ⍰=false)
     maxIter=500
-    n, k = Attributes(℘)
+    n, k = _attributes(℘)
     l=k/2
-    isempty(w) ? v=[] : v = GetWeights(w, ✓w, k)
+    isempty(w) ? v=[] : v = _getWeights(w, ✓w, k)
     init == nothing ? M = meanP(℘, logEuclidean, w=w, ✓w=false) : M = ℍ(init)
     M◇ = similar(M, eltype(M))
     iter, conv, oldconv = 1, 0., maxpos
@@ -829,8 +835,8 @@ end
 function wasMean(℘::ℍVector; w::Vector=[], ✓w::Bool=true,
                  init=nothing, tol=1e-9, ⍰=false)
 
-    iter, conv, oldconv, maxIter, (n, k) = 1, 0., maxpos, 500, Attributes(℘)
-    isempty(w) ? v=[] : v = GetWeights(w, ✓w, k)
+    iter, conv, oldconv, maxIter, (n, k) = 1, 0., maxpos, 500, _attributes(℘)
+    isempty(w) ? v=[] : v = _getWeights(w, ✓w, k)
     init == nothing ? M = generalizedMean(℘, 0.5; w=v, ✓w=false) : M = ℍ(init)
     M◇ = similar(M, eltype(M))
     ⍰ && @info("Iterating wasMean Fixed-Point...")
@@ -945,11 +951,11 @@ function powerMean(℘::ℍVector, p::Real;     w::Vector=[], ✓w::Bool=true, i
     else
         # Set Parameters
         maxIter=500
-        n, k = Attributes(℘)
+        n, k = _attributes(℘)
         sqrtn=√n
         absp=abs(p)
         r=-0.375/absp
-        w≠[] ? v = GetWeights(w, ✓w, k) : v=[]
+        w≠[] ? v = _getWeights(w, ✓w, k) : v=[]
         init == nothing ? M = generalizedMean(℘, p; w=v, ✓w=false) : M = ℍ(init)
         p<0 ? X=ℍ(M^(0.5)) : X=ℍ(M^(-0.5))
         X◇, H = similar(X, eltype(X))
@@ -1071,8 +1077,8 @@ function meanP(℘::ℍVector, metric::Metric=Fisher;    w::Vector=[], ✓w::Boo
     end
 
     # closed-form expressions
-    n, k = Attributes(℘)
-    isempty(w) ? DoNothing : v = GetWeights(w, ✓w, k)
+    n, k = _attributes(℘)
+    isempty(w) ? _doNothing : v = _getWeights(w, ✓w, k)
     if  metric == Euclidean
         if isempty(w)   return ℍ(𝛍(P for P in ℘))
         else            return ℍ(𝚺(ω*P for (ω, P) in zip(v, ℘)))
@@ -1203,7 +1209,7 @@ end
 function expMap(S::ℍ, G::ℍ, metric::Metric=Fisher)
     if   metric==Fisher
          G½, G⁻½=pow(G, 0.5, -0.5)
-         return ℍ(G½ * exp(ℍ(G⁻½ * S * G⁻½')) * G½')
+         return ℍ(G½ * exp(ℍ(G⁻½ * S * G⁻½)) * G½)
     else @warn "in RiemannianGeometryP.expMap function:
               only the Fisher metric is supported for the exponential map"
     end
