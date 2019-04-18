@@ -143,7 +143,7 @@ function tests();
     ## 3. Diagonal functions of matrices
 
     name="function fDiagonal"; newTest(name)
-    D=fDiagonal(P_, x->x^2)
+    D=fDiagonal(x->x^2, P_)
     D≈Diagonal(diagm(0 => [9.,16.,25.])) ? OK() : OH(name)
 
     ## 4. Orthogonalization Procedures
