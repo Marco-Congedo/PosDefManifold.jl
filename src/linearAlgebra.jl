@@ -410,23 +410,22 @@ end
 ## 4. Diagonal functions of matrices
 #  ---------------------------------
 """
-    (1) fDiagonal(func::Function, D::Diagonal, k::Int=0)
-    (2) fDiagonal(func::Function, L::LowerTriangular, k::Int=0)
-    (3) fDiagonal(func::Function, X::Matrix, k::Int=0)
+    fDiagonal(func::Function, X::Matrix, k::Int=0)
 
  **alias**: `𝑓𝑫`
 
- Applies function `func` element-wise to the elements of the ``k^{th}`` diagonal of
-  -(1) diagonal matrix ``D`` (in this case `k` is not used since it must be zero, see below)
-  -(2) lower Triangular matrix ``L`` (in this case `k` canot be positive, see below)
-  -(3) generic matrix ``X`` of dimension *r⋅c*
+ Applies function `func` element-wise to the elements of the ``k^{th}``
+ diagonal of generic matrix ``X`` of dimension *r⋅c*
  and return a diagonal matrix with these elements.
 
  See julia [tril(M, k::Integer)](https://bit.ly/2Tbx8o7) function
  for numbering of diagonals.
 
- Note that for (3) the dimension of the result depends on the size of ``X``
- and the chosen diagonal.
+ If the matrix is Diagonal `k` must be zero.
+ If the matrix is lower triangular `k` cannot be positive.
+
+ Note that if ``X`` is rectangular the dimension of the result depends
+ on the size of ``X`` and on the chosen diagonal.
  For example,
  - *r ≠ c* and ``k``=0 (main diagonal), the result will be of dimension min*(r,c)*⋅*min(r,c)*,
  - ``X`` *3⋅4* and ``k=-1``, the result will be *2⋅2*,
