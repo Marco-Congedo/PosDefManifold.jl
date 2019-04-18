@@ -410,14 +410,22 @@ end
 ## 4. Diagonal functions of matrices
 #  ---------------------------------
 """
-    fDiagonal(X::Matrix, func::Function, k::Int=0)
+    (1) fDiagonal(func::Function, D::Diagonal, k::Int=0)
+    (2) fDiagonal(func::Function, P::Hermitian, k::Int=0)
+    (3) fDiagonal(func::Function, L::LowerTriangular, k::Int=0)
+    (4) fDiagonal(func::Function, X::Matrix, k::Int=0)
 
- Applies function `func` element-wise to the elements of the ``k^{th}`` diagonal
- of generic matrix ``X`` (real or complex) of dimension *r⋅c*
+ **alias**: `𝑓𝑫`
+
+ Applies function `func` element-wise to the elements of the ``k^{th}`` diagonal of
+  -(1) diagonal matrix ``D`` (in this case `k` is not used since it must be zero, see below)
+  -(2) Hermitian matrix ``P``
+  -(3) lower Triangular matrix ``L`` (in this case `k` canot be positive, see below)
+  -(4) generic matrix ``X`` of dimension *r⋅c*
  and return a diagonal matrix with these elements.
- Note that the dimension of the result depends on the size of ``X``
- and the chosen diagonal.
 
+ Note that for (4) the dimension of the result depends on the size of ``X``
+ and the chosen diagonal.
  For example,
  - *r ≠ c* and ``k``=0 (main diagonal), the result will be of dimension min*(r,c)*⋅*min(r,c)*,
  - ``X`` *3⋅4* and ``k=-1``, the result will be *2⋅2*,
@@ -426,29 +434,33 @@ end
  See julia [tril(M, k::Integer)](https://bit.ly/2Tbx8o7) function
  for numbering of diagonals.
 
-  **Arguments** `(X, func, k)`
- - ``X`` is a generic matrix of real or complex elements;
- - `func` is a function;
- - ``k`` is the chosen diagonal (by default `k`=0, which is the main diagonal).
-
 !!! note "Nota Bene"
     The function `func` must support the `func.` syntax and therefore
     must be able to apply element-wise to the elements of the chosen diagonal
-    (this includes anonymous functions). If `X` is complex, the function `func`
+    (this includes anonymous functions). If the input matrix is complex, the function `func`
     must be able to support complex arguments.
-
- A catch-all method is defined.
 
  ## Examples
     using PosDefManifold
     P=randP(5) # use P=randP(ComplexF64, 5) for generating an Hermitian matrix
+    D=fDiagonal(inv, P, -1) # diagonal matrix with the inverse of the first sub-diagonal of P
     (Λ, U) = evd(P)         # Λ holds the eigenvalues of P, see evd
-    Δ=fDiagonal(Λ, log)     # diagonal matrix with the log of the eigenvalues
-    Δ=fDiagonal(Λ, x->x^2)  # using an anonymous function for the square of the eigenvalues
-
+    Δ=fDiagonal(log, Λ)     # diagonal matrix with the log of the eigenvalues
+    Δ=fDiagonal(x->x^2, Λ)  # using an anonymous function for the square of the eigenvalues
 """
-fDiagonal(X::Matrix, func::Function, k::Int=0) = ⋱(func.(diag(X, k)));
-fDiagonal(X, func::Function, k::Int=0) = ⋱(func.(diag(X, k)));
+fDiagonal(func::Function, D::⋱, k::Int=0) = ⋱(func.(D))
+
+fDiagonal(func::Function, P::ℍ, k::Int=0) = ⋱(func.(diag(P, k)))
+
+function fDiagonal(func::Function, L::LowerTriangular, k::Int=0)
+ if k>0 @error("in function fDiagonal (linearAlgebra.jl): k argument cannot be positive.")
+ else return ⋱(func.(diag(L, k)))
+ end
+end
+
+fDiagonal(func::Function, X::Matrix, k::Int=0) = ⋱(func.(diag(X, k)))
+
+𝑓𝑫=fDiagonal
 
 
 

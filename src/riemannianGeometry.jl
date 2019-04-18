@@ -18,6 +18,8 @@
 #    5. Tangent Space
 #    6. Procrustes Problems
 
+
+
 # -----------------------------------------------------------
 # 0. Internal Functions
 #    By convention their name begin with underscore char
@@ -35,6 +37,7 @@ function _getWeights(w::Vector, ✓w::Bool, k::Int)
     else return w
     end # if
 end
+
 
 
 # -----------------------------------------------------------
@@ -150,6 +153,8 @@ function geodesic(P::ℍ, Q::ℍ, a::Real, metric::Metric=Fisher)
                  (PosDefManifold Package): the chosen 'metric' does not exist")
     end # if
 end # function
+
+
 
 # -----------------------------------------------------------
 # 2. Distances
@@ -326,6 +331,8 @@ distance²=distanceSqr # alias
 """
 distance(P::ℍ, metric::Metric=Fisher) = √(distanceSqr(P, metric))
 distance(P::ℍ, Q::ℍ, metric::Metric=Fisher) = √(distanceSqr(P, Q, metric))
+
+
 
 # -----------------------------------------------------------
 # 3. Inter-distance matrix, Laplacian and Spectral Embedding
@@ -605,6 +612,7 @@ function spectralEmbedding(℘::ℍVector, q::Int, metric::Metric=Fisher;
 end
 
 
+
 # -----------------------------------------------------------
 # 4. Means (centers of mass, barycenters, ...)
 # -----------------------------------------------------------
@@ -835,6 +843,7 @@ end
 function wasMean(℘::ℍVector; w::Vector=[], ✓w::Bool=true,
                  init=nothing, tol=1e-9, ⍰=false)
 
+    maxIter=500
     iter, conv, oldconv, maxIter, (n, k) = 1, 0., maxpos, 500, _attributes(℘)
     isempty(w) ? v=[] : v = _getWeights(w, ✓w, k)
     init == nothing ? M = generalizedMean(℘, 0.5; w=v, ✓w=false) : M = ℍ(init)
@@ -907,9 +916,9 @@ end
  - if `⍰` is true, the convergence attained at each iteration is printed.
 
 !!! note "Nota Bene"
-  In normal circumstances this algorithm converges monothonically.
-  If the algorithm diverges a **warning** is printed indicating the iteration
-  when this happened and the algorithm is interrupted.
+    In normal circumstances this algorithm converges monothonically.
+    If the algorithm diverges a **warning** is printed indicating the iteration
+    when this happened and the algorithm is interrupted.
 
  **See**: [power means](@ref), [generalized means](@ref), [modified Bhattacharyya mean](@ref).
 
@@ -1080,38 +1089,35 @@ function meanP(℘::ℍVector, metric::Metric=Fisher;    w::Vector=[], ✓w::Boo
     n, k = _attributes(℘)
     isempty(w) ? _doNothing : v = _getWeights(w, ✓w, k)
     if  metric == Euclidean
-        if isempty(w)   return ℍ(𝛍(P for P in ℘))
+        if isempty(w)   return ℍ(𝛍(℘))
         else            return ℍ(𝚺(ω*P for (ω, P) in zip(v, ℘)))
         end
 
     elseif metric == invEuclidean
-        if isempty(w)   return inv(ℍ(𝛍(inv(P) for P in ℘)))
+        if isempty(w)   return inv(ℍ(𝛍(inv, ℘)))
         else            return inv(ℍ(𝚺(ω*inv(P) for (ω, P) in zip(v, ℘))))
         end
 
     elseif metric == logEuclidean
-        if isempty(w)   return ℍ(exp(ℍ(𝛍(log(P) for P in ℘))))
+        if isempty(w)   return ℍ(exp(ℍ(𝛍(log, ℘))))
         else            return ℍ(exp(ℍ(𝚺(ω*log(P) for (ω, P) in zip(v, ℘)))))
         end
 
     elseif metric == ChoEuclidean
-        if isempty(w)   L = 𝛍(choL(P) for P in ℘)
+        if isempty(w)   L = 𝛍(choL, ℘)
         else            L = 𝚺(ω*choL(P) for (ω, P) in zip(v, ℘))
         end
         return ℍ(L*L')
 
     elseif metric == logCholesky # Aggiusta!
         L℘=[choL(P) for P in ℘]
-        #if ω==0 L=mean(tril(L℘[i],-1)      for i in 1:k) + exp(mean(𝑓𝑫(L℘[i], log)      for i in 1:k))
         if isempty(w)
-            L=𝛍(tril(L℘[i],-1) for i in 1:k)
-            for l in 1:n L[l, l] = exp(𝛍(log(L℘[i][l, l]) for i in 1:k)) end
-        #else    L=𝚺(ζ[i]*tril(L℘[i],-1) for i in 1:k)/k + exp(𝚺(𝑓𝑫(ζ[i]*L℘[i], log) for i in 1:k))/k end
+            T=𝛍(tril(L,-1) for L in L℘) + exp(mean(𝑓𝑫(log, L) for L in L℘))
         else
-            L=𝛍(v[i]*tril(L℘[i],-1) for i in 1:k)
-            for l in 1:n L[l, l] = exp(𝚺(v[i]*log(L℘[i][l, l]) for i in 1:k)) end
+            T=𝚺(ω*tril(L,-1) for (ω, L) in zip(v, L℘))
+                + exp(𝚺(ω*𝑓𝑫(log, L) for (ω, L) in zip(v, L℘)))
         end
-        return ℍ(L*L')
+        return ℍ(T*T')
 
     elseif metric == Jeffrey
         P=meanP(℘, Euclidean; w=w, ✓w=✓w)
@@ -1283,7 +1289,7 @@ function matP(ς::Vector)
     S[j, j]=ς[l]
     for i in j+1:n
       l=l+1
-       S[i, j]=invsqrt2*ς[l];  S[j, i]=S[i, j]
+      S[i, j]=invsqrt2*ς[l];  S[j, i]=S[i, j]
     end
   end
   S[n, n]=ς[end]

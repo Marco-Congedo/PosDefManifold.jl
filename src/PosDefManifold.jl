@@ -86,7 +86,7 @@ export
     colNorm,
     sumOfSqrTril,
     fidelity,
-    fDiagonal,
+    fDiagonal, 𝑓𝑫,
     mgs,
     evd,
     spectralFunctions,
