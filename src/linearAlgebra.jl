@@ -476,7 +476,7 @@ fDiagonal(func::Function, X::Matrix{T}, k::Int=0) where T<:RealOrComplex= ⋱(fu
 
  All columns are orthogonalized by default. If instead argument `numCol` is provided,
  then only the first `numCol` columns of ``T`` are orthogonalized.
- In this case only the firt `numCol columns will be returned.
+ In this case only the firt `numCol` columns will be returned.
 
  ## Examples
     using LinearAlgebra, PosDefManifold
