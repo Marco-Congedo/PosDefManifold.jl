@@ -119,11 +119,11 @@ end
 normalizeCol!(X::Matrix{T}, j::Int, by::Number) where T<:RealOrComplex = @inbounds for i=1:size(X, 1) X[i, j]=X[i, j]/by end
 normalizeCol!(X, j::Int, by::Number) = @inbounds for i=1:size(X, 1) X[i, j]=X[i, j]/by end
 
-normalizeCol!(X::Matrix{T}, range::UnitRange) where T<:RealOrComplex = for j in range @inbounds normalizeCol!(X, j) end
-normalizeCol!(X, range::UnitRange) = for j in range @inbounds normalizeCol!(X, j) end
+normalizeCol!(X::Matrix{T}, range::UnitRange) where T<:RealOrComplex = for j in range normalizeCol!(X, j) end
+normalizeCol!(X, range::UnitRange) = for j in range normalizeCol!(X, j) end
 
-normalizeCol!(X::Matrix{T}, range::UnitRange, by::Number) where T<:RealOrComplex = for j in range @inbounds normalizeCol!(X, j, by) end
-normalizeCol!(X, range::UnitRange, by::Number) = for j in range @inbounds normalizeCol!(X, j, by) end
+normalizeCol!(X::Matrix{T}, range::UnitRange, by::Number) where T<:RealOrComplex = for j in range normalizeCol!(X, j, by) end
+normalizeCol!(X, range::UnitRange, by::Number) = for j in range normalizeCol!(X, j, by) end
 
 
 #  -------------------------------
@@ -350,7 +350,7 @@ sumOfSqrDiag(X) = 𝚺(abs2(X[i, i]) for i=1:minimum(size(X)))
 
 """
 function sumOfSqrTril(X::Matrix{T}, k::Int=0) where T<:Real
-    r=size(X, 1);  c=size(X, 2)
+    (r, c)=size(X)
     if k<(1-r) || k>(c-1)
         @warn "in LinearAmgebraInP.sumOfSqrTRil function (real input): argument k is out of bounds"
     else
@@ -360,7 +360,7 @@ function sumOfSqrTril(X::Matrix{T}, k::Int=0) where T<:Real
 end
 
 function sumOfSqrTril(X::Matrix{T}, k::Int=0) where T<:Complex
-    r=size(X, 1);  c=size(X, 2)
+    (r, c)=size(X)
     if k<(1-r) || k>(c-1)
         @warn "in LinearAmgebraInP.sumOfSqrTRil function (complex input): argument k is out of bounds"
     else
@@ -370,7 +370,7 @@ function sumOfSqrTril(X::Matrix{T}, k::Int=0) where T<:Complex
 end
 
 function sumOfSqrTril(X, k::Int=0)
-    r=size(X, 1);  c=size(X, 2)
+    (r, c)=size(X)
     if k<(1-r) || k>(c-1)
         @warn "in LinearAmgebraInP.sumOfSqrTRil function (catch-all input): argument k is out of bounds"
     else
@@ -410,29 +410,26 @@ end
 ## 4. Diagonal functions of matrices
 #  ---------------------------------
 """
-    (1) fDiagonal(func::Function, D::Diagonal, k::Int=0)
-    (2) fDiagonal(func::Function, P::Hermitian, k::Int=0)
-    (3) fDiagonal(func::Function, L::LowerTriangular, k::Int=0)
-    (4) fDiagonal(func::Function, X::Matrix, k::Int=0)
+    fDiagonal(func::Function, X::Matrix, k::Int=0)
 
  **alias**: `𝑓𝑫`
 
- Applies function `func` element-wise to the elements of the ``k^{th}`` diagonal of
-  -(1) diagonal matrix ``D`` (in this case `k` is not used since it must be zero, see below)
-  -(2) Hermitian matrix ``P``
-  -(3) lower Triangular matrix ``L`` (in this case `k` canot be positive, see below)
-  -(4) generic matrix ``X`` of dimension *r⋅c*
+ Applies function `func` element-wise to the elements of the ``k^{th}``
+ diagonal of generic matrix ``X`` of dimension *r⋅c*
  and return a diagonal matrix with these elements.
 
- Note that for (4) the dimension of the result depends on the size of ``X``
- and the chosen diagonal.
+ See julia [tril(M, k::Integer)](https://bit.ly/2Tbx8o7) function
+ for numbering of diagonals.
+
+ If the matrix is Diagonal `k` must be zero.
+ If the matrix is lower triangular `k` cannot be positive.
+
+ Note that if ``X`` is rectangular the dimension of the result depends
+ on the size of ``X`` and on the chosen diagonal.
  For example,
  - *r ≠ c* and ``k``=0 (main diagonal), the result will be of dimension min*(r,c)*⋅*min(r,c)*,
  - ``X`` *3⋅4* and ``k=-1``, the result will be *2⋅2*,
  - ``X`` *3⋅4* and ``k=1``, the result will be *3⋅3*, etc.
-
- See julia [tril(M, k::Integer)](https://bit.ly/2Tbx8o7) function
- for numbering of diagonals.
 
 !!! note "Nota Bene"
     The function `func` must support the `func.` syntax and therefore
@@ -450,15 +447,15 @@ end
 """
 fDiagonal(func::Function, D::⋱, k::Int=0) = ⋱(func.(D))
 
-fDiagonal(func::Function, P::ℍ, k::Int=0) = ⋱(func.(diag(P, k)))
-
 function fDiagonal(func::Function, L::LowerTriangular, k::Int=0)
  if k>0 @error("in function fDiagonal (linearAlgebra.jl): k argument cannot be positive.")
  else return ⋱(func.(diag(L, k)))
  end
 end
 
-fDiagonal(func::Function, X::Matrix, k::Int=0) = ⋱(func.(diag(X, k)))
+fDiagonal(func::Function, P::ℍ, k::Int=0) = ⋱(func.(diag(P, k)))
+
+fDiagonal(func::Function, X::Matrix{T}, k::Int=0) where T<:RealOrComplex= ⋱(func.(diag(X, k)))
 
 𝑓𝑫=fDiagonal
 
