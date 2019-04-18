@@ -136,6 +136,6 @@ include("signalProcessing.jl")
 include("riemannianGeometry.jl")
 include("test.jl")
 
-println("\n⭐  "," Welcome to the PosDefManifold package v0.1.1", "⭐\n")
+println("\n⭐  "," Welcome to the PosDefManifold package v dev.", "⭐\n")
 
 end # module
