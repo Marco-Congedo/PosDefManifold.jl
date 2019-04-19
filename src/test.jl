@@ -65,7 +65,7 @@ function tests();
     # functions in LinearAlgebrainP.jl
     print("Testing functions in unit 'LinearAlgebrainP.jl'")
 
-    ## Matrix Normalizations
+    ## 1. Matrix Normalizations
 
     name="function det1"; newTest(name)
     det(det1(P))  ≈ 1 ?  OK() : OH(name*" real case")
@@ -94,13 +94,13 @@ function tests();
     normalizeCol!(TC, 2:3, 2)
     norm(TC[:, 2])+norm(TC[:, 3]) ≈ 1 ? OK() : OH(name*" Method 4 complex case")
 
-    ## Boolean functions of matrices
+    ## 2. Boolean functions of matrices
 
     name="function ispos"; newTest(name)
     ispos(λ, 🔔=false) == false ? OK() : OH(name*" Method 1 real case")
     ispos(Λ, 🔔=false) == false ? OK() : OH(name*" Method 2 real case")
 
-    ## Scalar Functions of Matrices
+    ## 3. Scalar Functions of Matrices
 
     name="function colProd"; newTest(name)
     j1=1; j2=rand(2:n);
@@ -139,14 +139,13 @@ function tests();
     name="function fidelity"; newTest(name); SKIP()
     f=fidelity(P, Q)
 
-
-    ## 3. Diagonal functions of matrices
+    ## 4. Diagonal functions of matrices
 
     name="function fDiagonal"; newTest(name)
     D=fDiagonal(x->x^2, P_)
     D≈Diagonal(diagm(0 => [9.,16.,25.])) ? OK() : OH(name)
 
-    ## 4. Orthogonalization Procedures
+    ## 5. Unitary functions of matrices
 
     name="function mgs"; newTest(name)
     U=mgs(X)
@@ -154,9 +153,9 @@ function tests();
     U=mgs(XC)
     U'*U≈I ? OK() : OH(name*" Complex Input")
 
-    ## 5. Matrix function of matrices
+    ## 6. Matrix function of matrices
 
-    ## 6. Spectral decompositions of positive matrices
+    ## 7. Spectral decompositions of positive matrices
 
     name="function evd"; newTest(name)
     (Λ, U) = evd(P)
@@ -194,6 +193,7 @@ function tests();
     L=choL(PC_)
     L*L'≈PC_ ? OK() : OH(name*" Complex Input")
 
+    # 8. Decompositions involving triangular matrices
 
     # functions in SignalProcessinginP.jl
     println(" ")

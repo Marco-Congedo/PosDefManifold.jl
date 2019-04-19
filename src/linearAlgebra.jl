@@ -109,21 +109,21 @@ tr1(P) = P/tr(P)
 """
 function normalizeCol!(X::Matrix{T}, j::Int) where T<:RealOrComplex
     w=colNorm(X, j)
-    @inbounds for i=1:size(X, 1) X[i, j]=X[i, j]/w end
+    @inbounds for i=1:size(X, 1) X[i, j]/=w end
 end
 function normalizeCol!(X, j::Int)
     w=colNorm(X, j)
-    @inbounds for i=1:size(X, 1) X[i, j]=X[i, j]/w end
+    @inbounds for i=1:size(X, 1) X[i, j]/=w end
 end
 
-normalizeCol!(X::Matrix{T}, j::Int, by::Number) where T<:RealOrComplex = @inbounds for i=1:size(X, 1) X[i, j]=X[i, j]/by end
-normalizeCol!(X, j::Int, by::Number) = @inbounds for i=1:size(X, 1) X[i, j]=X[i, j]/by end
+normalizeCol!(X::Matrix{T}, j::Int, by::Number) where T<:RealOrComplex = @inbounds for i=1:size(X, 1) X[i, j]/=by end
+normalizeCol!(X, j::Int, by::Number) = @inbounds for i=1:size(X, 1) X[i, j]/=by end
 
-normalizeCol!(X::Matrix{T}, range::UnitRange) where T<:RealOrComplex = for j in range normalizeCol!(X, j) end
-normalizeCol!(X, range::UnitRange) = for j in range normalizeCol!(X, j) end
+normalizeCol!(X::Matrix{T}, range::UnitRange) where T<:RealOrComplex = @inbounds for j in range normalizeCol!(X, j) end
+normalizeCol!(X, range::UnitRange) = @inbounds for j in range normalizeCol!(X, j) end
 
-normalizeCol!(X::Matrix{T}, range::UnitRange, by::Number) where T<:RealOrComplex = for j in range normalizeCol!(X, j, by) end
-normalizeCol!(X, range::UnitRange, by::Number) = for j in range normalizeCol!(X, j, by) end
+normalizeCol!(X::Matrix{T}, range::UnitRange, by::Number) where T<:RealOrComplex = @inbounds for j in range normalizeCol!(X, j, by) end
+normalizeCol!(X, range::UnitRange, by::Number) = @inbounds for j in range normalizeCol!(X, j, by) end
 
 
 #  -------------------------------
@@ -132,7 +132,7 @@ normalizeCol!(X, range::UnitRange, by::Number) = for j in range normalizeCol!(X,
 
 """
 ```
-(1) ispos(  λ::Vector; <tol::Real=minpos, rev=true, 🔔=true, msg="">)
+(1) ispos(  λ::Vector;   <tol::Real=minpos, rev=true, 🔔=true, msg="">)
 (2) ispos(  Λ::Diagonal; <tol::Real=minpos, rev=true, 🔔=true, msg="">)
 ```
 
@@ -178,15 +178,7 @@ function ispos( λ::Vector;   tol::Real=minpos, rev=true, 🔔=true, msg="")
 end
 
 function ispos( Λ::Diagonal;   tol::Real=minpos, rev=true, 🔔=true, msg="")
-    rev ? iterations=(size(Λ, 1):-1:1) : iterations=(1:size(Λ, 1))
-    for i in iterations
-        if Λ[i, i]<tol
-            🔔 && print('\a')
-            length(msg)>0 && @warn("function ispos(linearAlgebra.jl) "*msg*" at position [$i, $i]")
-            return false; break
-        end
-    end
-    return true
+    return ispos( diag(Λ); tol=tol, rev=rev, 🔔=🔔, msg=msg)
 end
 
 
@@ -277,12 +269,10 @@ colNorm(X, j::Int) = √sumOfSqr(X, j)
     sum²=sumOfSqr(X, 2:4)   # (3) sum of squares of elements in column 2 to 4
 
 """
-sumOfSqr(A::Array{T}) where T<:Real = 𝚺(a^2 for a in A)
-sumOfSqr(A::Array{T}) where T<:Complex = 𝚺(abs2(a) for a in A)
+sumOfSqr(A::Array{T}) where T<:RealOrComplex = 𝚺(abs2(a) for a in A)
 sumOfSqr(A) = 𝚺(abs2(a) for a in A)
 
-sumOfSqr(X::Matrix{T}, j::Int) where T<:Real = 𝚺(X[:, j].^2)
-sumOfSqr(X::Matrix{T}, j::Int) where T<:Complex = 𝚺(abs2.(X[:, j]))
+sumOfSqr(X::Matrix{T}, j::Int) where T<:RealOrComplex = 𝚺(abs2.(X[:, j]))
 sumOfSqr(X, j::Int) = 𝚺(abs2.(X[:, j]))
 
 sumOfSqr(X::Matrix{T}, range::UnitRange) where T<:RealOrComplex = 𝚺(sumOfSqr(X, j) for j in range)
@@ -310,9 +300,8 @@ sumOfSqr(X, range::UnitRange) = 𝚺(sumOfSqr(X, j) for j in range)
     sumDiag²=sumOfSqrDiag(Diagonal(X)) # (2)
 
 """
-sumOfSqrDiag(X::Matrix{T}) where T<:Real = 𝚺(X[i, i]^2 for i=1:minimum(size(X)))
-sumOfSqrDiag(X::Matrix{T}) where T<:Complex = 𝚺(abs2(X[i, i]) for i=1:minimum(size(X)))
-sumOfSqrDiag(Λ::Diagonal) = 𝚺(Λ[i, i]^2 for i=1:size(Λ, 1))
+sumOfSqrDiag(X::Matrix{T}) where T<:RealOrComplex = 𝚺(abs2(X[i, i]) for i=1:minimum(size(X)))
+sumOfSqrDiag(Λ::Diagonal) = 𝚺(abs2(Λ[i, i]) for i=1:size(Λ, 1))
 sumOfSqrDiag(X) = 𝚺(abs2(X[i, i]) for i=1:minimum(size(X)))
 
 
@@ -345,20 +334,10 @@ sumOfSqrDiag(X) = 𝚺(abs2(X[i, i]) for i=1:minimum(size(X)))
     # 50.0 = 1²+2²+2²+4²+5²
 
 """
-function sumOfSqrTril(X::Matrix{T}, k::Int=0) where T<:Real
+function sumOfSqrTril(X::Matrix{T}, k::Int=0) where T<:RealOrComplex
     (r, c)=size(X)
     if k<(1-r) || k>(c-1)
-        @warn "in LinearAmgebraInP.sumOfSqrTRil function (real input): argument k is out of bounds"
-    else
-        s=0.0; @inbounds for j=1:c, i=max(j-k, 1):r s+=X[i, j]^2 end
-        return s
-    end
-end
-
-function sumOfSqrTril(X::Matrix{T}, k::Int=0) where T<:Complex
-    (r, c)=size(X)
-    if k<(1-r) || k>(c-1)
-        @warn "in LinearAmgebraInP.sumOfSqrTRil function (complex input): argument k is out of bounds"
+        @warn "in LinearAmgebraInP.sumOfSqrTRil function: argument k is out of bounds"
     else
         s=0.0; @inbounds for j=1:c, i=max(j-k, 1):r s+=abs2(X[i, j]) end
         return s
@@ -442,17 +421,13 @@ end
     Δ=fDiagonal(x->x^2, Λ)  # using an anonymous function for the square of the eigenvalues
 """
 fDiagonal(func::Function, D::⋱, k::Int=0) = ⋱(func.(D))
-
 function fDiagonal(func::Function, L::LowerTriangular, k::Int=0)
  if k>0 @error("in function fDiagonal (linearAlgebra.jl): k argument cannot be positive.")
  else return ⋱(func.(diag(L, k)))
  end
 end
-
 fDiagonal(func::Function, P::ℍ, k::Int=0) = ⋱(func.(diag(P, k)))
-
 fDiagonal(func::Function, X::Matrix{T}, k::Int=0) where T<:RealOrComplex= ⋱(func.(diag(X, k)))
-
 𝑓𝑫=fDiagonal
 
 
@@ -716,7 +691,7 @@ function powerIterations(S::ℍ, q::Int;
                      evalues=false, tol=1e-9, maxiter=300, ⍰=false)
     U=randn(eltype(S), size(S, 1), q) # initialization
     normalizeCol!(U, 1:q)
-    💡=similar(U, eltype(U))
+    💡=similar(U, eltype(U)) # 💡 is the iterated solution
     (iter, conv) = 1, 0.
     if ⍰ @info("Running Power Iterations...") end
     while true
