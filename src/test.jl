@@ -97,8 +97,8 @@ function tests();
     ## Boolean functions of matrices
 
     name="function ispos"; newTest(name)
-    ispos(λ, bell=false) == false ? OK() : OH(name*" Method 1 real case")
-    ispos(Λ, bell=false) == false ? OK() : OH(name*" Method 2 real case")
+    ispos(λ, 🔔=false) == false ? OK() : OH(name*" Method 1 real case")
+    ispos(Λ, 🔔=false) == false ? OK() : OH(name*" Method 2 real case")
 
     ## Scalar Functions of Matrices
 

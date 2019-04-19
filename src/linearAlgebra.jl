@@ -132,10 +132,8 @@ normalizeCol!(X, range::UnitRange, by::Number) = for j in range normalizeCol!(X,
 
 """
 ```
-(1) ispos(  λ::Vector; <tol::Real=minpos, rev::Bool=true,
-            bell::Bool=true, msg::String="">)
-(2) ispos(  Λ::Diagonal; <tol::Real=minpos, rev::Bool=true,
-            bell::Bool=true, msg::String="">)
+(1) ispos(  λ::Vector; <tol::Real=minpos, rev=true, 🔔=true, msg="">)
+(2) ispos(  Λ::Diagonal; <tol::Real=minpos, rev=true, 🔔=true, msg="">)
 ```
 
  Return ``true`` if all numbers in (1) real vector ``λ`` or in (2) real diagonal
@@ -151,7 +149,7 @@ normalizeCol!(X, range::UnitRange, by::Number) = for j in range normalizeCol!(X,
  check when the elements are sorted where to start checking.
 
  If the result is ``false``:
- - if ``bell=true`` a bell character will be printed. In most systems this will ring a bell on the computer.
+ - if ``🔔=true`` a bell character will be printed. In most systems this will ring a bell on the computer.
  - if string ``msg`` is provided, a warning will print ``msg`` followed by:
  "at position *pos*", where *pos* is the position where the
  first non-positive element has been found.
@@ -159,7 +157,7 @@ normalizeCol!(X, range::UnitRange, by::Number) = for j in range normalizeCol!(X,
 ```
  ## Examples
  using PosDefManifold
- a=[1, 0, 2, 8];
+ a=[1, 0, 2, 8]
  ispos(a, msg="non-positive element found")
 
  # it will print:
@@ -167,26 +165,24 @@ normalizeCol!(X, range::UnitRange, by::Number) = for j in range normalizeCol!(X,
  # └ @ [here julie will point to the line of code issuing the warning]
 ```
  """
-function ispos( λ::Vector; tol::Real=minpos, rev::Bool=true,
-                bell::Bool=true, msg::String="")
-    rev ? ind = (length(λ):-1:1) : ind=(1:length(λ))
-    for i in ind
+function ispos( λ::Vector;   tol::Real=minpos, rev=true, 🔔=true, msg="")
+    rev ? iterations = (length(λ):-1:1) : iterations=(1:length(λ))
+    for i in iterations
         if λ[i]<tol
-            bell && print('\a') # print('\a') sounds a bell
-            length(msg)>0 && @warn(msg* " at position $i")
+            🔔 && print('\a') # print('\a') sounds a bell
+            length(msg)>0 && @warn("function ispos(linearAlgebra.jl) "*msg* " at position $i")
             return false; break
         end
     end
     return true
 end
 
-function ispos( Λ::Diagonal; tol::Real=minpos, rev::Bool=true,
-                bell::Bool=true, msg::String="")
-    rev ? ind=(size(Λ, 1):-1:1) : ind=(1:size(Λ, 1))
-    for i in ind
+function ispos( Λ::Diagonal;   tol::Real=minpos, rev=true, 🔔=true, msg="")
+    rev ? iterations=(size(Λ, 1):-1:1) : iterations=(1:size(Λ, 1))
+    for i in iterations
         if Λ[i, i]<tol
-            bell && print('\a')
-            length(msg)>0 && @warn(msg*" at position [$i, $i]")
+            🔔 && print('\a')
+            length(msg)>0 && @warn("function ispos(linearAlgebra.jl) "*msg*" at position [$i, $i]")
             return false; break
         end
     end
@@ -710,7 +706,7 @@ sqr(P::ℍ) = ℍ(P*P')
     using LinearAlgebra, PosDefManifold
     S=randP(10);
     # all eigenvectors
-    U, iterations, covergence=powIter(S, size(P, 2), ⍰=true)
+    U, iterations, covergence=powIter(S, size(S, 2), ⍰=true)
     # 3 eigenvectors and eigenvalues
     Λ, U, iterations, covergence=powIter(S, 3, evalues=true);
     U'*U≈ I ? println(" ⭐ ") : println(" ⛔ ")
@@ -720,25 +716,25 @@ function powerIterations(S::ℍ, q::Int;
                      evalues=false, tol=1e-9, maxiter=300, ⍰=false)
     U=randn(eltype(S), size(S, 1), q) # initialization
     normalizeCol!(U, 1:q)
-    U◇=similar(U, eltype(U))
+    💡=similar(U, eltype(U))
     (iter, conv) = 1, 0.
     if ⍰ @info("Running Power Iterations...") end
     while true
         # power iteration of q vectors and their Gram-Schmidt Orthogonalization
-        U◇=mgs(S*U)
-        conv=norm((U◇)' * U-I) / q
+        💡=mgs(S*U)
+        conv=norm((💡)' * U-I) / q
         if ⍰ println("iteration: ", iter, "; convergence: ", conv) end
         if conv<=tol || iter >= maxiter
             break;
-        else U = U◇ end
+        else U = 💡 end
         iter += 1
     end # while
     if evalues == false
-        return (U◇, iter, conv)
+        return (💡, iter, conv)
     else
         D=zeros(eltype(U), q, q)
-        for i=1:q D[i, i] = U◇[:, i]' * S * U◇[:, i] end
-        return (⋱(real(D)), U◇, iter, conv)
+        for i=1:q D[i, i] = 💡[:, i]' * S * 💡[:, i] end
+        return (⋱(real(D)), 💡, iter, conv)
     end
 end
 powIter=powerIterations

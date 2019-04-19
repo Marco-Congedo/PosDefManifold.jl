@@ -133,15 +133,13 @@ function geodesic(P::ℍ, Q::ℍ, a::Real, metric::Metric=Fisher)
             @warn("An expression for the geodesic is not available for the Von neumann metric")
 
     elseif  metric==ChoEuclidean
-            L=choL(P)*b + choL(Q)*a
-    return  ℍ(L*L')
+            T=choL(P)*b + choL(Q)*a
+    return  ℍ(T*T')
 
     elseif  metric==logCholesky
             LP=choL(P); LQ=choL(Q); slLP=tril(LP,-1)
-            #L=slLP+a*(tril(LQ,-1)-slLP)+⋱(LP)*exp(a*(𝑓𝑫(LQ, log)-𝑓𝑫(LP, log)))
-            L=slLP+(tril(LQ,-1)-slLP)*a
-            for i in 1:size(P, 1) L[i, i]+=LP[i, i]*exp( (log(LQ[i, i])-log(LP[i, i]))*a ) end
-    return  ℍ(L*L')
+            T=slLP+a*(tril(LQ,-1)-slLP)+𝑓𝑫(x->x, LP)*exp(a*(𝑓𝑫(log, LQ)-𝑓𝑫(log, LP)))
+    return  ℍ(T*T')
 
     elseif  metric==Wasserstein
             if isreal(P) && isreal(Q)
@@ -253,8 +251,7 @@ function distanceSqr(P::ℍ, metric::Metric=Fisher)
 
     elseif  metric==logCholesky
             LP=choL(P)
-    return  sumOfSqrTril(tril(LP,-1), -1)
-                + 𝚺(log(LP[i, i])^2 for i in 1:size(P, 1))
+    return  sumOfSqrTril(LP, -1) + sumOfSqrDiag(𝑓𝑫(log, LP))
 
     elseif  metric==Jeffrey
     return  tr(P)/2 + tr(inv(P))/2 - size(P, 1)
@@ -293,15 +290,14 @@ function distanceSqr(P::ℍ, Q::ℍ, metric::Metric=Fisher)
     elseif  metric==logCholesky
             LP = choL(P)
             LQ = choL(Q)
-    return  sumOfSqrTril(tril(LP,-1)-tril(LQ,-1), -1)
-                + 𝚺((log(LP[i, i])-log(LQ[i, i]))^2 for i in 1:size(P, 1))
+    return  sumOfSqrTril(tril(LP,-1)-tril(LQ,-1), -1) + sumOfSqrDiag(𝑓𝑫(log, LP)-𝑓𝑫(log, LQ))
 
     elseif  metric==Jeffrey
     return  real(tr(inv(Q)*P)/2 + tr(inv(P)*Q)/2) - size(P, 1)
 
     elseif  metric==VonNeumann      # using formula: tr(PlogP - PlogQ + QlogQ - QlogP)/2=
-            𝓵Pm𝓵Q=log(P)-log(Q);         # (tr(P(logP - LoqQ)) + tr(Q(logQ - logP)))/2=
-    return  (tr(P*𝓵Pm𝓵Q) - tr(Q*𝓵Pm𝓵Q))/2     # (tr(P(logP - LoqQ)) - tr(Q(logP - LoqQ)))/2
+            R=log(P)-log(Q);         # (tr(P(logP - LoqQ)) + tr(Q(logQ - logP)))/2=
+    return  (tr(P*R) - tr(Q*R))/2     # (tr(P(logP - LoqQ)) - tr(Q(logP - LoqQ)))/2
 
     elseif  metric==Wasserstein
             P½=sqrt(P);
@@ -359,10 +355,10 @@ function GetdistSqrMat(℘::ℍVector, metric::Metric=Fisher)
                 △[i, j]=sumOfSqr(℘L[i] - ℘L[j])  end
 
     elseif  metric==logCholesky
-            ℘L=[choL(P)     for P in ℘]
+            ℘L=[choL(P) for P in ℘]
             for j in 1:k-1, i in j+1:k
                 △[i, j]=sumOfSqrTril(tril(℘L[i], -1)-tril(℘L[j], -1), -1)
-                        + 𝚺((log(℘L[i][l, l])-log(℘L[j][l, l]))^2 for l in 1:n) end
+                        + sumOfSqrDiag(𝑓𝑫(log, ℘L[i])-𝑓𝑫(log, ℘L[j])) end
 
     elseif  metric==Jeffrey
             ℘𝓲=[inv(P) for P in ℘]
@@ -371,9 +367,9 @@ function GetdistSqrMat(℘::ℍVector, metric::Metric=Fisher)
 
     elseif  metric==VonNeumann  # using formula: tr( PlogP + QLoqQ - PlogQ - QlogP)
             𝓵℘=[log(P)      for P in ℘]
-            ℘i𝓵℘i=[P*log(P) for P in ℘]
+            ℒ=[P*log(P) for P in ℘]
             for j in 1:k-1, i in j+1:k
-                △[i, j]=(tr(℘i𝓵℘i[i])+tr(℘i𝓵℘i[j])-tr(℘[i] * 𝓵℘[j])-tr(℘[j] * 𝓵℘[i]))/2   end
+                △[i, j]=(tr(ℒ[i])+tr(ℒ[j])-tr(℘[i] * 𝓵℘[j])-tr(℘[j] * 𝓵℘[i]))/2   end
 
     elseif  metric==Wasserstein
             ℘½=[sqrt(P) for P in ℘]
@@ -618,7 +614,7 @@ end
 # -----------------------------------------------------------
 
 """
-    generalizedMean(℘::ℍVector, p::Real; <w::Vector=[], ✓w::Bool=true>)
+    generalizedMean(℘::ℍVector, p::Real; <w::Vector=[], ✓w=true>)
 
  Given a 1d array `℘` of ``k`` positive definite matrices``{P_1,...,P_k}``
  of [ℍVector type](@ref) and optional non-negative real weights vector ``w={w_1,...,w_k}``,
@@ -672,7 +668,7 @@ end
     G = generalizedMean(℘, 0.5; w=weights, ✓w=false)
 
 """
-function generalizedMean(℘::ℍVector, p::Real; w::Vector=[], ✓w::Bool=true)
+function generalizedMean(℘::ℍVector, p::Real; w::Vector=[], ✓w=true)
     if     p == -1 return meanP(℘, invEuclidean; w=w, ✓w=✓w)
     elseif p ==  0 return meanP(℘, logEuclidean; w=w, ✓w=✓w)
     elseif p ==  1 return meanP(℘, Euclidean;    w=w, ✓w=✓w)
@@ -690,7 +686,7 @@ end # function
 
 """
 
-    logdet0Mean(℘::ℍVector; <w::Vector=[], ✓w::Bool=true, init=nothing,
+    logdet0Mean(℘::ℍVector; <w::Vector=[], ✓w=true, init=nothing,
                      tol=1e-9, ⍰=false>)
 
  Given a 1d array ``℘`` of ``k`` positive definite matrices ``{P_1,...,P_k}``
@@ -750,37 +746,37 @@ suggested by (Moakher, 2012, p315)[🎓](@ref), yielding iterations
     G, iter, conv = logdet0Mean(℘, w=weights, ✓w=false, ⍰=true, init=G)
 
 """
-function logdet0Mean(℘::ℍVector;  w::Vector=[], ✓w::Bool=true, init=nothing,
+function logdet0Mean(℘::ℍVector;  w::Vector=[], ✓w=true, init=nothing,
                             tol=1e-9, ⍰=false)
     maxIter=500
     n, k = _attributes(℘)
     l=k/2
     isempty(w) ? v=[] : v = _getWeights(w, ✓w, k)
     init == nothing ? M = meanP(℘, logEuclidean, w=w, ✓w=false) : M = ℍ(init)
-    M◇ = similar(M, eltype(M))
+    💡 = similar(M, eltype(M))
     iter, conv, oldconv = 1, 0., maxpos
     ⍰ && @info("Iterating RlogDetMean Fixed-Point...")
 
     @inbounds while true
         if isempty(w)
-            M◇ = l * inv(ℍ(𝚺(inv(ℍ(P+M)) for P in ℘)))
+            💡 = l * inv(ℍ(𝚺(inv(ℍ(P+M)) for P in ℘)))
         else
-            M◇ = 0.5 * inv(ℍ(𝚺(ω * inv(ℍ(P+M)) for (ω, P) in zip(v, ℘))))
+            💡 = 0.5 * inv(ℍ(𝚺(ω * inv(ℍ(P+M)) for (ω, P) in zip(v, ℘))))
         end
-        conv = norm(M◇-M)/norm(M)
+        conv = norm(💡-M)/norm(M)
         ⍰ && println("iteration: ", iter, "; convergence: ", conv)
         diverging = conv > oldconv
         diverging ? @warn("logdet0Mean diverged at:", iter) : oldconv=conv
-        iter==maxIter || diverging || conv <= tol ? break : M = M◇
+        iter==maxIter || diverging || conv <= tol ? break : M = 💡
         iter += 1
     end # while
 
-    return (M◇, iter, conv)
+    return (💡, iter, conv)
 end
 
 
 """
-    wasMean(℘::ℍVector; <w::Vector=[], ✓w::Bool=true, init=nothing,
+    wasMean(℘::ℍVector; <w::Vector=[], ✓w=true, init=nothing,
                  tol=1e-9, ⍰=false>)
 
  Given a 1d array `℘` of ``k`` positive definite matrices ``{P_1,...,P_k}``
@@ -840,37 +836,37 @@ end
     G, iter, conv = wasMean(℘, w=weights, ⍰=true, init=G)
 
 """
-function wasMean(℘::ℍVector; w::Vector=[], ✓w::Bool=true,
+function wasMean(℘::ℍVector; w::Vector=[], ✓w=true,
                  init=nothing, tol=1e-9, ⍰=false)
 
     maxIter=500
     iter, conv, oldconv, maxIter, (n, k) = 1, 0., maxpos, 500, _attributes(℘)
     isempty(w) ? v=[] : v = _getWeights(w, ✓w, k)
     init == nothing ? M = generalizedMean(℘, 0.5; w=v, ✓w=false) : M = ℍ(init)
-    M◇ = similar(M, eltype(M))
+    💡 = similar(M, eltype(M))
     ⍰ && @info("Iterating wasMean Fixed-Point...")
 
     @inbounds while true
         S, W=pow(M, 0.5, -0.5)
         if isempty(w)
-            M◇ = ℍ(W * sqr(ℍ(𝛍(sqrt(ℍ(S*P*S)) for P in ℘))) * W)
+            💡 = ℍ(W * sqr(ℍ(𝛍(sqrt(ℍ(S*P*S)) for P in ℘))) * W)
         else
-            M◇ = ℍ(W * sqr(ℍ(𝚺((sqrt(ℍ(S*P*S)) * ω) for (ω, P) in zip(v, ℘)))) * W)
+            💡 = ℍ(W * sqr(ℍ(𝚺((sqrt(ℍ(S*P*S)) * ω) for (ω, P) in zip(v, ℘)))) * W)
         end
-        conv = norm(M◇-M)/norm(M)
+        conv = norm(💡-M)/norm(M)
         ⍰ &&  println("iteration: ", iter, "; convergence: ", conv)
         diverging = conv > oldconv
         diverging ? @warn("wasMean diverged at:", iter) : oldconv=conv
-        iter==maxIter || diverging || conv <= tol ? break : M = M◇
+        iter==maxIter || diverging || conv <= tol ? break : M = 💡
         iter += 1
     end # while
 
-    return (M◇, iter, conv)
+    return (💡, iter, conv)
 end
 
 
 """
-    powerMean(℘::ℍVector, p::Real; <w::Vector=[], ✓w::Bool=true, init=nothing,
+    powerMean(℘::ℍVector, p::Real; <w::Vector=[], ✓w=true, init=nothing,
                             tol=1e-9, ⍰=false>)
 
  Given a 1d array `℘` of ``k`` positive definite matrices ``{P_1,...,P_k}``
@@ -944,7 +940,7 @@ end
     G, iter, conv = powerMean(℘, 0.5, w=weights, ⍰=true, init=G)
 
 """
-function powerMean(℘::ℍVector, p::Real;     w::Vector=[], ✓w::Bool=true, init=nothing,
+function powerMean(℘::ℍVector, p::Real;     w::Vector=[], ✓w=true, init=nothing,
                                     tol=1e-9, ⍰=false)
   if !(-1<=p<=1) @error("The parameter p for power means must be in range [-1...1]")
   else
@@ -967,7 +963,7 @@ function powerMean(℘::ℍVector, p::Real;     w::Vector=[], ✓w::Bool=true, i
         w≠[] ? v = _getWeights(w, ✓w, k) : v=[]
         init == nothing ? M = generalizedMean(℘, p; w=v, ✓w=false) : M = ℍ(init)
         p<0 ? X=ℍ(M^(0.5)) : X=ℍ(M^(-0.5))
-        X◇, H = similar(X, eltype(X))
+        💡, H = similar(X, eltype(X))
         𝒫=similar(℘, eltype(℘))
         if p<0 𝒫=[inv(P) for P in ℘] else 𝒫=℘ end
         iter, conv, oldconv = 1, 0., maxpos
@@ -979,18 +975,18 @@ function powerMean(℘::ℍVector, p::Real;     w::Vector=[], ✓w::Bool=true, i
             else
                 H=ℍ(𝚺(ω * pow(ℍ(X*P*X), absp) for (ω, P) in zip(v, 𝒫)))
             end
-            X◇=(pow(H, r))*X
+            💡=(pow(H, r))*X
             conv=norm(H-I)/sqrtn # relative difference to identity
             ⍰ &&  println("iteration: ", iter, "; convergence: ", conv)
             diverging = conv > oldconv
             diverging ? @warn("powerMean diverged at:", iter) : oldconv=conv
-            iter==maxIter || diverging || conv <= tol ? break : X = X◇
+            iter==maxIter || diverging || conv <= tol ? break : X = 💡
             iter += 1
         end # while
     end # if
 
-    if p<0  return ( ℍ((X◇)'*X◇), iter, conv )
-    else    return ( inv(ℍ((X◇)'*X◇)), iter, conv ) end
+    if p<0  return ( ℍ((💡)'*💡), iter, conv )
+    else    return ( inv(ℍ((💡)'*💡)), iter, conv ) end
   end # if !(-1<=p<=1)
 end
 
@@ -998,7 +994,7 @@ end
 
 """
     (1) meanP(P::ℍ, Q::ℍ, metric::Metric=Fisher)
-    (2) meanP(℘::ℍVector, metric::Metric=Fisher; <w::Vector=[], ✓w::Bool=true>)
+    (2) meanP(℘::ℍVector, metric::Metric=Fisher; <w::Vector=[], ✓w=true>)
 
  (1) Mean of two positive definite matrices, passed in arbitrary order as
  arguments ``P`` and ``Q``, using the specified `metric` of type
@@ -1072,7 +1068,7 @@ end
 """
 meanP(P::ℍ, Q::ℍ, metric::Metric=Fisher) = geodesic(P, Q, 0.5, metric)
 
-function meanP(℘::ℍVector, metric::Metric=Fisher;    w::Vector=[], ✓w::Bool=true)
+function meanP(℘::ℍVector, metric::Metric=Fisher;    w::Vector=[], ✓w=true)
     # iterative solutions
     if      metric == Fisher
             (G, iter, conv)=powerMean(℘, 0; w=w, ✓w=✓w)
