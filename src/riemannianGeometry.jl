@@ -1058,10 +1058,15 @@ end
     M=meanP(P, Q, logdet0) # (1)
     M=meanP(P, Q) # (1), uses Fisher metric
 
+    R=randP(3)
+    # passing several matrices and associated weights listing them
+    # weights vector, does not need to be normalized
+    meanP(ℍVector([P, Q, R]), logEuclidean, w=[1, 2, 3])
+
     # Generate a set of 4 random 3x3 SPD matrices
     ℘=randP(3, 4)
-    # weights vector, does not need to be normalized
     weights=[1, 2, 3, 1]
+    # passing a vector of Hermitian matrices (ℍVector type)
     M=meanP(℘, Euclidean, w=weights) # (2) weighted Euclidean mean
     M=meanP(℘, Wasserstein)  # (2) unweighted Wassertein mean
 
@@ -1128,7 +1133,6 @@ function meanP(℘::ℍVector, metric::Metric=Fisher;    w::Vector=[], ✓w=true
         @warn "in RiemannianGeometryP.meanP function: the chosen 'metric' does not exist"
     end # if metric
 end # function
-
 
 # -----------------------------------------------------------
 # 5. Tangent Space Tools
