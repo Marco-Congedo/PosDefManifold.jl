@@ -21,7 +21,7 @@ The main module does not contains functions, but it declares all **constant**,
 | [types](@ref) |
 | [tips & tricks](@ref) |
 
-## constants
+### constants
 | constant   | value | numeric value
 |:----------:| ----------- | ----------- |
 |`sqrt2` |√2 | 1.4142135623730951 |
@@ -29,7 +29,7 @@ The main module does not contains functions, but it declares all **constant**,
 |`minpos`| 1e-15 | 0.000000000000001|
 |`maxpos`| 1e15 | 100000000000000|
 
-## aliases
+### aliases
 
 | alias   | Julia function | in Package | tab-completition | REPL support |
 |:----------:| ----------- | ----------- | ----------- | ----------- |
@@ -40,9 +40,9 @@ The main module does not contains functions, but it declares all **constant**,
 
 All packages above are built-in julia packages.
 
-## types
+### types
 
-### Metric::Enumerated type
+#### Metric::Enumerated type
 ```
 @enum Metric begin
   Euclidean    =1
@@ -85,10 +85,10 @@ To know what is the current metric, get it as a string as:
 
     s=string(metric)
 
-### RealOrComplex type
+#### RealOrComplex type
  `RealOrComplex=Union{Real, Complex}` is the Union of Real and Complex Types.
 
-### ℍVector type
+#### ℍVector type
  `ℍVector=Vector{ℍ}` is a vector of Hermitian matrices.
  Julia sees is at: `Array{Hermitian,1}`.
 
@@ -98,9 +98,9 @@ To know what is the current metric, get it as a string as:
   to have the same length. See [aliases](@ref) for the ℍ symbol and
   [typecasting matrices](@ref) for the use of Hermitian matrices  in **PosDefManifold**.
 
-## tips & tricks
+### tips & tricks
 
-### typecasting matrices
+#### typecasting matrices
  Several functions in **PosDefManifold** implement multiple dispatch and can handle  
  several kinds of matrices as input, however the core functions for manipulating  
  objects on the Riemannian manifold of positive definite matrices act by definition
