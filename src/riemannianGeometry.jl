@@ -772,10 +772,11 @@ end # function
      using PosDefManifold
      # Generate a set of 4 random 3x3 SPD matrices
      𝐏=randP(3, 4)
-     # Generate a set of 40 random 3x3 SPD matrices
-     𝐐=randP(3, 40)
+     # Generate a set of 40 random 4x4 SPD matrices
+     𝐐=randP(4, 40)
      # listing directly ℍVector objects
      meansP([𝐏, 𝐐], logEuclidean)
+     # note that [𝐏, 𝐐] is actually a ℍVector₂ type object
 
      # creating and passing an object of ℍVector₂ type
      ℘=ℍVector₂(undef, 2)
@@ -785,6 +786,7 @@ end # function
 
 """
 meansP(℘::ℍVector₂, metric::Metric=Fisher)=ℍVector([meanP(𝐏, metric) for 𝐏 in ℘])
+
 
 """
     generalizedMean(𝐏::ℍVector, p::Real; <w::Vector=[], ✓w=true>)
