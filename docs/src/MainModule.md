@@ -92,11 +92,7 @@ To know what is the current metric, get it as a string as:
  `ℍVector=Vector{ℍ}` is a vector of Hermitian matrices.
  Julia sees is at: `Array{Hermitian,1}`. See [aliases](@ref) for  the ℍ symbol and [typecasting matrices](@ref) for the use of Hermitian matrices in **PosDefManifold**.
 
-### ℍVector₂ type
- `ℍVector₂=Vector{ℍVector}` is a vector of [ℍVector type](@ref) objects, i.e., a vector of vectors of Hermitian matrices. Julia sees it as: `Array{Array{Hermitian,1},1}`. Note that `ℍVector₂` is not a matrix
- of Hermitian matrices since the several `ℍVector` it holds do not need
- to have the same length. See [aliases](@ref) for the ℍ symbol and
- [typecasting matrices](@ref) for the use of Hermitian matrices  in **PosDefManifold**.
+
 
 ## tips & tricks
 
