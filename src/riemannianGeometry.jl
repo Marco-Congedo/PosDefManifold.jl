@@ -955,17 +955,14 @@ function powerMean(℘::ℍVector, p::Real;     w::Vector=[], ✓w=true, init=no
                 return (meanP(℘, Euclidean, w=w, ✓w=✓w), 1, 0)
     else
         # Set Parameters
-        maxIter=500
         n, k = _attributes(℘)
-        sqrtn=√n
-        absp=abs(p)
+        sqrtn, absp, maxIter=√n, abs(p), 500
         r=-0.375/absp
         w≠[] ? v = _getWeights(w, ✓w, k) : v=[]
         init == nothing ? M = generalizedMean(℘, p; w=v, ✓w=false) : M = ℍ(init)
         p<0 ? X=ℍ(M^(0.5)) : X=ℍ(M^(-0.5))
-        💡, H = similar(X, eltype(X))
-        𝒫=similar(℘, eltype(℘))
-        if p<0 𝒫=[inv(P) for P in ℘] else 𝒫=℘ end
+        💡, H, 𝒫 = similar(X, eltype(X)), similar(X, eltype(X)), similar(℘, eltype(℘))
+        p<0 ? 𝒫=[inv(P) for P in ℘] : 𝒫=℘
         iter, conv, oldconv = 1, 0., maxpos
         ⍰ && @info("Iterating powerMean Fixed-Point...")
 
