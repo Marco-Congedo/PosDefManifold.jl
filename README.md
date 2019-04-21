@@ -1,6 +1,7 @@
 # PosDefManifold.jl
 
 [![](https://img.shields.io/badge/docs-dev-blue.svg)](https://Marco-Congedo.github.io/PosDefManifold.jl/latest)
+[![](https://img.shields.io/github/languages/code-size/:user/:repo.svg)](https://Marco-Congedo.github.io/PosDefManifold.jl)
 
 **PosDefManifold** is a [**Julia**](https://julialang.org/) package for manipulating data in the manifold **P** of real or complex [**positive definite matrices**](https://en.wikipedia.org/wiki/Definiteness_of_a_matrix). The package supports **10 metrics** acting on **P**, two of which define [**Riemannian manifolds**](https://en.wikipedia.org/wiki/Riemannian_manifold). 
 
