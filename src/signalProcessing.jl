@@ -213,50 +213,50 @@ end
 
 function randPosDefMat(n::Int, k::Int; df::Int=2, eigvalsSNR::Real=10e3, SNR::Real=100)
     U=randU(n)
-    ℘=ℍVector(undef, k)
+    𝐏=ℍVector(undef, k)
     φ=1/SNR
     for j in 1:k
         V=randU(n)
-        ℘[j]=ℍ( U*randΛ(n, df=df, eigvalsSNR=eigvalsSNR)*U'
+        𝐏[j]=ℍ( U*randΛ(n, df=df, eigvalsSNR=eigvalsSNR)*U'
                  + V*(φ*randΛ(n, df=df, eigvalsSNR=eigvalsSNR))*V' )
     end
-    return ℘
+    return 𝐏
 end
 
 
 function randPosDefMat(::Type{Complex{T}}, n::Int, k::Int; df::Int=2, eigvalsSNR::Real=10e3, SNR::Real=100) where {T<:AbstractFloat}
     U=randU(ComplexF64, n)
-    ℘=ℍVector(undef, k)
+    𝐏=ℍVector(undef, k)
     φ=1/SNR
     for j in 1:k
         V=randU(ComplexF64, n)
-        ℘[j]=ℍ( U*randΛ(n, df=df, eigvalsSNR=eigvalsSNR)*U'
+        𝐏[j]=ℍ( U*randΛ(n, df=df, eigvalsSNR=eigvalsSNR)*U'
                  + V*(φ*randΛ(n, df=df, eigvalsSNR=eigvalsSNR))*V' )
     end
-    return ℘
+    return 𝐏
 end
 randP=randPosDefMat
 
 
 """
     (1) regularize!(P::ℍ; <SNR=10e3>)
-    (2) regularize!(℘::ℍVector; <SNR=10e3>)
+    (2) regularize!(𝐏::ℍVector; <SNR=10e3>)
 
  Add [white noise](https://bit.ly/2TN8472) to either
  - (1) a positive definite matrix ``P`` of size ``n⋅n``, or
- - (2) a 1d array ``℘`` of ``k`` positive definite matrices of size ``n⋅n``, of [ℍVector type](@ref).
+ - (2) a 1d array ``𝐏`` of ``k`` positive definite matrices of size ``n⋅n``, of [ℍVector type](@ref).
 
  The added noise improves the matrix conditioning with respect to inversion.
  This is used to avoid numerical errors when decomposing these matrices
  or when evaluating some functions of their eigevalues such as the log.
 
  A constant value is added to all diagonal elements of (1) ``P``
- or (2) af all matrices in ``℘``,
+ or (2) af all matrices in ``𝐏``,
  that is, on output:
 
  ``\\textrm{(1)}\\hspace{2pt}P\\leftarrow P+ηI``
 
- ``\\textrm{(2)}\\hspace{2pt}℘_i\\leftarrow ℘_i+ηI, \\hspace{2pt}\\textrm{for}\\hspace{2pt} i=1:k.``
+ ``\\textrm{(2)}\\hspace{2pt}𝐏_i\\leftarrow 𝐏_i+ηI, \\hspace{2pt}\\textrm{for}\\hspace{2pt} i=1:k.``
 
  The amount of added noise ``η`` is determined by the `SNR`
  *<keyword argument>*, which by default is 10000. This is
@@ -264,7 +264,7 @@ randP=randPosDefMat
 
  ``\\textrm{(1)}\\hspace{2pt}SNR=\\frac{\\displaystyle\\textrm{tr}(P)}{\\displaystyle\\textrm{tr}(ηI)}.``
 
- ``\\textrm{(2)}\\hspace{2pt}SNR=\\frac{\\displaystyle\\sum_{i=1}^{k}\\textrm{tr}(℘_i)}{\\displaystyle k\\hspace{1pt}\\textrm{tr}(ηI)}.``
+ ``\\textrm{(2)}\\hspace{2pt}SNR=\\frac{\\displaystyle\\sum_{i=1}^{k}\\textrm{tr}(𝐏_i)}{\\displaystyle k\\hspace{1pt}\\textrm{tr}(ηI)}.``
 
  ``P`` in (1) must be flagged as Hermitian. See [typecasting matrices](@ref).
 
@@ -292,15 +292,15 @@ randP=randPosDefMat
     heatmap(Matrix(Q), yflip=true, c=:bluesreds)
 
     # (2)
-    ℘=[ℍ(U*Diagonal(randn(3).^2)*U') for i=1:5] # 5 real 3x3 positive matrices
-    regularize!(℘, SNR=1000)
+    𝐏=[ℍ(U*Diagonal(randn(3).^2)*U') for i=1:5] # 5 real 3x3 positive matrices
+    regularize!(𝐏, SNR=1000)
 
  ## Run a test
     using LinearAlgebra
-    ℘=randP(10, 100, SNR=1000); # 100 real Hermitian matrices
-    signalVar=sum(tr(P) for P in ℘);
-    regularize!(℘, SNR=1000);
-    signalPlusNoiseVar=sum(tr(P) for P in ℘);
+    𝐏=randP(10, 100, SNR=1000); # 100 real Hermitian matrices
+    signalVar=sum(tr(P) for P in 𝐏);
+    regularize!(𝐏, SNR=1000);
+    signalPlusNoiseVar=sum(tr(P) for P in 𝐏);
     output_snr=signalVar/(signalPlusNoiseVar-signalVar)
     # output_snr should be approx. equal to 1000
 
@@ -311,11 +311,11 @@ function regularize!(P::ℍ; SNR=10e3)
     for i in 1:n P[i, i]+=η  end
 end
 
-function regularize!(℘::ℍVector; SNR=10e3)
-    k=length(℘)
-    n=size(℘[1], 1)
-    η=sum(tr(P) for P in ℘)/(SNR*n*k)
-    for l in 1:k, i in 1:n ℘[l][i, i]+=η  end
+function regularize!(𝐏::ℍVector; SNR=10e3)
+    k=length(𝐏)
+    n=size(𝐏[1], 1)
+    η=sum(tr(P) for P in 𝐏)/(SNR*n*k)
+    for l in 1:k, i in 1:n 𝐏[l][i, i]+=η  end
 end
 
 
@@ -367,11 +367,11 @@ trade(P::ℍ)
     using Plots
     k=100
     n=10
-    ℘=randP(n, k, SNR=1000); # 100 real Hermitian matrices
+    𝐏=randP(n, k, SNR=1000); # 100 real Hermitian matrices
     x=Vector{Float64}(undef, k)
     y=Vector{Float64}(undef, k)
     for i=1:k
-        x[i], y[i] = trade(℘[i])
+        x[i], y[i] = trade(𝐏[i])
     end
     x=log.(x./n)
     y=log.(y)

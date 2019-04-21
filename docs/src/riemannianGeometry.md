@@ -41,11 +41,12 @@ spectralEmbedding
 
 ## Means
 ```@docs
+meanP
+meansP
 generalizedMean
 logdet0Mean
 wasMean
 powerMean
-meanP
 ```
 
 ## Tangent Space operations

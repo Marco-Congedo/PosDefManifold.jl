@@ -118,7 +118,7 @@ Ten of them are implemented in **PosDefManifold** and two of them are Riemannian
 - *weighted Fréchet mean* ``G(P,w)`` of a set of ``k>2`` points ``\{P_1,...,P_k\}`` with associated real non-negative weights ``\{w_1,...,w_k\}`` summing up to 1.
 
 !!! note "Nota Bene"
-  In the following, the weights ``\{w_1,...,w_k\}`` are always supposed summing up to 1, superscript ``*`` indicate conjugate transpose (or just transpose if the matrix is real) and if ``a`` is the arclength of a geodesic, we define for convenience ``b=1-a``.
+    In the following, the weights ``\{w_1,...,w_k\}`` are always supposed summing up to 1, superscript ``*`` indicate conjugate transpose (or just transpose if the matrix is real) and if ``a`` is the arclength of a geodesic, we define for convenience ``b=1-a``.
 
 ### Euclidean
 
