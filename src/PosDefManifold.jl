@@ -23,12 +23,14 @@ const maxpos=1e15
 𝚺 = sum          # alias for sum, tab-completition: \bfSigma
 𝛍 = mean         # alias for mean, tab-completition: \bfmu
 ⋱ = Diagonal     # alias for Diagonal, tab-completition: ⋱\ddots
-ℍ = Hermitian   # alias for Hermitian, tab completion \bbH
+ℍ = Hermitian    # alias for Hermitian, tab completion \bbH
 
 # types
 
 RealOrComplex=Union{Real, Complex}
-ℍVector=Vector{ℍ}
+ℍVector=Vector{ℍ}           # vector of Hermitian matrices
+ℍVector₂=Vector{ℍVector}    # vector of vectors of Hermitian matrices
+
 
 @enum Metric begin
     Euclidean    =1  # distance: δ_e; mean: Arithmetic
@@ -64,6 +66,7 @@ export
     #types
     RealOrComplex,
     ℍVector,
+    ℍVector₂,
     Metric,
         Euclidean,
         invEuclidean,
@@ -116,8 +119,9 @@ export
     laplacian,
     laplacianEigenMaps, laplacianEM,
     spectralEmbedding,
-    generalizedMean,
     meanP,
+    meansP,
+    generalizedMean,
     powerMean,
     logdet0Mean,
     wasMean,
