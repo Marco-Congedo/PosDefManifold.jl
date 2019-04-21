@@ -1,6 +1,0 @@
-using LinearAlgebra
-ℍ = Hermitian
-
-
-
-A=Array{ℍ}(undef, k, t, n, n)
