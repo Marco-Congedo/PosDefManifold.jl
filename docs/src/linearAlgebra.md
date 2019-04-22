@@ -49,12 +49,13 @@ ispos
 
 | Function   | Description |
 |:----------:| ----------- |
-| [`colProd`](@ref) | Sum of products of the elements in two columns|
-| [`sumOfSqr`](@ref) | Sum of squares of all elements or of specified columns|
-| [`sumOfSqrDiag`](@ref) | Sum of squares of the diagonal elements|
-| [`colNorm`](@ref) | Eucliden norm of a column|
-| [`sumOfSqrTril`](@ref) | Sum of squares of the lower triangle elements up to a given underdiagonal|
-| [`fidelity`](@ref) | (Quantum) Fidelity of two positive matrices|
+| [`colProd`](@ref) | Sum of products of the elements in two columns |
+| [`sumOfSqr`](@ref) | Sum of squares of all elements or of specified columns |
+| [`sumOfSqrDiag`](@ref) | Sum of squares of the diagonal elements |
+| [`colNorm`](@ref) | Eucliden norm of a column |
+| [`sumOfSqrTril`](@ref) | Sum of squares of the lower triangle elements up to a given underdiagonal |
+| [`tr`](@ref) | Fast trace of the product of two Hermitian matrices |
+| [`fidelity`](@ref) | (Quantum) Fidelity of two positive matrices |
 
 ⋅
 
@@ -64,6 +65,7 @@ sumOfSqr
 sumOfSqrDiag
 colNorm
 sumOfSqrTril
+tr
 fidelity
 ```
 
@@ -112,7 +114,6 @@ mgs
 | [`invsqrt`](@ref)| Principal square root inverse (whitening) of a positive matrix|
 | [`sqr`](@ref)| Square of a positive matrix|
 | [`powerIterations`](@ref), `powIter` | Power method for estimating any number of eigenvectors and associated eigenvalues|
-| [`choL`](@ref) | Lower triangula factor of Cholesky decomposition|
 
 ⋅
 
@@ -126,6 +127,12 @@ powerIterations
 ```
 
 ## Decompositions involving triangular matrices
+
+| Function   | Description |
+|:----------:| ----------- |
+| [`choL`](@ref) | Lower triangula factor of Cholesky decomposition|
+
+⋅
 
 ```@docs
 choL
