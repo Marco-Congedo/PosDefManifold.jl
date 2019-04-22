@@ -187,18 +187,29 @@ end
 #  -------------------------------
 
 """
-    colProd(X::Matrix, j::Int, l::Int)
+    (1) colProd(X::Matrix, j::Int, l::Int)
+    (2) colProd(X::Matrix, j::Int, l::Int)
 
- Given a general matrix ``X``, comprised of real or complex elements,
+ (1) Given a general matrix ``X``, comprised of real or complex elements,
  return the dot product of the ``j^{th}`` and ``l^{th}`` columns, defined as,
 
  ``\\sum_{i=1}^{r} \\big(x_{ij}^*x_{il}\\big), ``
 
  where ``r`` is the number of rows of ``X`` and ``^*`` the complex conjugate.
 
- No range check nor type check is performed. A catch-all method is defined.
+ (2) Given two general matrices ``X`` and ``Y``, comprised of real or complex elements,
+ return the dot product of the ``j^{th}`` column of ``X`` and the ``l^{th}`` column
+ of ``Y``, defined as,
 
-  Arguments ``j`` and ``l`` must be positive integers in range `1:size(X, 2)`.
+ ``\\sum_{i=1}^{r} \\big(x_{ij}^*y_{il}\\big), ``
+
+ where ``r`` is the number of rows of ``X`` and of ``Y`` and ``^*`` the complex conjugate.
+
+ ``X`` and of ``Y`` may have a different number of columns.
+ A catch-all method is defined.
+
+ Arguments ``j`` and ``l`` must be positive integers in range
+ (1) `j,l in 1:size(X, 2)` and (2) `j in 1:size(X, 2), l in 1:size(Y, 2)`.
 
  **See also**: [`normalizeCol!`](@ref), [`colNorm`](@ref).
 
@@ -206,12 +217,17 @@ end
     using PosDefManifold
     X=randn(10, 20)
     p=colProd(X, 1, 3)
+    Y=randn(10, 30)
+    q=colProd(X, Y, 2, 25)
 
 """
 colProd(X::Matrix{T}, j::Int, l::Int) where T<:Real=𝚺(x1*x2 for (x1, x2) in zip(X[:, j], X[:, l]))
 colProd(X::Matrix{T}, j::Int, l::Int) where T<:Complex=𝚺(conj(x1)*x2 for (x1, x2) in zip(X[:, j], X[:, l]))
 colProd(X, j::Int, l::Int)=𝚺(conj(x1)*x2 for (x1, x2) in zip(X[:, j], X[:, l]))
 
+colProd(X::Matrix{T}, Y::Matrix{T}, j::Int, l::Int) where T<:Real=𝚺(x1*x2 for (x1, x2) in zip(X[:, j], Y[:, l]))
+colProd(X::Matrix{T}, Y::Matrix{T}, j::Int, l::Int) where T<:Complex=𝚺(conj(x1)*x2 for (x1, x2) in zip(X[:, j], Y[:, l]))
+colProd(X, Y, j::Int, l::Int)=𝚺(conj(x1)*x2 for (x1, x2) in zip(X[:, j], Y[:, l]))
 
 """
     colNorm(X::Matrix, j::Int)

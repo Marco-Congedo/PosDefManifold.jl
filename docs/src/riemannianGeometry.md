@@ -33,7 +33,7 @@ distance
 ## Graphs and Laplacians
 ```@docs
 distanceSqrMat
-distanceMatrix
+distanceMat
 laplacian
 laplacianEigenMaps
 spectralEmbedding

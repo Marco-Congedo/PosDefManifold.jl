@@ -257,10 +257,10 @@ function distanceSqr(metric::Metric, P::ℍ)
 
     elseif  metric==VonNeumann # see squared distance
             𝓵P=log(P)
-    return  (tr(P*𝓵P) - tr(𝓵P))/2
+    return  real(tr(P*𝓵P) - tr(𝓵P)/2)
 
     elseif  metric==Wasserstein
-    return  tr(P+I) - 2*tr(sqrt(P))
+    return  tr(P) + size(P, 1) - 2*tr(sqrt(P))
 
     else    @warn("in RiemannianGeometryP.distanceSqr function
              (PosDefManifold Package): the chosen 'metric' does not exist")
@@ -291,16 +291,20 @@ function distanceSqr(metric::Metric, P::ℍ, Q::ℍ)
             LQ = choL(Q)
     return  sumOfSqrTril(tril(LP,-1)-tril(LQ,-1), -1) + sumOfSqrDiag(𝑓𝑫(log, LP)-𝑓𝑫(log, LQ))
 
-    elseif  metric==Jeffrey # optimize computing only diagonal elements
-    return  real(tr(inv(Q)*P)/2 + tr(inv(P)*Q)/2) - size(P, 1)
+    elseif  metric==Jeffrey
+            n=size(P, 1)  #using formula tr(Q⁻¹P)/2 + tr(P⁻¹Q)/2 -n
+    return  real( (𝚺(colProd(inv(Q), P, i, i) for i=1:n)/2 + 𝚺(colProd(inv(P), Q, i, i) for i=1:n))/2  ) - n
+    #return  real(tr(inv(Q)*P)/2 + tr(inv(P)*Q)/2) - size(P, 1)
 
     elseif  metric==VonNeumann      # using formula: tr(PlogP - PlogQ + QlogQ - QlogP)/2=
-            R=log(P)-log(Q)         # (tr(P(logP - LoqQ)) + tr(Q(logQ - logP)))/2=
-    return  (tr(P*R) - tr(Q*R))/2     # (tr(P(logP - LoqQ)) - tr(Q(logP - LoqQ)))/2
+            n=size(P, 1)            # (tr(P(logP - LoqQ)) + tr(Q(logQ - logP)))/2=
+            R=log(P)-log(Q)         # (tr(P(logP - LoqQ)) - tr(Q(logP - LoqQ)))/2
+    return  real( 𝚺(colProd(P, R, i, i) for i=1:n) - 𝚺(colProd(Q, R, i, i) for i=1:n) /2)
+    #return  (tr(P*R) - tr(Q*R))/2
 
     elseif  metric==Wasserstein
             P½=sqrt(P)
-    return  tr(P) + tr(Q) -2tr(sqrt(ℍ(P½*Q*P½)))
+    return  tr(P) + tr(Q) -2*real(tr(sqrt(ℍ(P½*Q*P½))))
 
     else    @warn("in RiemannianGeometryP.distanceSqr function
                     (PosDefManifold Package): the chosen 'metric' does not exist")
@@ -362,18 +366,20 @@ function GetdistSqrMat(metric::Metric, 𝐏::ℍVector)
     elseif  metric==Jeffrey
             𝐏𝓲=[inv(P) for P in 𝐏]
             for j in 1:k-1, i in j+1:k # optimize computingonly diagonal elements
-                △[i, j]=0.5*(tr(𝐏𝓲[j]*𝐏[i]) + tr(𝐏𝓲[i]*𝐏[j])) - n   end
+                #△[i, j]=0.5*(tr(𝐏𝓲[j]*𝐏[i]) + tr(𝐏𝓲[i]*𝐏[j])) - n   end
+                △[i, j]=real((𝚺(colProd(𝐏𝓲[j], 𝐏[i], l, l) for l=1:n) + 𝚺(colProd(𝐏𝓲[i], 𝐏[j], l, l) for l=1:n))/2) - n end
 
     elseif  metric==VonNeumann  # using formula: tr( PlogP + QLoqQ - PlogQ - QlogP)
             𝓵𝐏=[log(P)  for P in 𝐏]
             ℒ=[P*log(P) for P in 𝐏]
             for j in 1:k-1, i in j+1:k
-                △[i, j]=(tr(ℒ[i])+tr(ℒ[j])-tr(𝐏[i] * 𝓵𝐏[j])-tr(𝐏[j] * 𝓵𝐏[i]))/2   end
+                #△[i, j]=(tr(ℒ[i])+tr(ℒ[j])-tr(𝐏[i] * 𝓵𝐏[j])-tr(𝐏[j] * 𝓵𝐏[i]))/2   end
+                △[i, j]=(tr(ℒ[i])+tr(ℒ[j])-real(𝚺(colProd(𝐏[i], 𝓵𝐏[j], l, l) for l=1:n)+𝚺(colProd(𝐏[j], 𝓵𝐏[i], l, l) for l=1:n)))/2 end
 
     elseif  metric==Wasserstein
             𝐏½=[sqrt(P) for P in 𝐏]
             for j in 1:k-1, i in j+1:k
-                △[i, j]=tr(𝐏[i]) + tr(𝐏[j]) -2*tr(sqrt(𝐏½[i] * 𝐏[j] * 𝐏½[i]'))     end
+                △[i, j]=tr(𝐏[i]) + tr(𝐏[j]) -2*real(tr(sqrt(ℍ(𝐏½[i] * 𝐏[j] * 𝐏½[i])))) end
 
     elseif  metric in (Euclidean, Fisher, logdet0)
             for j in 1:k-1, i in j+1:k

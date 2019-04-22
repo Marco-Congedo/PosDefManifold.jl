@@ -28,6 +28,7 @@ push!(LOAD_PATH, pwd())
 using LinearAlgebra, Statistics, PosDefManifold
 
 function tests();
+    metrics=[Metric(i) for i in 1:10]
     n=10
     m=20
     P=randP(n)      # an SPD Hermitian matrix
@@ -36,6 +37,8 @@ function tests();
     QC=randP(ComplexF64, n) # a complex Hermitian matrix
     T=randn(m, n)   # a real tall Matrix
     TC=randn(ComplexF64, m, n)   # a complex tall Matrix
+    T2=randn(m, n)   # a real tall Matrix
+    TC2=randn(ComplexF64, m, n)   # a complex tall Matrix
     W=randn(n, m)   # a wide Matrix
     X=randn(n, n)   # a square matrix
     XC=randn(ComplexF64, n, n) # a complex square matrix
@@ -67,9 +70,6 @@ function tests();
     𝐏C=randP(ComplexF64, 10, 4)
     𝐐=randP(10, 4)
     𝐐C=randP(ComplexF64, 10, 4)
-
-
-    metrics=[Metric(i) for i in 1:10]
 
     # functions in LinearAlgebrainP.jl
     print("Testing functions in unit 'LinearAlgebrainP.jl'")
@@ -114,9 +114,14 @@ function tests();
     name="function colProd"; newTest(name)
     j1=1; j2=rand(2:n);
     s=𝚺(T[:, j1].*T[:, j2])
-    colProd(T, j1, j2) ≈ s ? OK() : OH(name*" real case")
+    colProd(T, j1, j2) ≈ s ? OK() : OH(name*" Method 1 real case")
     s=𝚺(conj(TC[:, j1]).*TC[:, j2])
-    colProd(TC, j1, j2) ≈ s ? OK() : OH(name*" complex case")
+    colProd(TC, j1, j2) ≈ s ? OK() : OH(name*" Method 1 complex case")
+    s=𝚺(T[:, j1].*T2[:, j2])
+    colProd(T, T2, j1, j2) ≈ s ? OK() : OH(name*" Method 2 real case")
+    s=𝚺(conj(TC[:, j1]).*TC2[:, j2])
+    colProd(TC, TC2, j1, j2) ≈ s ? OK() : OH(name*" Method 2 complex case")
+
 
     name="function sumOfSqr"; newTest(name)
     sumOfSqr(P_)        ≈ 68    ? OK() : OH(name*" Method 1 real case")
@@ -279,7 +284,7 @@ function tests();
     for m in metrics distance(m, P) end; RUN()
     for m in metrics distance(m, P, Q) end; RUN()
     for m in metrics distance(m, PC) end; RUN()
-    for m in metrics distance(m, PC, QC) end; RUN()
+    for m in metrics d=distance(m, PC, QC); end; RUN()
 
     name="function distanceSqrMat"; newTest(name); SKIP()
 #    k=length(𝐏)
