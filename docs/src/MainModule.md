@@ -61,14 +61,14 @@ end
  Riemannian manipulations are defined for a given *metric* (see [metrics](@ref)).
  An instance for this type is requested as an argument in many functions
  contained in the [riemannianGeometry.jl](@ref) unit in order to specify
- the metric, unless the default metric (Fisher) is sought.
+ the metric.
 
 ```
  ## Example
  # generate a 15x15 symmetric positive definite matrix
  P=randP(15)              
  # distance from P to the identity matrix according to the logdet0 metric
- d=distance(P, logdet0)  
+ d=distance(logdet0, P)  
 ```
 
  If you want to work consistently with a specific metric,
@@ -79,7 +79,7 @@ end
  and then pass `metric` as argument in all your computations,
  *e.g.*, referring to the above example,
 
-    d=distance(P, metric).
+    d=distance(metric, P).
 
 To know what is the current metric, get it as a string as:
 

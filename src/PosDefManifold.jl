@@ -1,5 +1,5 @@
 #    Main Module of the  PosDefManifold Package for julia language
-#    v 0.1.1 - last update 16th of April 2019
+#    v 0.1.2 - last update 22th of April 2019
 #
 #    MIT License
 #    Copyright (c) 2019, Marco Congedo, CNRS, Grenobe, France:
@@ -46,6 +46,7 @@ RealOrComplex=Union{Real, Complex}
     #...
 end
 
+import Statistics.mean
 
 export
     # From this module
@@ -115,12 +116,12 @@ export
     distance,
     geodesic,
     distanceSqrMat, distance²Mat,
-    distanceMatrix, distanceMat,
+    distanceMat,
     laplacian,
     laplacianEigenMaps, laplacianEM,
     spectralEmbedding,
-    meanP,
-    meansP,
+    mean,
+    means,
     generalizedMean,
     powerMean,
     logdet0Mean,
@@ -140,6 +141,6 @@ include("signalProcessing.jl")
 include("riemannianGeometry.jl")
 include("test.jl")
 
-println("\n⭐"," Welcome to the PosDefManifold package", " ⭐\n")
+println("\n⭐ "," Welcome to the PosDefManifold package", " ⭐\n")
 
 end # module
