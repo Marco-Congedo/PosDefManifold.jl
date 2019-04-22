@@ -26,7 +26,6 @@
 # -----------------------------------------------------------
 _attributes(𝐏::ℍVector)=( size(𝐏[1], 1), length(𝐏))
 
-function _doNothing end
 
 # Given a non-negative weight vector normalize the weights so as to sum up to 1
 # if ✓w == true and if they are not already normalized
@@ -709,7 +708,8 @@ function mean(𝐏::ℍVector, metric::Metric=Fisher;    w::Vector=[], ✓w=true
 
     # closed-form expressions
     n, k = _attributes(𝐏)
-    isempty(w) ? _doNothing : v = _getWeights(w, ✓w, k)
+    isempty(w) ? nothing : v = _getWeights(w, ✓w, k)
+    
     if  metric == Euclidean
         if isempty(w)   return ℍ(𝛍(𝐏))
         else            return ℍ(𝚺(ω*P for (ω, P) in zip(v, 𝐏)))
