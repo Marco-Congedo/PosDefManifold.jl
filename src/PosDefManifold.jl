@@ -46,7 +46,8 @@ RealOrComplex=Union{Real, Complex}
     #...
 end
 
-import Statistics.mean
+import  Statistics.mean,
+        LinearAlgebra.tr
 
 export
     # From this module
