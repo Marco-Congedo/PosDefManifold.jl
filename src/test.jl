@@ -33,6 +33,7 @@ function tests();
     P=randP(n)      # an SPD Hermitian matrix
     Q=randP(n)      # an SPD Hermitian matrix
     PC=randP(ComplexF64, n) # a complex Hermitian matrix
+    QC=randP(ComplexF64, n) # a complex Hermitian matrix
     T=randn(m, n)   # a real tall Matrix
     TC=randn(ComplexF64, m, n)   # a complex tall Matrix
     W=randn(n, m)   # a wide Matrix
@@ -61,6 +62,14 @@ function tests();
     PC_small=randP(ComplexF64, 3)
 
     A3x2=[4. 3.; 2. 5.; 1. 2.]
+
+    𝐏=randP(10, 4)
+    𝐏C=randP(ComplexF64, 10, 4)
+    𝐐=randP(10, 4)
+    𝐐C=randP(ComplexF64, 10, 4)
+
+
+    metrics=[Metric(i) for i in 1:10]
 
     # functions in LinearAlgebrainP.jl
     print("Testing functions in unit 'LinearAlgebrainP.jl'")
@@ -136,8 +145,11 @@ function tests();
     s=sumOfSqr(A)-abs2(A[1, 2])
     sumOfSqrTril(A, 0)≈ s ? OK() : OH(name*" Method 1 complex case")
 
-    name="function fidelity"; newTest(name); SKIP()
-    f=fidelity(P, Q)
+    name="function fidelity"; newTest(name);
+    # Test compilation only
+    f=fidelity(P, Q); RUN()
+    f=fidelity(PC, QC); RUN()
+
 
     ## 4. Diagonal functions of matrices
 
@@ -164,8 +176,9 @@ function tests();
     U*Λ*U'≈PC ? OK() : OH(name*" Complex Input")
 
 
-    name="function spectralFunctions"; newTest(name); SKIP()
-    Q=spectralFunctions(P, x->x+1)
+    name="function spectralFunctions"; newTest(name);
+    spectralFunctions(P, x->x+1); RUN()
+    spectralFunctions(PC, abs2); RUN()
 
     name="function pow"; newTest(name)
     P½, P½ⁱ=pow(P_, 0.5, -0.5)
@@ -199,11 +212,11 @@ function tests();
     println(" ")
     print("Testing functions in unit 'SignalProcessinginP.jl'")
 
-    name="function randλ"; newTest(name); SKIP()
-    λ=randλ(10)
+    name="function randλ"; newTest(name);
+    randλ(10); RUN()
 
-    name="function randΛ"; newTest(name); SKIP()
-    Λ=randΛ(10)
+    name="function randΛ"; newTest(name);
+    randΛ(10); RUN()
 
     name="function randU"; newTest(name);
     U=randU(10)
@@ -211,7 +224,9 @@ function tests();
     U=randU(ComplexF64, 10)
     U'*U≈I ? OK() : OH(name*" Complex Input")
 
-    name="function randP"; newTest(name); SKIP()
+    name="function randP"; newTest(name);
+    randP(3); RUN()
+    randP(ComplexF64, 3); RUN()
 
     name="function regularize!"; newTest(name)
     signalVar=tr(P)
@@ -236,75 +251,167 @@ function tests();
     signalPlusNoiseVar=𝚺(tr(P) for P in 𝐏)
     signalVar/(signalPlusNoiseVar-signalVar) ≈ 10 ? OK() : OH(name*" Real Input Method 2")
 
-    name="function gram"; newTest(name); SKIP()
-    gramMat=gram(T)
+    name="function gram"; newTest(name);
+    gram(T); RUN()
+    gram(W); RUN()
 
-    name="function trade"; newTest(name); SKIP()
-    trade1, trade2=trade(P)
+    name="function trade"; newTest(name);
+    trade(P); RUN()
+    trade(PC); RUN()
+
 
     # functions in RiemannianGeometryinP.jl
     println(" ")
     print("Testing functions in unit 'RiemannianGeometryinP.jl'")
 
-    name="function geodesic"; newTest(name); SKIP()
-    geodesic(P, Q, 0.5, Euclidean)
+    name="function geodesic"; newTest(name);
+    (geodesic(m, P, Q, 0.5) for m in metrics if m≠9); RUN()
+    (geodesic(m, PC, QC, 0.5) for m in metrics if m≠9); RUN()
 
-    name="function distanceSqr"; newTest(name); SKIP()
-    d=distanceSqr(P, Wasserstein)
+    name="function distanceSqr"; newTest(name);
+    for m in metrics distanceSqr(m, P) end; RUN()
+    for m in metrics distanceSqr(m, P, Q) end; RUN()
+    for m in metrics distanceSqr(m, PC) end; RUN()
+    for m in metrics distanceSqr(m, PC, QC) end; RUN()
 
-    name="function distance"; newTest(name); SKIP()
-    d=distance(P, logdet0)
+    name="function distance"; newTest(name);
+    # since it calls distanceSqr just check the call works
+    for m in metrics distance(m, P) end; RUN()
+    for m in metrics distance(m, P, Q) end; RUN()
+    for m in metrics distance(m, PC) end; RUN()
+    for m in metrics distance(m, PC, QC) end; RUN()
 
-    name="function distanceSqrMatrix"; newTest(name); SKIP()
+    name="function distanceSqrMat"; newTest(name); SKIP()
+#    k=length(𝐏)
+#    for m in metrics
+#            D=distanceSqrMat(m, 𝐏)
+#            manualD=Matrix{Float64}(undef, k, k)
+#            for j=1:k, i=1:k manualD[i, j]=distanceSqr(m, 𝐏[i], 𝐏[j]) end
+#            manualD=[distanceSqr(m, 𝐏[i], 𝐏[j]) for j=1:k, i=1:k]
+#            manualD≈D ? OK() : OH(name*" Real Input, metric "*string(m))
+#    end
 
-    name="function distanceMatrix"; newTest(name); SKIP()
 
-    name="function laplacian"; newTest(name); SKIP()
+    #k=length(𝐏C)
+    #for m in metrics
+        #    D=distanceSqrMat(m, 𝐏C)
+         #   manualD=Matrix{Float64}(undef, k, k)
+        #    for j=1:k, i=1:k manualD[i, j]=distanceSqr(m, 𝐏C[i], 𝐏C[j]) end
+        #    #manualD=[distanceSqr(m, 𝐏C[i], 𝐏C[j]) for j=1:k, i=1:k]
+        #    manualD≈D ? OK() : OH(name*" Complex Input, metric "*string(m))
+    #end
 
-    name="function laplacianEigenMaps"; newTest(name); SKIP()
+    name="function distanceMat"; newTest(name); SKIP()
 
-    name="function spectralEmbedding"; newTest(name); SKIP()
+    name="function laplacian"; newTest(name);
+    Dsqr=distanceSqrMat(Euclidean, 𝐏)
+    lap=laplacian(Dsqr); RUN()
 
+    name="function laplacianEigenMaps"; newTest(name);
+    laplacianEM(lap, 2); RUN()
+
+    name="function spectralEmbedding"; newTest(name);
+    spectralEmbedding(Euclidean, 𝐏, 2); RUN()
+
+    name="function mean"; newTest(name);
+    (mean(m, P, Q) for m in metrics); RUN()
+    (mean(m, 𝐏) for m in metrics); RUN()
+    (mean(m, PC, QC) for m in metrics); RUN()
+    (mean(m, 𝐏C) for m in metrics); RUN()
+
+    name="function means"; newTest(name);
+    means(logEuclidean, ℍVector₂([𝐏, 𝐐])); RUN()
+    means(logEuclidean, ℍVector₂([𝐏C, 𝐐C])); RUN()
 
     name="function generalizedMean"; newTest(name);
     𝐏=ℍVector([P_, Q_])
     w=[0.2, 0.8]
     p=0.5
     ℍ( (P_^p+Q_^p)/2) ^(1/p) ≈ generalizedMean(𝐏, p) ? OK() : OH(name*" Real Input 1")
-    ℍ( (ℍ(0.2*P_^p)+ℍ(0.8*Q_^p))  )^(1/p) ≈ generalizedMean(𝐏, p, w=w, ✓w=false) ? OK() : OH(name*" Real Input 2")
+    ℍ( (ℍ(0.2*P_^p)+ℍ(0.8*Q_^p))  )^(1/p) ≈ generalizedMean(𝐏, p; w=w, ✓w=false) ? OK() : OH(name*" Real Input 2")
     w=w.*2.0
-    ℍ( (ℍ(0.2*P_^p)+ℍ(0.8*Q_^p))  )^(1/p) ≈ generalizedMean(𝐏, p, w=w) ? OK() : OH(name*" Real Input 3")
-    ℍ( (ℍ(0.2*P_^p)+ℍ(0.8*Q_^p))  )^(1/p) ≉ generalizedMean(𝐏, p, w=w, ✓w=false) ? OK() : OH(name*" Real Input 4")
-    ℍ( (ℍ(0.4*P_^p)+ℍ(1.6*Q_^p))  )^(1/p) ≈ generalizedMean(𝐏, p, w=w, ✓w=false) ? OK() : OH(name*" Real Input 5")
+    ℍ( (ℍ(0.2*P_^p)+ℍ(0.8*Q_^p))  )^(1/p) ≈ generalizedMean(𝐏, p; w=w) ? OK() : OH(name*" Real Input 3")
+    ℍ( (ℍ(0.2*P_^p)+ℍ(0.8*Q_^p))  )^(1/p) ≉ generalizedMean(𝐏, p; w=w, ✓w=false) ? OK() : OH(name*" Real Input 4")
+    ℍ( (ℍ(0.4*P_^p)+ℍ(1.6*Q_^p))  )^(1/p) ≈ generalizedMean(𝐏, p; w=w, ✓w=false) ? OK() : OH(name*" Real Input 5")
     𝐏=ℍVector([PC_, QC_])
     w=[0.2, 0.8]
     ℍ( (PC_^p+QC_^p)/2) ^(1/p) ≈ generalizedMean(𝐏, p) ? OK() : OH(name*" Complex Input 1")
-    ℍ( (ℍ(0.2*PC_^p)+ℍ(0.8*QC_^p))  )^(1/p) ≈ generalizedMean(𝐏, p, w=w, ✓w=false) ? OK() : OH(name*" Complex Input 2")
+    ℍ( (ℍ(0.2*PC_^p)+ℍ(0.8*QC_^p))  )^(1/p) ≈ generalizedMean(𝐏, p; w=w, ✓w=false) ? OK() : OH(name*" Complex Input 2")
     w=w.*2.0
-    ℍ( (ℍ(0.2*PC_^p)+ℍ(0.8*QC_^p))  )^(1/p) ≈ generalizedMean(𝐏, p, w=w) ? OK() : OH(name*" Complex Input 3")
-    ℍ( (ℍ(0.2*PC_^p)+ℍ(0.8*QC_^p))  )^(1/p) ≉ generalizedMean(𝐏, p, w=w, ✓w=false) ? OK() : OH(name*" Complex Input 4")
-    ℍ( (ℍ(0.4*PC_^p)+ℍ(1.6*QC_^p))  )^(1/p) ≈ generalizedMean(𝐏, p, w=w, ✓w=false) ? OK() : OH(name*" Complex Input 5")
+    ℍ( (ℍ(0.2*PC_^p)+ℍ(0.8*QC_^p))  )^(1/p) ≈ generalizedMean(𝐏, p; w=w) ? OK() : OH(name*" Complex Input 3")
+    ℍ( (ℍ(0.2*PC_^p)+ℍ(0.8*QC_^p))  )^(1/p) ≉ generalizedMean(𝐏, p; w=w, ✓w=false) ? OK() : OH(name*" Complex Input 4")
+    ℍ( (ℍ(0.4*PC_^p)+ℍ(1.6*QC_^p))  )^(1/p) ≈ generalizedMean(𝐏, p; w=w, ✓w=false) ? OK() : OH(name*" Complex Input 5")
 
 
     name="function logdet0Mean"; newTest(name);
-    𝐏=ℍVector([P_, Q_])
     w=[0.5, 0.5]
     P½, P½ⁱ=pow(P_, 0.5, -0.5)
     GM=P½*(P½ⁱ*Q_*P½ⁱ)^0.5*P½  # Fisher mean for k=2
-    ldG, iter, conv = logdet0Mean(𝐏) # logdet0 mean for k=2
+    ldG, iter, conv = logdet0Mean(ℍVector([P_, Q_])) # logdet0 mean for k=2
     GM ≈ ldG ? OK() : OH(name*" Real Input 1")
-    ldG, iter, conv = logdet0Mean(𝐏, w=w) # weighted logdet0 mean for k=2
+    ldG, iter, conv = logdet0Mean(ℍVector([P_, Q_]); w=w) # weighted logdet0 mean for k=2
     GM ≈ ldG ? OK() : OH(name*" Real Input 2")
-    𝐏=𝐏=ℍVector([PC_, QC_])
     P½, P½ⁱ=pow(PC_, 0.5, -0.5)
     GM=P½*(P½ⁱ*QC_*P½ⁱ)^0.5*P½  # Fisher mean for k=2
-    ldG, iter, conv = logdet0Mean(𝐏) # logdet0 mean for k=2
+    ldG, iter, conv = logdet0Mean(ℍVector([PC_, QC_])) # logdet0 mean for k=2
     GM ≈ ldG ? OK() : OH(name*" Complex Input 1")
-    ldG, iter, conv = logdet0Mean(𝐏, w=w) # weighted logdet0 mean for k=2
+    ldG, iter, conv = logdet0Mean(ℍVector([PC_, QC_]); w=w) # weighted logdet0 mean for k=2
     GM ≈ ldG ? OK() : OH(name*" Complex Input 2")
 
+    name="function wasMean"; newTest(name);
+    wasMean(ℍVector([P_, Q_])); RUN()
+    wasMean(ℍVector([PC_, QC_])); RUN()
 
-end
+    name="function powerMean"; newTest(name);
+    powerMean(ℍVector([P_, Q_]), 0.5); RUN()
+    powerMean(ℍVector([PC_, QC_]), 0.5); RUN()
+
+    name="function logMap"; newTest(name);
+    logMap(Fisher, P, Q); RUN()
+    logMap(Fisher, PC, QC); RUN()
+
+    name="function expMap"; newTest(name);
+    expMap(Fisher, P, Q); RUN()
+    expMap(Fisher, PC, QC); RUN()
+
+    G=mean(Fisher, P, Q)
+    S=logMap(Fisher, P, G)
+    H=expMap(Fisher, S, G)
+    if P≉H
+        println("")
+        @error("either logMap or expMap or both do not give the expected output in the real case")
+    end
+
+    G=mean(Fisher, PC, QC)
+    S=logMap(Fisher, PC, G)
+    H=expMap(Fisher, S, G)
+    if PC≉H
+        println("")
+        @error("either logMap or expMap or both do not give the expected output in the complex case")
+    end
+
+    name="function vecP"; newTest(name);
+    v=vecP(P); RUN()
+    vC=vecP(PC); RUN()
+
+    name="function matP"; newTest(name);
+    Pnew=matP(v); RUN()
+    PCnew=matP(vC); RUN()
+
+    if P≉Pnew
+        println("")
+        @warn("either vecP or matP or both do not give the expected output in the real case")
+    end
+
+    if PC≉PCnew
+        println("")
+        @warn("either vecP or matP or both do not give the expected output in the complex case")
+    end
+
+    name="function procrustes"; newTest(name);
+    procrustes(P, Q); RUN()
+
+end # function tests
 
 global failed=[]
 
@@ -315,6 +422,8 @@ function newTest(name::String)
 end
 
 OK()=print("⭐ ")
+
+RUN()=print("▶ ")
 
 function OH(name::String)
     print("⛔ ")

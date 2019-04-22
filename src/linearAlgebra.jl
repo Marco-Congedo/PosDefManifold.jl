@@ -99,12 +99,12 @@ tr1(P) = P/tr(P)
   ## Examples
     using PosDefManifold
     X=randn(10, 20)
-    normalizeCol!(X, 2)                 # (1) normalize columns 2
-    normalizeCol!(X, 2, 10.0)           # (2) divide columns 2 by 10.0
-    normalizeCol!(X, 2:4)               # (3) normalize columns 2 to 4
+    normalizeCol!(X, 2)                  # (1) normalize columns 2
+    normalizeCol!(X, 2, 10.0)            # (2) divide columns 2 by 10.0
+    normalizeCol!(X, 2:4)                # (3) normalize columns 2 to 4
     X=randn(ComplexF64, 10, 20)
-    normalizeCol!(X, 3)                 # (1) normalize columns 3
-    normalizeCol!(X, 3:6, (2.0 + 0.5im))# (4) divide columns 3 to 5 by (2.0 + 0.5im)
+    normalizeCol!(X, 3)                  # (1) normalize columns 3
+    normalizeCol!(X, 3:6, (2.0 + 0.5im)) # (4) divide columns 3 to 5 by (2.0 + 0.5im)
 
 """
 function normalizeCol!(X::Matrix{T}, j::Int) where T<:RealOrComplex
@@ -264,9 +264,9 @@ colNorm(X, j::Int) = √sumOfSqr(X, j)
  ## Examples
     using PosDefManifold
     X=randn(10, 20)
-    sum²=sumOfSqr(X)        # (1) sum of squares of all elements
-    sum²=sumOfSqr(X, 1)     # (2) sum of squares of elements in column 1
-    sum²=sumOfSqr(X, 2:4)   # (3) sum of squares of elements in column 2 to 4
+    sum2=sumOfSqr(X)        # (1) sum of squares of all elements
+    sum2=sumOfSqr(X, 1)     # (2) sum of squares of elements in column 1
+    sum2=sumOfSqr(X, 2:4)   # (3) sum of squares of elements in column 2 to 4
 
 """
 sumOfSqr(A::Array{T}) where T<:RealOrComplex = 𝚺(abs2(a) for a in A)
@@ -296,8 +296,8 @@ sumOfSqr(X, range::UnitRange) = 𝚺(sumOfSqr(X, j) for j in range)
  ## Examples
     using LinearAlgebra, PosDefManifold
     X=randn(10, 20)
-    sumDiag²=sumOfSqrDiag(X) # (1)
-    sumDiag²=sumOfSqrDiag(Diagonal(X)) # (2)
+    sumDiag2=sumOfSqrDiag(X) # (1)
+    sumDiag2=sumOfSqrDiag(Diagonal(X)) # (2)
 
 """
 sumOfSqrDiag(X::Matrix{T}) where T<:RealOrComplex = 𝚺(abs2(X[i, i]) for i=1:minimum(size(X)))

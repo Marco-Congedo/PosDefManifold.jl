@@ -26,7 +26,6 @@
 # -----------------------------------------------------------
 _attributes(𝐏::ℍVector)=( size(𝐏[1], 1), length(𝐏))
 
-
 # Given a non-negative weight vector normalize the weights so as to sum up to 1
 # if ✓w == true and if they are not already normalized
 function _getWeights(w::Vector, ✓w::Bool, k::Int)
@@ -44,12 +43,11 @@ end
 # -----------------------------------------------------------
 
 """
-    geodesic(P::ℍ, Q::ℍ, a::Real, metric::Metric=Fisher)
+    geodesic(metric::Metric, P::ℍ, Q::ℍ, a::Real)
 
  Move along the [geodesic](@ref) from point ``P`` to point ``Q``
  (two positive definite matrices) with *arclegth* ``0<=a<=1``,
  using the specified metric, of type [Metric::Enumerated type](@ref).
- By default de [Fisher](@ref) metric is adopted.
 
  For all metrics,
  - with ``a=0`` we stay at ``P``,
@@ -99,15 +97,15 @@ end
 
  ## Examples
     using PosDefManifold
-    P=randP(10);
-    Q=randP(10);
+    P=randP(10)
+    Q=randP(10)
     # Wasserstein mean
-    M=geodesic(P, Q, 0.5, Wasserstein)
+    M=geodesic(Wasserstein, P, Q, 0.5)
     # extrapolate suing the Fisher metric
-    E=geodesic(P, Q, 2)
+    E=geodesic(Fisher, P, Q, 2)
 
 """
-function geodesic(P::ℍ, Q::ℍ, a::Real, metric::Metric=Fisher)
+function geodesic(metric::Metric, P::ℍ, Q::ℍ, a::Real)
     if a ≈ 0 return P end
     if a ≈ 1 return Q end
     b = 1-a
@@ -126,7 +124,7 @@ function geodesic(P::ℍ, Q::ℍ, a::Real, metric::Metric=Fisher)
     return  ℍ( P½ * (P⁻½ * Q * P⁻½)^a * P½ )
 
     elseif  metric in (logdet0, Jeffrey)
-    return  mean(ℍVector([P, Q]), metric, w=[b, a], ✓w=false)
+    return  mean(metric, ℍVector([P, Q]), w=[b, a], ✓w=false)
 
     elseif  metric==VonNeumann
             @warn("An expression for the geodesic is not available for the Von neumann metric")
@@ -136,7 +134,9 @@ function geodesic(P::ℍ, Q::ℍ, a::Real, metric::Metric=Fisher)
     return  ℍ(T*T')
 
     elseif  metric==logCholesky
-            LP=choL(P); LQ=choL(Q); slLP=tril(LP,-1)
+            LP=choL(P)
+            LQ=choL(Q)
+            slLP=tril(LP,-1)
             T=slLP+a*(tril(LQ,-1)-slLP)+𝑓𝑫(x->x, LP)*exp(a*(𝑓𝑫(log, LQ)-𝑓𝑫(log, LP)))
     return  ℍ(T*T')
 
@@ -158,8 +158,8 @@ end # function
 # -----------------------------------------------------------
 
 """
-    (1) distanceSqr(P::ℍ, metric::Metric=Fisher
-    (2) distanceSqr(P::ℍ, Q::ℍ, metric::Metric=Fisher)
+    (1) distanceSqr(metric::Metric, P::ℍ)
+    (2) distanceSqr(metric::Metric, P::ℍ, Q::ℍ)
 
  **alias**: `distance²`
 
@@ -170,7 +170,7 @@ end # function
  positive definite matrices ``P`` and ``Q``. See [distance](@ref).
 
  In both cases the distance function ``δ`` is induced by the argument `metric` of type
- [Metric::Enumerated type](@ref). By default, the [Fisher](@ref) metric is adopted.
+ [Metric::Enumerated type](@ref).
 
  ``P`` in (1) and ``P``, ``Q`` in (2) must be flagged by julia as `Hermitian`.
  See [typecasting matrices](@ref).
@@ -216,22 +216,22 @@ end # function
 
  ## Examples (1)
     using PosDefManifold
-    P=randP(10);
-    d=distanceSqr(P, Wasserstein)
-    e=distanceSqr(P) # uses the default metric (Fisher)
+    P=randP(10)
+    d=distanceSqr(Wasserstein, P)
+    e=distanceSqr(Fisher, P)
     metric=Metric(Int(logdet0)) # or metric=logdet0
     s=string(metric) # check what is the current metric
-    f=distance²(P, metric) #using the alias distance²
+    f=distance²(metric, P) #using the alias distance²
 
  ## Examples (2)
     using PosDefManifold
-    P=randP(10);
-    Q=randP(10);
-    d=distanceSqr(P, Q, Wasserstein)
-    e=distance²(P, Q, Jeffrey)
+    P=randP(10)
+    Q=randP(10)
+    d=distanceSqr(logEuclidean, P, Q)
+    e=distance²(Jeffrey, P, Q)
 
 """
-function distanceSqr(P::ℍ, metric::Metric=Fisher)
+function distanceSqr(metric::Metric, P::ℍ)
 
     if      metric==Euclidean
     return  sumOfSqr(P-I)
@@ -267,7 +267,7 @@ function distanceSqr(P::ℍ, metric::Metric=Fisher)
     end # if
 end #function
 
-function distanceSqr(P::ℍ, Q::ℍ, metric::Metric=Fisher)
+function distanceSqr(metric::Metric, P::ℍ, Q::ℍ)
     if      metric==Euclidean
     return  sumOfSqr(P - Q)
 
@@ -291,15 +291,15 @@ function distanceSqr(P::ℍ, Q::ℍ, metric::Metric=Fisher)
             LQ = choL(Q)
     return  sumOfSqrTril(tril(LP,-1)-tril(LQ,-1), -1) + sumOfSqrDiag(𝑓𝑫(log, LP)-𝑓𝑫(log, LQ))
 
-    elseif  metric==Jeffrey
+    elseif  metric==Jeffrey # optimize computing only diagonal elements
     return  real(tr(inv(Q)*P)/2 + tr(inv(P)*Q)/2) - size(P, 1)
 
     elseif  metric==VonNeumann      # using formula: tr(PlogP - PlogQ + QlogQ - QlogP)/2=
-            R=log(P)-log(Q);         # (tr(P(logP - LoqQ)) + tr(Q(logQ - logP)))/2=
+            R=log(P)-log(Q)         # (tr(P(logP - LoqQ)) + tr(Q(logQ - logP)))/2=
     return  (tr(P*R) - tr(Q*R))/2     # (tr(P(logP - LoqQ)) - tr(Q(logP - LoqQ)))/2
 
     elseif  metric==Wasserstein
-            P½=sqrt(P);
+            P½=sqrt(P)
     return  tr(P) + tr(Q) -2tr(sqrt(ℍ(P½*Q*P½)))
 
     else    @warn("in RiemannianGeometryP.distanceSqr function
@@ -310,8 +310,8 @@ distance²=distanceSqr # alias
 
 
 """
-    (1) distance(P::ℍ, metric::Metric=Fisher
-    (2) distance(P::ℍ, Q::ℍ, metric::Metric=Fisher)
+    (1) distance(metric::Metric, P::ℍ)
+    (2) distance(metric::Metric, P::ℍ, Q::ℍ)
 
  (1) Return ``δ(P, I)``, the *distance* between positive definite matrix ``P`` and
  the identity matrix.
@@ -324,8 +324,8 @@ distance²=distanceSqr # alias
 
  **See also**: [`distanceMatrix`](@ref).
 """
-distance(P::ℍ, metric::Metric=Fisher) = √(distanceSqr(P, metric))
-distance(P::ℍ, Q::ℍ, metric::Metric=Fisher) = √(distanceSqr(P, Q, metric))
+distance(metric::Metric, P::ℍ) = √(distanceSqr(metric, P))
+distance(metric::Metric, P::ℍ, Q::ℍ) = √(distanceSqr(metric, P, Q))
 
 
 
@@ -334,7 +334,7 @@ distance(P::ℍ, Q::ℍ, metric::Metric=Fisher) = √(distanceSqr(P, Q, metric))
 # -----------------------------------------------------------
 
 # Internal Function for fast computation of inter_distance matrices
-function GetdistSqrMat(𝐏::ℍVector, metric::Metric=Fisher)
+function GetdistSqrMat(metric::Metric, 𝐏::ℍVector)
     n, k=_attributes(𝐏)
     △=zeros(k,  k)
 
@@ -361,8 +361,8 @@ function GetdistSqrMat(𝐏::ℍVector, metric::Metric=Fisher)
 
     elseif  metric==Jeffrey
             𝐏𝓲=[inv(P) for P in 𝐏]
-            for j in 1:k-1, i in j+1:k
-                △[i, j]=tr(𝐏𝓲[j]*𝐏[i])/2 + tr(𝐏𝓲[i]*𝐏[j])/2 - n   end
+            for j in 1:k-1, i in j+1:k # optimize computingonly diagonal elements
+                △[i, j]=0.5*(tr(𝐏𝓲[j]*𝐏[i]) + tr(𝐏𝓲[i]*𝐏[j])) - n   end
 
     elseif  metric==VonNeumann  # using formula: tr( PlogP + QLoqQ - PlogQ - QlogP)
             𝓵𝐏=[log(P)  for P in 𝐏]
@@ -377,7 +377,7 @@ function GetdistSqrMat(𝐏::ℍVector, metric::Metric=Fisher)
 
     elseif  metric in (Euclidean, Fisher, logdet0)
             for j in 1:k-1, i in j+1:k
-                △[i, j]=distanceSqr(𝐏[i], 𝐏[j], metric)  end
+                △[i, j]=distanceSqr(metric, 𝐏[i], 𝐏[j])  end
 
     else    @warn("in RiemannianGeometryP.distanceSqrMat or .distanceMatrix function
                          (PosDefManifold Package): the chosen 'metric' does not exist")
@@ -390,7 +390,7 @@ end #function
 
 
 """
-    distanceSqrMat(𝐏::ℍVector, metric::Metric=Fisher)
+    distanceSqrMat(metric::Metric, 𝐏::ℍVector)
 
  **alias**: `distance²Mat`
 
@@ -401,7 +401,6 @@ end #function
  This is the matrix of all *squared inter-distances* (zero on diagonal), using the
  specified `metric`, of type [Metric::Enumerated type](@ref),
  giving rise to distance function ``δ``. See [`distanceSqr`](@ref).
- By default, the [Fisher](@ref) metric is adopted.
 
  **See**: [distance](@ref).
 
@@ -410,21 +409,20 @@ end #function
  ## Examples
     using PosDefManifold
     # Generate a set of 4 random 10x10 SPD matrices
-    𝐏=randP(10, 4)
+    Pset=randP(10, 4) # or, using unicode: 𝐏=randP(10, 4)
     # Compute the squared inter-distance matrix according to the log Euclidean metric.
     # This is much faster as compared to the Fisher metric and in general
     # it is a good approximation.
-    Δ²=distanceSqrMat(𝐏, logEuclidean)
+    Dsqr=distanceSqrMat(logEuclidean, Pset)
+    # or, using unicode: Δ²=distanceSqrMat(logEuclidean, 𝐏)
 
 """
-distanceSqrMat(𝐏::ℍVector, metric::Metric=Fisher)=ℍ(GetdistSqrMat(𝐏, metric), :L)
+distanceSqrMat(metric::Metric, 𝐏::ℍVector)=ℍ(GetdistSqrMat(metric, 𝐏), :L)
 distance²Mat=distanceSqrMat
 
 
 """
-    distanceMatrix(𝐏::ℍVector, metric::Metric=Fisher)
-
- **alias**: `distanceMat`
+    distanceMatrix(metric::Metric, 𝐏::ℍVector)
 
  Given a 1d array `𝐏` of ``k`` positive definite matrices
  ``{P_1,...,P_k}`` of [ℍVector type](@ref), create the ``k⋅k`` real `Hermitian`
@@ -434,7 +432,6 @@ distance²Mat=distanceSqrMat
  This is the matrix of all *inter-distances* (zero on diagonal), using the
  specified `metric`, of type [Metric::Enumerated type](@ref),
  giving rise to distance ``δ``. See [`distance`](@ref).
- By default, the [Fisher](@ref) metric is adopted.
 
  The elements of this matrix are the square root of
  [`distanceSqrMat`](@ref).
@@ -444,11 +441,11 @@ distance²Mat=distanceSqrMat
  ## Examples
     using PosDefManifold
     # Generate a set of 4 random 10x10 SPD matrices
-    𝐏=randP(10, 4)
-    Δ=distanceMatrix(𝐏)
+    Pset=randP(10, 4) # or, using unicode: 𝐏=randP(10, 4)
+    D=distanceMat(Fisher, Pset)
+    # or, using unicode: Δ=distanceMatrix(Fisher, 𝐏)
 """
-distanceMatrix(𝐏::ℍVector, metric::Metric=Fisher)=ℍ(sqrt.(GetdistSqrMat(𝐏, metric)), :L)
-distanceMat=distanceMatrix
+distanceMat(metric::Metric, 𝐏::ℍVector)=ℍ(sqrt.(GetdistSqrMat(metric, 𝐏)), :L)
 
 
 """
@@ -483,9 +480,9 @@ distanceMat=distanceMatrix
  ## Examples
     using PosDefManifold
     # Generate a set of 4 random 10x10 SPD matrices
-    𝐏=randP(10, 4)
-    Δ²=distanceSqrMat(𝐏)
-    Ω=laplacian(Δ²) # or, equivalently, Ω=RΩ(Δ)
+    Pset=randP(10, 4) # or, using unicode: 𝐏=randP(10, 4)
+    Dsqr=distanceSqrMat(Fisher, Pset) # or: Δ²=distanceSqrMat(Fisher, 𝐏)
+    lap=laplacian(Dsqr) # or: Ω=laplacian(Δ²)
 
  """
 function laplacian(Δ²)
@@ -501,7 +498,8 @@ end
 
 
 """
-    laplacianEigenMaps(Ω, q::Int; <tol=1e-9, maxiter=300, ⍰=false>)
+    laplacianEigenMaps(Ω, q::Int;
+                      <tol=1e-9, maxiter=300, ⍰=false>)
 
  **alias**: `laplacianEM`
 
@@ -515,10 +513,10 @@ end
  allowing calling this function even for big Laplacian matrices.
 
  Return the 4-tuple ``(Λ, U, iterations, convergence)``, where:
- - ``Λ`` is a ``q⋅q`` diagonal matrix holding on diagonal the eigenvalues corresponding to the ``q`` dimensions of the Laplacian eigen maps;
- - ``U`` holds in columns the eigen maps, that is, the ``q`` eigenvectors
- - ``iterations`` is the number of iterations executed by the power method;
- - ``convergence`` is the convergence attained by the power method;
+ - ``Λ`` is a ``q⋅q`` diagonal matrix holding on diagonal the eigenvalues corresponding to the ``q`` dimensions of the Laplacian eigen maps,
+ - ``U`` holds in columns the eigen maps, that is, the ``q`` eigenvectors,
+ - ``iterations`` is the number of iterations executed by the power method,
+ - ``convergence`` is the convergence attained by the power method.
 
  The eigenvectors of ``U`` holds the coordinates of the points in a
  low-dimension Euclidean space (typically two or three).
@@ -534,11 +532,11 @@ end
 
 
  **Arguments**: `(Ω, q; <tol=1e-9, maxiter=300, ⍰=false>)`:
- - ``Ω`` is a normalized Laplacian obtained by the [`laplacian`](@ref) function;
+ - ``Ω`` is a normalized Laplacian obtained by the [`laplacian`](@ref) function,
  - ``q`` is the dimension of the Laplacian eigen maps;
  - The following are *<optional keyword arguments>* for the power method iterative algorithm:
-   * `tol` is the tolerance for convergence;
-   * `maxiter` is the maximum number of iterations allowed;
+   * `tol` is the tolerance for convergence,
+   * `maxiter` is the maximum number of iterations allowed,
    * if `⍰` is true, the convergence at all iterations will be printed.
 
  **See also**: [`distanceSqrMat`](@ref), [`laplacian`](@ref), [`spectralEmbedding`](@ref).
@@ -546,25 +544,26 @@ end
  ## Examples
     using PosDefManifold
     # Generate a set of 4 random 10x10 SPD matrices
-    𝐏=randP(10, 4)
-    evalues, maps, iterations, convergence=laplacianEM(Ω, 2)
-    evalues, maps, iterations, convergence=laplacianEM(Ω, 2, maxiter=500)
-    evalues, maps, iterations, convergence=laplacianEM(Ω, 2, ⍰=true)
+    Pset=randP(10, 4) # or, using unicode: 𝐏=randP(10, 4)
+    Dsqr=distanceSqrMat(Fisher, Pset) #or: Δ²=distanceSqrMat(Fisher, 𝐏)
+    lap= laplacian(Dsqr) # or: Ω=laplacian(Δ²)
+    evalues, maps, iterations, convergence=laplacianEM(lap, 2)
+    evalues, maps, iterations, convergence=laplacianEM(lap, 2; maxiter=500)
+    evalues, maps, iterations, convergence=laplacianEM(lap, 2; ⍰=true)
 
 """
-function laplacianEigenMaps(Ω, q::Int; tol=1e-9, maxiter=300, ⍰=false)
+function laplacianEigenMaps(Ω, q::Int;
+                            tol=1e-9, maxiter=300, ⍰=false)
     (Λ, U, iter, conv) =
         powIter(Ω, q+1; evalues=true, tol=tol, maxiter=maxiter, ⍰=⍰)
     return ⋱(Λ[2:q+1, 2:q+1]), U[1:size(U, 1), 2:q+1], iter, conv
-end;
+end
 laplacianEM=laplacianEigenMaps
 
 
 """
-    spectralEmbedding(𝐏::ℍVector, q::Int, metric::Metric=Fisher;
-                        <tol=1e-9, maxiter=300, ⍰=false>)
-
- **alias**: `Rse`
+    spectralEmbedding(metric::Metric, 𝐏::ℍVector, q::Int;
+                     <tol=1e-9, maxiter=300, ⍰=false>)
 
  Given a 1d array `𝐏` of ``k`` positive definite matrices ``{P_1,...,P_k}``,
  compute its *eigen maps* in ``q`` dimensions.
@@ -575,19 +574,18 @@ laplacianEM=laplacianEigenMaps
  - [`laplacianEigenMaps`](@ref) (get the eigen maps).
 
   Return the 4-tuple `(Λ, U, iterations, convergence)`, where:
- - ``Λ`` is a ``q⋅q`` diagonal matrix holding on diagonal the eigenvalues corresponding to the ``q`` dimensions of the Laplacian eigen maps;
- - ``U`` holds in columns the ``q`` eigenvectors, i.e., the ``q`` coordinates of the points in the embedded space.
- - ``iterations`` is the number of iterations executed by the power method;
- - ``convergence`` is the convergence attained by the power method;
+ - ``Λ`` is a ``q⋅q`` diagonal matrix holding on diagonal the eigenvalues corresponding to the ``q`` dimensions of the Laplacian eigen maps,
+ - ``U`` holds in columns the ``q`` eigenvectors, i.e., the ``q`` coordinates of the points in the embedded space,
+ - ``iterations`` is the number of iterations executed by the power method,
+ - ``convergence`` is the convergence attained by the power method.
 
- **Arguments** `(𝐏, q, metric, <tol=1e-9, maxiter=300, ⍰=false>)`:
- - `𝐏` is a 1d array of ``k`` positive matrices of [ℍVector type](@ref);
+ **Arguments** `(metric, 𝐏, q, <tol=1e-9, maxiter=300, ⍰=false>)`:
+ - `metric` is the metric of type [Metric::Enumerated type](@ref) used for computing the inter-distances,
+ - `𝐏` is a 1d array of ``k`` positive matrices of [ℍVector type](@ref),
  - ``q`` is the dimension of the Laplacian eigen maps;
- - `metric` is a metric of type [Metric::Enumerated type](@ref),
-   used for computing the inter-distances. By default, the [Fisher](@ref) metric is adopted.
  - The following are *<optional keyword arguments>* for the power method iterative algorithm:
-   * `tol` is the tolerance for convergence of the power method;
-   * `maxiter` is the maximum number of iterations allowed for the power method;
+   * `tol` is the tolerance for convergence of the power method,
+   * `maxiter` is the maximum number of iterations allowed for the power method,
    * if `⍰` is true the convergence at all iterations will be printed.
 
  **See also**: [`distanceSqrMat`](@ref), [`laplacian`](@ref), [`laplacianEigenMaps`](@ref).
@@ -595,15 +593,15 @@ laplacianEM=laplacianEigenMaps
  ## Examples
     using PosDefManifold
     # Generate a set of 4 random 10x10 SPD matrices
-    𝐏=randP(10, 4)
-    evalues, maps, iterations, convergence=spectralEmbedding(𝐏, 2)
-    evalues, maps, iterations, convergence=spectralEmbedding(𝐏, 2, ⍰=true)
+    Pset=randP(10, 4) # or, using unicode: 𝐏=randP(10, 4)
+    evalues, maps, iterations, convergence=spectralEmbedding(logEuclidean, Pset, 2)
+    evalues, maps, iterations, convergence=spectralEmbedding(logEuclidean, Pset, 2; ⍰=true)
 
 """
-function spectralEmbedding(𝐏::ℍVector, q::Int, metric::Metric=Fisher;
-                            tol=1e-9, maxiter=300, ⍰=false)
+function spectralEmbedding(metric::Metric, 𝐏::ℍVector, q::Int;
+                           tol=1e-9, maxiter=300, ⍰=false)
     return (Λ, U, iter, conv) =
-      laplacianEM(laplacian(distance²Mat(𝐏::ℍVector, metric)), q; tol=tol, maxiter=maxiter, ⍰=⍰)
+      laplacianEM(laplacian(distance²Mat(metric, 𝐏)), q; tol=tol, maxiter=maxiter, ⍰=⍰)
 end
 
 
@@ -613,12 +611,14 @@ end
 # -----------------------------------------------------------
 
 """
-    (1) mean(P::ℍ, Q::ℍ, metric::Metric=Fisher)
-    (2) mean(𝐏::ℍVector, metric::Metric=Fisher; <w::Vector=[], ✓w=true>)
+    (1) mean(metric::Metric, P::ℍ, Q::ℍ)
+
+    (2) mean(metric::Metric, 𝐏::ℍVector;
+            <w::Vector=[], ✓w=true>)
 
  (1) Mean of two positive definite matrices, passed in arbitrary order as
  arguments ``P`` and ``Q``, using the specified `metric` of type
- [Metric::Enumerated type](@ref). By defult the [Fisher](@ref) metric is used.
+ [Metric::Enumerated type](@ref).
  The order is arbitrary as all metrics implemented in **PosDefManifold** are symmetric.
  This is the midpoint of the geodesic.
  For the weighted mean of two positive definite matrices use instead
@@ -675,25 +675,26 @@ end
     # Generate 2 random 3x3 SPD matrices
     P=randP(3)
     Q=randP(3)
-    M=mean(P, Q, logdet0) # (1)
-    M=mean(P, Q) # (1), uses Fisher metric
+    M=mean(logdet0, P, Q) # (1)
+    M=mean(logdet0, P, Q) # (1)
 
     R=randP(3)
     # passing several matrices and associated weights listing them
     # weights vector, does not need to be normalized
-    mean(ℍVector([P, Q, R]), logEuclidean, w=[1, 2, 3])
+    mean(Fisher, ℍVector([P, Q, R]); w=[1, 2, 3])
 
     # Generate a set of 4 random 3x3 SPD matrices
-    𝐏=randP(3, 4)
+    Pset=randP(3, 4) # or, using unicode: 𝐏=randP(3, 4)
     weights=[1, 2, 3, 1]
     # passing a vector of Hermitian matrices (ℍVector type)
-    M=mean(𝐏, Euclidean, w=weights) # (2) weighted Euclidean mean
-    M=mean(𝐏, Wasserstein)  # (2) unweighted Wassertein mean
-
+    M=mean(Euclidean, Pset; w=weights) # (2) weighted Euclidean mean
+    M=mean(Wasserstein, Pset)  # (2) unweighted Wassertein mean
+    # using unicode: M=mean(Wasserstein, 𝐏)
 """
-mean(P::ℍ, Q::ℍ, metric::Metric=Fisher) = geodesic(P, Q, 0.5, metric)
+mean(metric::Metric, P::ℍ, Q::ℍ) = geodesic(metric, P, Q, 0.5)
 
-function mean(𝐏::ℍVector, metric::Metric=Fisher;    w::Vector=[], ✓w=true)
+function mean(metric::Metric, 𝐏::ℍVector;
+              w::Vector=[], ✓w=true)
     # iterative solutions
     if      metric == Fisher
             (G, iter, conv)=powerMean(𝐏, 0; w=w, ✓w=✓w)
@@ -709,7 +710,7 @@ function mean(𝐏::ℍVector, metric::Metric=Fisher;    w::Vector=[], ✓w=true
     # closed-form expressions
     n, k = _attributes(𝐏)
     isempty(w) ? nothing : v = _getWeights(w, ✓w, k)
-    
+
     if  metric == Euclidean
         if isempty(w)   return ℍ(𝛍(𝐏))
         else            return ℍ(𝚺(ω*P for (ω, P) in zip(v, 𝐏)))
@@ -742,8 +743,8 @@ function mean(𝐏::ℍVector, metric::Metric=Fisher;    w::Vector=[], ✓w=true
         return ℍ(T*T')
 
     elseif metric == Jeffrey
-        P=mean(𝐏, Euclidean; w=w, ✓w=✓w)
-        Q=mean(𝐏, invEuclidean; w=w, ✓w=✓w)
+        P=mean(Euclidean, 𝐏; w=w, ✓w=✓w)
+        Q=mean(invEuclidean, 𝐏; w=w, ✓w=✓w)
         P½, P⁻½=pow(P, 0.5, -0.5)
         return ℍ(P½ * sqrt(ℍ(P⁻½ * Q * P⁻½)) * P½)
 
@@ -756,12 +757,12 @@ function mean(𝐏::ℍVector, metric::Metric=Fisher;    w::Vector=[], ✓w=true
 end # function
 
 """
-    means(℘::ℍVector₂, metric::Metric=Fisher)
+    means(metric::Metric, ℘::ℍVector₂)
 
  Given a 2d array `℘` of positive definite matrices as an [ℍVector₂ type](@ref)
  compute the [Fréchet mean](@ref) for as many [ℍVector type](@ref) object
  as hold in `℘`, using the specified `metric` of type
- [Metric::Enumerated type](@ref). By defult the [Fisher](@ref) metric is used.
+ [Metric::Enumerated type](@ref).
   Return the means in a vector of Hermitian matrices, that is, as an `ℍVector` type.
 
  The weigted Fréchet mean is not supported in this function.
@@ -771,25 +772,26 @@ end # function
   ## Examples
      using PosDefManifold
      # Generate a set of 4 random 3x3 SPD matrices
-     𝐏=randP(3, 4)
+     Pset=randP(3, 4) # or, using unicode: 𝐏=randP(3, 4)
      # Generate a set of 40 random 4x4 SPD matrices
-     𝐐=randP(4, 40)
+     Qset=randP(3, 4) # or, using unicode: 𝐐=randP(3, 4)
      # listing directly ℍVector objects
-     means([𝐏, 𝐐], logEuclidean)
+     means(logEuclidean, ℍVector₂([Pset, Qset])) # or: means(logEuclidean, ℍVector₂([𝐏, 𝐐]))
      # note that [𝐏, 𝐐] is actually a ℍVector₂ type object
 
      # creating and passing an object of ℍVector₂ type
-     ℘=ℍVector₂(undef, 2)
-     ℘[1]=𝐏
-     ℘[2]=𝐐
-     means(℘) # uses default Fisher metric
+     sets=ℍVector₂(undef, 2) # or: ℘=ℍVector₂(undef, 2)
+     sets[1]=Pset # or: ℘[1]=𝐏
+     sets[2]=Qset # or: ℘[2]=𝐐
+     means(logEuclidean, sets) # or: means(logEuclidean, ℘)
 
 """
-means(℘::ℍVector₂, metric::Metric=Fisher)=ℍVector([mean(𝐏, metric) for 𝐏 in ℘])
+means(metric::Metric, ℘::ℍVector₂)=ℍVector([mean(metric, 𝐏) for 𝐏 in ℘])
 
 
 """
-    generalizedMean(𝐏::ℍVector, p::Real; <w::Vector=[], ✓w=true>)
+    generalizedMean(𝐏::ℍVector, p::Real;
+                   <w::Vector=[], ✓w=true>)
 
  Given a 1d array `𝐏` of ``k`` positive definite matrices``{P_1,...,P_k}``
  of [ℍVector type](@ref) and optional non-negative real weights vector ``w={w_1,...,w_k}``,
@@ -827,26 +829,27 @@ means(℘::ℍVector₂, metric::Metric=Fisher)=ℍVector([mean(𝐏, metric) fo
  ## Examples
     using LinearAlgebra, Statistics, PosDefManifold
     # Generate a set of 4 random 3x3 SPD matrices
-    𝐏=randP(3, 4)
+    Pset=randP(3, 4) # or, using unicode: 𝐏=randP(3, 4)
 
     # weights vector, does not need to be normalized
     weights=[1, 2, 3, 1]
 
     # unweighted mean
-    G = generalizedMean(𝐏, 0.25)
+    G = generalizedMean(Pset, 0.25) # or: G = generalizedMean(𝐏, 0.25)
 
     # weighted mean
-    G = generalizedMean(𝐏, 0.5; w=weights)
+    G = generalizedMean(Pset, 0.5; w=weights)
 
     # with weights previously normalized we can set ✓w=false
-    weights=weights./mean(weights)
-    G = generalizedMean(𝐏, 0.5; w=weights, ✓w=false)
+    weights=weights./sum(weights)
+    G = generalizedMean(Pset, 0.5; w=weights, ✓w=false)
 
 """
-function generalizedMean(𝐏::ℍVector, p::Real; w::Vector=[], ✓w=true)
-    if     p == -1 return mean(𝐏, invEuclidean; w=w, ✓w=✓w)
-    elseif p ==  0 return mean(𝐏, logEuclidean; w=w, ✓w=✓w)
-    elseif p ==  1 return mean(𝐏, Euclidean;    w=w, ✓w=✓w)
+function generalizedMean(𝐏::ℍVector, p::Real;
+                         w::Vector=[], ✓w=true)
+    if     p == -1 return mean(invEuclidean, 𝐏; w=w, ✓w=✓w)
+    elseif p ==  0 return mean(logEuclidean, 𝐏; w=w, ✓w=✓w)
+    elseif p ==  1 return mean(Euclidean, 𝐏;    w=w, ✓w=✓w)
     else
         n, k=_attributes(𝐏)
         if isempty(w)
@@ -861,8 +864,8 @@ end # function
 
 """
 
-    logdet0Mean(𝐏::ℍVector; <w::Vector=[], ✓w=true, init=nothing,
-                     tol=1e-9, ⍰=false>)
+    logdet0Mean(𝐏::ℍVector;
+               <w::Vector=[], ✓w=true, init=nothing, tol=1e-9, ⍰=false>)
 
  Given a 1d array ``𝐏`` of ``k`` positive definite matrices ``{P_1,...,P_k}``
  of [ℍVector type](@ref) and optional non-negative real weights vector ``w={w_1,...,w_k}``,
@@ -888,8 +891,8 @@ suggested by (Moakher, 2012, p315)[🎓](@ref), yielding iterations
  vector each time.
 
  The following are more *<optional keyword arguments*>:
- - `init` is a matrix to be used as initialization for the mean. If no matrix is provided, the [log Euclidean](@ref) mean will be used;
- - `tol` is the tolerance for the convergence. The smaller this number (it must be positive) the closer the algorithm gets to the saddle point;
+ - `init` is a matrix to be used as initialization for the mean. If no matrix is provided, the [log Euclidean](@ref) mean will be used,
+ - `tol` is the tolerance for the convergence. The smaller this number (it must be positive) the closer the algorithm gets to the saddle point,
  - if `⍰` is true, the convergence attained at each iteration is printed.
 
 !!! note "Nota Bene"
@@ -902,32 +905,32 @@ suggested by (Moakher, 2012, p315)[🎓](@ref), yielding iterations
  ## Examples
     using LinearAlgebra, PosDefManifold
     # Generate a set of 4 random 3x3 SPD matrices
-    𝐏=randP(3, 4)
+    Pset=randP(3, 4) # or, using unicode: 𝐏=randP(3, 4)
 
     # unweighted mean
-    G, iter, conv = logdet0Mean(𝐏)
+    G, iter, conv = logdet0Mean(Pset) # or G, iter, conv = logdet0Mean(𝐏)
 
     # weights vector, does not need to be normalized
     weights=[1, 2, 3, 1]
 
     # weighted mean
-    G, iter, conv = logdet0Mean(𝐏, w=weights)
+    G, iter, conv = logdet0Mean(Pset, w=weights)
 
     # print the convergence at all iterations
-    G, iter, conv = logdet0Mean(𝐏, w=weights, ⍰=true)
+    G, iter, conv = logdet0Mean(Pset; w=weights, ⍰=true)
 
-    # now suppose 𝐏 has changed a bit, initialize with G to hasten convergence
-    𝐏[1]=ℍ(𝐏[1]+(randP(3)/100))
-    G, iter, conv = logdet0Mean(𝐏, w=weights, ✓w=false, ⍰=true, init=G)
+    # now suppose Pset has changed a bit, initialize with G to hasten convergence
+    Pset[1]=ℍ(Pset[1]+(randP(3)/100))
+    G, iter, conv = logdet0Mean(Pset; w=weights, ✓w=false, ⍰=true, init=G)
 
 """
-function logdet0Mean(𝐏::ℍVector;  w::Vector=[], ✓w=true, init=nothing,
-                            tol=1e-9, ⍰=false)
+function logdet0Mean(𝐏::ℍVector;
+                     w::Vector=[], ✓w=true, init=nothing, tol=1e-9, ⍰=false)
     maxIter=500
     n, k = _attributes(𝐏)
     l=k/2
     isempty(w) ? v=[] : v = _getWeights(w, ✓w, k)
-    init == nothing ? M = mean(𝐏, logEuclidean, w=w, ✓w=false) : M = ℍ(init)
+    init == nothing ? M = mean(logEuclidean, 𝐏; w=w, ✓w=false) : M = ℍ(init)
     💡 = similar(M, eltype(M))
     iter, conv, oldconv = 1, 0., maxpos
     ⍰ && @info("Iterating RlogDetMean Fixed-Point...")
@@ -942,7 +945,7 @@ function logdet0Mean(𝐏::ℍVector;  w::Vector=[], ✓w=true, init=nothing,
         ⍰ && println("iteration: ", iter, "; convergence: ", conv)
         diverging = conv > oldconv
         diverging ? @warn("logdet0Mean diverged at:", iter) : oldconv=conv
-        iter==maxIter || diverging || conv <= tol ? break : M = 💡
+        iter==maxIter || conv <= tol ? break : M = 💡 # diverging ||
         iter += 1
     end # while
 
@@ -951,8 +954,8 @@ end
 
 
 """
-    wasMean(𝐏::ℍVector; <w::Vector=[], ✓w=true, init=nothing,
-                 tol=1e-9, ⍰=false>)
+    wasMean(𝐏::ℍVector;
+           <w::Vector=[], ✓w=true, init=nothing, tol=1e-9, ⍰=false>)
 
  Given a 1d array `𝐏` of ``k`` positive definite matrices ``{P_1,...,P_k}``
  of [ℍVector type](@ref) and optional non-negative real weights vector ``w={w_1,...,w_k}``,
@@ -973,13 +976,13 @@ end
 
  If *<optional keword argument>* `✓w=true` (default), the weights are
  normalized so as to sum up to 1, otherwise they are used as they are passed
- and Metric::Enumerated type be already normalized.  This option is provided to allow
+ and they should be already normalized.  This option is provided to allow
  calling this function repeatedly without normalizing the same weights
  vector each time.
 
  The following are more *<optional keyword arguments*>:
- - `init` is a matrix to be used as initialization for the mean. If no matrix is provided, the instance of [generalized means](@ref) with ``p=0.5`` will be used;
- - `tol` is the tolerance for the convergence. The smaller this number (it must be positive) the closer the algorithm gets to the true solution;
+ - `init` is a matrix to be used as initialization for the mean. If no matrix is provided, the instance of [generalized means](@ref) with ``p=0.5`` will be used,
+ - `tol` is the tolerance for the convergence. The smaller this number (it must be positive) the closer the algorithm gets to the true solution,
  - if `⍰` is true, the convergence attained at each iteration is printed.
 
 !!! note "Nota Bene"
@@ -992,27 +995,27 @@ end
  ## Examples
     using LinearAlgebra, PosDefManifold
     # Generate a set of 4 random 3x3 SPD matrices
-    𝐏=randP(3, 4)
+    Pset=randP(3, 4) # or, using unicode: 𝐏=randP(3, 4)
 
     # unweighted mean
-    G, iter, conv = wasMean(𝐏)
+    G, iter, conv = wasMean(Pset) # or: G, iter, conv = wasMean(𝐏)
 
     # weights vector, does not need to be normalized
     weights=[1, 2, 3, 1]
 
     # weighted mean
-    G, iter, conv = wasMean(𝐏, w=weights)
+    G, iter, conv = wasMean(Pset; w=weights)
 
     # print the convergence at all iterations
-    G, iter, conv = wasMean(𝐏, w=weights, ⍰=true)
+    G, iter, conv = wasMean(Pset; w=weights, ⍰=true)
 
     # now suppose 𝐏 has changed a bit, initialize with G to hasten convergence
-    𝐏[1]=ℍ(𝐏[1]+(randP(3)/100))
-    G, iter, conv = wasMean(𝐏, w=weights, ⍰=true, init=G)
+    Pset[1]=ℍ(Pset[1]+(randP(3)/100))
+    G, iter, conv = wasMean(Pset; w=weights, ⍰=true, init=G)
 
 """
-function wasMean(𝐏::ℍVector; w::Vector=[], ✓w=true,
-                 init=nothing, tol=1e-9, ⍰=false)
+function wasMean(𝐏::ℍVector;
+                 w::Vector=[], ✓w=true, init=nothing, tol=1e-9, ⍰=false)
 
     maxIter=500
     iter, conv, oldconv, maxIter, (n, k) = 1, 0., maxpos, 500, _attributes(𝐏)
@@ -1032,7 +1035,7 @@ function wasMean(𝐏::ℍVector; w::Vector=[], ✓w=true,
         ⍰ &&  println("iteration: ", iter, "; convergence: ", conv)
         diverging = conv > oldconv
         diverging ? @warn("wasMean diverged at:", iter) : oldconv=conv
-        iter==maxIter || diverging || conv <= tol ? break : M = 💡
+        iter==maxIter || conv <= tol ? break : M = 💡 # diverging ||
         iter += 1
     end # while
 
@@ -1041,8 +1044,8 @@ end
 
 
 """
-    powerMean(𝐏::ℍVector, p::Real; <w::Vector=[], ✓w=true, init=nothing,
-                            tol=1e-9, ⍰=false>)
+    powerMean(𝐏::ℍVector, p::Real;
+             <w::Vector=[], ✓w=true, init=nothing, tol=1e-9, ⍰=false>)
 
  Given a 1d array `𝐏` of ``k`` positive definite matrices ``{P_1,...,P_k}``
  of [ℍVector type](@ref),
@@ -1077,7 +1080,7 @@ end
 
  If *<optional keword argument>* `✓w=true` (default), the weights are
  normalized so as to sum up to 1, otherwise they are used as they are passed
- and Metric::Enumerated type be already normalized.  This option is provided to allow
+ and should type be already normalized.  This option is provided to allow
  calling this function repeatedly without normalizing the same weights
  vector each time.
 
@@ -1096,38 +1099,38 @@ end
  ## Examples
     using LinearAlgebra, PosDefManifold
     # Generate a set of 4 random 3x3 SPD matrices
-    𝐏=randP(3, 4)
+    Pset=randP(3, 4) # or, using unicode: 𝐏=randP(3, 4)
 
     # unweighted mean
-    G, iter, conv = powerMean(𝐏, 0.5)
+    G, iter, conv = powerMean(Pset, 0.5) # or G, iter, conv = powerMean(𝐏, 0.5)
 
     # weights vector, does not need to be normalized
     weights=[1, 2, 3, 1]
 
     # weighted mean
-    G, iter, conv = powerMean(𝐏, 0.5, w=weights)
+    G, iter, conv = powerMean(Pset, 0.5; w=weights)
 
     # print the convergence at all iterations
-    G, iter, conv = powerMean(𝐏, 0.5, w=weights, ⍰=true)
+    G, iter, conv = powerMean(Pset, 0.5; w=weights, ⍰=true)
 
     # now suppose 𝐏 has changed a bit, initialize with G to hasten convergence
-    𝐏[1]=ℍ(𝐏[1]+(randP(3)/100))
-    G, iter, conv = powerMean(𝐏, 0.5, w=weights, ⍰=true, init=G)
+    Pset[1]=ℍ(Pset[1]+(randP(3)/100))
+    G, iter, conv = powerMean(Pset, 0.5; w=weights, ⍰=true, init=G)
 
 """
 function powerMean(𝐏::ℍVector, p::Real;
-            w::Vector=[], ✓w=true, init=nothing, tol=1e-9, ⍰=false)
+                   w::Vector=[], ✓w=true, init=nothing, tol=1e-9, ⍰=false)
   if !(-1<=p<=1) @error("The parameter p for power means must be in range [-1...1]")
   else
     if     p ≈-1
-            return (mean(𝐏, InvEuclidean, w=w, ✓w=✓w), 1, 0)
+            return (mean(invEuclidean, 𝐏; w=w, ✓w=✓w), 1, 0)
     elseif p ≈ 0
-            LE=mean(𝐏, logEuclidean, w=w, ✓w=✓w)
-            P, iter1, conv1=powerMean(𝐏,  0.01, w=w, ✓w=✓w, init=LE, tol=tol, ⍰=⍰)
-            Q, iter2, conv2=powerMean(𝐏, -0.01, w=w, ✓w=✓w, init=P, tol=tol, ⍰=⍰)
-            return (geodesic(P, Q,  0.5,  Fisher), iter1+iter2, (conv1+conv2)/2)
+            LE=mean(logEuclidean, 𝐏, w=w, ✓w=✓w)
+            P, iter1, conv1=powerMean(𝐏,  0.01; w=w, ✓w=✓w, init=LE, tol=tol, ⍰=⍰)
+            Q, iter2, conv2=powerMean(𝐏, -0.01; w=w, ✓w=✓w, init=P, tol=tol, ⍰=⍰)
+            return (geodesic(Fisher, P, Q,  0.5), iter1+iter2, (conv1+conv2)/2)
     elseif p ≈ 1
-                return (mean(𝐏, Euclidean, w=w, ✓w=✓w), 1, 0)
+                return (mean(Euclidean, 𝐏; w=w, ✓w=✓w), 1, 0)
     else
         # Set Parameters
         n, k = _attributes(𝐏)
@@ -1152,7 +1155,7 @@ function powerMean(𝐏::ℍVector, p::Real;
             ⍰ &&  println("iteration: ", iter, "; convergence: ", conv)
             diverging = conv > oldconv
             diverging ? @warn("powerMean diverged at:", iter) : oldconv=conv
-            iter==maxIter || diverging || conv <= tol ? break : X = 💡
+            iter==maxIter || conv <= tol ? break : X = 💡 # diverging ||
             iter += 1
         end # while
     end # if
@@ -1169,7 +1172,7 @@ end
 # -----------------------------------------------------------
 
 """
-    logMap(P::ℍ, G::ℍ, metric::Metric=Fisher)
+    logMap(metric::Metric, P::ℍ, G::ℍ)
 
  *Logaritmic Map:* map a positive definite matrix ``P`` from the SPD or
  Hermitian manifold into the tangent space at base-point ``G`` using the [Fisher](@ref) metric.
@@ -1183,10 +1186,10 @@ end
  The result is an `Hermitian` matrix.
  The inverse operation is [`expMap`](@ref).
 
- **Arguments** `(P, G, metric)`:
+ **Arguments** `(metric, P, G)`:
+ - `metric` is a metric of type [Metric::Enumerated type](@ref).
  - ``P`` is the positive definite matrix to be projected onto the tangent space,
  - ``G`` is the tangent space base point,
- - `metric` is a metric of type [Metric::Enumerated type](@ref).
 
  Currently only the [Fisher](@ref) metric is supported for tangent space operations.
 
@@ -1196,11 +1199,12 @@ end
     using PosDefManifold
     P=randP(3)
     Q=randP(3)
-    G=mean(P, Q)
+    metric=Fisher
+    G=mean(metric, P, Q)
     # projecting P at the base point given by the geometric mean of P and Q
-    S=logMap(P, G)
+    S=logMap(metric, P, G)
 """
-function logMap(P::ℍ, G::ℍ, metric::Metric=Fisher)
+function logMap(metric::Metric, P::ℍ, G::ℍ)
     if   metric==Fisher
          G½, G⁻½=pow(G, 0.5, -0.5)
          return ℍ(G½ * log(ℍ(G⁻½ * P * G⁻½)) * G½)
@@ -1211,7 +1215,7 @@ end
 
 """
 
-    expMap(S::ℍ, G::ℍ, metric::Metric=Fisher)
+    expMap(metric::Metric, S::ℍ, G::ℍ)
 
  *Exponential Map:* map an `Hermitian` matrix ``S`` from the tangent space at base
  point ``G`` into the SPD or Hermitian manifold (using the [Fisher](@ref) metric).
@@ -1225,10 +1229,10 @@ end
  The result is a positive definite matrix.
  The inverse operation is [`logMap`](@ref).
 
- **Arguments** `(S, G, metric)`:
+ **Arguments** `(metric, S, G)`:
+ - `metric` is a metric of type [Metric::Enumerated type](@ref),
  - ``S`` is a Hermitian matrix, real or complex, to be projected on the SPD or Hermitian manifold,
- - ``G`` is the tangent space base point,
- - `metric` is a metric of type [Metric::Enumerated type](@ref).
+ - ``G`` is the tangent space base point.
 
   Currently only the Fisher metric is supported for tangent space operations.
 
@@ -1236,13 +1240,13 @@ end
     using PosDefManifold, LinearAlgebra
     P=randP(3)
     Q=randP(3)
-    G=mean(P, Q, Fisher)
+    G=mean(Fisher, P, Q)
     # projecting P on the tangent space at the Fisher mean base point G
-    S=logMap(P, G)
+    S=logMap(Fisher, P, G)
     # adding the identity in the tangent space and reprojecting back onto the manifold
-    H=expMap(ℍ(S+I), G)
+    H=expMap(Fisher, ℍ(S+I), G)
 """
-function expMap(S::ℍ, G::ℍ, metric::Metric=Fisher)
+function expMap(metric::Metric, S::ℍ, G::ℍ)
     if   metric==Fisher
          G½, G⁻½=pow(G, 0.5, -0.5)
          return ℍ(G½ * exp(ℍ(G⁻½ * S * G⁻½)) * G½)
@@ -1271,11 +1275,11 @@ end
     using PosDefManifold
     P=randP(3)
     Q=randP(3)
-    G=mean(P, Q, Fisher)
+    G=mean(Fisher, P, Q)
     # projecting P at the base point given by the geometric mean of P and Q
-    S=logMap(P, G)
+    S=logMap(Fisher, P, G)
     # vectorize S
-    ς=vecP(S)
+    v=vecP(S)
 """
 vecP(S::ℍ)=[(if i==j return S[i, j] else return (S[i, j])*sqrt2 end) for j=1:size(S, 2) for i=j:size(S, 1)]
 
@@ -1298,22 +1302,22 @@ vecP(S::ℍ)=[(if i==j return S[i, j] else return (S[i, j])*sqrt2 end) for j=1:s
     using PosDefManifold
     P=randP(3)
     Q=randP(3)
-    G=mean(P, Q, Fisher)
+    G=mean(Fishr, P, Q)
     # projecting P at onto the tangent space at the Fisher mean base point
-    S=logMap(P, G)
+    S=logMap(Fisher, P, G)
     # vectorize S
-    ς=vecP(S)
+    v=vecP(S)
     # Rotate the vector by an orthogonal matrix
     n=Int(size(S, 1)*(size(S, 1)+1)/2)
     U=randP(n)
-    v=U*ς
+    z=U*v
     # Get the point in the tangent space
-    S=matP(v)
+    S=matP(z)
 """
 function matP(ς::Vector)
   n=Int((-1+√(1+8*length(ς)))/2) # Size of the matrix whose vectorization vector v has size length(v)
   S=Matrix{eltype(ς)}(undef, n, n)
-  l=0;
+  l=0
   @inbounds for j in 1:n-1
     l=l+1
     S[j, j]=ς[l]

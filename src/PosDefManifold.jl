@@ -116,7 +116,7 @@ export
     distance,
     geodesic,
     distanceSqrMat, distance²Mat,
-    distanceMatrix, distanceMat,
+    distanceMat,
     laplacian,
     laplacianEigenMaps, laplacianEM,
     spectralEmbedding,
@@ -141,6 +141,6 @@ include("signalProcessing.jl")
 include("riemannianGeometry.jl")
 include("test.jl")
 
-println("\n⭐"," Welcome to the PosDefManifold package", " ⭐\n")
+println("\n⭐ "," Welcome to the PosDefManifold package", " ⭐\n")
 
 end # module
