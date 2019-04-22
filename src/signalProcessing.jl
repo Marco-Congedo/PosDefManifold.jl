@@ -1,5 +1,5 @@
 #    Unit signalProcessing.jl, part of PosDefManifold Package for julia language
-#    v 0.1.1 - last update 16th of April 2019
+#    v 0.1.2 - last update 22th of April 2019
 #
 #    MIT License
 #    Copyright (c) 2019, Marco Congedo, CNRS, Grenobe, France:
