@@ -33,7 +33,7 @@ distance
 ## Graphs and Laplacians
 ```@docs
 distanceSqrMat
-distanceMatrix
+distanceMat
 laplacian
 laplacianEigenMaps
 spectralEmbedding
@@ -41,8 +41,8 @@ spectralEmbedding
 
 ## Means
 ```@docs
-meanP
-meansP
+mean
+means
 generalizedMean
 logdet0Mean
 wasMean

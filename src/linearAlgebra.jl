@@ -1,5 +1,5 @@
 # Unit linearAlgebra.jl, part of PosDefManifold Package for julia language
-# v 0.1.1 - last update 16 of April 2019
+# v 0.1.2 - last update 22 of April 2019
 #
 # MIT License
 # Copyright (c) 2019, Marco Congedo, CNRS, Grenobe, France:
@@ -99,12 +99,12 @@ tr1(P) = P/tr(P)
   ## Examples
     using PosDefManifold
     X=randn(10, 20)
-    normalizeCol!(X, 2)                 # (1) normalize columns 2
-    normalizeCol!(X, 2, 10.0)           # (2) divide columns 2 by 10.0
-    normalizeCol!(X, 2:4)               # (3) normalize columns 2 to 4
+    normalizeCol!(X, 2)                  # (1) normalize columns 2
+    normalizeCol!(X, 2, 10.0)            # (2) divide columns 2 by 10.0
+    normalizeCol!(X, 2:4)                # (3) normalize columns 2 to 4
     X=randn(ComplexF64, 10, 20)
-    normalizeCol!(X, 3)                 # (1) normalize columns 3
-    normalizeCol!(X, 3:6, (2.0 + 0.5im))# (4) divide columns 3 to 5 by (2.0 + 0.5im)
+    normalizeCol!(X, 3)                  # (1) normalize columns 3
+    normalizeCol!(X, 3:6, (2.0 + 0.5im)) # (4) divide columns 3 to 5 by (2.0 + 0.5im)
 
 """
 function normalizeCol!(X::Matrix{T}, j::Int) where T<:RealOrComplex
@@ -187,18 +187,29 @@ end
 #  -------------------------------
 
 """
-    colProd(X::Matrix, j::Int, l::Int)
+    (1) colProd(X::Matrix, j::Int, l::Int)
+    (2) colProd(X::Matrix, j::Int, l::Int)
 
- Given a general matrix ``X``, comprised of real or complex elements,
+ (1) Given a general matrix ``X``, comprised of real or complex elements,
  return the dot product of the ``j^{th}`` and ``l^{th}`` columns, defined as,
 
  ``\\sum_{i=1}^{r} \\big(x_{ij}^*x_{il}\\big), ``
 
  where ``r`` is the number of rows of ``X`` and ``^*`` the complex conjugate.
 
- No range check nor type check is performed. A catch-all method is defined.
+ (2) Given two general matrices ``X`` and ``Y``, comprised of real or complex elements,
+ return the dot product of the ``j^{th}`` column of ``X`` and the ``l^{th}`` column
+ of ``Y``, defined as,
 
-  Arguments ``j`` and ``l`` must be positive integers in range `1:size(X, 2)`.
+ ``\\sum_{i=1}^{r} \\big(x_{ij}^*y_{il}\\big), ``
+
+ where ``r`` is the number of rows of ``X`` and of ``Y`` and ``^*`` the complex conjugate.
+
+ ``X`` and of ``Y`` may have a different number of columns.
+ A catch-all method is defined.
+
+ Arguments ``j`` and ``l`` must be positive integers in range
+ (1) `j,l in 1:size(X, 2)` and (2) `j in 1:size(X, 2), l in 1:size(Y, 2)`.
 
  **See also**: [`normalizeCol!`](@ref), [`colNorm`](@ref).
 
@@ -206,12 +217,17 @@ end
     using PosDefManifold
     X=randn(10, 20)
     p=colProd(X, 1, 3)
+    Y=randn(10, 30)
+    q=colProd(X, Y, 2, 25)
 
 """
 colProd(X::Matrix{T}, j::Int, l::Int) where T<:Real=𝚺(x1*x2 for (x1, x2) in zip(X[:, j], X[:, l]))
 colProd(X::Matrix{T}, j::Int, l::Int) where T<:Complex=𝚺(conj(x1)*x2 for (x1, x2) in zip(X[:, j], X[:, l]))
 colProd(X, j::Int, l::Int)=𝚺(conj(x1)*x2 for (x1, x2) in zip(X[:, j], X[:, l]))
 
+colProd(X::Matrix{T}, Y::Matrix{T}, j::Int, l::Int) where T<:Real=𝚺(x1*x2 for (x1, x2) in zip(X[:, j], Y[:, l]))
+colProd(X::Matrix{T}, Y::Matrix{T}, j::Int, l::Int) where T<:Complex=𝚺(conj(x1)*x2 for (x1, x2) in zip(X[:, j], Y[:, l]))
+colProd(X, Y, j::Int, l::Int)=𝚺(conj(x1)*x2 for (x1, x2) in zip(X[:, j], Y[:, l]))
 
 """
     colNorm(X::Matrix, j::Int)
@@ -264,9 +280,9 @@ colNorm(X, j::Int) = √sumOfSqr(X, j)
  ## Examples
     using PosDefManifold
     X=randn(10, 20)
-    sum²=sumOfSqr(X)        # (1) sum of squares of all elements
-    sum²=sumOfSqr(X, 1)     # (2) sum of squares of elements in column 1
-    sum²=sumOfSqr(X, 2:4)   # (3) sum of squares of elements in column 2 to 4
+    sum2=sumOfSqr(X)        # (1) sum of squares of all elements
+    sum2=sumOfSqr(X, 1)     # (2) sum of squares of elements in column 1
+    sum2=sumOfSqr(X, 2:4)   # (3) sum of squares of elements in column 2 to 4
 
 """
 sumOfSqr(A::Array{T}) where T<:RealOrComplex = 𝚺(abs2(a) for a in A)
@@ -296,8 +312,8 @@ sumOfSqr(X, range::UnitRange) = 𝚺(sumOfSqr(X, j) for j in range)
  ## Examples
     using LinearAlgebra, PosDefManifold
     X=randn(10, 20)
-    sumDiag²=sumOfSqrDiag(X) # (1)
-    sumDiag²=sumOfSqrDiag(Diagonal(X)) # (2)
+    sumDiag2=sumOfSqrDiag(X) # (1)
+    sumDiag2=sumOfSqrDiag(Diagonal(X)) # (2)
 
 """
 sumOfSqrDiag(X::Matrix{T}) where T<:RealOrComplex = 𝚺(abs2(X[i, i]) for i=1:minimum(size(X)))
