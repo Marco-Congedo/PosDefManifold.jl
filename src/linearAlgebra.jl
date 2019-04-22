@@ -31,8 +31,8 @@
  ``P`` from the set of matrices in the [special linear group](https://bit.ly/2W5jDZ6),
  i.e., the closer matrix having det=1. See Bhatia and Jain (2014)[🎓].
 
- ``P`` must be flagged as Hermitian. See [typecasting matrices](@ref),
- however a catch-all method is defined.
+ ``P`` must be flagged as Hermitian. See [typecasting matrices](@ref).
+ However a catch-all method is defined.
 
  **See** [det](https://bit.ly/2Y4MnTF).
 
@@ -55,8 +55,8 @@ det1(P) = P/det(P)^(1/size(P, 1))
  Given a positive definite matrix ``P``, return the trace-normalized ``P``
  (trace=1).
 
- ``P`` must be flagged as Hermitian. See [typecasting matrices](@ref),
- however a catch-all method is defined.
+ ``P`` must be flagged as Hermitian. See [typecasting matrices](@ref).
+ However a catch-all method is defined.
 
  **See**: [trace](https://bit.ly/2HoOLiM).
 
@@ -372,32 +372,33 @@ end
 
 
 """
-    tr(P::ℍ, Q::ℍ)
+    trOfProd(P::ℍ, Q::ℍ)
 
  Given two positive definite matrix ``P`` and ``Q``,
  return the trace of the product ``PQ``.
  This is real even if ``P`` and ``Q`` are complex.
 
- ``P`` must be flagged as Hermitian. See [typecasting matrices](@ref),
- however a catch-all method for any combination of ``P`` and ``Q`` `Hermitian`
+ ``P`` must be flagged as Hermitian. See [typecasting matrices](@ref).
+ However a catch-all method for any combination of ``P`` and ``Q`` `Hermitian`
  and generic `Matrix` is defined,
- which can be called if the product ``PQ`` is real or if it as real eigenvalues.
+ which can be called if the product ``PQ`` is real or if it has
+ real eigenvalues.
 
  **See**: [trace](https://bit.ly/2HoOLiM).
 
  **See also**: [`tr1`](@ref).
 
  ## Examples
-    using LinearAlgebra, PosDefManifold
+    using PosDefManifold
     P=randP(5) # generate a random real positive definite matrix 5x5
     Q=randP(5) # generate a random real positive definite matrix 5x5
     trace=tr(P, Q)
 
 """
-tr(P::ℍ, Q::ℍ) = real(𝚺(colProd(P, Q, i, i) for i=1:size(P, 1)))
-tr(P::Matrix, Q::ℍ) = real(𝚺(colProd(P, Q, i, i) for i=1:size(P, 1)))
-tr(P::ℍ, Q::Matrix) = real(𝚺(colProd(P, Q, i, i) for i=1:size(P, 1)))
-tr(P::Matrix, Q::Matrix) = real(𝚺(colProd(P, Q, i, i) for i=1:size(P, 1)))
+trOfProd(P::ℍ, Q::ℍ) = real(𝚺(colProd(P, Q, i, i) for i=1:size(P, 1)))
+trOfProd(P::Matrix, Q::ℍ) = real(𝚺(colProd(P, Q, i, i) for i=1:size(P, 1)))
+trOfProd(P::ℍ, Q::Matrix) = real(𝚺(colProd(P, Q, i, i) for i=1:size(P, 1)))
+trOfProd(P::Matrix, Q::Matrix) = real(𝚺(colProd(P, Q, i, i) for i=1:size(P, 1)))
 
 
 """

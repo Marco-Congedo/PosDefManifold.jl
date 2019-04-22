@@ -257,7 +257,7 @@ function distanceSqr(metric::Metric, P::ℍ)
 
     elseif  metric==VonNeumann # see squared distance
             𝓵P=log(P)
-    return  real(tr(P*𝓵P) - tr(𝓵P)/2)
+    return  (trOfProd(P, 𝓵P) - tr(𝓵P))/2
 
     elseif  metric==Wasserstein
     return  tr(P) + size(P, 1) - 2*tr(sqrt(P))
@@ -293,13 +293,13 @@ function distanceSqr(metric::Metric, P::ℍ, Q::ℍ)
 
     elseif  metric==Jeffrey
             n=size(P, 1)  #using formula tr(Q⁻¹P)/2 + tr(P⁻¹Q)/2 -n
-    return  0.5*(tr(inv(Q), P) + tr(inv(P), Q)) - n
+    return  0.5*(trOfProd(inv(Q), P) + trOfProd(inv(P), Q)) - n
     #return  real(tr(inv(Q)*P)/2 + tr(inv(P)*Q)/2) - size(P, 1)
 
     elseif  metric==VonNeumann      # using formula: tr(PlogP - PlogQ + QlogQ - QlogP)/2=
             n=size(P, 1)            # (tr(P(logP - LoqQ)) + tr(Q(logQ - logP)))/2=
             R=log(P)-log(Q)         # (tr(P(logP - LoqQ)) - tr(Q(logP - LoqQ)))/2
-    return  0.5*( tr(P, R) - tr(Q, R) )
+    return  0.5*( trOfProd(P, R) - trOfProd(Q, R) )
     #return  (tr(P*R) - tr(Q*R))/2
 
     elseif  metric==Wasserstein
@@ -367,19 +367,19 @@ function GetdistSqrMat(metric::Metric, 𝐏::ℍVector)
             𝐏𝓲=[inv(P) for P in 𝐏]
             for j in 1:k-1, i in j+1:k # optimize computingonly diagonal elements
                 #△[i, j]=0.5*(tr(𝐏𝓲[j]*𝐏[i]) + tr(𝐏𝓲[i]*𝐏[j])) - n   end
-                △[i, j]=0.5*(tr(𝐏𝓲[j], 𝐏[i]) + tr(𝐏𝓲[i], 𝐏[j])) - n end
+                △[i, j]=0.5*(trOfProd(𝐏𝓲[j], 𝐏[i]) + trOfProd(𝐏𝓲[i], 𝐏[j])) - n end
 
     elseif  metric==VonNeumann  # using formula: tr( PlogP + QLoqQ - PlogQ - QlogP)/2
             𝓵𝐏=[ℍ(log(P))  for P in 𝐏]
             ℒ=[P*log(P) for P in 𝐏]
             for j in 1:k-1, i in j+1:k
                 #△[i, j]=(tr(ℒ[i])+tr(ℒ[j])-tr(𝐏[i] * 𝓵𝐏[j])-tr(𝐏[j] * 𝓵𝐏[i]))/2   end
-                △[i, j]=0.5(tr(ℒ[i])+tr(ℒ[j])-tr(𝐏[i], 𝓵𝐏[j])-tr(𝐏[j], 𝓵𝐏[i])) end
+                △[i, j]=0.5(tr(ℒ[i])+tr(ℒ[j])-trOfProd(𝐏[i], 𝓵𝐏[j])-trOfProd(𝐏[j], 𝓵𝐏[i])) end
 
     elseif  metric==Wasserstein
             𝐏½=[sqrt(P) for P in 𝐏]
             for j in 1:k-1, i in j+1:k
-                △[i, j]=tr(𝐏[i]) + tr(𝐏[j]) -2*real(tr(sqrt(ℍ(𝐏½[i] * 𝐏[j] * 𝐏½[i])))) end
+                △[i, j]=tr(𝐏[i]) + tr(𝐏[j]) -2*tr(sqrt(ℍ(𝐏½[i] * 𝐏[j] * 𝐏½[i]))) end
 
     elseif  metric in (Euclidean, Fisher, logdet0)
             for j in 1:k-1, i in j+1:k
