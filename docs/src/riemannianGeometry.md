@@ -41,8 +41,8 @@ spectralEmbedding
 
 ## Means
 ```@docs
-meanP
-meansP
+mean
+means
 generalizedMean
 logdet0Mean
 wasMean

@@ -46,6 +46,7 @@ RealOrComplex=Union{Real, Complex}
     #...
 end
 
+import Statistics.mean
 
 export
     # From this module
@@ -119,8 +120,8 @@ export
     laplacian,
     laplacianEigenMaps, laplacianEM,
     spectralEmbedding,
-    meanP,
-    meansP,
+    mean,
+    means,
     generalizedMean,
     powerMean,
     logdet0Mean,

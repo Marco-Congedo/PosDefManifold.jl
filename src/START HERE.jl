@@ -56,6 +56,6 @@ begin
         Base.HOME_PROJECT[] = abspath(Base.HOME_PROJECT[])
     end
 
-    clipboard("""makedocs(sitename="PosDefManifold")""")
+    clipboard("""makedocs(sitename="PosDefManifold", modules=[PosDefManifold])""")
     @info("\nhit CTRL+V+ENTER on the REPL for building the documentation.");
 end

@@ -67,7 +67,7 @@ end
 
  For the [logdet zero](@ref) and [Jeffrey](@ref) metric no closed form expression
  for the geodesic is available (to the best of authors' knowledge),
- so in this case the geodesic is found as the weighted mean using [`meanP(@ref)`].
+ so in this case the geodesic is found as the weighted mean using [`mean(@ref)`].
  For the [Von Neumann](@ref) not even an expression for the mean is available,
  so in this case the geodesic is not provided and a *warning* is printed.
 
@@ -88,7 +88,7 @@ end
 |logCholesky| ``TT^*``, where ``T=S_P+a(S_Q-S_P)+D_P\\hspace{2pt}\\text{exp}\\big(a(\\text{log}D_Q-\\text{log}D_P)\\big)``|
 |Fisher | ``P^{1/2} \\big(P^{-1/2} Q P^{-1/2}\\big)^a P^{1/2}``|
 |logdet0| uses weighted mean algorithm [`logdet0Mean`](@ref) |
-|Jeffrey | uses weighted mean [`meanP`](@ref) |
+|Jeffrey | uses weighted mean [`mean`](@ref) |
 |VonNeumann | N.A.|
 |Wasserstein| ``b^2P+a^2Q +ab\\big[(PQ)^{1/2} +(QP)^{1/2}\\big]``|
 
@@ -96,7 +96,7 @@ end
    are the Cholesky lower triangle of ``X``, its strictly lower triangular part
    and diagonal part, respectively (hence, ``S_X+D_X=L_X``,  ``L_XL_X^*=X``).
 
- **See also**: [`meanP`](@ref).
+ **See also**: [`mean`](@ref).
 
  ## Examples
     using PosDefManifold
@@ -127,7 +127,7 @@ function geodesic(P::ℍ, Q::ℍ, a::Real, metric::Metric=Fisher)
     return  ℍ( P½ * (P⁻½ * Q * P⁻½)^a * P½ )
 
     elseif  metric in (logdet0, Jeffrey)
-    return  meanP(ℍVector([P, Q]), metric, w=[b, a], ✓w=false)
+    return  mean(ℍVector([P, Q]), metric, w=[b, a], ✓w=false)
 
     elseif  metric==VonNeumann
             @warn("An expression for the geodesic is not available for the Von neumann metric")
@@ -614,8 +614,8 @@ end
 # -----------------------------------------------------------
 
 """
-    (1) meanP(P::ℍ, Q::ℍ, metric::Metric=Fisher)
-    (2) meanP(𝐏::ℍVector, metric::Metric=Fisher; <w::Vector=[], ✓w=true>)
+    (1) mean(P::ℍ, Q::ℍ, metric::Metric=Fisher)
+    (2) mean(𝐏::ℍVector, metric::Metric=Fisher; <w::Vector=[], ✓w=true>)
 
  (1) Mean of two positive definite matrices, passed in arbitrary order as
  arguments ``P`` and ``Q``, using the specified `metric` of type
@@ -676,25 +676,25 @@ end
     # Generate 2 random 3x3 SPD matrices
     P=randP(3)
     Q=randP(3)
-    M=meanP(P, Q, logdet0) # (1)
-    M=meanP(P, Q) # (1), uses Fisher metric
+    M=mean(P, Q, logdet0) # (1)
+    M=mean(P, Q) # (1), uses Fisher metric
 
     R=randP(3)
     # passing several matrices and associated weights listing them
     # weights vector, does not need to be normalized
-    meanP(ℍVector([P, Q, R]), logEuclidean, w=[1, 2, 3])
+    mean(ℍVector([P, Q, R]), logEuclidean, w=[1, 2, 3])
 
     # Generate a set of 4 random 3x3 SPD matrices
     𝐏=randP(3, 4)
     weights=[1, 2, 3, 1]
     # passing a vector of Hermitian matrices (ℍVector type)
-    M=meanP(𝐏, Euclidean, w=weights) # (2) weighted Euclidean mean
-    M=meanP(𝐏, Wasserstein)  # (2) unweighted Wassertein mean
+    M=mean(𝐏, Euclidean, w=weights) # (2) weighted Euclidean mean
+    M=mean(𝐏, Wasserstein)  # (2) unweighted Wassertein mean
 
 """
-meanP(P::ℍ, Q::ℍ, metric::Metric=Fisher) = geodesic(P, Q, 0.5, metric)
+mean(P::ℍ, Q::ℍ, metric::Metric=Fisher) = geodesic(P, Q, 0.5, metric)
 
-function meanP(𝐏::ℍVector, metric::Metric=Fisher;    w::Vector=[], ✓w=true)
+function mean(𝐏::ℍVector, metric::Metric=Fisher;    w::Vector=[], ✓w=true)
     # iterative solutions
     if      metric == Fisher
             (G, iter, conv)=powerMean(𝐏, 0; w=w, ✓w=✓w)
@@ -742,21 +742,21 @@ function meanP(𝐏::ℍVector, metric::Metric=Fisher;    w::Vector=[], ✓w=tru
         return ℍ(T*T')
 
     elseif metric == Jeffrey
-        P=meanP(𝐏, Euclidean; w=w, ✓w=✓w)
-        Q=meanP(𝐏, invEuclidean; w=w, ✓w=✓w)
+        P=mean(𝐏, Euclidean; w=w, ✓w=✓w)
+        Q=mean(𝐏, invEuclidean; w=w, ✓w=✓w)
         P½, P⁻½=pow(P, 0.5, -0.5)
         return ℍ(P½ * sqrt(ℍ(P⁻½ * Q * P⁻½)) * P½)
 
     elseif metric == VonNeumann
-        @warn "function RiemannianGeometryP.meanP and .geodesic not defined for metric $metric"
+        @warn "function RiemannianGeometryP.mean and .geodesic not defined for metric $metric"
 
     else
-        @warn "in RiemannianGeometryP.meanP function: the chosen 'metric' does not exist"
+        @warn "in RiemannianGeometryP.mean function: the chosen 'metric' does not exist"
     end # if metric
 end # function
 
 """
-    meansP(℘::ℍVector₂, metric::Metric=Fisher)
+    means(℘::ℍVector₂, metric::Metric=Fisher)
 
  Given a 2d array `℘` of positive definite matrices as an [ℍVector₂ type](@ref)
  compute the [Fréchet mean](@ref) for as many [ℍVector type](@ref) object
@@ -766,7 +766,7 @@ end # function
 
  The weigted Fréchet mean is not supported in this function.
 
-  **See also**: [`meanP`](@ref).
+  **See also**: [`mean`](@ref).
 
   ## Examples
      using PosDefManifold
@@ -775,17 +775,17 @@ end # function
      # Generate a set of 40 random 4x4 SPD matrices
      𝐐=randP(4, 40)
      # listing directly ℍVector objects
-     meansP([𝐏, 𝐐], logEuclidean)
+     means([𝐏, 𝐐], logEuclidean)
      # note that [𝐏, 𝐐] is actually a ℍVector₂ type object
 
      # creating and passing an object of ℍVector₂ type
      ℘=ℍVector₂(undef, 2)
      ℘[1]=𝐏
      ℘[2]=𝐐
-     meansP(℘) # uses default Fisher metric
+     means(℘) # uses default Fisher metric
 
 """
-meansP(℘::ℍVector₂, metric::Metric=Fisher)=ℍVector([meanP(𝐏, metric) for 𝐏 in ℘])
+means(℘::ℍVector₂, metric::Metric=Fisher)=ℍVector([mean(𝐏, metric) for 𝐏 in ℘])
 
 
 """
@@ -844,9 +844,9 @@ meansP(℘::ℍVector₂, metric::Metric=Fisher)=ℍVector([meanP(𝐏, metric) 
 
 """
 function generalizedMean(𝐏::ℍVector, p::Real; w::Vector=[], ✓w=true)
-    if     p == -1 return meanP(𝐏, invEuclidean; w=w, ✓w=✓w)
-    elseif p ==  0 return meanP(𝐏, logEuclidean; w=w, ✓w=✓w)
-    elseif p ==  1 return meanP(𝐏, Euclidean;    w=w, ✓w=✓w)
+    if     p == -1 return mean(𝐏, invEuclidean; w=w, ✓w=✓w)
+    elseif p ==  0 return mean(𝐏, logEuclidean; w=w, ✓w=✓w)
+    elseif p ==  1 return mean(𝐏, Euclidean;    w=w, ✓w=✓w)
     else
         n, k=_attributes(𝐏)
         if isempty(w)
@@ -927,7 +927,7 @@ function logdet0Mean(𝐏::ℍVector;  w::Vector=[], ✓w=true, init=nothing,
     n, k = _attributes(𝐏)
     l=k/2
     isempty(w) ? v=[] : v = _getWeights(w, ✓w, k)
-    init == nothing ? M = meanP(𝐏, logEuclidean, w=w, ✓w=false) : M = ℍ(init)
+    init == nothing ? M = mean(𝐏, logEuclidean, w=w, ✓w=false) : M = ℍ(init)
     💡 = similar(M, eltype(M))
     iter, conv, oldconv = 1, 0., maxpos
     ⍰ && @info("Iterating RlogDetMean Fixed-Point...")
@@ -1120,14 +1120,14 @@ function powerMean(𝐏::ℍVector, p::Real;
   if !(-1<=p<=1) @error("The parameter p for power means must be in range [-1...1]")
   else
     if     p ≈-1
-            return (meanP(𝐏, InvEuclidean, w=w, ✓w=✓w), 1, 0)
+            return (mean(𝐏, InvEuclidean, w=w, ✓w=✓w), 1, 0)
     elseif p ≈ 0
-            LE=meanP(𝐏, logEuclidean, w=w, ✓w=✓w)
+            LE=mean(𝐏, logEuclidean, w=w, ✓w=✓w)
             P, iter1, conv1=powerMean(𝐏,  0.01, w=w, ✓w=✓w, init=LE, tol=tol, ⍰=⍰)
             Q, iter2, conv2=powerMean(𝐏, -0.01, w=w, ✓w=✓w, init=P, tol=tol, ⍰=⍰)
             return (geodesic(P, Q,  0.5,  Fisher), iter1+iter2, (conv1+conv2)/2)
     elseif p ≈ 1
-                return (meanP(𝐏, Euclidean, w=w, ✓w=✓w), 1, 0)
+                return (mean(𝐏, Euclidean, w=w, ✓w=✓w), 1, 0)
     else
         # Set Parameters
         n, k = _attributes(𝐏)
@@ -1196,7 +1196,7 @@ end
     using PosDefManifold
     P=randP(3)
     Q=randP(3)
-    G=meanP(P, Q)
+    G=mean(P, Q)
     # projecting P at the base point given by the geometric mean of P and Q
     S=logMap(P, G)
 """
@@ -1236,7 +1236,7 @@ end
     using PosDefManifold, LinearAlgebra
     P=randP(3)
     Q=randP(3)
-    G=meanP(P, Q, Fisher)
+    G=mean(P, Q, Fisher)
     # projecting P on the tangent space at the Fisher mean base point G
     S=logMap(P, G)
     # adding the identity in the tangent space and reprojecting back onto the manifold
@@ -1271,7 +1271,7 @@ end
     using PosDefManifold
     P=randP(3)
     Q=randP(3)
-    G=meanP(P, Q, Fisher)
+    G=mean(P, Q, Fisher)
     # projecting P at the base point given by the geometric mean of P and Q
     S=logMap(P, G)
     # vectorize S
@@ -1298,7 +1298,7 @@ vecP(S::ℍ)=[(if i==j return S[i, j] else return (S[i, j])*sqrt2 end) for j=1:s
     using PosDefManifold
     P=randP(3)
     Q=randP(3)
-    G=meanP(P, Q, Fisher)
+    G=mean(P, Q, Fisher)
     # projecting P at onto the tangent space at the Fisher mean base point
     S=logMap(P, G)
     # vectorize S
