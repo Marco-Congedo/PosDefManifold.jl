@@ -1,7 +1,7 @@
 push!(LOAD_PATH,"../src/")
 using Documenter, PosDefManifold
 
-makedocs (
+makedocs(
    sitename="PosDefManifold",
    modules=[PosDefManifold],
    pages =
