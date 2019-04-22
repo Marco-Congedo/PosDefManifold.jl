@@ -74,36 +74,6 @@ tr1(P) = P/tr(P)
 
 
 """
-    tr(P::ℍ, Q::ℍ)
-
- Given two positive definite matrix ``P`` and ``Q``,
- return the trace of the product ``PQ``.
- This is real even if ``P`` and ``Q`` are complex.
-
- ``P`` must be flagged as Hermitian. See [typecasting matrices](@ref),
- however a catch-all method for any combination of ``P`` and ``Q`` `Hermitian`
- and generic `Matrix` is defined,
- which can be called if the product ``PQ`` is real or if it as real eigenvalues.
-
- **See**: [trace](https://bit.ly/2HoOLiM).
-
- **See also**: [`tr1`](@ref).
-
- ## Examples
-    using LinearAlgebra, PosDefManifold
-    P=randP(5) # generate a random real positive definite matrix 5x5
-    Q=randP(5) # generate a random real positive definite matrix 5x5
-    trace=tr(P, Q)
-
-"""
-tr(P::ℍ, Q::ℍ) = real(𝚺(colProd(P, Q, i, i) for i=1:size(P, 1)))
-tr(P::Matrix, Q::ℍ) = real(𝚺(colProd(P, Q, i, i) for i=1:size(P, 1)))
-tr(P::ℍ, Q::Matrix) = real(𝚺(colProd(P, Q, i, i) for i=1:size(P, 1)))
-tr(P::Matrix, Q::Matrix) = real(𝚺(colProd(P, Q, i, i) for i=1:size(P, 1)))
-
-
-
-"""
     (1) normalizeCol!(X::Matrix, j::Int)
     (2) normalizeCol!(X::Matrix, j::Int, by::Number)
     (3) normalizeCol!(X::Matrix, range::UnitRange)
@@ -399,6 +369,36 @@ function sumOfSqrTril(X, k::Int=0)
         return s
     end
 end
+
+
+"""
+    tr(P::ℍ, Q::ℍ)
+
+ Given two positive definite matrix ``P`` and ``Q``,
+ return the trace of the product ``PQ``.
+ This is real even if ``P`` and ``Q`` are complex.
+
+ ``P`` must be flagged as Hermitian. See [typecasting matrices](@ref),
+ however a catch-all method for any combination of ``P`` and ``Q`` `Hermitian`
+ and generic `Matrix` is defined,
+ which can be called if the product ``PQ`` is real or if it as real eigenvalues.
+
+ **See**: [trace](https://bit.ly/2HoOLiM).
+
+ **See also**: [`tr1`](@ref).
+
+ ## Examples
+    using LinearAlgebra, PosDefManifold
+    P=randP(5) # generate a random real positive definite matrix 5x5
+    Q=randP(5) # generate a random real positive definite matrix 5x5
+    trace=tr(P, Q)
+
+"""
+tr(P::ℍ, Q::ℍ) = real(𝚺(colProd(P, Q, i, i) for i=1:size(P, 1)))
+tr(P::Matrix, Q::ℍ) = real(𝚺(colProd(P, Q, i, i) for i=1:size(P, 1)))
+tr(P::ℍ, Q::Matrix) = real(𝚺(colProd(P, Q, i, i) for i=1:size(P, 1)))
+tr(P::Matrix, Q::Matrix) = real(𝚺(colProd(P, Q, i, i) for i=1:size(P, 1)))
+
 
 """
     fidelity(P::ℍ, Q::ℍ)
