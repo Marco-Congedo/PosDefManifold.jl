@@ -632,7 +632,7 @@ end
  ``P`` and ``Q`` must be flagged as `Hermitian`. See [typecasting matrices](@ref).
 
  (2) [Fréchet mean](@ref) of an 1d array ``𝐏`` of ``k`` positive definite
- matrices``{P_1,...,P_k}`` of [ℍVector type](@ref),
+ matrices ``𝐏={P_1,...,P_k}`` of [ℍVector type](@ref),
  with optional non-negative real weights ``w={w_1,...,w_k}`` and using the
  specified `metric`as in (1).
 
@@ -799,7 +799,7 @@ means(metric::Metric, ℘::ℍVector₂)=ℍVector([mean(metric, 𝐏) for 𝐏 
     generalizedMean(𝐏::ℍVector, p::Real;
                    <w::Vector=[], ✓w=true>)
 
- Given a 1d array `𝐏` of ``k`` positive definite matrices``{P_1,...,P_k}``
+ Given a 1d array `𝐏` of ``k`` positive definite matrices ``𝐏={P_1,...,P_k}``
  of [ℍVector type](@ref) and optional non-negative real weights vector ``w={w_1,...,w_k}``,
  return the *weighted generalized mean* ``G`` with real parameter ``p``, that is,
 
@@ -819,12 +819,12 @@ means(metric::Metric, ℘::ℍVector₂)=ℍVector([mean(metric, 𝐏) for 𝐏 
  - For ``p=\\frac{1}{2}`` the generalized mean is the [modified Bhattacharyya mean](@ref).
  - For ``p=1`` the generalized mean is the [Euclidean](@ref) mean.
  - For ``p=-1`` the generalized mean is the [inverse Euclidean](@ref) mean.
- - For ``p=0`` the generalized mean is the [log Euclidean](@ref) mean, which is the [Fisher](@ref) mean when matrices in `𝐏` all pair-wise commute.
+ - For ``p=0`` the generalized mean is the [log Euclidean](@ref) mean, which is the [Fisher](@ref) mean when matrices in 𝐏 all pair-wise commute.
 
- Notice that when matrices in `𝐏` all pair-wise commute,
+ Notice that when matrices in 𝐏 all pair-wise commute,
  the generalized means coincide with the [power means](@ref)
  for any ``p∈[-1, 1]`` and for ``p=0.5`` it coincides also with the
- *Wasserstein* mean (see [`wasMean`](@ref)). For this reason the generalized means are used
+ *Wasserstein* mean. For this reason the generalized means are used
  as default initialization of both the [`powerMean`](@ref) and [`wasMean`](@ref)
  algorithm.
 
@@ -873,7 +873,7 @@ end # function
     logdet0Mean(𝐏::ℍVector;
                <w::Vector=[], ✓w=true, init=nothing, tol=1e-9, ⍰=false>)
 
- Given a 1d array ``𝐏`` of ``k`` positive definite matrices ``{P_1,...,P_k}``
+ Given a 1d array ``𝐏`` of ``k`` positive definite matrices ``𝐏={P_1,...,P_k}``
  of [ℍVector type](@ref) and optional non-negative real weights vector ``w={w_1,...,w_k}``,
  return the 3-tuple ``(G, iter, conv)``, where ``G`` is the mean according
  to the [logdet zero](@ref) metric and ``iter``, ``conv`` are the number of iterations
@@ -904,7 +904,7 @@ suggested by (Moakher, 2012, p315)[🎓](@ref), yielding iterations
 !!! note "Nota Bene"
     In normal circumstances this algorithm converges monothonically.
     If the algorithm diverges a **warning** is printed indicating the iteration
-    when this happened and the algorithm is interrupted.
+    when this happened.
 
  **See**: [logdet zero](@ref) metric, [modified Bhattacharyya mean](@ref).
 
@@ -963,7 +963,7 @@ end
     wasMean(𝐏::ℍVector;
            <w::Vector=[], ✓w=true, init=nothing, tol=1e-9, ⍰=false>)
 
- Given a 1d array `𝐏` of ``k`` positive definite matrices ``{P_1,...,P_k}``
+ Given a 1d array `𝐏` of ``k`` positive definite matrices ``𝐏={P_1,...,P_k}``
  of [ℍVector type](@ref) and optional non-negative real weights vector ``w={w_1,...,w_k}``,
  return the 3-tuple ``(G, iter, conv)``, where ``G`` is the mean according
  to the [Wasserstein](@ref) metric and ``iter``, ``conv`` are the number of iterations
@@ -994,7 +994,7 @@ end
 !!! note "Nota Bene"
     In normal circumstances this algorithm converges monothonically.
     If the algorithm diverges a **warning** is printed indicating the iteration
-    when this happened and the algorithm is interrupted.
+    when this happened.
 
  **See**: [Wasserstein](@ref) metric.
 
@@ -1053,7 +1053,7 @@ end
     powerMean(𝐏::ℍVector, p::Real;
              <w::Vector=[], ✓w=true, init=nothing, tol=1e-9, ⍰=false>)
 
- Given a 1d array `𝐏` of ``k`` positive definite matrices ``{P_1,...,P_k}``
+ Given a 1d array `𝐏` of ``k`` positive definite matrices ``𝐏={P_1,...,P_k}``
  of [ℍVector type](@ref),
  an optional non-negative real weights vector ``w={w_1,...,w_k}`` and
  a real parameter `p` ``\\in[-1, 1]``, return the
@@ -1098,7 +1098,7 @@ end
 !!! note "Nota Bene"
     In normal circumstances this algorithm converges monothonically.
     If the algorithm diverges a **warning** is printed indicating the iteration
-    when this happened and the algorithm is interrupted.
+    when this happened.
 
  **See**: [power means](@ref), [generalized means](@ref), [modified Bhattacharyya mean](@ref).
 
