@@ -322,7 +322,7 @@ distance²=distanceSqr # alias
  This is the square root of [`distanceSqr`](@ref)
  and is invoked with the same syntax therein.
 
- **See also**: [`distanceMatrix`](@ref).
+ **See also**: [`distanceMat`](@ref).
 """
 distance(metric::Metric, P::ℍ) = √(distanceSqr(metric, P))
 distance(metric::Metric, P::ℍ, Q::ℍ) = √(distanceSqr(metric, P, Q))
@@ -379,7 +379,7 @@ function GetdistSqrMat(metric::Metric, 𝐏::ℍVector)
             for j in 1:k-1, i in j+1:k
                 △[i, j]=distanceSqr(metric, 𝐏[i], 𝐏[j])  end
 
-    else    @warn("in RiemannianGeometryP.distanceSqrMat or .distanceMatrix function
+    else    @warn("in RiemannianGeometryP.distanceSqrMat or .distanceMat function
                          (PosDefManifold Package): the chosen 'metric' does not exist")
 
     end # If
@@ -422,7 +422,7 @@ distance²Mat=distanceSqrMat
 
 
 """
-    distanceMatrix(metric::Metric, 𝐏::ℍVector)
+    distanceMat(metric::Metric, 𝐏::ℍVector)
 
  Given a 1d array `𝐏` of ``k`` positive definite matrices
  ``{P_1,...,P_k}`` of [ℍVector type](@ref), create the ``k⋅k`` real `Hermitian`
@@ -443,7 +443,7 @@ distance²Mat=distanceSqrMat
     # Generate a set of 4 random 10x10 SPD matrices
     Pset=randP(10, 4) # or, using unicode: 𝐏=randP(10, 4)
     D=distanceMat(Fisher, Pset)
-    # or, using unicode: Δ=distanceMatrix(Fisher, 𝐏)
+    # or, using unicode: Δ=distanceMat(Fisher, 𝐏)
 """
 distanceMat(metric::Metric, 𝐏::ℍVector)=ℍ(sqrt.(GetdistSqrMat(metric, 𝐏)), :L)
 
