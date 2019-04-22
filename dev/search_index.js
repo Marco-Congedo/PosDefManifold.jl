@@ -581,7 +581,7 @@ var documenterSearchIndex = {"docs": [
     "page": "linearAlgebra.jl",
     "title": "PosDefManifold.det1",
     "category": "function",
-    "text": "det1!(P::ℍ)\n\nGiven a positive definite matrix P, return the best approximant to  P from the set of matrices in the special linear group,  i.e., the closer matrix having det=1. See Bhatia and Jain (2014)[🎓].\n\nP must be flagged as Hermitian. See typecasting matrices,  however a catch-all method is defined.\n\nSee det.\n\nSee also: tr1.\n\nExamples\n\nusing LinearAlgebra, PosDefManifold\nP=randP(5) # generate a random real positive definite matrix 5x5\nQ=det1(P)\ndet(Q) # must be 1\n\n\n\n\n\n"
+    "text": "det1!(P::ℍ)\n\nGiven a positive definite matrix P, return the best approximant to  P from the set of matrices in the special linear group,  i.e., the closer matrix having det=1. See Bhatia and Jain (2014)[🎓].\n\nP must be flagged as Hermitian. See typecasting matrices.  However a catch-all method is defined.\n\nSee det.\n\nSee also: tr1.\n\nExamples\n\nusing LinearAlgebra, PosDefManifold\nP=randP(5) # generate a random real positive definite matrix 5x5\nQ=det1(P)\ndet(Q) # must be 1\n\n\n\n\n\n"
 },
 
 {
@@ -589,7 +589,7 @@ var documenterSearchIndex = {"docs": [
     "page": "linearAlgebra.jl",
     "title": "PosDefManifold.tr1",
     "category": "function",
-    "text": "tr1(P::ℍ)\n\nGiven a positive definite matrix P, return the trace-normalized P  (trace=1).\n\nP must be flagged as Hermitian. See typecasting matrices,  however a catch-all method is defined.\n\nSee: trace.\n\nSee also: det1.\n\nExamples\n\nusing LinearAlgebra, PosDefManifold\nP=randP(5) # generate a random real positive definite matrix 5x5\nQ=tr1(P)\ntr(Q)  # must be 1\n\n\n\n\n\n"
+    "text": "tr1(P::ℍ)\n\nGiven a positive definite matrix P, return the trace-normalized P  (trace=1).\n\nP must be flagged as Hermitian. See typecasting matrices.  However a catch-all method is defined.\n\nSee: trace.\n\nSee also: det1.\n\nExamples\n\nusing LinearAlgebra, PosDefManifold\nP=randP(5) # generate a random real positive definite matrix 5x5\nQ=tr1(P)\ntr(Q)  # must be 1\n\n\n\n\n\n"
 },
 
 {
@@ -625,11 +625,67 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "linearAlgebra/#PosDefManifold.colProd",
+    "page": "linearAlgebra.jl",
+    "title": "PosDefManifold.colProd",
+    "category": "function",
+    "text": "(1) colProd(X::Matrix, j::Int, l::Int)\n(2) colProd(X::Matrix, j::Int, l::Int)\n\n(1) Given a general matrix X, comprised of real or complex elements,  return the dot product of the j^th and l^th columns, defined as,\n\nsum_i=1^r big(x_ij^*x_ilbig)\n\nwhere r is the number of rows of X and ^* the complex conjugate.\n\n(2) Given two general matrices X and Y, comprised of real or complex elements,  return the dot product of the j^th column of X and the l^th column  of Y, defined as,\n\nsum_i=1^r big(x_ij^*y_ilbig)\n\nwhere r is the number of rows of X and of Y and ^* the complex conjugate.\n\nX and of Y may have a different number of columns.  A catch-all method is defined.\n\nArguments j and l must be positive integers in range  (1) j,l in 1:size(X, 2) and (2) j in 1:size(X, 2), l in 1:size(Y, 2).\n\nSee also: normalizeCol!, colNorm.\n\nExamples\n\nusing PosDefManifold\nX=randn(10, 20)\np=colProd(X, 1, 3)\nY=randn(10, 30)\nq=colProd(X, Y, 2, 25)\n\n\n\n\n\n"
+},
+
+{
+    "location": "linearAlgebra/#PosDefManifold.sumOfSqr",
+    "page": "linearAlgebra.jl",
+    "title": "PosDefManifold.sumOfSqr",
+    "category": "function",
+    "text": "(1) sumOfSqr(A::Array)\n(2) sumOfSqr(X::Matrix, j::Int)\n(3) sumOfSqr(X::Matrix, range::UnitRange)\n\nReturn\n\n(1) the sum of square of the elements in an array A of any dimensions.\n(2) the sum of square of the j^th column of a matrix X.\n(3) the sum of square of the columns of X in a given range.\n\nNo range check nor type check is performed. A catch-all method is defined.\n\nNote that only (1) works for arrays of any dimensions and that  if A is a matrix (1) returns the square of the Frobenius norm:  sum a_ij^2\n\nArguments\n\n(1)  (A):\n\nA is an array of any dimensions (e.g., a vector, matrix or tensor), real or complex.\n\n(2) (X, j):\n\nX is a generic matrix, real or complex;\nj is a positive integer in range 1:size(X, 2).\n\n(3) (X, range):\n\nX is a generic matrix, real or complex;;\nrange is a UnitRange type.\n\nSee also: sumOfSqrDiag, sumOfSqrTril.\n\nExamples\n\nusing PosDefManifold\nX=randn(10, 20)\nsum2=sumOfSqr(X)        # (1) sum of squares of all elements\nsum2=sumOfSqr(X, 1)     # (2) sum of squares of elements in column 1\nsum2=sumOfSqr(X, 2:4)   # (3) sum of squares of elements in column 2 to 4\n\n\n\n\n\n"
+},
+
+{
+    "location": "linearAlgebra/#PosDefManifold.sumOfSqrDiag",
+    "page": "linearAlgebra.jl",
+    "title": "PosDefManifold.sumOfSqrDiag",
+    "category": "function",
+    "text": "(1) sumOfSqrDiag(X::Matrix)\n(2) sumOfSqrDiag(D::Diagonal)\n\nReturn (1) the sum of squares of the diagonal elements in general matrix X  comprised of real or complex numbers.  If X is rectangular, the main diagonal is considered.\n\nIt also return (2) the sum of squares of real diagonal matrix Λ.\n\nNo range check nor type check is performed. A catch-all method is defined.\n\nSee also: sumOfSqr, sumOfSqrTril.\n\nExamples\n\nusing LinearAlgebra, PosDefManifold\nX=randn(10, 20)\nsumDiag2=sumOfSqrDiag(X) # (1)\nsumDiag2=sumOfSqrDiag(Diagonal(X)) # (2)\n\n\n\n\n\n"
+},
+
+{
+    "location": "linearAlgebra/#PosDefManifold.colNorm",
+    "page": "linearAlgebra.jl",
+    "title": "PosDefManifold.colNorm",
+    "category": "function",
+    "text": "colNorm(X::Matrix, j::Int)\n\nReturn the Euclidean norm of the j^th column of general matrix X.  No range check nor type check is performed. A catch-all method is defined.\n\nSee also: normalizeCol!, colProd.\n\nExamples\n\nusing PosDefManifold\nX=randn(10, 20)\nnormOfSecondColumn=colNorm(X, 2)\n\n\n\n\n\n"
+},
+
+{
+    "location": "linearAlgebra/#PosDefManifold.sumOfSqrTril",
+    "page": "linearAlgebra.jl",
+    "title": "PosDefManifold.sumOfSqrTril",
+    "category": "function",
+    "text": "sumOfSqrTril(X::Matrix, k::Int=0)\n\nGiven a general matrix X, return the sum of squares of the elements  in the lower triangle X up to the k^th underdiagonal.\n\nX may be rectangular. k must be in range 1-size(X, 1):0.\n\nSee julia tril(M, k::Integer) function  for numbering of diagonals.   No range check nor type check is performed. A catch-all method is defined.\n\nSee also: sumOfSqr, sumOfSqrDiag.\n\nExamples\n\nusing PosDefManifold\nA=[4. 3.; 2. 5.; 1. 2.]\n#3×2 Array{Float64,2}:\n# 4.0  3.0\n# 2.0  5.0\n# 1.0  2.0\n\ns=sumOfSqrTril(A, -1)\n# 9.0 = 1²+2²+2²\n\ns=sumOfSqrTril(A, 0)\n# 50.0 = 1²+2²+2²+4²+5²\n\n\n\n\n\n"
+},
+
+{
+    "location": "linearAlgebra/#PosDefManifold.trOfProd",
+    "page": "linearAlgebra.jl",
+    "title": "PosDefManifold.trOfProd",
+    "category": "function",
+    "text": "trOfProd(P::ℍ, Q::ℍ)\n\nGiven two positive definite matrix P and Q,  return the trace of the product PQ.  This is real even if P and Q are complex.\n\nP must be flagged as Hermitian. See typecasting matrices.  However a catch-all method for any combination of P and Q Hermitian  and generic Matrix is defined,  which can be called if the product PQ is real or if it has  real eigenvalues.\n\nSee: trace.\n\nSee also: tr1.\n\nExamples\n\nusing PosDefManifold\nP=randP(5) # generate a random real positive definite matrix 5x5\nQ=randP(5) # generate a random real positive definite matrix 5x5\ntrace=tr(P, Q)\n\n\n\n\n\n"
+},
+
+{
+    "location": "linearAlgebra/#PosDefManifold.fidelity",
+    "page": "linearAlgebra.jl",
+    "title": "PosDefManifold.fidelity",
+    "category": "function",
+    "text": "fidelity(P::ℍ, Q::ℍ)\n\nGiven two positive definte matrices P and Q, return their fidelity:\n\ntrbig(P^12QP^12big)^12\n\nThis is used in quantum physics and is related to the  Wasserstein metric. See for example Bhatia, Jain and Lim (2019b)🎓.\n\nP and Q must be flagged as Hermitian.  See typecasting matrices,  however a catch-all method is defined.\n\nExamples\n\nusing PosDefManifold\nP=randP(5);\nQ=randP(5);\nf=fidelity(P, Q)\n\n\n\n\n\n"
+},
+
+{
     "location": "linearAlgebra/#Scalar-functions-of-matrices-1",
     "page": "linearAlgebra.jl",
     "title": "Scalar functions of matrices",
     "category": "section",
-    "text": "Function Description\ncolProd Sum of products of the elements in two columns\nsumOfSqr Sum of squares of all elements or of specified columns\nsumOfSqrDiag Sum of squares of the diagonal elements\ncolNorm Eucliden norm of a column\nsumOfSqrTril Sum of squares of the lower triangle elements up to a given underdiagonal\ntr Fast trace of the product of two Hermitian matrices\nfidelity (Quantum) Fidelity of two positive matrices⋅colProd\nsumOfSqr\nsumOfSqrDiag\ncolNorm\nsumOfSqrTril\ntr\nfidelity"
+    "text": "Function Description\ncolProd Sum of products of the elements in two columns\nsumOfSqr Sum of squares of all elements or of specified columns\nsumOfSqrDiag Sum of squares of the diagonal elements\ncolNorm Eucliden norm of a column\nsumOfSqrTril Sum of squares of the lower triangle elements up to a given underdiagonal\ntrOfProd Fast trace of the product of two Hermitian matrices\nfidelity (Quantum) Fidelity of two positive matrices⋅colProd\nsumOfSqr\nsumOfSqrDiag\ncolNorm\nsumOfSqrTril\ntrOfProd\nfidelity"
 },
 
 {
