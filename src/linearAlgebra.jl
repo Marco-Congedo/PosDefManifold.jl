@@ -380,16 +380,16 @@ end
 
  ``P`` must always be flagged as `Hermitian`. See [typecasting matrices](@ref).
  ``Q`` may be flagged as `Hermitian`, or may be a generic `Matrix` object,
- in which case this function return
- - a real trace if the product ``PQ`` is real or it has all positive real eigenvalues.
+ in which case return
+ - a real trace if the product ``PQ`` is real or if it has all positive real eigenvalues.
  - a complex trace if the product ``PQ`` is not real and has complex eigenvalues.
 
  ## Math
  Let ``P`` and ``Q`` be `Hermitian` matrices, using the properties of the trace
  (e.g., the cyclic property and the similarity invariance) you can use this
- function to compute the trace of many expressions. For example:
+ function to fast compute the trace of many expressions. For example:
 
- ``\\textrm{tr}(PQ)=\\textrm{tr}(P^{1/2}QP{1/2})``
+ ``\\textrm{tr}(PQ)=\\textrm{tr}(P^{1/2}QP^{1/2})``
 
  and
 
