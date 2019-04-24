@@ -685,7 +685,7 @@ var documenterSearchIndex = {"docs": [
     "page": "linearAlgebra.jl",
     "title": "Scalar functions of matrices",
     "category": "section",
-    "text": "Function Description\ncolProd Sum of products of the elements in two columns\nsumOfSqr Sum of squares of all elements or of specified columns\nsumOfSqrDiag Sum of squares of the diagonal elements\ncolNorm Eucliden norm of a column\nsumOfSqrTril Sum of squares of the lower triangle elements up to a given underdiagonal\ntrOfProd Fast trace of the product of two Hermitian matrices\nfidelity (Quantum) Fidelity of two positive matrices⋅colProd\nsumOfSqr\nsumOfSqrDiag\ncolNorm\nsumOfSqrTril\ntr\nfidelity"
+    "text": "Function Description\ncolProd Sum of products of the elements in two columns\nsumOfSqr Sum of squares of all elements or of specified columns\nsumOfSqrDiag Sum of squares of the diagonal elements\ncolNorm Eucliden norm of a column\nsumOfSqrTril Sum of squares of the lower triangle elements up to a given underdiagonal\ntr Fast trace of the product of two Hermitian matrices\nfidelity (Quantum) Fidelity of two positive matrices⋅colProd\nsumOfSqr\nsumOfSqrDiag\ncolNorm\nsumOfSqrTril\ntr\nfidelity"
 },
 
 {
