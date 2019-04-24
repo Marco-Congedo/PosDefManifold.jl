@@ -150,6 +150,12 @@ function tests();
     s=sumOfSqr(A)-abs2(A[1, 2])
     sumOfSqrTril(A, 0)≈ s ? OK() : OH(name*" Method 1 complex case")
 
+    name="function tr"; newTest(name)
+    tr(P, Q) ≈ tr(P*Q) ? OK() : OH(name*" Method 1 real case")
+    tr(PC, QC) ≈ tr(PC*QC) ? OK() : OH(name*" Method 1 complex case")
+    tr(P, X) ≈ tr(P*X) ? OK() : OH(name*" Method 2 real case")
+    tr(PC, XC) ≈ tr(PC*XC) ? OK() : OH(name*" Method 2 complex case")
+
     name="function fidelity"; newTest(name);
     # Test compilation only
     f=fidelity(P, Q); RUN()
@@ -418,8 +424,6 @@ function tests();
 
 end # function tests
 
-global failed=[]
-
 function newTest(name::String)
     sleep(0.025)
     println(" ")
@@ -432,10 +436,12 @@ RUN()=print("▶ ")
 
 function OH(name::String)
     print("⛔ ")
-    push!(failed, name)
+    push!(failing_tests, name)
 end
 
 SKIP()=print(" skypped")
+
+failing_tests=[]
 
 function testall()
     println("\n⭐ "," PosDefManifold testing utility", "⭐\n")
@@ -443,13 +449,10 @@ function testall()
     tests()
     # print out the tests that have failed (if any)
     println("\n")
-    length(failed)==0 ? @info("All tests were succesful!") :
-        for s in failed @warn("Test of $s failed") end
-        #for i=1:length(failed) @warn("Test of ", failed[i]," failed") end
-    if length(failed)>0
-        return failed
-        println("\nList of test that failed:")
-    end
+    length(failing_tests)==0 ? @info("All tests were succesful!") :
+        for s in failing_tests @warn("Test of $s failed") end
+    for i=1:length(failing_tests) pop!(failing_tests) end
+    return nothing
 end # function testall
 
 #clipboard("testall()")

@@ -372,17 +372,29 @@ end
 
 
 """
-    trOfProd(P::ℍ, Q::ℍ)
+    tr(P::ℍ, Q::ℍ)
 
  Given two positive definite matrix ``P`` and ``Q``,
  return the trace of the product ``PQ``.
  This is real even if ``P`` and ``Q`` are complex.
 
- ``P`` must be flagged as Hermitian. See [typecasting matrices](@ref).
- However a catch-all method for any combination of ``P`` and ``Q`` `Hermitian`
- and generic `Matrix` is defined,
- which can be called if the product ``PQ`` is real or if it has
- real eigenvalues.
+ ``P`` must always be flagged as `Hermitian`. See [typecasting matrices](@ref).
+ ``Q`` may be flagged as `Hermitian`, or may be a generic `Matrix` object,
+ in which case this function return
+ - a real trace if the product ``PQ`` is real or it has all positive real eigenvalues.
+ - a complex trace if the product ``PQ`` is not real and has complex eigenvalues.
+
+ ## Math
+ Let ``P`` and ``Q`` be `Hermitian` matrices, using the properties of the trace
+ (e.g., the cyclic property and the similarity invariance) you can use this
+ function to compute the trace of many expressions. For example:
+
+ ``\\textrm{tr}(PQ)=\\textrm{tr}(P^{1/2}QP{1/2})``
+
+ and
+
+ ``\\textrm{tr}(PQP)=\\textrm{tr}(P^{2}Q)`` (see example below).
+
 
  **See**: [trace](https://bit.ly/2HoOLiM).
 
@@ -390,15 +402,21 @@ end
 
  ## Examples
     using PosDefManifold
-    P=randP(5) # generate a random real positive definite matrix 5x5
-    Q=randP(5) # generate a random real positive definite matrix 5x5
-    trace=tr(P, Q)
+    P=randP(ComplexF64, 5) # generate a random complex positive definite matrix 5x5
+    Q=randP(ComplexF64, 5) # generate a random complex positive definite matrix 5x5
+    tr(P, Q) ≈ tr(P*Q) ? println(" ⭐ ") : println(" ⛔ ")
+    tr(P, Q) ≈ tr(sqrt(P)*Q*sqrt(P)) ? println(" ⭐ ") : println(" ⛔ ")
+    tr(sqr(P), Q) ≈ tr(P*Q*P) ? println(" ⭐ ") : println(" ⛔ ")
 
 """
-trOfProd(P::ℍ, Q::ℍ) = real(𝚺(colProd(P, Q, i, i) for i=1:size(P, 1)))
-trOfProd(P::Matrix, Q::ℍ) = real(𝚺(colProd(P, Q, i, i) for i=1:size(P, 1)))
-trOfProd(P::ℍ, Q::Matrix) = real(𝚺(colProd(P, Q, i, i) for i=1:size(P, 1)))
-trOfProd(P::Matrix, Q::Matrix) = real(𝚺(colProd(P, Q, i, i) for i=1:size(P, 1)))
+function tr(P::ℍ, Q::ℍ)
+    a = 𝚺(colProd(P, Q, i, i) for i=1:size(P, 1))
+    if real(a)<0 return a else return real(a) end;
+end
+function tr(P::ℍ, Q::Matrix)
+    a = 𝚺(colProd(P, Q, i, i) for i=1:size(P, 1))
+    if real(a)<0 return a else return real(a) end;
+end
 
 
 """

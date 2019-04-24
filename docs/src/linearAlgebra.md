@@ -65,7 +65,7 @@ sumOfSqr
 sumOfSqrDiag
 colNorm
 sumOfSqrTril
-trOfProd
+tr
 fidelity
 ```
 

@@ -90,7 +90,7 @@ export
     sumOfSqrDiag,
     colNorm,
     sumOfSqrTril,
-    trOfProd,
+    tr,
     fidelity,
     fDiagonal, 𝑓𝑫,
     mgs,
