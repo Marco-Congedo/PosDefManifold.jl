@@ -54,7 +54,7 @@ ispos
 | [`sumOfSqrDiag`](@ref) | Sum of squares of the diagonal elements |
 | [`colNorm`](@ref) | Eucliden norm of a column |
 | [`sumOfSqrTril`](@ref) | Sum of squares of the lower triangle elements up to a given underdiagonal |
-| [`trOfProd`](@ref) | Fast trace of the product of two Hermitian matrices |
+| [`tr`](@ref) | Fast trace of the product of two Hermitian matrices |
 | [`fidelity`](@ref) | (Quantum) Fidelity of two positive matrices |
 
 ⋅
