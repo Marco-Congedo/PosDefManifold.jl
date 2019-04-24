@@ -665,11 +665,11 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "linearAlgebra/#PosDefManifold.trOfProd",
+    "location": "linearAlgebra/#LinearAlgebra.tr",
     "page": "linearAlgebra.jl",
-    "title": "PosDefManifold.trOfProd",
+    "title": "LinearAlgebra.tr",
     "category": "function",
-    "text": "trOfProd(P::ℍ, Q::ℍ)\n\nGiven two positive definite matrix P and Q,  return the trace of the product PQ.  This is real even if P and Q are complex.\n\nP must be flagged as Hermitian. See typecasting matrices.  However a catch-all method for any combination of P and Q Hermitian  and generic Matrix is defined,  which can be called if the product PQ is real or if it has  real eigenvalues.\n\nSee: trace.\n\nSee also: tr1.\n\nExamples\n\nusing PosDefManifold\nP=randP(5) # generate a random real positive definite matrix 5x5\nQ=randP(5) # generate a random real positive definite matrix 5x5\ntrace=tr(P, Q)\n\n\n\n\n\n"
+    "text": "tr(P::ℍ, Q::ℍ)\n\nGiven two positive definite matrix P and Q,  return the trace of the product PQ.  This is real even if P and Q are complex.\n\nP must always be flagged as Hermitian. See typecasting matrices.  Q may be flagged as Hermitian, or may be a generic Matrix object,  in which case this function return\n\na real trace if the product PQ is real or it has all positive real eigenvalues.\na complex trace if the product PQ is not real and has complex eigenvalues.\n\nMath\n\nLet P and Q be Hermitian matrices, using the properties of the trace  (e.g., the cyclic property and the similarity invariance) you can use this  function to compute the trace of many expressions. For example:\n\ntextrmtr(PQ)=textrmtr(P^12QP12)\n\nand\n\ntextrmtr(PQP)=textrmtr(P^2Q) (see example below).\n\nSee: trace.\n\nSee also: tr1.\n\nExamples\n\nusing PosDefManifold\nP=randP(ComplexF64, 5) # generate a random complex positive definite matrix 5x5\nQ=randP(ComplexF64, 5) # generate a random complex positive definite matrix 5x5\ntr(P, Q) ≈ tr(P*Q) ? println(\" ⭐ \") : println(\" ⛔ \")\ntr(P, Q) ≈ tr(sqrt(P)*Q*sqrt(P)) ? println(\" ⭐ \") : println(\" ⛔ \")\ntr(sqr(P), Q) ≈ tr(P*Q*P) ? println(\" ⭐ \") : println(\" ⛔ \")\n\n\n\n\n\n"
 },
 
 {
@@ -685,7 +685,7 @@ var documenterSearchIndex = {"docs": [
     "page": "linearAlgebra.jl",
     "title": "Scalar functions of matrices",
     "category": "section",
-    "text": "Function Description\ncolProd Sum of products of the elements in two columns\nsumOfSqr Sum of squares of all elements or of specified columns\nsumOfSqrDiag Sum of squares of the diagonal elements\ncolNorm Eucliden norm of a column\nsumOfSqrTril Sum of squares of the lower triangle elements up to a given underdiagonal\ntrOfProd Fast trace of the product of two Hermitian matrices\nfidelity (Quantum) Fidelity of two positive matrices⋅colProd\nsumOfSqr\nsumOfSqrDiag\ncolNorm\nsumOfSqrTril\ntrOfProd\nfidelity"
+    "text": "Function Description\ncolProd Sum of products of the elements in two columns\nsumOfSqr Sum of squares of all elements or of specified columns\nsumOfSqrDiag Sum of squares of the diagonal elements\ncolNorm Eucliden norm of a column\nsumOfSqrTril Sum of squares of the lower triangle elements up to a given underdiagonal\ntrOfProd Fast trace of the product of two Hermitian matrices\nfidelity (Quantum) Fidelity of two positive matrices⋅colProd\nsumOfSqr\nsumOfSqrDiag\ncolNorm\nsumOfSqrTril\ntr\nfidelity"
 },
 
 {
