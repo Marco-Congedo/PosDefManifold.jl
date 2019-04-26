@@ -1,5 +1,5 @@
 # Unit linearAlgebra.jl, part of PosDefManifold Package for julia language
-# v 0.1.2 - last update 22 of April 2019
+# v 0.1.2 - last update 26 of April 2019
 #
 # MIT License
 # Copyright (c) 2019, Marco Congedo, CNRS, Grenobe, France:
