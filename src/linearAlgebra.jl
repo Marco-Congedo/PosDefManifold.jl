@@ -58,9 +58,9 @@ det1(P) = P/det(P)^(1/size(P, 1))
  ``P`` must be flagged as Hermitian. See [typecasting matrices](@ref).
  However a catch-all method is defined.
 
- **See**: [trace](https://bit.ly/2HoOLiM).
+ **See**: [Julia trace function](https://bit.ly/2HoOLiM).
 
- **See also**: [`det1`](@ref).
+ **See also**: [`tr`](@ref), [`det1`](@ref).
 
  ## Examples
     using LinearAlgebra, PosDefManifold
@@ -79,7 +79,7 @@ tr1(P) = P/tr(P)
     (3) normalizeCol!(X::Matrix, range::UnitRange)
     (4) normalizeCol!(X::Matrix, range::UnitRange, by::Number)
 
- Given a general matrix ``X`` comprised of real or complex elements,
+ Given a general matrix ``X``,
  - (1) normalize the ``j^{th}``column
  - (2) divide the elements of the ``j^{th}`` column by number ``by``
  - (3) normalize the columns in ``range``
@@ -90,7 +90,10 @@ tr1(P) = P/tr(P)
 
  ``range`` is a [UnitRange](https://bit.ly/2HSfK5J) type.
 
-  No range check nor type check is performed. A catch-all method is defined.
+  No range check nor type check is performed.
+  A catch-all method is defined, but keep in mind that Julia
+  does not allow normalizing the columns of `Hermitian` matrices.
+  (see [typecasting matrices](@ref)).
 
   **See** [norm](https://bit.ly/2TaAkR0) and [randn](https://bit.ly/2I1Vgrg) for the example
 
@@ -109,21 +112,21 @@ tr1(P) = P/tr(P)
 """
 function normalizeCol!(X::Matrix{T}, j::Int) where T<:RealOrComplex
     w=colNorm(X, j)
-    @inbounds for i=1:size(X, 1) X[i, j]/=w end
+    for i=1:size(X, 1) @inbounds X[i, j]/=w end
 end
 function normalizeCol!(X, j::Int)
     w=colNorm(X, j)
-    @inbounds for i=1:size(X, 1) X[i, j]/=w end
+    for i=1:size(X, 1) @inbounds X[i, j]/=w end
 end
 
-normalizeCol!(X::Matrix{T}, j::Int, by::Number) where T<:RealOrComplex = @inbounds for i=1:size(X, 1) X[i, j]/=by end
-normalizeCol!(X, j::Int, by::Number) = @inbounds for i=1:size(X, 1) X[i, j]/=by end
+normalizeCol!(X::Matrix{T}, j::Int, by::Number) where T<:RealOrComplex = for i=1:size(X, 1) @inbounds X[i, j]/=by end
+normalizeCol!(X, j::Int, by::Number) = for i=1:size(X, 1) @inbounds X[i, j]/=by end
 
-normalizeCol!(X::Matrix{T}, range::UnitRange) where T<:RealOrComplex = @inbounds for j in range normalizeCol!(X, j) end
-normalizeCol!(X, range::UnitRange) = @inbounds for j in range normalizeCol!(X, j) end
+normalizeCol!(X::Matrix{T}, range::UnitRange) where T<:RealOrComplex = for j in range normalizeCol!(X, j) end
+normalizeCol!(X, range::UnitRange) = for j in range normalizeCol!(X, j) end
 
-normalizeCol!(X::Matrix{T}, range::UnitRange, by::Number) where T<:RealOrComplex = @inbounds for j in range normalizeCol!(X, j, by) end
-normalizeCol!(X, range::UnitRange, by::Number) = @inbounds for j in range normalizeCol!(X, j, by) end
+normalizeCol!(X::Matrix{T}, range::UnitRange, by::Number) where T<:RealOrComplex = for j in range normalizeCol!(X, j, by) end
+normalizeCol!(X, range::UnitRange, by::Number) = for j in range normalizeCol!(X, j, by) end
 
 
 #  -------------------------------
@@ -221,13 +224,12 @@ end
     q=colProd(X, Y, 2, 25)
 
 """
-colProd(X::Matrix{T}, j::Int, l::Int) where T<:Real=𝚺(x1*x2 for (x1, x2) in zip(X[:, j], X[:, l]))
-colProd(X::Matrix{T}, j::Int, l::Int) where T<:Complex=𝚺(conj(x1)*x2 for (x1, x2) in zip(X[:, j], X[:, l]))
+colProd(X::Matrix{T}, j::Int, l::Int) where T<:RealOrComplex=𝚺(conj(x1)*x2 for (x1, x2) in zip(X[:, j], X[:, l]))
 colProd(X, j::Int, l::Int)=𝚺(conj(x1)*x2 for (x1, x2) in zip(X[:, j], X[:, l]))
 
-colProd(X::Matrix{T}, Y::Matrix{T}, j::Int, l::Int) where T<:Real=𝚺(x1*x2 for (x1, x2) in zip(X[:, j], Y[:, l]))
-colProd(X::Matrix{T}, Y::Matrix{T}, j::Int, l::Int) where T<:Complex=𝚺(conj(x1)*x2 for (x1, x2) in zip(X[:, j], Y[:, l]))
+colProd(X::Matrix{T}, Y::Matrix{T}, j::Int, l::Int) where T<:RealOrComplex=𝚺(conj(x1)*x2 for (x1, x2) in zip(X[:, j], Y[:, l]))
 colProd(X, Y, j::Int, l::Int)=𝚺(conj(x1)*x2 for (x1, x2) in zip(X[:, j], Y[:, l]))
+
 
 """
     colNorm(X::Matrix, j::Int)
@@ -372,14 +374,15 @@ end
 
 
 """
-    tr(P::ℍ, Q::ℍ)
+    (1) tr(P::ℍ, Q::ℍ)
+    (2) tr(P::ℍ, Q::Matrix)
 
- Given two positive definite matrix ``P`` and ``Q``,
+ Given (1) two positive definite matrix ``P`` and ``Q``,
  return the trace of the product ``PQ``.
  This is real even if ``P`` and ``Q`` are complex.
 
  ``P`` must always be flagged as `Hermitian`. See [typecasting matrices](@ref).
- ``Q`` may be flagged as `Hermitian`, or may be a generic `Matrix` object,
+ In (2) ``Q`` is a generic `Matrix` object,
  in which case return
  - a real trace if the product ``PQ`` is real or if it has all positive real eigenvalues.
  - a complex trace if the product ``PQ`` is not real and has complex eigenvalues.
@@ -410,12 +413,19 @@ end
 
 """
 function tr(P::ℍ, Q::ℍ)
-    a = 𝚺(colProd(P, Q, i, i) for i=1:size(P, 1))
+    a = 𝚺(colProd(P, Q, i, i) for i=1:size(P, 2))
     if real(a)<0 return a else return real(a) end;
 end
 function tr(P::ℍ, Q::Matrix)
-    a = 𝚺(colProd(P, Q, i, i) for i=1:size(P, 1))
-    if real(a)<0 return a else return real(a) end;
+    λ = [colProd(P, Q, i, i) for i=1:size(P, 2)]
+    OK=true
+    for l in λ
+        if imag(l) ≉  0
+            OK=false
+            break
+        end
+    end
+    if OK return real(𝚺(λ)) else return 𝚺(λ) end
 end
 
 
@@ -450,19 +460,22 @@ end
 ## 4. Diagonal functions of matrices
 #  ---------------------------------
 """
-    fDiagonal(func::Function, X::Matrix, k::Int=0)
+    (1) fDiagonal(func::Function, X::ℍ, k::Int=0)
+    (2) fDiagonal(func::Function, X::LowerTriangular, k::Int=0)
+    (3) fDiagonal(func::Function, X::Diagonal, k::Int=0)
+    (4) fDiagonal(func::Function, X::Matrix, k::Int=0)
 
  **alias**: `𝑓𝑫`
 
  Applies function `func` element-wise to the elements of the ``k^{th}``
- diagonal of generic matrix ``X`` of dimension *r⋅c*
+ diagonal of matrix ``X`` (square in (1-3) and of dimension *r⋅c* in (4))
  and return a diagonal matrix with these elements.
 
  See julia [tril(M, k::Integer)](https://bit.ly/2Tbx8o7) function
  for numbering of diagonals.
 
- If the matrix is Diagonal `k` must be zero.
- If the matrix is lower triangular `k` cannot be positive.
+ If the matrix is Diagonal (3) `k` must be zero.
+ If the matrix is lower triangular (2) `k` cannot be positive.
 
  Note that if ``X`` is rectangular the dimension of the result depends
  on the size of ``X`` and on the chosen diagonal.
@@ -709,11 +722,11 @@ invsqrt(P::ℍ) = spectralFunctions(P, x->1/sqrt(x));
     sqrt(P²)≈ P ? println(" ⭐ ") : println(" ⛔ ")
 
 """
-sqr(P::ℍ) = ℍ(P*P')
+sqr(P::ℍ) = ℍ(P*P)
 
 
 """
-    powerIterations(S::ℍ, q;
+    powerIterations(S, q;
             <evalues=false, tol=1e-9, maxiter=300, ⍰=false>)
 
  **alias**: `powIter`
@@ -722,16 +735,14 @@ sqr(P::ℍ) = ℍ(P*P')
  of matrix ``S`` using the [power iterations](https://bit.ly/2JSo0pb) +
  [Gram-Schmidt orthogonalization](https://bit.ly/2YE6zvy) as suggested by Strang.
 
- ``S`` must be flagged by julia as Hermitian.
- See [typecasting matrices](@ref).
+ ``S`` may be a generic matrix or may be flagged by julia as `Hermitian`.
+ See [typecasting matrices](@ref). In any case it must be symmetric if real
+ or Hermitian if complex. ``S`` may also be `LowerTriangular`,
+ but only if it is real (see below).
 
 !!! note "Nota Bene"
     Differently from the [`evd`](@ref) function, the eigenvectors and
     eigenvalues are sorted by decreasing order of eigenvalues.
-
- **Arguments** `(S, q; evalues=false, tol=1e-9, maxiter=300, ⍰=false)`:
- - ``S`` is an Hermitian matrix (real, complex, positive definite or not).
- - ``q`` is the number of eigenvectors to be found (thus the number of columns of the output).
 
  The following are *<optional keyword arguments>*:
  - ``tol`` is the tolerance for the convergence of the power method.
@@ -740,29 +751,44 @@ sqr(P::ℍ) = ℍ(P*P')
  - if ``evalues=true``, return the 4-tuple ``(Λ, U, iterations, covergence)``
  - if ``evalues=false`` return the 3-tuple ``(U, iterations, covergence)``
 
+ !!! note "Nota Bene"
+     If ``S`` is real, only its lower triangular part is used.
+     In this case a BLAS routine is used. See [BLAS routines](@ref)
+
 **See also**: [`mgs`](@ref).
 
  ## Examples
     using LinearAlgebra, PosDefManifold
-    S=randP(10);
+    # Generate an Hermitian (complex) matrix
+    S=randP(ComplexF64, 10);
     # all eigenvectors
     U, iterations, covergence=powIter(S, size(S, 2), ⍰=true)
     # 3 eigenvectors and eigenvalues
     Λ, U, iterations, covergence=powIter(S, 3, evalues=true);
     U'*U≈ I ? println(" ⭐ ") : println(" ⛔ ")
 
+    # passing a `Matrix` object
+    Λ, U, iterations, covergence=powIter(Matrix(S), 3, evalues=true)
+
+    # passing a `LowerTriangular` object (must be a real matrix in this case)
+    A=LowerTriangular(randn(10, 10))
+    Λ, U, iterations, covergence=powIter(A, 3, evalues=true)
+
+
 """
-function powerIterations(S::ℍ, q::Int;
-                     evalues=false, tol=1e-9, maxiter=300, ⍰=false)
-    U=randn(eltype(S), size(S, 1), q) # initialization
+function powerIterations(S::Matrix, q::Int;
+                evalues=false, tol=1e-9, maxiter=300, ⍰=false)
+    n=size(S, 1)
+    nq=n*q
+    U=randn(eltype(S), n, q) # initialization
     normalizeCol!(U, 1:q)
     💡=similar(U, eltype(U)) # 💡 is the iterated solution
     (iter, conv) = 1, 0.
     if ⍰ @info("Running Power Iterations...") end
     while true
         # power iteration of q vectors and their Gram-Schmidt Orthogonalization
-        💡=mgs(S*U)
-        conv=norm((💡)' * U-I) / q
+        eltype(S)<:Real ? 💡=mgs(BLAS.symm('L', 'L', S, U)) : 💡=mgs(S*U)
+        conv=norm((💡)' * U-I) / nq
         if ⍰ println("iteration: ", iter, "; convergence: ", conv) end
         if conv<=tol || iter >= maxiter
             break;
@@ -777,6 +803,14 @@ function powerIterations(S::ℍ, q::Int;
         return (⋱(real(D)), 💡, iter, conv)
     end
 end
+powerIterations(S::ℍ, q::Int;
+        evalues=false, tol=1e-9, maxiter=300, ⍰=false) =
+    powerIterations(Matrix(S), q; evalues=evalues, tol=tol, maxiter=maxiter, ⍰=⍰)
+
+powerIterations(S::LowerTriangular{T}, q::Int;
+        evalues=false, tol=1e-9, maxiter=300, ⍰=false) where T<:Real =
+    powerIterations(Matrix(S), q; evalues=evalues, tol=tol, maxiter=maxiter, ⍰=⍰)
+
 powIter=powerIterations
 
 #  -----------------------------------------------

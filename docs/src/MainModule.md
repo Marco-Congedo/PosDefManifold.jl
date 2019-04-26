@@ -99,7 +99,7 @@ To know what is the current metric, get it as a string as:
   a vector of vectors of Hermitian matrices.
   Julia sees it as: `Array{Array{Hermitian,1},1}`. Note that `ℍVector₂`
   is not a matrix of Hermitian matrices since the several `ℍVector` objects
-  it holds do not need to have the same length. 
+  it holds do not need to have the same length.
 
 ### tips & tricks
 
@@ -165,13 +165,12 @@ To know what is the current metric, get it as a string as:
     julia> norm(X[:, 1])
     1.0
 
- Another example when typecasting is useful: the [`gram`](@ref) function
- takes a `Matrix` type as argument (since `X` is expected to be a data matrix),
+ Another example when typecasting is useful: functions like the [`gram`](@ref) function takes a `Matrix` type as argument (since `X` is expected to be a data matrix),
  like in
 
-    H=gram(X)
+    H=gram(X).
 
- The following will not work though:
+ The following would not work though:
 ```
  H=gram(X')
 ```
@@ -179,9 +178,20 @@ To know what is the current metric, get it as a string as:
  since `X'` is an `Adjoint` type. The problem is fixed by typecasting the
  adjoint matrix, such as
 
-  H=gram(Matrix(X'))
+  H=gram(Matrix(X')).
 
  Another example: here is how to get an Hermitian matrix out of the
  diagonal part of an Hermitian matrix H:
 
     Hermitian(Matrix(Diagonal(H))).
+
+#### BLAS routines
+Some functions in **PosDefManifold** call BLAS routines for optimal performnce.
+This is reported in the help section of the concerned functions.
+When this is the case, you can set the number of threads
+the BLAS library should use by:
+
+   using LinearAlgebra
+   BLAS.set_num_threads(n)
+
+where `n` is the number of threads.
