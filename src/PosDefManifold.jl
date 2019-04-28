@@ -1,5 +1,5 @@
 #    Main Module of the  PosDefManifold Package for julia language
-#    v 0.1.2 - last update 22th of April 2019
+#    v 0.1.3 - last update 28th of April 2019
 #
 #    MIT License
 #    Copyright (c) 2019, Marco Congedo, CNRS, Grenobe, France:
@@ -12,18 +12,20 @@ module PosDefManifold
 
 using LinearAlgebra, Statistics
 
+# Special instructions
+BLAS.set_num_threads(Int(round(Sys.CPU_THREADS*3/4)))
+
 # constants
 const sqrt2=√2
 const invsqrt2=1/sqrt2
-const minpos=1e-15
 const maxpos=1e15
-#const ghostMat=Matrix{Nothing}(undef, 1, 1)
 
 # aliases
-𝚺 = sum          # alias for sum, tab-completition: \bfSigma
-𝛍 = mean         # alias for mean, tab-completition: \bfmu
-⋱ = Diagonal     # alias for Diagonal, tab-completition: ⋱\ddots
-ℍ = Hermitian    # alias for Hermitian, tab completion \bbH
+𝚺 = sum             # alias for sum, tab-completition: \bfSigma
+𝛍 = mean            # alias for mean, tab-completition: \bfmu
+𝔻 = Diagonal	     # alias for Diagonal, tab-completition: \bbD
+ℍ = Hermitian       # alias for Hermitian, tab completion \bbH
+𝕃 = LowerTriangular # alias for LowerTriangular, tab completition \bbL
 
 # types
 
@@ -46,6 +48,7 @@ RealOrComplex=Union{Real, Complex}
     #...
 end
 
+
 import  Statistics.mean,
         LinearAlgebra.tr
 
@@ -62,8 +65,9 @@ export
     #aliases
     𝚺,
     𝛍,
-    ⋱,
+    𝔻,
     ℍ,
+    𝕃,
 
     #types
     RealOrComplex,
@@ -87,12 +91,13 @@ export
     normalizeCol!,
     colProd,
     sumOfSqr,
-    sumOfSqrDiag,
+    sumOfSqrDiag, ssd,
     colNorm,
-    sumOfSqrTril,
+    sumOfSqrTril, sst,
     tr,
+    quadraticForm, qufo,
     fidelity,
-    fDiagonal, 𝑓𝑫,
+    fDiagonal, 𝑓𝔻,
     mgs,
     evd,
     spectralFunctions,
