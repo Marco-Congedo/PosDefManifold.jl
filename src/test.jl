@@ -1,28 +1,29 @@
-# Unit test.jl, part of PosDefManifold Package for julia language
-# v 0.1.2 - last update 22th of April 2019
+#    Unit test.jl, part of PosDefManifold Package for julia language
+#    v 0.1.3 - last update 28th of April 2019
 #
-# MIT License
-# Copyright (c) 2019, Marco Congedo, CNRS, Grenobe, France:
-# https://sites.google.com/site/marcocongedo/home
+#    MIT License
+#    Copyright (c) 2019, Marco Congedo, CNRS, Grenobe, France:
+#    https://sites.google.com/site/marcocongedo/home
 #
-# DESCRIPTION
-# This Unit tests all functions in PosDefManifold.
-# Unce you ran it, for each method of each function,
-# a star is printed if the test is succesful,
-# a no_entry sign is printed if the test is not succesful.
-# If there are fails, the concerned functions will be listed as Warnings
-# and returned by the testall() function as an array of strings
+#    DESCRIPTION
+#    This Unit tests all functions in PosDefManifold.
+#    Unce you ran it, for each method of each function,
+#    a star sign is printed if the test is succesful,
+#    a play sign is printed if the function executes correctly and
+#    a no_entry sign is printed if the test is not succesful.
+#    If there are fails, the concerned functions will be listed as Warnings
+#    and returned by the testall() function as an array of strings
 
-# RUN TESTS
-# just hit CRTL+A (seect all) and Shift+Enter (run),
-# then invoke 'testall()' in the REPL
+#    RUN TESTS
+#    just hit CRTL+A (seect all) and Shift+Enter (run),
+#    then invoke 'testall()' in the REPL
 
-# USE IT FOR TESTING YOUR OWN PACKAGES
-# - Copy this unit in the same directory where the Main
-#     module of your library is.
-# - Replace 'PosDefManifold' by the name of your module(s) in the
-#    'using' command here below.
-# - Overwrite the tests() function with your own tests.
+#    USE IT FOR TESTING YOUR OWN PACKAGES
+#    - Copy this unit in the same directory where the Main
+#      module of your library is.
+#    - Replace 'PosDefManifold' by the name of your module(s) in the
+#      'using' command here below.
+#    - Overwrite the tests() function with your own tests.
 
 push!(LOAD_PATH, pwd())
 using LinearAlgebra, Statistics, PosDefManifold
@@ -80,9 +81,11 @@ function tests();
     det(det1(P))  ≈ 1 ?  OK() : OH(name*" real case")
     det(det1(PC)) ≈ 1 ?  OK() : OH(name*" complex case")
 
+
     name="function tr1"; newTest(name)
     tr(tr1(P))  ≈ 1 ?    OK() : OH(name*" real case")
     tr(tr1(PC)) ≈ 1 ?    OK() : OH(name*" complex case")
+
 
     name="function normalizeCol!"; newTest(name)
     j=rand(1:n)
@@ -124,12 +127,15 @@ function tests();
 
 
     name="function sumOfSqr"; newTest(name)
-    sumOfSqr(P_)        ≈ 68    ? OK() : OH(name*" Method 1 real case")
-    sumOfSqr(P_, 2)     ≈ 24    ? OK() : OH(name*" Method 2 real case")
-    sumOfSqr(P_, 1:2)   ≈ 38    ? OK() : OH(name*" Method 3 real case")
-    sumOfSqr(PC_)       ≈ 68.18 ? OK() : OH(name*" Method 1 complex case")
-    sumOfSqr(PC_, 2)    ≈ 24.08 ? OK() : OH(name*" Method 2 complex case")
-    sumOfSqr(PC_, 1:3)  ≈ 68.18 ? OK() : OH(name*" Method 3 complex case")
+    sumOfSqr(Matrix(P_))  ≈ 68    ? OK() : OH(name*" Method 1 real case")
+    sumOfSqr(P_)          ≈ 68    ? OK() : OH(name*" Method 2 real case")
+    sumOfSqr(P_, 2)       ≈ 24    ? OK() : OH(name*" Method 3 real case")
+    sumOfSqr(P_, 1:2)     ≈ 38    ? OK() : OH(name*" Method 4 real case")
+    sumOfSqr(Matrix(PC_)) ≈ 68.18 ? OK() : OH(name*" Method 1 complex case")
+    sumOfSqr(PC_)         ≈ 68.18 ? OK() : OH(name*" Method 2 complex case")
+    sumOfSqr(PC_, 2)      ≈ 24.08 ? OK() : OH(name*" Method 3 complex case")
+    sumOfSqr(PC_, 1:3)    ≈ 68.18 ? OK() : OH(name*" Method 4 complex case")
+
 
     name="function sumOfSqrDiag"; newTest(name)
     sumOfSqrDiag(P_)    ≈ 50 ? OK() : OH(name*" Method 1 real case")
@@ -140,9 +146,11 @@ function tests();
     s=sum(A[i, i]^2 for i in 1:size(A, 1))
     sumOfSqrDiag(A)     ≈ s  ? OK() : OH(name*" Method 2")
 
+
     name="function colNorm"; newTest(name)
     colNorm(X, 2)      ≈ norm(X[:, 2]) ? OK()  : OH(name*" Method 1 real case")
     colNorm(XC, 2)     ≈ norm(XC[:, 2]) ? OK() : OH(name*" Method 1 complex case")
+
 
     name="function sumOfSqrTril"; newTest(name)
     sumOfSqrTril(A3x2, -1)≈ 9 ? OK() : OH(name*" Method 1 real case")
@@ -150,11 +158,24 @@ function tests();
     s=sumOfSqr(A)-abs2(A[1, 2])
     sumOfSqrTril(A, 0)≈ s ? OK() : OH(name*" Method 1 complex case")
 
+
     name="function tr"; newTest(name)
     tr(P, Q) ≈ tr(P*Q) ? OK() : OH(name*" Method 1 real case")
     tr(PC, QC) ≈ tr(PC*QC) ? OK() : OH(name*" Method 1 complex case")
     tr(P, X) ≈ tr(P*X) ? OK() : OH(name*" Method 2 real case")
     tr(PC, XC) ≈ tr(PC*XC) ? OK() : OH(name*" Method 2 complex case")
+
+
+    name="function quadraticForm"; newTest(name)
+    v=randn(n)
+    vC=randn(ComplexF64, n)
+    quadraticForm(v, Matrix(P)) ≈ v'*P*v ? OK() : OH(name*" Method 1 real case")
+    quadraticForm(v, P) ≈ v'*P*v ? OK() : OH(name*" Method 2 real case")
+    quadraticForm(v, LowerTriangular(Matrix(P))) ≈ v'*P*v ? OK() : OH(name*" Method 3 real case")
+    quadraticForm(vC, Matrix(PC)) ≈ vC'*PC*vC ? OK() : OH(name*" Method 1 complex case")
+    quadraticForm(vC, PC) ≈ vC'*PC*vC ? OK() : OH(name*" Method 2 complex case")
+
+
 
     name="function fidelity"; newTest(name);
     # Test compilation only
@@ -191,25 +212,36 @@ function tests();
     spectralFunctions(P, x->x+1); RUN()
     spectralFunctions(PC, abs2); RUN()
 
+
     name="function pow"; newTest(name)
     P½, P½ⁱ=pow(P_, 0.5, -0.5)
     P½*P½ⁱ≈I && P½*P½≈P_ ?  OK() : OH(name*" Real Input")
     P½, P½ⁱ=pow(PC_, 0.5, -0.5)
     P½*P½ⁱ≈I && P½*P½≈PC_ ? OK() : OH(name*" Complex Input")
 
+
     name="function invsqrt"; newTest(name)
     P½ⁱ=invsqrt(P_)
     P½ⁱ*P_*P½ⁱ'≈I ? OK() : OH(name)
+
 
     name="function sqr"; newTest(name)
     P²=sqr(P_)
     P² ≈ P_*P_' ? OK() : OH(name)
 
-    name="function powerMethod"; newTest(name)
-    Λ, U, iterations, covergence=powIter(ℍ(P_), size(P_, 2), evalues=true)
-    sort(diag(Λ))≈eigvals(P_) && U*Λ*U'≈P_ ? OK() : OH(name*" Real Input")
-    Λ, U, iterations, covergence=powIter(ℍ(PC_), size(PC_, 2), evalues=true)
-    sort(diag(Λ))≈eigvals(PC_) && U*Λ*U'≈PC_ ? OK() : OH(name*" Complex Input")
+
+    name="function powerIterations"; newTest(name)
+    Λ, U, iterations, convergence=powIter(P_, size(P_, 2), evalues=true; tol=tol=1e-9)
+    sort(diag(Λ))≈eigvals(P_) && U*Λ*U'≈P_ ? OK() : OH(name*" Real Input Method 1")
+    Λ, U, iterations, convergence=powIter(PC_, size(PC_, 2), evalues=true; tol=tol=1e-9)
+    sort(diag(Λ))≈eigvals(PC_) && U*Λ*U'≈PC_ ? OK() : OH(name*" Complex Input Method 1")
+    Λ, U, iterations, convergence=powIter(ℍ(P_), size(P_, 2), evalues=true; tol=tol=1e-9)
+    sort(diag(Λ))≈eigvals(P_) && U*Λ*U'≈P_ ? OK() : OH(name*" Real Input Method 2")
+    Λ, U, iterations, convergence=powIter(ℍ(PC_), size(PC_, 2), evalues=true; tol=tol=1e-9)
+    sort(diag(Λ))≈eigvals(PC_) && U*Λ*U'≈PC_ ? OK() : OH(name*" Complex Input Method 2")
+    Λ, U, iterations, convergence=powIter(LowerTriangular(P_), size(P_, 2), evalues=true; tol=tol=1e-9)
+    sort(diag(Λ))≈eigvals(P_) && U*Λ*U'≈P_ ? OK() : OH(name*" Real Input Method 3")
+
 
     name="function choL"; newTest(name)
     L=choL(P_)
@@ -226,8 +258,10 @@ function tests();
     name="function randλ"; newTest(name);
     randλ(10); RUN()
 
+
     name="function randΛ"; newTest(name);
     randΛ(10); RUN()
+
 
     name="function randU"; newTest(name);
     U=randU(10)
@@ -235,9 +269,11 @@ function tests();
     U=randU(ComplexF64, 10)
     U'*U≈I ? OK() : OH(name*" Complex Input")
 
+
     name="function randP"; newTest(name);
     randP(3); RUN()
     randP(ComplexF64, 3); RUN()
+
 
     name="function regularize!"; newTest(name)
     signalVar=tr(P)
@@ -262,9 +298,11 @@ function tests();
     signalPlusNoiseVar=𝚺(tr(P) for P in 𝐏)
     signalVar/(signalPlusNoiseVar-signalVar) ≈ 10 ? OK() : OH(name*" Real Input Method 2")
 
+
     name="function gram"; newTest(name);
     gram(T); RUN()
     gram(W); RUN()
+
 
     name="function trade"; newTest(name);
     trade(P); RUN()
@@ -279,11 +317,13 @@ function tests();
     (geodesic(m, P, Q, 0.5) for m in metrics if m≠9); RUN()
     (geodesic(m, PC, QC, 0.5) for m in metrics if m≠9); RUN()
 
+
     name="function distanceSqr"; newTest(name);
     for m in metrics distanceSqr(m, P) end; RUN()
     for m in metrics distanceSqr(m, P, Q) end; RUN()
     for m in metrics distanceSqr(m, PC) end; RUN()
     for m in metrics distanceSqr(m, PC, QC) end; RUN()
+
 
     name="function distance"; newTest(name);
     # since it calls distanceSqr just check the call works
@@ -292,37 +332,42 @@ function tests();
     for m in metrics distance(m, PC) end; RUN()
     for m in metrics d=distance(m, PC, QC); end; RUN()
 
-    name="function distanceSqrMat"; newTest(name); SKIP()
-#    k=length(𝐏)
-#    for m in metrics
-#            D=distanceSqrMat(m, 𝐏)
-#            manualD=Matrix{Float64}(undef, k, k)
-#            for j=1:k, i=1:k manualD[i, j]=distanceSqr(m, 𝐏[i], 𝐏[j]) end
-#            manualD=[distanceSqr(m, 𝐏[i], 𝐏[j]) for j=1:k, i=1:k]
-#            manualD≈D ? OK() : OH(name*" Real Input, metric "*string(m))
-#    end
+
+    name="function distanceSqrMat (I)"; newTest(name);
+    k=length(𝐏)
+    for m in metrics
+            D=distanceSqrMat(m, 𝐏)
+            manualD=LowerTriangular(Matrix{Float64}(undef, k, k))
+            for j=1:k, i=j:k manualD[i, j]=distanceSqr(m, 𝐏[i], 𝐏[j]) end
+            manualD≈D ? OK() : OH(name*" Real Input, metric "*string(m))
+    end
 
 
-    #k=length(𝐏C)
-    #for m in metrics
-        #    D=distanceSqrMat(m, 𝐏C)
-         #   manualD=Matrix{Float64}(undef, k, k)
-        #    for j=1:k, i=1:k manualD[i, j]=distanceSqr(m, 𝐏C[i], 𝐏C[j]) end
-        #    #manualD=[distanceSqr(m, 𝐏C[i], 𝐏C[j]) for j=1:k, i=1:k]
-        #    manualD≈D ? OK() : OH(name*" Complex Input, metric "*string(m))
-    #end
+    name="function distanceSqrMat (II)"; newTest(name);
+    k=length(𝐏C)
+    for m in metrics
+            D=distanceSqrMat(m, 𝐏C)
+            manualD=LowerTriangular(Matrix{Float64}(undef, k, k))
+            for j=1:k, i=j:k manualD[i, j]=distanceSqr(m, 𝐏C[i], 𝐏C[j]) end
+            manualD≈D ? OK() : OH(name*" Complex Input, metric "*string(m))
+    end
+
 
     name="function distanceMat"; newTest(name); SKIP()
 
+
     name="function laplacian"; newTest(name);
-    Dsqr=distanceSqrMat(Euclidean, 𝐏)
+    Dsqr=distanceSqrMat(logEuclidean, 𝐏)
     lap=laplacian(Dsqr); RUN()
+
 
     name="function laplacianEigenMaps"; newTest(name);
     laplacianEM(lap, 2); RUN()
 
+
     name="function spectralEmbedding"; newTest(name);
-    spectralEmbedding(Euclidean, 𝐏, 2); RUN()
+    spectralEmbedding(logEuclidean, 𝐏, 2); RUN()
+
 
     name="function mean"; newTest(name);
     (mean(m, P, Q) for m in metrics); RUN()
@@ -330,9 +375,11 @@ function tests();
     (mean(m, PC, QC) for m in metrics); RUN()
     (mean(m, 𝐏C) for m in metrics); RUN()
 
+
     name="function means"; newTest(name);
     means(logEuclidean, ℍVector₂([𝐏, 𝐐])); RUN()
     means(logEuclidean, ℍVector₂([𝐏C, 𝐐C])); RUN()
+
 
     name="function generalizedMean"; newTest(name);
     𝐏=ℍVector([P_, Q_])
@@ -369,17 +416,21 @@ function tests();
     ldG, iter, conv = logdet0Mean(ℍVector([PC_, QC_]); w=w) # weighted logdet0 mean for k=2
     GM ≈ ldG ? OK() : OH(name*" Complex Input 2")
 
+
     name="function wasMean"; newTest(name);
     wasMean(ℍVector([P_, Q_])); RUN()
     wasMean(ℍVector([PC_, QC_])); RUN()
+
 
     name="function powerMean"; newTest(name);
     powerMean(ℍVector([P_, Q_]), 0.5); RUN()
     powerMean(ℍVector([PC_, QC_]), 0.5); RUN()
 
+
     name="function logMap"; newTest(name);
     logMap(Fisher, P, Q); RUN()
     logMap(Fisher, PC, QC); RUN()
+
 
     name="function expMap"; newTest(name);
     expMap(Fisher, P, Q); RUN()
@@ -401,9 +452,11 @@ function tests();
         @error("either logMap or expMap or both do not give the expected output in the complex case")
     end
 
+
     name="function vecP"; newTest(name);
     v=vecP(P); RUN()
     vC=vecP(PC); RUN()
+
 
     name="function matP"; newTest(name);
     Pnew=matP(v); RUN()

@@ -1,24 +1,24 @@
-# Unit linearAlgebra.jl, part of PosDefManifold Package for julia language
-# v 0.1.2 - last update 26 of April 2019
+#   Unit linearAlgebra.jl, part of PosDefManifold Package for julia language
+#   v 0.1.3 - last update 28th of April 2019
 #
-# MIT License
-# Copyright (c) 2019, Marco Congedo, CNRS, Grenobe, France:
-# https://sites.google.com/site/marcocongedo/home
+#   MIT License
+#   Copyright (c) 2019, Marco Congedo, CNRS, Grenobe, France:
+#   https://sites.google.com/site/marcocongedo/home
 #
-# DESCRIPTION
-# This Unit implements Linear Algebra methods and procedures
-# useful in relation to the Riemannian Geometry on the manifold
-# of Symmetric Positive Definite (SPD) or Hermitian matrices.
+#   DESCRIPTION
+#   This Unit implements Linear Algebra methods and procedures
+#   useful in relation to the Riemannian Geometry on the manifold
+#   of Symmetric Positive Definite (SPD) or Hermitian matrices.
 #
-# CONTENT
-# 1. Matrix normalizations
-# 2. Boolean functions of matrices
-# 3. Scalar functions of matrices
-# 4. Diagonal functions of matrices
-# 5. Unitary functions of matrices
-# 6. Matrix function of matrices
-# 7. Spectral decompositions of positive matrices
-# 8. Decompositions involving triangular matrices
+#   CONTENT
+#   1. Matrix normalizations
+#   2. Boolean functions of matrices
+#   3. Scalar functions of matrices
+#   4. Diagonal functions of matrices
+#   5. Unitary functions of matrices
+#   6. Matrix function of matrices
+#   7. Spectral decompositions of positive matrices
+#   8. Decompositions involving triangular matrices
 # __________________________________________________________________
 
 #  ------------------------
@@ -46,6 +46,7 @@
 
 """
 det1(P::ℍ) = ℍ(triu(P)/det(P)^(1/size(P, 1)))
+
 det1(P) = P/det(P)^(1/size(P, 1))
 
 
@@ -70,6 +71,7 @@ det1(P) = P/det(P)^(1/size(P, 1))
 
 """
 tr1(P::ℍ) = ℍ(triu(P)/tr(P))
+
 tr1(P) = P/tr(P)
 
 
@@ -114,18 +116,22 @@ function normalizeCol!(X::Matrix{T}, j::Int) where T<:RealOrComplex
     w=colNorm(X, j)
     for i=1:size(X, 1) @inbounds X[i, j]/=w end
 end
+
 function normalizeCol!(X, j::Int)
     w=colNorm(X, j)
     for i=1:size(X, 1) @inbounds X[i, j]/=w end
 end
 
 normalizeCol!(X::Matrix{T}, j::Int, by::Number) where T<:RealOrComplex = for i=1:size(X, 1) @inbounds X[i, j]/=by end
+
 normalizeCol!(X, j::Int, by::Number) = for i=1:size(X, 1) @inbounds X[i, j]/=by end
 
 normalizeCol!(X::Matrix{T}, range::UnitRange) where T<:RealOrComplex = for j in range normalizeCol!(X, j) end
+
 normalizeCol!(X, range::UnitRange) = for j in range normalizeCol!(X, j) end
 
 normalizeCol!(X::Matrix{T}, range::UnitRange, by::Number) where T<:RealOrComplex = for j in range normalizeCol!(X, j, by) end
+
 normalizeCol!(X, range::UnitRange, by::Number) = for j in range normalizeCol!(X, j, by) end
 
 
@@ -135,15 +141,19 @@ normalizeCol!(X, range::UnitRange, by::Number) = for j in range normalizeCol!(X,
 
 """
 ```
-(1) ispos(  λ::Vector;   <tol::Real=minpos, rev=true, 🔔=true, msg="">)
-(2) ispos(  Λ::Diagonal; <tol::Real=minpos, rev=true, 🔔=true, msg="">)
+    (1) ispos(   λ::Vector{T};
+                <tol::Real=0, rev=true, 🔔=true, msg="">) where T<:Real
+
+    (2) ispos(   Λ::Diagonal{T};
+                <tol::Real=0, rev=true, 🔔=true, msg="">) where T<:Real
 ```
 
  Return ``true`` if all numbers in (1) real vector ``λ`` or in (2) real diagonal
  matrix ``Λ`` are not inferior to ``tol``, otherwise return ``false``. This may be used,
  for example, in spectral functions to check that all eigenvalues are positive.
- The default value for ``tol`` is constant ``minpos`` declared in the main module
- [constants](@ref).
+ ``tol`` defaults to the square root of `Base.eps` of the type of ``λ`` (1)
+ or ``Λ`` (2). This corresponds to requiring positivity beyond about half of
+ the significant digits.
 
  The following are *<optional keyword arguments>*:
 
@@ -168,10 +178,11 @@ normalizeCol!(X, range::UnitRange, by::Number) = for j in range normalizeCol!(X,
  # └ @ [here julie will point to the line of code issuing the warning]
 ```
  """
-function ispos( λ::Vector;   tol::Real=minpos, rev=true, 🔔=true, msg="")
+function ispos( λ::Vector{T};   tol::Real=0, rev=true, 🔔=true, msg="")  where T<:Real
+    tol==0 ? tolerance = √eps(eltype(λ)) : tolerance = tol
     rev ? iterations = (length(λ):-1:1) : iterations=(1:length(λ))
     for i in iterations
-        if λ[i]<tol
+        if λ[i]<tolerance
             🔔 && print('\a') # print('\a') sounds a bell
             length(msg)>0 && @warn("function ispos(linearAlgebra.jl) "*msg* " at position $i")
             return false; break
@@ -180,7 +191,7 @@ function ispos( λ::Vector;   tol::Real=minpos, rev=true, 🔔=true, msg="")
     return true
 end
 
-function ispos( Λ::Diagonal;   tol::Real=minpos, rev=true, 🔔=true, msg="")
+function ispos( Λ::Diagonal{T};   tol::Real=0, rev=true, 🔔=true, msg="")  where T<:Real
     return ispos( diag(Λ); tol=tol, rev=rev, 🔔=🔔, msg=msg)
 end
 
@@ -224,11 +235,17 @@ end
     q=colProd(X, Y, 2, 25)
 
 """
-colProd(X::Matrix{T}, j::Int, l::Int) where T<:RealOrComplex=𝚺(conj(x1)*x2 for (x1, x2) in zip(X[:, j], X[:, l]))
-colProd(X, j::Int, l::Int)=𝚺(conj(x1)*x2 for (x1, x2) in zip(X[:, j], X[:, l]))
+colProd(X::Matrix{T}, j::Int, l::Int) where T<:RealOrComplex =
+        𝚺(conj(x1)*x2 for (x1, x2) in zip(X[:, j], X[:, l]))
 
-colProd(X::Matrix{T}, Y::Matrix{T}, j::Int, l::Int) where T<:RealOrComplex=𝚺(conj(x1)*x2 for (x1, x2) in zip(X[:, j], Y[:, l]))
-colProd(X, Y, j::Int, l::Int)=𝚺(conj(x1)*x2 for (x1, x2) in zip(X[:, j], Y[:, l]))
+colProd(X, j::Int, l::Int) =
+        𝚺(conj(x1)*x2 for (x1, x2) in zip(X[:, j], X[:, l]))
+
+colProd(X::Matrix{T}, Y::Matrix{T}, j::Int, l::Int) where T<:RealOrComplex =
+        𝚺(conj(x1)*x2 for (x1, x2) in zip(X[:, j], Y[:, l]))
+
+colProd(X, Y, j::Int, l::Int) =
+        𝚺(conj(x1)*x2 for (x1, x2) in zip(X[:, j], Y[:, l]))
 
 
 """
@@ -245,7 +262,8 @@ colProd(X, Y, j::Int, l::Int)=𝚺(conj(x1)*x2 for (x1, x2) in zip(X[:, j], Y[:,
     normOfSecondColumn=colNorm(X, 2)
 
 """
-colNorm(X::Matrix{T}, j::Int) where T<:RealOrComplex= √sumOfSqr(X, j)
+colNorm(X::Matrix{T}, j::Int) where T<:RealOrComplex = √sumOfSqr(X, j)
+
 colNorm(X, j::Int) = √sumOfSqr(X, j)
 
 
@@ -258,11 +276,13 @@ colNorm(X, j::Int) = √sumOfSqr(X, j)
  - (1) the sum of square of the elements in an array ``A`` of any dimensions.
  - (2) the sum of square of the ``j^{th}`` column of a matrix ``X``.
  - (3) the sum of square of the columns of ``X`` in a given range.
- No range check nor type check is performed. A catch-all method is defined.
 
  Note that only (1) works for arrays of any dimensions and that
  if ``A`` is a matrix (1) returns the square of the [Frobenius norm](https://bit.ly/2Fi10eH):
  ``\\sum |a_{ij}|^2. ``
+
+ For (1), if ``A`` is a matrix flagged by Julia as `Hermtian` or as
+ `LowerTriangular`, only the lower triangular part of ``A`` is used.
 
 **Arguments**
 
@@ -288,18 +308,33 @@ colNorm(X, j::Int) = √sumOfSqr(X, j)
 
 """
 sumOfSqr(A::Array{T}) where T<:RealOrComplex = 𝚺(abs2(a) for a in A)
-sumOfSqr(A) = 𝚺(abs2(a) for a in A)
+
+function sumOfSqr(H::Union{ℍ, 𝕃})
+    r=size(H, 1)
+    s=eltype(H)(0)
+    for j=1:size(H, 2)-1
+        @inbounds s+=abs2(H[j, j])
+        for i=j+1:r @inbounds s+=2*abs2(H[i, j]) end
+    end
+    @inbounds s+=abs2(H[r, r])
+    return s
+end
 
 sumOfSqr(X::Matrix{T}, j::Int) where T<:RealOrComplex = 𝚺(abs2.(X[:, j]))
-sumOfSqr(X, j::Int) = 𝚺(abs2.(X[:, j]))
 
-sumOfSqr(X::Matrix{T}, range::UnitRange) where T<:RealOrComplex = 𝚺(sumOfSqr(X, j) for j in range)
-sumOfSqr(X, range::UnitRange) = 𝚺(sumOfSqr(X, j) for j in range)
+sumOfSqr(H::ℍ, j::Int) = 𝚺(abs2.(H[:, j]))
+
+sumOfSqr(X::Matrix{T}, range::UnitRange) where T<:RealOrComplex =
+         𝚺(sumOfSqr(X, j) for j in range)
+
+sumOfSqr(H::ℍ, range::UnitRange) = 𝚺(sumOfSqr(H, j) for j in range)
 
 
 """
     (1) sumOfSqrDiag(X::Matrix)
     (2) sumOfSqrDiag(D::Diagonal)
+
+ **alias**: `ssd`
 
  Return (1) the sum of squares of the diagonal elements in general matrix ``X``
  comprised of real or complex numbers.
@@ -315,16 +350,22 @@ sumOfSqr(X, range::UnitRange) = 𝚺(sumOfSqr(X, j) for j in range)
     using LinearAlgebra, PosDefManifold
     X=randn(10, 20)
     sumDiag2=sumOfSqrDiag(X) # (1)
-    sumDiag2=sumOfSqrDiag(Diagonal(X)) # (2)
+    sumDiag2=sumOfSqrDiag(𝔻(X)) # (2) 𝔻=LinearAlgebra.Diagonal
 
 """
-sumOfSqrDiag(X::Matrix{T}) where T<:RealOrComplex = 𝚺(abs2(X[i, i]) for i=1:minimum(size(X)))
+sumOfSqrDiag(X::Matrix{T}) where T<:RealOrComplex =
+             𝚺(abs2(X[i, i]) for i=1:minimum(size(X)))
+
 sumOfSqrDiag(Λ::Diagonal) = 𝚺(abs2(Λ[i, i]) for i=1:size(Λ, 1))
+
 sumOfSqrDiag(X) = 𝚺(abs2(X[i, i]) for i=1:minimum(size(X)))
 
+ssd=sumOfSqrDiag
 
 """
     sumOfSqrTril(X::Matrix, k::Int=0)
+
+**alias**: `sst`
 
  Given a general matrix ``X``, return the sum of squares of the elements
  in the lower triangle ``X`` up to the ``k^{th}`` underdiagonal.
@@ -372,6 +413,7 @@ function sumOfSqrTril(X, k::Int=0)
     end
 end
 
+sst=sumOfSqrTril
 
 """
     (1) tr(P::ℍ, Q::ℍ)
@@ -416,6 +458,7 @@ function tr(P::ℍ, Q::ℍ)
     a = 𝚺(colProd(P, Q, i, i) for i=1:size(P, 2))
     if real(a)<0 return a else return real(a) end;
 end
+
 function tr(P::ℍ, Q::Matrix)
     λ = [colProd(P, Q, i, i) for i=1:size(P, 2)]
     OK=true
@@ -427,6 +470,60 @@ function tr(P::ℍ, Q::Matrix)
     end
     if OK return real(𝚺(λ)) else return 𝚺(λ) end
 end
+
+
+"""
+    quadraticForm(v::Vector{T}, X::Matrix{T}) where T<:RealOrComplex
+
+ **alias**: `qufo`
+
+ Given a vector ``v`` and a matrix ``X``, compute the quadratic form
+
+ ``v^*Xv``.
+
+ ``v`` and ``X`` may be real or complex. If they are real, only the
+ lower triangular part of ``X`` is used.
+
+ ``X`` may be a generic `Matrix`, may be flagged by Julia as an `Hermitian`
+ matrix or as a `LowerTriangular` matrix. In the latter case it must be real.
+
+ ## Math
+
+ For ``v`` and ``X`` real, the quadratic form is
+
+ ```sum_i(v_i^2x_{ii})+sum_i>j(2v_iv_jx_{ij})``.
+
+
+ ## Examples
+    using PosDefManifold
+    P=randP(5) # generate a random real positive definite matrix 5x5
+    v=randn(5)
+    q1=quadraticForm(v, P) # or q1=quad(v, P)
+    # obtain a lower Triangular view of P
+    L=LowerTriangular(Matrix(P)) # or L=𝕃(Matrix(P))
+    q2=quadraticForm(v, L)
+    q1 ≈ q2 ? println(" ⭐ ") : println(" ⛔ ")
+
+"""
+function quadraticForm(v::Vector{T}, X::Matrix{T}) where T<:RealOrComplex
+    if T<:Real
+        r=length(v)
+        s=0.
+        for i=1:r @inbounds s+=(v[i]^2 * X[i, i]) end # Diagonal
+        for j=1:r-1, i=j+1:r @inbounds s+=2*v[i]*v[j]*X[i, j] end # Off-diagonal
+        return s
+    else
+        return v'*X*v
+    end
+end
+
+quadraticForm(v::Vector{T}, P::ℍ{T}) where T<:RealOrComplex =
+              quadraticForm(v, Matrix(P))
+
+quadraticForm(v::Vector{T}, L::𝕃{T}) where T<:Real =
+              quadraticForm(v, Matrix(L))
+
+qufo=quadraticForm
 
 
 """
@@ -461,11 +558,11 @@ end
 #  ---------------------------------
 """
     (1) fDiagonal(func::Function, X::ℍ, k::Int=0)
-    (2) fDiagonal(func::Function, X::LowerTriangular, k::Int=0)
+    (2) fDiagonal(func::Function, X::𝕃, k::Int=0)
     (3) fDiagonal(func::Function, X::Diagonal, k::Int=0)
     (4) fDiagonal(func::Function, X::Matrix, k::Int=0)
 
- **alias**: `𝑓𝑫`
+ **alias**: `𝑓𝔻`
 
  Applies function `func` element-wise to the elements of the ``k^{th}``
  diagonal of matrix ``X`` (square in (1-3) and of dimension *r⋅c* in (4))
@@ -498,15 +595,19 @@ end
     Δ=fDiagonal(log, Λ)     # diagonal matrix with the log of the eigenvalues
     Δ=fDiagonal(x->x^2, Λ)  # using an anonymous function for the square of the eigenvalues
 """
-fDiagonal(func::Function, D::⋱, k::Int=0) = ⋱(func.(D))
-function fDiagonal(func::Function, L::LowerTriangular, k::Int=0)
+fDiagonal(func::Function, D::𝔻, k::Int=0) = 𝔻(func.(D))
+
+function fDiagonal(func::Function, L::𝕃, k::Int=0)
  if k>0 @error("in function fDiagonal (linearAlgebra.jl): k argument cannot be positive.")
- else return ⋱(func.(diag(L, k)))
+ else return 𝔻(func.(diag(L, k)))
  end
 end
-fDiagonal(func::Function, P::ℍ, k::Int=0) = ⋱(func.(diag(P, k)))
-fDiagonal(func::Function, X::Matrix{T}, k::Int=0) where T<:RealOrComplex= ⋱(func.(diag(X, k)))
-𝑓𝑫=fDiagonal
+
+fDiagonal(func::Function, P::ℍ, k::Int=0) = 𝔻(func.(diag(P, k)))
+
+fDiagonal(func::Function, X::Matrix{T}, k::Int=0) where T<:RealOrComplex= 𝔻(func.(diag(X, k)))
+
+𝑓𝔻=fDiagonal
 
 
 
@@ -519,9 +620,7 @@ fDiagonal(func::Function, X::Matrix{T}, k::Int=0) where T<:RealOrComplex= ⋱(fu
  Modified (stabilized) [Gram-Schmidt orthogonalization](https://bit.ly/2YE6zvy)
  of the columns of square or tall matrix ``T``, which can be comprised of real
  or complex elements.
- The orthogonalized ``T`` is returned by the function.
-
- ``T`` is not changed.
+ The orthogonalized ``T`` is returned by the function. ``T`` is not changed.
 
  All columns are orthogonalized by default. If instead argument `numCol` is provided,
  then only the first `numCol` columns of ``T`` are orthogonalized.
@@ -585,9 +684,9 @@ end # mgs function
     (U*Λ*U') ≈ S ? println(" ⭐ ") : println(" ⛔ ")
     # => UΛU'=S, UΛ=SU, ΛU'=U'S
 """
-function evd(S::ℍ) # returns tuple (Λ, U)
+function evd(S::ℍ) # return tuple (Λ, U)
     F = eigen(S)
-    return  ⋱(F.values), F.vectors # ⋱=LinearAlgebra.Diagonal
+    return  𝔻(F.values), F.vectors # 𝔻=LinearAlgebra.Diagonal
 end
 
 
@@ -640,9 +739,9 @@ end
 """
 function spectralFunctions(P::ℍ, func::Function)
     F = eigen(P)
-    ispos(F.values, msg="function spectralFunctions: at least one eigenvalue is smaller than the chosen tolerance")
+    ispos(F.values, msg="function spectralFunctions: at least one eigenvalue is smaller than the default tolerance")
     # optimize by computing only the upper trinagular part
-    return ℍ(F.vectors * ⋱(func.(F.values)) * F.vectors')
+    return ℍ(F.vectors * 𝔻(func.(F.values)) * F.vectors')
 end
 
 
@@ -677,7 +776,7 @@ end
 pow(P::ℍ, p)=spectralFunctions(P, x->x^p) # one argument
 function pow(P::ℍ, args...)               # several arguments
     (Λ, U) = evd(P)
-    ispos(Λ, msg="function Rpow: at least one eigenvalue is smaller than the chosen tolerance")
+    ispos(Λ, msg="function Rpow: at least one eigenvalue is smaller than the default tolerance")
     # optimize by computing only the upper trinagular part
     return  (ℍ(U * Λ^p * U') for p in args)
 end
@@ -726,90 +825,104 @@ sqr(P::ℍ) = ℍ(P*P)
 
 
 """
-    powerIterations(S, q;
-            <evalues=false, tol=1e-9, maxiter=300, ⍰=false>)
+    powerIterations(H, q;
+            <evalues=false, tol::Real=0, maxiter=300, ⍰=false>)
 
  **alias**: `powIter`
 
  Compute the ``q`` eigenvectors associated to the ``q`` largest (real) eigenvalues
- of matrix ``S`` using the [power iterations](https://bit.ly/2JSo0pb) +
+ of matrix ``H`` using the [power iterations](https://bit.ly/2JSo0pb) +
  [Gram-Schmidt orthogonalization](https://bit.ly/2YE6zvy) as suggested by Strang.
+ The eigenvectors are returned with the same type as ``H``.
 
- ``S`` may be a generic matrix or may be flagged by julia as `Hermitian`.
- See [typecasting matrices](@ref). In any case it must be symmetric if real
- or Hermitian if complex. ``S`` may also be `LowerTriangular`,
+ ``H`` must have real eigenvalues. It may be a generic `Matrix` object or may be
+ flagged by Julia as `Hermitian`. See [typecasting matrices](@ref).
+ In both cases it must be a symmetric matrix if it is real
+ or an Hermitian matrix if it is complex. ``H`` may also be `LowerTriangular`,
  but only if it is real (see below).
 
-!!! note "Nota Bene"
-    Differently from the [`evd`](@ref) function, the eigenvectors and
-    eigenvalues are sorted by decreasing order of eigenvalues.
-
  The following are *<optional keyword arguments>*:
- - ``tol`` is the tolerance for the convergence of the power method.
+ - ``tol`` is the tolerance for the convergence of the power method (see below).
  - ``maxiter`` is the maximum number of iterations allowed for the power method
  - if ``⍰=true``, the convergence of all iterations will be printed.
  - if ``evalues=true``, return the 4-tuple ``(Λ, U, iterations, covergence)``
  - if ``evalues=false`` return the 3-tuple ``(U, iterations, covergence)``
 
- !!! note "Nota Bene"
-     If ``S`` is real, only its lower triangular part is used.
-     In this case a BLAS routine is used. See [BLAS routines](@ref)
+
+!!! note "Nota Bene"
+    Differently from the [`evd`](@ref) function, the eigenvectors and
+    eigenvalues are sorted by decreasing order of eigenvalues.
+
+    If ``H`` is real, only its lower triangular part is used.
+    In this case a BLAS routine is used for computing the power iterations.
+    See [BLAS routines](@ref).
+
+    ``tol`` defaults to the square root of `Base.eps` of the type of ``H``.
+    This corresponds to requiring equality for the convergence criterion
+    over two successive iterations of about half the significant digits.
+
 
 **See also**: [`mgs`](@ref).
 
  ## Examples
     using LinearAlgebra, PosDefManifold
     # Generate an Hermitian (complex) matrix
-    S=randP(ComplexF64, 10);
+    H=randP(ComplexF64, 10);
     # all eigenvectors
-    U, iterations, covergence=powIter(S, size(S, 2), ⍰=true)
+    U, iterations, convergence=powIter(H, size(H, 2), ⍰=true)
     # 3 eigenvectors and eigenvalues
-    Λ, U, iterations, covergence=powIter(S, 3, evalues=true);
-    U'*U≈ I ? println(" ⭐ ") : println(" ⛔ ")
+    Λ, U, iterations, convergence=powIter(H, 3, evalues=true);
+    U'*U ≈ I && U*Λ*U'≈H ? println(" ⭐ ") : println(" ⛔ ")
 
     # passing a `Matrix` object
-    Λ, U, iterations, covergence=powIter(Matrix(S), 3, evalues=true)
+    Λ, U, iterations, convergence=powIter(Matrix(H), 3, evalues=true)
 
     # passing a `LowerTriangular` object (must be a real matrix in this case)
-    A=LowerTriangular(randn(10, 10))
-    Λ, U, iterations, covergence=powIter(A, 3, evalues=true)
-
+    L=𝕃(randP(10))
+    Λ, U, iterations, convergence=powIter(L, 3, evalues=true)
 
 """
-function powerIterations(S::Matrix, q::Int;
-                evalues=false, tol=1e-9, maxiter=300, ⍰=false)
-    n=size(S, 1)
-    nq=n*q
-    U=randn(eltype(S), n, q) # initialization
+function powerIterations(H::Matrix, q::Int;
+                         evalues=false, tol::Real=0, maxiter=300, ⍰=false)
+
+    (n, q², type) = size(H, 1), q^2, eltype(H)
+    tol==0 ? tolerance = √eps(real(type)) : tolerance = tol
+    msg1="Power Iterations reached a saddle point at:"
+    msg2="Power Iterations reached the max number of iterations at:"
+    U=randn(type, n, q) # initialization
     normalizeCol!(U, 1:q)
-    💡=similar(U, eltype(U)) # 💡 is the iterated solution
-    (iter, conv) = 1, 0.
-    if ⍰ @info("Running Power Iterations...") end
+    💡=similar(U) # 💡 is the poweriteration matrix
+    (iter, conv, oldconv) = 1, 0., maxpos
+    ⍰ && @info("Running Power Iterations...")
     while true
         # power iteration of q vectors and their Gram-Schmidt Orthogonalization
-        eltype(S)<:Real ? 💡=mgs(BLAS.symm('L', 'L', S, U)) : 💡=mgs(S*U)
-        conv=norm((💡)' * U-I) / nq
-        if ⍰ println("iteration: ", iter, "; convergence: ", conv) end
-        if conv<=tol || iter >= maxiter
-            break;
+        type<:Real ? 💡=mgs(BLAS.symm('L', 'L', H, U)) : 💡=mgs(H*U)
+        conv=norm((💡)' * U-I) / q²
+        saddlePoint = conv ≈ oldconv  && @info(msg1, iter)
+        overRun     = iter == maxiter && @warn(msg2, iter)
+        #diverged    = conv > oldconv && @warn(msg3, iter)
+        ⍰ && println("iteration: ", iter, "; convergence: ", conv)
+        if conv<=tolerance || saddlePoint==true ||  overRun==true
+            break
         else U = 💡 end
+        oldconv=conv
         iter += 1
     end # while
     if evalues == false
         return (💡, iter, conv)
     else
-        D=zeros(eltype(U), q, q)
-        for i=1:q D[i, i] = 💡[:, i]' * S * 💡[:, i] end
-        return (⋱(real(D)), 💡, iter, conv)
+        type<:Real ? d=[quadraticForm(💡[:, i], H) for i=1:q] : d=[💡[:, i]'*H*💡[:, i] for i =1:q]
+        return (𝔻(real(d)), 💡, iter, conv)
     end
 end
-powerIterations(S::ℍ, q::Int;
-        evalues=false, tol=1e-9, maxiter=300, ⍰=false) =
-    powerIterations(Matrix(S), q; evalues=evalues, tol=tol, maxiter=maxiter, ⍰=⍰)
 
-powerIterations(S::LowerTriangular{T}, q::Int;
-        evalues=false, tol=1e-9, maxiter=300, ⍰=false) where T<:Real =
-    powerIterations(Matrix(S), q; evalues=evalues, tol=tol, maxiter=maxiter, ⍰=⍰)
+powerIterations(H::ℍ, q::Int;
+        evalues=false, tol::Real=0, maxiter=300, ⍰=false) =
+    powerIterations(Matrix(H), q; evalues=evalues, tol=tol, maxiter=maxiter, ⍰=⍰)
+
+powerIterations(L::𝕃{T}, q::Int;
+        evalues=false, tol::Real=0, maxiter=300, ⍰=false) where T<:Real =
+    powerIterations(Matrix(L), q; evalues=evalues, tol=tol, maxiter=maxiter, ⍰=⍰)
 
 powIter=powerIterations
 
@@ -817,8 +930,7 @@ powIter=powerIterations
 ## 8. Decompositions involving triangular matrices
 #  -----------------------------------------------
 """
-    choL(P::ℍ)
-    choL(P::Matrix)
+    choL(P::Union{ℍ, Matrix})
 
  Given a positive matrix ``P``, return the *Cholesky lower triangular factor* ``L``
  such that ``LL'=P``. To obtain ``L'`` or both ``L`` and ``L'``, use instead
@@ -837,12 +949,7 @@ powIter=powerIterations
     L*L'≈ P ? println(" ⭐ ") : println(" ⛔ ")
 
 """
-function choL(P::ℍ)
-    choP = cholesky(P)
-    return choP.L
-end
-
-function choL(P::Matrix)
+function choL(P::Union{ℍ, Matrix})
     choP = cholesky(P)
     return choP.L
 end

@@ -26,7 +26,6 @@ The main module does not contains functions, but it declares all **constant**,
 |:----------:| ----------- | ----------- |
 |`sqrt2` |√2 | 1.4142135623730951 |
 |`invsqrt2`|1/√2 | 0.7071067811865475 |
-|`minpos`| 1e-15 | 0.000000000000001|
 |`maxpos`| 1e15 | 100000000000000|
 
 ### aliases
@@ -35,8 +34,10 @@ The main module does not contains functions, but it declares all **constant**,
 |:----------:| ----------- | ----------- | ----------- | ----------- |
 |`𝚺` |[`sum`](https://bit.ly/2FcsAJg)|Base| \bfSigma | ⛔ |
 |`𝛍`|[`mean`](https://bit.ly/2TOakA0)|Statistics| \bfmu | ⛔ |
-|`⋱`|[`Diagonal`](https://bit.ly/2Jovxf8)|LinearAlgebra| \ddots | ✓ |
+|`𝔻`|[`Diagonal`](https://bit.ly/2Jovxf8)|LinearAlgebra| \bbD | ⛔ |
 |`ℍ`|[`Hermitian`](https://bit.ly/2JOiROX)|LinearAlgebra| \bbH | ✓ |
+|`𝕃`|[`LowerTriangular`](https://docs.julialang.org/en/v1/stdlib/LinearAlgebra/#LinearAlgebra.LowerTriangular)|LinearAlgebra| \bbH | ✓ |
+
 
 All packages above are built-in julia packages.
 
@@ -180,10 +181,18 @@ To know what is the current metric, get it as a string as:
 
   H=gram(Matrix(X')).
 
- Another example: here is how to get an Hermitian matrix out of the
- diagonal part of an Hermitian matrix H:
+ Some more examples:
+
+ - here is how to get an `Hermitian` matrix out of the
+ diagonal part of an `Hermitian` matrix H:
 
     Hermitian(Matrix(Diagonal(H))).
+
+ - here is how to get a `LowerTriangular` matrix out of an
+ `Hermitian` matrix H:
+
+   LowerTriangular(Matrix(H)).
+
 
 #### BLAS routines
 Some functions in **PosDefManifold** call BLAS routines for optimal performnce.
@@ -195,3 +204,5 @@ the BLAS library should use by:
    BLAS.set_num_threads(n)
 
 where `n` is the number of threads.
+By default, **PosDefManifold** emplys 3/4 of the threads available
+on your computer rounded to the nearest integer.

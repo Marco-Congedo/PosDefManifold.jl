@@ -1,5 +1,5 @@
 #    Unit riemannianGeometry.jl, part of PosDefManifold Package for julia language
-#    v 0.1.2 - last update 22th of April 2019
+#    v 0.1.3 - last update 28th of April 2019
 #
 #    MIT License
 #    Copyright (c) 2019, Marco Congedo, CNRS, Grenobe, France:
@@ -137,7 +137,7 @@ function geodesic(metric::Metric, P::ℍ, Q::ℍ, a::Real)
             LP=choL(P)
             LQ=choL(Q)
             slLP=tril(LP,-1)
-            T=slLP+a*(tril(LQ,-1)-slLP)+𝑓𝑫(x->x, LP)*exp(a*(𝑓𝑫(log, LQ)-𝑓𝑫(log, LP)))
+            T=slLP+a*(tril(LQ,-1)-slLP)+𝑓𝔻(x->x, LP)*exp(a*(𝑓𝔻(log, LQ)-𝑓𝔻(log, LP)))
     return  ℍ(T*T')
 
     elseif  metric==Wasserstein
@@ -250,14 +250,14 @@ function distanceSqr(metric::Metric, P::ℍ)
 
     elseif  metric==logCholesky
             LP=choL(P)
-    return  sumOfSqrTril(LP, -1) + sumOfSqrDiag(𝑓𝑫(log, LP))
+    return  sumOfSqrTril(LP, -1) + sumOfSqrDiag(𝑓𝔻(log, LP))
 
     elseif  metric==Jeffrey
-    return  tr(P)/2 + tr(inv(P))/2 - size(P, 1)
+    return  0.5*(tr(P) + tr(inv(P))) - size(P, 1)
 
     elseif  metric==VonNeumann # see squared distance
             𝓵P=ℍ(log(P))
-    return  (tr(P, 𝓵P) - tr(𝓵P))/2
+    return  0.5*(tr(P, 𝓵P) - tr(𝓵P))
 
     elseif  metric==Wasserstein
     return  tr(P) + size(P, 1) - 2*tr(sqrt(P))
@@ -269,13 +269,13 @@ end #function
 
 function distanceSqr(metric::Metric, P::ℍ, Q::ℍ)
     if      metric==Euclidean
-    return  sumOfSqr(P - Q)
+    return  sumOfSqr(ℍ(P - Q))
 
     elseif  metric==invEuclidean
-    return  sumOfSqr(inv(P) - inv(Q))
+    return  sumOfSqr(ℍ(inv(P) - inv(Q)))
 
     elseif  metric==logEuclidean
-    return  sumOfSqr(log(P) - log(Q))
+    return  sumOfSqr(ℍ(log(P) - log(Q)))
 
     elseif  metric==Fisher
     return  𝚺(log.(eigvals(P, Q)).^2)
@@ -289,18 +289,16 @@ function distanceSqr(metric::Metric, P::ℍ, Q::ℍ)
     elseif  metric==logCholesky
             LP = choL(P)
             LQ = choL(Q)
-    return  sumOfSqrTril(tril(LP,-1)-tril(LQ,-1), -1) + sumOfSqrDiag(𝑓𝑫(log, LP)-𝑓𝑫(log, LQ))
+    return  sst(tril(LP,-1)-tril(LQ,-1), -1) + ssd(𝑓𝔻(log, LP)-𝑓𝔻(log, LQ))
 
     elseif  metric==Jeffrey
             n=size(P, 1)  #using formula tr(Q⁻¹P)/2 + tr(P⁻¹Q)/2 -n
     return  0.5*(tr(inv(Q), P) + tr(inv(P), Q)) - n
-    #return  real(tr(inv(Q)*P)/2 + tr(inv(P)*Q)/2) - size(P, 1)
 
     elseif  metric==VonNeumann      # using formula: tr(PlogP - PlogQ + QlogQ - QlogP)/2=
             n=size(P, 1)            # (tr(P(logP - LoqQ)) + tr(Q(logQ - logP)))/2=
             R=log(P)-log(Q)         # (tr(P(logP - LoqQ)) - tr(Q(logP - LoqQ)))/2
-    return  0.5*( tr(P, R) - tr(Q, R) )
-    #return  (tr(P*R) - tr(Q*R))/2
+    return  0.5*real( tr(P, R) - tr(Q, R) )
 
     elseif  metric==Wasserstein
             P½=sqrt(P)
@@ -329,6 +327,7 @@ distance²=distanceSqr # alias
  **See also**: [`distanceMat`](@ref).
 """
 distance(metric::Metric, P::ℍ) = √(distanceSqr(metric, P))
+
 distance(metric::Metric, P::ℍ, Q::ℍ) = √(distanceSqr(metric, P, Q))
 
 
@@ -337,76 +336,26 @@ distance(metric::Metric, P::ℍ, Q::ℍ) = √(distanceSqr(metric, P, Q))
 # 3. Inter-distance matrix, Laplacian and Spectral Embedding
 # -----------------------------------------------------------
 
-# Internal Function for fast computation of inter_distance matrices
-function GetdistSqrMat(metric::Metric, 𝐏::ℍVector)
-    n, k=_attributes(𝐏)
-    △=zeros(k,  k)
-
-    if      metric==invEuclidean
-            𝐏𝓲=[inv(P) for P in 𝐏]
-            for j in 1:k-1, i in j+1:k
-                △[i, j]=sumOfSqr(𝐏𝓲[i] - 𝐏𝓲[j])  end
-
-    elseif  metric==logEuclidean
-            𝐏𝓵=[log(P) for P in 𝐏]
-            for j in 1:k-1, i in j+1:k
-                △[i, j]=sumOfSqr(𝐏𝓵[i] - 𝐏𝓵[j])  end
-
-    elseif  metric==ChoEuclidean
-            𝐏L=[choL(P) for P in 𝐏]
-            for j in 1:k-1, i in j+1:k
-                △[i, j]=sumOfSqr(𝐏L[i] - 𝐏L[j])  end
-
-    elseif  metric==logCholesky
-            𝐏L=[choL(P) for P in 𝐏]
-            for j in 1:k-1, i in j+1:k
-                △[i, j]=sumOfSqrTril(tril(𝐏L[i], -1)-tril(𝐏L[j], -1), -1)
-                        + sumOfSqrDiag(𝑓𝑫(log, 𝐏L[i])-𝑓𝑫(log, 𝐏L[j])) end
-
-    elseif  metric==Jeffrey
-            𝐏𝓲=[inv(P) for P in 𝐏]
-            for j in 1:k-1, i in j+1:k # optimize computingonly diagonal elements
-                #△[i, j]=0.5*(tr(𝐏𝓲[j]*𝐏[i]) + tr(𝐏𝓲[i]*𝐏[j])) - n   end
-                △[i, j]=0.5*(tr(𝐏𝓲[j], 𝐏[i]) + tr(𝐏𝓲[i], 𝐏[j])) - n end
-
-    elseif  metric==VonNeumann  # using formula: tr( PlogP + QLoqQ - PlogQ - QlogP)/2
-            𝓵𝐏=[ℍ(log(P))  for P in 𝐏]
-            ℒ=[P*log(P) for P in 𝐏]
-            for j in 1:k-1, i in j+1:k
-                #△[i, j]=(tr(ℒ[i])+tr(ℒ[j])-tr(𝐏[i] * 𝓵𝐏[j])-tr(𝐏[j] * 𝓵𝐏[i]))/2   end
-                △[i, j]=0.5(tr(ℒ[i])+tr(ℒ[j])-tr(𝐏[i], 𝓵𝐏[j])-tr(𝐏[j], 𝓵𝐏[i])) end
-
-    elseif  metric==Wasserstein
-            𝐏½=[sqrt(P) for P in 𝐏]
-            for j in 1:k-1, i in j+1:k
-                △[i, j]=tr(𝐏[i]) + tr(𝐏[j]) -2*tr(sqrt(ℍ(𝐏½[i] * 𝐏[j] * 𝐏½[i]))) end
-
-    elseif  metric in (Euclidean, Fisher, logdet0)
-            for j in 1:k-1, i in j+1:k
-                △[i, j]=distanceSqr(metric, 𝐏[i], 𝐏[j])  end
-
-    else    @warn("in RiemannianGeometryP.distanceSqrMat or .distanceMat function
-                         (PosDefManifold Package): the chosen 'metric' does not exist")
-
-    end # If
-
-    return △
-end #function
-
-
-
+# Fast computation of inter_distance matrices
 """
-    distanceSqrMat(metric::Metric, 𝐏::ℍVector)
+    (1) distanceSqrMat(metric::Metric, 𝐏::ℍVector)
+    (2) distanceSqrMat(metric::Metric, 𝐏::ℍVector, type::Type{T}) where T<:AbstractFloat
 
  **alias**: `distance²Mat`
 
  Given a 1d array `𝐏` of ``k`` positive definite matrices
- ``{P_1,...,P_k}`` of [ℍVector type](@ref), create the ``k⋅k`` real `Hermitian`
- matrix comprising elements ``δ^2(P_i, P_j)\\textrm{, for all }i≠j``.
+ ``{P_1,...,P_k}`` of [ℍVector type](@ref), create the ``k⋅k`` real
+ `LowerTriangular` matrix comprising elements ``δ^2(P_i, P_j)\\textrm{, for all }i>=j``.
 
- This is the matrix of all *squared inter-distances* (zero on diagonal), using the
+ This is the lower triangular matrix holding all *squared inter-distances*
+ (zero on diagonal), using the
  specified `metric`, of type [Metric::Enumerated type](@ref),
  giving rise to distance function ``δ``. See [`distanceSqr`](@ref).
+
+ Only the lower triangular part is computed in order to optimize memory use.
+
+ By default, the result matrix is of type `Float32`. The type can be changed
+ to another real type using method (2).
 
  **See**: [distance](@ref).
 
@@ -422,22 +371,81 @@ end #function
     Dsqr=distanceSqrMat(logEuclidean, Pset)
     # or, using unicode: Δ²=distanceSqrMat(logEuclidean, 𝐏)
 
+    # return a matrix of type Float64
+    DsqrF64=distanceSqrMat(logEuclidean, Pset, Float64)
+
 """
-distanceSqrMat(metric::Metric, 𝐏::ℍVector)=ℍ(GetdistSqrMat(metric, 𝐏), :L)
+function distanceSqrMat(metric::Metric, 𝐏::ℍVector, type::Type{T}) where T<:AbstractFloat
+
+    n, k=_attributes(𝐏)
+    △=𝕃{type}(diagm(0 => zeros(k)))
+
+    if      metric == invEuclidean
+            𝐏𝓲=[inv(P) for P in 𝐏]
+            for j=1:k-1, i=j+1:k △[i, j]=sumOfSqr(ℍ(𝐏𝓲[i] - 𝐏𝓲[j]))  end
+
+    elseif  metric == logEuclidean
+            𝐏𝓵=[log(P) for P in 𝐏]
+            for j=1:k-1, i=j+1:k △[i, j]=sumOfSqr(ℍ(𝐏𝓵[i] - 𝐏𝓵[j]))  end
+
+    elseif  metric == ChoEuclidean
+            𝐏L=[choL(P) for P in 𝐏]
+            for j=1:k-1, i=j+1:k △[i, j]=sumOfSqr(𝐏L[i] - 𝐏L[j])  end
+
+    elseif  metric==logCholesky
+            𝐏L=[choL(P) for P in 𝐏]
+            for j=1:k-1, i=j+1:k
+                △[i, j]=sst(tril(𝐏L[i], -1)-tril(𝐏L[j], -1), -1) + ssd(𝑓𝔻(log, 𝐏L[i])-𝑓𝔻(log, 𝐏L[j])) end
+
+    elseif  metric==Jeffrey
+            𝐏𝓲=[inv(P) for P in 𝐏]
+            for j=1:k-1, i=j+1:k
+                △[i, j]=0.5*(tr(𝐏𝓲[j], 𝐏[i]) + tr(𝐏𝓲[i], 𝐏[j])) - n end
+
+    elseif  metric==VonNeumann  # using formula: tr( PlogP + QLoqQ - PlogQ - QlogP)/2
+            𝐏𝓵=[ℍ(log(P))  for P in 𝐏] # delete ℍ()?
+            ℒ=[P*log(P) for P in 𝐏]
+            for j=1:k-1, i=j+1:k
+                △[i, j]=0.5*real(tr(ℒ[i])+tr(ℒ[j])-tr(𝐏[i], 𝐏𝓵[j])-tr(𝐏[j], 𝐏𝓵[i])) end
+
+    elseif  metric==Wasserstein
+            𝐏½=[sqrt(P) for P in 𝐏]
+            for j=1:k-1, i=j+1:k
+                △[i, j]=tr(𝐏[i]) + tr(𝐏[j]) -2*tr(sqrt(ℍ(𝐏½[i] * 𝐏[j] * 𝐏½[i]))) end
+
+     elseif  metric in (Euclidean, Fisher, logdet0)
+             for j in 1:k-1, i in j+1:k
+                △[i, j]=distanceSqr(metric, 𝐏[i], 𝐏[j])  end
+
+     else    @warn("in RiemannianGeometryP.distanceSqrMat or .distanceMat function
+                     (PosDefManifold Package): the chosen 'metric' does not exist")
+     end # If
+
+     return △
+end #function
+distanceSqrMat(metric::Metric, 𝐏::ℍVector) = distanceSqrMat(metric, 𝐏, Float32)
 distance²Mat=distanceSqrMat
 
 
 """
-    distanceMat(metric::Metric, 𝐏::ℍVector)
+    (1) distanceMat(metric::Metric, 𝐏::ℍVector)
+    (2) distanceMat(metric::Metric, 𝐏::ℍVector, type::Type{T}) where T<:AbstractFloat
+
 
  Given a 1d array `𝐏` of ``k`` positive definite matrices
- ``{P_1,...,P_k}`` of [ℍVector type](@ref), create the ``k⋅k`` real `Hermitian`
- matrix comprising elements
- ``δ(P_i, P_j)\\textrm{, for all }i≠j``.
+ ``{P_1,...,P_k}`` of [ℍVector type](@ref), create the ``k⋅k`` real
+ `LowerTriangular` matrix comprising elements
+ ``δ(P_i, P_j)\\textrm{, for all }i>=j``.
 
- This is the matrix of all *inter-distances* (zero on diagonal), using the
+ This is the lower triangular matrix holding all *inter-distances*
+ (zero on diagonal), using the
  specified `metric`, of type [Metric::Enumerated type](@ref),
  giving rise to distance ``δ``. See [`distance`](@ref).
+
+ Only the lower triangular part is computed in order to optimize memory use.
+
+ By default, the result matrix is of type `Float32`. The type can be changed
+ to another real type using method (2).
 
  The elements of this matrix are the square root of
  [`distanceSqrMat`](@ref).
@@ -450,16 +458,23 @@ distance²Mat=distanceSqrMat
     Pset=randP(10, 4) # or, using unicode: 𝐏=randP(10, 4)
     D=distanceMat(Fisher, Pset)
     # or, using unicode: Δ=distanceMat(Fisher, 𝐏)
+
+    # return a matrix of type Float64
+    DsqrF64=distanceSqrMat(Fisher, Pset, Float64)
+
 """
-distanceMat(metric::Metric, 𝐏::ℍVector)=ℍ(sqrt.(GetdistSqrMat(metric, 𝐏)), :L)
+distanceMat(metric::Metric, 𝐏::ℍVector, type::Type{T}) where T<:AbstractFloat =
+   sqrt.(distanceSqrMat(metric, 𝐏, type))
+
+distanceMat(metric::Metric, 𝐏::ℍVector)=sqrt.(distanceSqrMat(metric, 𝐏))
 
 
 """
     laplacian(Δ²)
 
  Given a matrix of squared inter-distances ``Δ^2``,
- computed for examples by function [`distanceSqrMat`](@ref),
- return the *normalized Laplacian*.
+ return the *normalized Laplacian*. The Laplacian is of the same
+ type as ``Δ^2``.
 
  First, a [Gaussian radial basis functions](https://bit.ly/1HVyf55)
  is applied to all elements of ``Δ^2``, such as
@@ -477,9 +492,14 @@ distanceMat(metric::Metric, 𝐏::ℍVector)=ℍ(sqrt.(GetdistSqrMat(metric, �
   the sum of the rows (or columns) of ``W``.
 
 !!! note "Nota Bene"
+    Only the lower triangular part of ``Δ²`` is needed.
+    This is for example what is computed by function [`distanceSqrMat`](@ref),
+    which by default if of type `Float32`.
+
     The normalized Laplacian as here defined can be requested for any
     input matrix of squared inter-distances, for example,
     those obtained on scalars or on vectors using appropriate metrics.
+    In any case, only the lower triangular part of the Laplacian is used.
 
  **See also**: [`distanceSqrMat`](@ref), [`laplacianEigenMaps`](@ref), [`spectralEmbedding`](@ref).
 
@@ -492,20 +512,27 @@ distanceMat(metric::Metric, 𝐏::ℍVector)=ℍ(sqrt.(GetdistSqrMat(metric, �
 
  """
 function laplacian(Δ²)
-    (r, c)=size(Δ²)
-    epsilon=median([Δ²[i, j] for j=1:c-1 for i=j+1:r]) # use geometric mean instead
-    L=Matrix{eltype(Δ²)}(undef, r, c)
-    for i=1:r L[i, i]=1.0 end
-    for j=1:c-1, i=j+1:r L[i, j]=exp(-Δ²[i, j]/epsilon)  end
-    W=ℍ(L, :L)
-    Dnorms=⋱([1/(√(𝚺(W[:, j]))) for j=1:c])
-    return ℍ(Dnorms * W * Dnorms) # Ω, see laplacianEigenMaps
+    r=size(Δ², 1)
+    epsilon=median([Δ²[i, j] for j=1:r-1 for i=j+1:r]) # use geometric mean instead
+    Ω=𝕃{eltype(Δ²)}(diagm(0 => ones(r)))
+    for j=1:r-1, i=j+1:r Ω[i, j]=exp(-Δ²[i, j]/epsilon)  end
+    # 1/sqrt of the row (or col) sum of L+L'-diag(L) using only L
+    D=Vector{eltype(Δ²)}(undef, r)
+    for i=1:r
+        D[i]=0.
+        for j=1:i D[i]+=Ω[i, j] end
+        for l=i+1:r D[i]+=Ω[l, i] end # conj(L[l, i]) for complex matrices
+        D[i]=1/√(D[i])
+    end
+    # D * (L+L'-diag(L))* D using only L
+    for j=1:r, i=j:r Ω[i, j]*=D[i]*D[j] end
+    return Ω #ℍ(D * W * D) # Ω, see laplacianEigenMaps
 end
 
 
 """
     laplacianEigenMaps(Ω, q::Int;
-                      <tol=1e-9, maxiter=300, ⍰=false>)
+                      <tol::Real=0, maxiter=300, ⍰=false>)
 
  **alias**: `laplacianEM`
 
@@ -513,10 +540,11 @@ end
  the *eigen maps* in ``q`` dimensions, i.e., the ``q`` eigenvectors of
  the normalized Laplacian associated with the largest ``q``
  eigenvalues, excluding the first (which is always equal to 1.0).
+ The eigenvectors are of the same type as ``Ω``.
 
  The eigenvectors of the normalized Laplacian are computed by the
  power iterations+modified Gram-Schmidt method,
- allowing calling this function even for big Laplacian matrices.
+ allowing the execution of this function for big Laplacian matrices.
 
  Return the 4-tuple ``(Λ, U, iterations, convergence)``, where:
  - ``Λ`` is a ``q⋅q`` diagonal matrix holding on diagonal the eigenvalues corresponding to the ``q`` dimensions of the Laplacian eigen maps,
@@ -531,19 +559,24 @@ end
  For examples of applications see Ridrigues et *al.* (2018) [🎓](@ref)
  and references therein.
 
+ **Arguments**: `(Ω, q; <tol::Real=0, maxiter=300, ⍰=false>)`:
+ - ``Ω`` is a normalized Laplacian obtained by the [`laplacian`](@ref) function,
+ - ``q`` is the dimension of the Laplacian eigen maps;
+ - The following are *<optional keyword arguments>* for the power iterations:
+   * `tol` is the tolerance for convergence (see below),
+   * `maxiter` is the maximum number of iterations allowed,
+   * if `⍰` is true, the convergence at all iterations will be printed.
+
 !!! note "Nota Bene"
+    Only the lower triangular part of ``Ω`` is needed.
+
     The maximum value of ``q`` that can be requested is ``n-1``,
     where ``n`` is the size of the Laplacian.
     In general, ``q=2`` or ``q=3`` is requested.
 
-
- **Arguments**: `(Ω, q; <tol=1e-9, maxiter=300, ⍰=false>)`:
- - ``Ω`` is a normalized Laplacian obtained by the [`laplacian`](@ref) function,
- - ``q`` is the dimension of the Laplacian eigen maps;
- - The following are *<optional keyword arguments>* for the power method iterative algorithm:
-   * `tol` is the tolerance for convergence,
-   * `maxiter` is the maximum number of iterations allowed,
-   * if `⍰` is true, the convergence at all iterations will be printed.
+    ``tol`` defaults to the square root of `Base.eps` of the (real) type
+    of ``Ω``. This corresponds to requiring equality for the convergence criterion
+    over two successive power iterations of about half of the significant digits.
 
  **See also**: [`distanceSqrMat`](@ref), [`laplacian`](@ref), [`spectralEmbedding`](@ref).
 
@@ -554,30 +587,38 @@ end
     Dsqr=distanceSqrMat(Fisher, Pset) #or: Δ²=distanceSqrMat(Fisher, 𝐏)
     lap= laplacian(Dsqr) # or: Ω=laplacian(Δ²)
     evalues, maps, iterations, convergence=laplacianEM(lap, 2)
-    evalues, maps, iterations, convergence=laplacianEM(lap, 2; maxiter=500)
+    evalues, maps, iterations, convergence=laplacianEM(lap, 2; maxiter=100)
     evalues, maps, iterations, convergence=laplacianEM(lap, 2; ⍰=true)
 
 """
 function laplacianEigenMaps(Ω, q::Int;
-                            tol=1e-9, maxiter=300, ⍰=false)
+                            tol::Real=0, maxiter=300, ⍰=false)
+    # make a check for q<size(Ω, 1)
+    tol==0 ? tolerance = √eps(real(eltype(Ω))) : tolerance = tol
     (Λ, U, iter, conv) =
-        powIter(Ω, q+1; evalues=true, tol=tol, maxiter=maxiter, ⍰=⍰)
-    return ⋱(Λ[2:q+1, 2:q+1]), U[1:size(U, 1), 2:q+1], iter, conv
+        powIter(Ω, q+1; evalues=true, tol=tolerance, maxiter=maxiter, ⍰=⍰)
+    return 𝔻(Λ[2:q+1, 2:q+1]), U[1:size(U, 1), 2:q+1], iter, conv
 end
 laplacianEM=laplacianEigenMaps
 
 
 """
-    spectralEmbedding(metric::Metric, 𝐏::ℍVector, q::Int;
-                     <tol=1e-9, maxiter=300, ⍰=false>)
+    (1) spectralEmbedding(metric::Metric, 𝐏::ℍVector, q::Int;
+                         <tol::Real=0, maxiter=300, ⍰=false>)
 
- Given a 1d array `𝐏` of ``k`` positive definite matrices ``{P_1,...,P_k}``,
- compute its *eigen maps* in ``q`` dimensions.
+    (2) spectralEmbedding(metric::Metric, 𝐏::ℍVector, q::Int, type::Type{T};
+                         <tol::Real=0, maxiter=300, ⍰=false>) where T<:Real
+
+ Given a 1d array `𝐏` of ``k`` positive definite matrices ``{P_1,...,P_k}``
+ (real or complex), compute its *eigen maps* in ``q`` dimensions.
 
  This function runs one after the other the functions:
  - [`distanceSqrMat`](@ref) (compute the squared inter-distance matrix),
  - [`laplacian`](@ref) (compute the normalized Laplacian),
  - [`laplacianEigenMaps`](@ref) (get the eigen maps).
+
+ By default all computations above are done with Float32 precision.
+ Another real type can be requested using method (2)
 
   Return the 4-tuple `(Λ, U, iterations, convergence)`, where:
  - ``Λ`` is a ``q⋅q`` diagonal matrix holding on diagonal the eigenvalues corresponding to the ``q`` dimensions of the Laplacian eigen maps,
@@ -585,14 +626,20 @@ laplacianEM=laplacianEigenMaps
  - ``iterations`` is the number of iterations executed by the power method,
  - ``convergence`` is the convergence attained by the power method.
 
- **Arguments** `(metric, 𝐏, q, <tol=1e-9, maxiter=300, ⍰=false>)`:
+ **Arguments** `(metric, 𝐏, q, <tol::Real=0, maxiter=300, ⍰=false>)`:
  - `metric` is the metric of type [Metric::Enumerated type](@ref) used for computing the inter-distances,
  - `𝐏` is a 1d array of ``k`` positive matrices of [ℍVector type](@ref),
  - ``q`` is the dimension of the Laplacian eigen maps;
  - The following are *<optional keyword arguments>* for the power method iterative algorithm:
-   * `tol` is the tolerance for convergence of the power method,
+   * `tol` is the tolerance for convergence of the power method (see below),
    * `maxiter` is the maximum number of iterations allowed for the power method,
    * if `⍰` is true the convergence at all iterations will be printed.
+
+!!! note "Nota Bene"
+    ``tol`` defaults to the square root of `Base.eps` of the `Float32` type (1)
+    or of the `type` passed as argumant (2). This corresponds to requiring
+    equality for the convergence criterion over two successive power iterations
+    of about half of the significant digits.
 
  **See also**: [`distanceSqrMat`](@ref), [`laplacian`](@ref), [`laplacianEigenMaps`](@ref).
 
@@ -601,13 +648,26 @@ laplacianEM=laplacianEigenMaps
     # Generate a set of 4 random 10x10 SPD matrices
     Pset=randP(10, 4) # or, using unicode: 𝐏=randP(10, 4)
     evalues, maps, iterations, convergence=spectralEmbedding(logEuclidean, Pset, 2)
+    # show convergence information
     evalues, maps, iterations, convergence=spectralEmbedding(logEuclidean, Pset, 2; ⍰=true)
+    # use Float64 precision.
+    evalues, maps, iterations, convergence=spectralEmbedding(logEuclidean, Pset, 2, Float64)
 
 """
-function spectralEmbedding(metric::Metric, 𝐏::ℍVector, q::Int;
-                           tol=1e-9, maxiter=300, ⍰=false)
+function spectralEmbedding(metric::Metric, 𝐏::ℍVector, q::Int, type::Type{T};
+                           tol::Real=0, maxiter=300, ⍰=false) where T<:Real
+    tol==0 ? tolerance = √eps(type) : tolerance = tol
     return (Λ, U, iter, conv) =
-      laplacianEM(laplacian(distance²Mat(metric, 𝐏)), q; tol=tol, maxiter=maxiter, ⍰=⍰)
+      laplacianEM(laplacian(distance²Mat(metric, 𝐏, type)), q;
+                                tol=tolerance, maxiter=maxiter, ⍰=⍰)
+end
+
+function spectralEmbedding(metric::Metric, 𝐏::ℍVector, q::Int;
+                           tol::Real=0, maxiter=300, ⍰=false)
+    tol==0 ? tolerance = √eps(Float32) : tolerance = tol
+    return (Λ, U, iter, conv) =
+      laplacianEM(laplacian(distance²Mat(metric, 𝐏)), q;
+                                tol=tolerance, maxiter=maxiter, ⍰=⍰)
 end
 
 
@@ -741,10 +801,10 @@ function mean(metric::Metric, 𝐏::ℍVector;
     elseif metric == logCholesky # Aggiusta!
         L𝐏=[choL(P) for P in 𝐏]
         if isempty(w)
-            T=𝛍(tril(L,-1) for L in L𝐏) + exp(mean(𝑓𝑫(log, L) for L in L𝐏))
+            T=𝛍(tril(L,-1) for L in L𝐏) + exp(mean(𝑓𝔻(log, L) for L in L𝐏))
         else
             T=𝚺(ω*tril(L,-1) for (ω, L) in zip(v, L𝐏))
-                + exp(𝚺(ω*𝑓𝑫(log, L) for (ω, L) in zip(v, L𝐏)))
+                + exp(𝚺(ω*𝑓𝔻(log, L) for (ω, L) in zip(v, L𝐏)))
         end
         return ℍ(T*T')
 
@@ -869,9 +929,8 @@ end # function
 
 
 """
-
     logdet0Mean(𝐏::ℍVector;
-               <w::Vector=[], ✓w=true, init=nothing, tol=1e-9, ⍰=false>)
+               <w::Vector=[], ✓w=true, init=nothing, tol::Real=0, ⍰=false>)
 
  Given a 1d array ``𝐏`` of ``k`` positive definite matrices ``𝐏={P_1,...,P_k}``
  of [ℍVector type](@ref) and optional non-negative real weights vector ``w={w_1,...,w_k}``,
@@ -898,13 +957,18 @@ suggested by (Moakher, 2012, p315)[🎓](@ref), yielding iterations
 
  The following are more *<optional keyword arguments*>:
  - `init` is a matrix to be used as initialization for the mean. If no matrix is provided, the [log Euclidean](@ref) mean will be used,
- - `tol` is the tolerance for the convergence. The smaller this number (it must be positive) the closer the algorithm gets to the saddle point,
+ - `tol` is the tolerance for the convergence (see below).
  - if `⍰` is true, the convergence attained at each iteration is printed.
 
 !!! note "Nota Bene"
     In normal circumstances this algorithm converges monothonically.
     If the algorithm diverges a **warning** is printed indicating the iteration
     when this happened.
+
+    ``tol`` defaults to the square root of `Base.eps` of the nearest real type
+    of data input ``𝐏``. This corresponds to requiring equality for the
+    convergence criterion over two successive iterations
+    of about half of the significant digits.
 
  **See**: [logdet zero](@ref) metric, [modified Bhattacharyya mean](@ref).
 
@@ -931,17 +995,18 @@ suggested by (Moakher, 2012, p315)[🎓](@ref), yielding iterations
 
 """
 function logdet0Mean(𝐏::ℍVector;
-                     w::Vector=[], ✓w=true, init=nothing, tol=1e-9, ⍰=false)
-    maxIter=500
+                     w::Vector=[], ✓w=true, init=nothing, tol::Real=0, ⍰=false)
+
+    (maxiter, iter, conv, oldconv) = 500, 1, 0., maxpos
     n, k = _attributes(𝐏)
-    l=k/2
+    l = k/2
     isempty(w) ? v=[] : v = _getWeights(w, ✓w, k)
     init == nothing ? M = mean(logEuclidean, 𝐏; w=w, ✓w=false) : M = ℍ(init)
     💡 = similar(M, eltype(M))
-    iter, conv, oldconv = 1, 0., maxpos
+    tol==0 ? tolerance = √eps(real(eltype(𝐏[1]))) : tolerance = tol
     ⍰ && @info("Iterating RlogDetMean Fixed-Point...")
 
-    @inbounds while true
+    while true
         if isempty(w)
             💡 = l * inv(ℍ(𝚺(inv(ℍ(P+M)) for P in 𝐏)))
         else
@@ -949,9 +1014,10 @@ function logdet0Mean(𝐏::ℍVector;
         end
         conv = norm(💡-M)/norm(M)
         ⍰ && println("iteration: ", iter, "; convergence: ", conv)
-        diverging = conv > oldconv
-        diverging ? @warn("logdet0Mean diverged at:", iter) : oldconv=conv
-        iter==maxIter || conv <= tol ? break : M = 💡 # diverging ||
+        diverging = conv > oldconv && ⍰ && @warn("logdet0Mean diverged at:", iter)
+        overRun = iter == maxiter && @warn("logdet0Mean reached the max number of iterations before convergence:", iter)
+        conv <= tolerance || overRun==true ? break : M = 💡
+        oldconv=conv
         iter += 1
     end # while
 
@@ -961,7 +1027,7 @@ end
 
 """
     wasMean(𝐏::ℍVector;
-           <w::Vector=[], ✓w=true, init=nothing, tol=1e-9, ⍰=false>)
+           <w::Vector=[], ✓w=true, init=nothing, tol::Real=0, ⍰=false>)
 
  Given a 1d array `𝐏` of ``k`` positive definite matrices ``𝐏={P_1,...,P_k}``
  of [ℍVector type](@ref) and optional non-negative real weights vector ``w={w_1,...,w_k}``,
@@ -988,13 +1054,17 @@ end
 
  The following are more *<optional keyword arguments*>:
  - `init` is a matrix to be used as initialization for the mean. If no matrix is provided, the instance of [generalized means](@ref) with ``p=0.5`` will be used,
- - `tol` is the tolerance for the convergence. The smaller this number (it must be positive) the closer the algorithm gets to the true solution,
+ - `tol` is the tolerance for the convergence (see below).
  - if `⍰` is true, the convergence attained at each iteration is printed.
 
 !!! note "Nota Bene"
     In normal circumstances this algorithm converges monothonically.
     If the algorithm diverges a **warning** is printed indicating the iteration
     when this happened.
+
+    ``tol`` defaults to the square root of `Base.eps` of the nearest real type
+    of data input ``𝐏``. This corresponds to requiring nullity for the
+    convergence criterion beyond about half of the significant digits.
 
  **See**: [Wasserstein](@ref) metric.
 
@@ -1021,16 +1091,16 @@ end
 
 """
 function wasMean(𝐏::ℍVector;
-                 w::Vector=[], ✓w=true, init=nothing, tol=1e-9, ⍰=false)
+                 w::Vector=[], ✓w=true, init=nothing, tol::Real=0, ⍰=false)
 
-    maxIter=500
-    iter, conv, oldconv, maxIter, (n, k) = 1, 0., maxpos, 500, _attributes(𝐏)
+    (iter, conv, oldconv, maxiter, (n, k)) = 1, 0., maxpos, 500, _attributes(𝐏)
     isempty(w) ? v=[] : v = _getWeights(w, ✓w, k)
     init == nothing ? M = generalizedMean(𝐏, 0.5; w=v, ✓w=false) : M = ℍ(init)
     💡 = similar(M, eltype(M))
+    tol==0 ? tolerance = √eps(real(eltype(𝐏[1]))) : tolerance = tol
     ⍰ && @info("Iterating wasMean Fixed-Point...")
 
-    @inbounds while true
+    while true
         S, W=pow(M, 0.5, -0.5)
         if isempty(w)
             💡 = ℍ(W * sqr(ℍ(𝛍(sqrt(ℍ(S*P*S)) for P in 𝐏))) * W)
@@ -1038,10 +1108,12 @@ function wasMean(𝐏::ℍVector;
             💡 = ℍ(W * sqr(ℍ(𝚺((sqrt(ℍ(S*P*S)) * ω) for (ω, P) in zip(v, 𝐏)))) * W)
         end
         conv = norm(💡-M)/norm(M)
-        ⍰ &&  println("iteration: ", iter, "; convergence: ", conv)
-        diverging = conv > oldconv
-        diverging ? @warn("wasMean diverged at:", iter) : oldconv=conv
-        iter==maxIter || conv <= tol ? break : M = 💡 # diverging ||
+
+        ⍰ && println("iteration: ", iter, "; convergence: ", conv)
+        diverging = conv > oldconv && ⍰ && @warn("wasMean diverged at:", iter)
+        overRun = iter == maxiter && @warn("wasMean reached the max number of iterations before convergence:", iter)
+        conv <= tolerance || overRun==true ? break : M = 💡
+        oldconv=conv
         iter += 1
     end # while
 
@@ -1051,7 +1123,7 @@ end
 
 """
     powerMean(𝐏::ℍVector, p::Real;
-             <w::Vector=[], ✓w=true, init=nothing, tol=1e-9, ⍰=false>)
+             <w::Vector=[], ✓w=true, init=nothing, tol::Real=0, ⍰=false>)
 
  Given a 1d array `𝐏` of ``k`` positive definite matrices ``𝐏={P_1,...,P_k}``
  of [ℍVector type](@ref),
@@ -1092,13 +1164,17 @@ end
 
  The following are more *<optional keyword arguments*>:
  - `init` is a matrix to be used as initialization for the mean. If no matrix is provided, the instance of [generalized means](@ref) with parameter ``p`` will be used.
- - `tol` is the tolerance for the convergence. The smaller this number (it must be positive) the closer the algorithm gets to the true solution;
+ - `tol` is the tolerance for the convergence (see below).
  - if `⍰` is true, the convergence attained at each iteration is printed.
 
 !!! note "Nota Bene"
     In normal circumstances this algorithm converges monothonically.
     If the algorithm diverges a **warning** is printed indicating the iteration
     when this happened.
+
+    ``tol`` defaults to the square root of `Base.eps` of the nearest real type
+    of data input ``𝐏``. This corresponds to requiring nullity for the
+    convergence criterion beyond about half of the significant digits.
 
  **See**: [power means](@ref), [generalized means](@ref), [modified Bhattacharyya mean](@ref).
 
@@ -1125,49 +1201,50 @@ end
 
 """
 function powerMean(𝐏::ℍVector, p::Real;
-                   w::Vector=[], ✓w=true, init=nothing, tol=1e-9, ⍰=false)
-  if !(-1<=p<=1) @error("The parameter p for power means must be in range [-1...1]")
+                   w::Vector=[], ✓w=true, init=nothing, tol::Real=0, ⍰=false)
+  if ! (-1<=p<=1)
+       @error("The parameter p for power means must be in range [-1...1]")
   else
-    if     p ≈-1
-            return (mean(invEuclidean, 𝐏; w=w, ✓w=✓w), 1, 0)
+    if p ≈-1
+       return (mean(invEuclidean, 𝐏; w=w, ✓w=✓w), 1, 0)
     elseif p ≈ 0
-            LE=mean(logEuclidean, 𝐏, w=w, ✓w=✓w)
-            P, iter1, conv1=powerMean(𝐏,  0.01; w=w, ✓w=✓w, init=LE, tol=tol, ⍰=⍰)
-            Q, iter2, conv2=powerMean(𝐏, -0.01; w=w, ✓w=✓w, init=P, tol=tol, ⍰=⍰)
-            return (geodesic(Fisher, P, Q,  0.5), iter1+iter2, (conv1+conv2)/2)
+       LE=mean(logEuclidean, 𝐏, w=w, ✓w=✓w)
+       P, iter1, conv1=powerMean(𝐏,  0.01; w=w, ✓w=✓w, init=LE, tol=tol, ⍰=⍰)
+       Q, iter2, conv2=powerMean(𝐏, -0.01; w=w, ✓w=✓w, init=P, tol=tol, ⍰=⍰)
+       return (geodesic(Fisher, P, Q,  0.5), iter1+iter2, (conv1+conv2)/2)
     elseif p ≈ 1
-                return (mean(Euclidean, 𝐏; w=w, ✓w=✓w), 1, 0)
+       return (mean(Euclidean, 𝐏; w=w, ✓w=✓w), 1, 0)
     else
-        # Set Parameters
-        n, k = _attributes(𝐏)
-        sqrtn, absp, maxIter=√n, abs(p), 500
-        r=-0.375/absp
-        w≠[] ? v = _getWeights(w, ✓w, k) : v=[]
-        init == nothing ? M = generalizedMean(𝐏, p; w=v, ✓w=false) : M = ℍ(init)
-        p<0 ? X=ℍ(M^(0.5)) : X=ℍ(M^(-0.5))
-        💡, H, 𝒫 = similar(X, eltype(X)), similar(X, eltype(X)), similar(𝐏, eltype(𝐏))
-        p<0 ? 𝒫=[inv(P) for P in 𝐏] : 𝒫=𝐏
-        iter, conv, oldconv = 1, 0., maxpos
-        ⍰ && @info("Iterating powerMean Fixed-Point...")
+       # Set Parameters
+       (n, k) = _attributes(𝐏)
+       (sqrtn, absp, maxiter, iter, conv, oldconv) = √n, abs(p), 500, 1, 0., maxpos
+       r=-0.375/absp
+       w≠[] ? v = _getWeights(w, ✓w, k) : v=[]
+       init == nothing ? M = generalizedMean(𝐏, p; w=v, ✓w=false) : M = ℍ(init)
+       p<0 ? X=ℍ(M^(0.5)) : X=ℍ(M^(-0.5))
+       💡, H, 𝒫 = similar(X), similar(X), similar(𝐏)
+       p<0 ? 𝒫=[inv(P) for P in 𝐏] : 𝒫=𝐏
+       tol==0 ? tolerance = √eps(real(eltype(𝐏[1]))) : tolerance = tol
+       ⍰ && @info("Iterating powerMean Fixed-Point...")
 
-        @inbounds while true
-            if isempty(w)
-                H=ℍ(𝛍(pow(ℍ(X*P*X), absp) for P in 𝒫))
-            else
-                H=ℍ(𝚺(ω * pow(ℍ(X*P*X), absp) for (ω, P) in zip(v, 𝒫)))
-            end
-            💡=(pow(H, r))*X
-            conv=norm(H-I)/sqrtn # relative difference to identity
-            ⍰ &&  println("iteration: ", iter, "; convergence: ", conv)
-            diverging = conv > oldconv
-            diverging ? @warn("powerMean diverged at:", iter) : oldconv=conv
-            iter==maxIter || conv <= tol ? break : X = 💡 # diverging ||
-            iter += 1
+       while true
+          if isempty(w)
+              H=𝛍(pow(ℍ(X*P*X), absp) for P in 𝒫)
+          else
+              H=𝚺(ω*pow(ℍ(X*P*X), absp) for (ω, P) in zip(v, 𝒫))
+          end
+          💡=(pow(ℍ(H), r))*X
+          conv=norm(H-I)/sqrtn # relative difference to identity
+          ⍰ && println("iteration: ", iter, "; convergence: ", conv)
+          diverging = conv > oldconv && ⍰ && @warn("powerMean diverged at:", iter)
+          overRun = iter == maxiter && @warn("powerMean: reached the max number of iterations before convergence:", iter)
+          conv <= tolerance || overRun==true ? break : X = 💡
+          oldconv=conv
+          iter += 1
         end # while
     end # if
 
-    if p<0  return ( ℍ((💡)'*💡), iter, conv )
-    else    return ( inv(ℍ((💡)'*💡)), iter, conv ) end
+    p<0 ? (return ℍ((💡)'*💡), iter, conv) : (return inv(ℍ((💡)'*💡)), iter, conv)
   end # if !(-1<=p<=1)
 end
 

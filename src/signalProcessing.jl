@@ -1,5 +1,5 @@
 #    Unit signalProcessing.jl, part of PosDefManifold Package for julia language
-#    v 0.1.2 - last update 22th of April 2019
+#    v 0.1.3 - last update 28th of April 2019
 #
 #    MIT License
 #    Copyright (c) 2019, Marco Congedo, CNRS, Grenobe, France:
@@ -28,6 +28,7 @@
     histogram(chi) # needs Plots package. Check your plots back-end.
 """
 randChi²(df::Int) = df<20 ? sum(randn()^2 for i=1:df) : df*(1.0-2.0/(9.0*df)+randn()*sqrt2/sqrt(9.0*df))^3
+
 randχ²=randChi²
 
 """
@@ -51,6 +52,7 @@ randχ²=randChi²
 """
 randEigvals(n::Int; df::Int=2, eigvalsSNR::Real=10e3) =
     eigvalsSNR==Inf ? λ=[randχ²(df) for i in 1:n] : λ=[randχ²(df)+(df/eigvalsSNR) for i in 1:n]
+
 randλ=randEigvals
 
 """
@@ -105,7 +107,8 @@ randλ=randEigvals
     Q=ℍ(U*Λ*U') # generate an SPD matrix and flag it as 'Hermitian'
 
 """
-randEigvalsMat(n::Int; df::Int=2, eigvalsSNR::Real=10e3)=⋱(randλ(n, df=df, eigvalsSNR=eigvalsSNR))
+randEigvalsMat(n::Int; df::Int=2, eigvalsSNR::Real=10e3)=𝔻(randλ(n, df=df, eigvalsSNR=eigvalsSNR))
+
 randΛ=randEigvalsMat
 
 
@@ -136,8 +139,11 @@ randΛ=randEigvalsMat
 
 """
 randUnitaryMat(n::Int)=mgs(randn(Float64, n, n))
+
 randOrthMat(n::Int)=mgs(randn(Float64, n, n))
+
 randUnitaryMat(::Type{Complex{T}}, n::Int) where {T<:AbstractFloat} = mgs(randn(ComplexF64, n, n))
+
 randU=randUnitaryMat
 
 
@@ -235,6 +241,7 @@ function randPosDefMat(::Type{Complex{T}}, n::Int, k::Int; df::Int=2, eigvalsSNR
     end
     return 𝐏
 end
+
 randP=randPosDefMat
 
 
@@ -377,4 +384,4 @@ trade(P::ℍ)
     y=log.(y)
     plot(x, y, seriestype=:scatter)
 """
-trade(P::ℍ)=(tr(P) , det(P))
+trade(P::ℍ)=(tr(P), det(P))
