@@ -34,6 +34,7 @@ The main module does not contains functions, but it declares all **constant**,
 |:----------:| ----------- | ----------- | ----------- | ----------- |
 |`𝚺` |[`sum`](https://bit.ly/2FcsAJg)|Base| \bfSigma | ⛔ |
 |`𝛍`|[`mean`](https://bit.ly/2TOakA0)|Statistics| \bfmu | ⛔ |
+|`𝕄`|[`Matrix`](https://docs.julialang.org/en/v1/base/arrays/#Base.Matrix)|base| \bbM | ⛔ |
 |`𝔻`|[`Diagonal`](https://bit.ly/2Jovxf8)|LinearAlgebra| \bbD | ⛔ |
 |`ℍ`|[`Hermitian`](https://bit.ly/2JOiROX)|LinearAlgebra| \bbH | ✓ |
 |`𝕃`|[`LowerTriangular`](https://docs.julialang.org/en/v1/stdlib/LinearAlgebra/#LinearAlgebra.LowerTriangular)|LinearAlgebra| \bbH | ✓ |
@@ -85,6 +86,10 @@ end
 To know what is the current metric, get it as a string as:
 
     s=string(metric)
+
+To see the list of metrics in type Metric ask:
+
+   instances(Metric)
 
 #### RealOrComplex type
  `RealOrComplex=Union{Real, Complex}` is the Union of Real and Complex Types.
@@ -192,6 +197,8 @@ To know what is the current metric, get it as a string as:
  `Hermitian` matrix H:
 
    LowerTriangular(Matrix(H)).
+
+ For example, you can use this to pass a full inter-distance matrix to the [`laplacian`](@ref) function to obtain the Laplacian matrix.
 
 
 #### BLAS routines

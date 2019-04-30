@@ -470,11 +470,12 @@ distanceMat(metric::Metric, 𝐏::ℍVector)=sqrt.(distanceSqrMat(metric, 𝐏))
 
 
 """
-    laplacian(Δ²)
+    laplacian(Δ²:𝕃)
 
  Given a matrix of squared inter-distances ``Δ^2``,
- return the *normalized Laplacian*. The Laplacian is of the same
- type as ``Δ^2``.
+ return the lower triangular part of the *normalized Laplacian*.
+ The elements of the Laplacian are of the same type as the elements of ``Δ^2``.
+ The result is a `LowerTriangular` matrix.
 
  First, a [Gaussian radial basis functions](https://bit.ly/1HVyf55)
  is applied to all elements of ``Δ^2``, such as
@@ -492,14 +493,11 @@ distanceMat(metric::Metric, 𝐏::ℍVector)=sqrt.(distanceSqrMat(metric, 𝐏))
   the sum of the rows (or columns) of ``W``.
 
 !!! note "Nota Bene"
-    Only the lower triangular part of ``Δ²`` is needed.
-    This is for example what is computed by function [`distanceSqrMat`](@ref),
-    which by default if of type `Float32`.
-
     The normalized Laplacian as here defined can be requested for any
     input matrix of squared inter-distances, for example,
     those obtained on scalars or on vectors using appropriate metrics.
-    In any case, only the lower triangular part of the Laplacian is used.
+    In any case, only the lower triangular part of the Laplacian is
+    taken as input. See [typecasting matrices](@ref).
 
  **See also**: [`distanceSqrMat`](@ref), [`laplacianEigenMaps`](@ref), [`spectralEmbedding`](@ref).
 
@@ -511,7 +509,7 @@ distanceMat(metric::Metric, 𝐏::ℍVector)=sqrt.(distanceSqrMat(metric, 𝐏))
     lap=laplacian(Dsqr) # or: Ω=laplacian(Δ²)
 
  """
-function laplacian(Δ²)
+function laplacian(Δ²::𝕃)
     r=size(Δ², 1)
     epsilon=median([Δ²[i, j] for j=1:r-1 for i=j+1:r]) # use geometric mean instead
     Ω=𝕃{eltype(Δ²)}(diagm(0 => ones(r)))
@@ -531,13 +529,14 @@ end
 
 
 """
-    laplacianEigenMaps(Ω, q::Int;
+    laplacianEigenMaps(Ω::𝕃, q::Int;
                       <tol::Real=0, maxiter=300, ⍰=false>)
 
  **alias**: `laplacianEM`
 
- Given a normalized Laplacian ``Ω`` (see [`laplacian`](@ref) ) return
- the *eigen maps* in ``q`` dimensions, i.e., the ``q`` eigenvectors of
+ Given the lower triangular part of a normalized Laplacian ``Ω``
+ (see [`laplacian`](@ref) ) return the *eigen maps* in ``q`` dimensions,
+ i.e., the ``q`` eigenvectors of
  the normalized Laplacian associated with the largest ``q``
  eigenvalues, excluding the first (which is always equal to 1.0).
  The eigenvectors are of the same type as ``Ω``.
@@ -559,8 +558,8 @@ end
  For examples of applications see Ridrigues et *al.* (2018) [🎓](@ref)
  and references therein.
 
- **Arguments**: `(Ω, q; <tol::Real=0, maxiter=300, ⍰=false>)`:
- - ``Ω`` is a normalized Laplacian obtained by the [`laplacian`](@ref) function,
+ **Arguments**: `(Ω::𝕃, q; <tol::Real=0, maxiter=300, ⍰=false>)`:
+ - ``Ω`` is a `LowerTriangular` normalized Laplacian obtained by the [`laplacian`](@ref) function,
  - ``q`` is the dimension of the Laplacian eigen maps;
  - The following are *<optional keyword arguments>* for the power iterations:
    * `tol` is the tolerance for convergence (see below),
@@ -568,8 +567,6 @@ end
    * if `⍰` is true, the convergence at all iterations will be printed.
 
 !!! note "Nota Bene"
-    Only the lower triangular part of ``Ω`` is needed.
-
     The maximum value of ``q`` that can be requested is ``n-1``,
     where ``n`` is the size of the Laplacian.
     In general, ``q=2`` or ``q=3`` is requested.
@@ -591,7 +588,7 @@ end
     evalues, maps, iterations, convergence=laplacianEM(lap, 2; ⍰=true)
 
 """
-function laplacianEigenMaps(Ω, q::Int;
+function laplacianEigenMaps(Ω::𝕃, q::Int;
                             tol::Real=0, maxiter=300, ⍰=false)
     # make a check for q<size(Ω, 1)
     tol==0 ? tolerance = √eps(real(eltype(Ω))) : tolerance = tol
@@ -1012,10 +1009,10 @@ function logdet0Mean(𝐏::ℍVector;
         else
             💡 = 0.5 * inv(ℍ(𝚺(ω * inv(ℍ(P+M)) for (ω, P) in zip(v, 𝐏))))
         end
-        conv = norm(💡-M)/norm(M)
+        conv = √norm(💡-M)/norm(M)
         ⍰ && println("iteration: ", iter, "; convergence: ", conv)
-        diverging = conv > oldconv && ⍰ && @warn("logdet0Mean diverged at:", iter)
-        overRun = iter == maxiter && @warn("logdet0Mean reached the max number of iterations before convergence:", iter)
+        (diverging = conv > oldconv) && ⍰ && @warn("logdet0Mean diverged at:", iter)
+        (overRun = iter == maxiter) && @warn("logdet0Mean reached the max number of iterations before convergence:", iter)
         conv <= tolerance || overRun==true ? break : M = 💡
         oldconv=conv
         iter += 1
@@ -1107,11 +1104,11 @@ function wasMean(𝐏::ℍVector;
         else
             💡 = ℍ(W * sqr(ℍ(𝚺((sqrt(ℍ(S*P*S)) * ω) for (ω, P) in zip(v, 𝐏)))) * W)
         end
-        conv = norm(💡-M)/norm(M)
+        conv = √norm(💡-M)/norm(M)
 
         ⍰ && println("iteration: ", iter, "; convergence: ", conv)
-        diverging = conv > oldconv && ⍰ && @warn("wasMean diverged at:", iter)
-        overRun = iter == maxiter && @warn("wasMean reached the max number of iterations before convergence:", iter)
+        (diverging = conv > oldconv) && ⍰ && @warn("wasMean diverged at:", iter)
+        (overRun = iter == maxiter) && @warn("wasMean reached the max number of iterations before convergence:", iter)
         conv <= tolerance || overRun==true ? break : M = 💡
         oldconv=conv
         iter += 1
@@ -1233,11 +1230,11 @@ function powerMean(𝐏::ℍVector, p::Real;
           else
               H=𝚺(ω*pow(ℍ(X*P*X), absp) for (ω, P) in zip(v, 𝒫))
           end
-          💡=(pow(ℍ(H), r))*X
-          conv=norm(H-I)/sqrtn # relative difference to identity
+          💡 = (pow(ℍ(H), r))*X
+          conv = √norm(H-I)/sqrtn # relative difference to identity
           ⍰ && println("iteration: ", iter, "; convergence: ", conv)
-          diverging = conv > oldconv && ⍰ && @warn("powerMean diverged at:", iter)
-          overRun = iter == maxiter && @warn("powerMean: reached the max number of iterations before convergence:", iter)
+          (diverging = conv > oldconv) && ⍰ && @warn("powerMean diverged at:", iter)
+          (overRun = iter == maxiter) && @warn("powerMean: reached the max number of iterations before convergence:", iter)
           conv <= tolerance || overRun==true ? break : X = 💡
           oldconv=conv
           iter += 1

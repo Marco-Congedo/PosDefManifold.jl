@@ -7,10 +7,11 @@
 #
 #    DESCRIPTION
 #    This Unit tests all functions in PosDefManifold.
+#    Some functions are fully tested, the others are just executed.
 #    Unce you ran it, for each method of each function,
-#    a star sign is printed if the test is succesful,
-#    a play sign is printed if the function executes correctly and
-#    a no_entry sign is printed if the test is not succesful.
+#    a ⭐ sign is printed if the test is succesful, while
+#    a ⛔ sign is printed if the test is not succesful.
+#    a ☆ sign is printed if the function has been executed correctly.
 #    If there are fails, the concerned functions will be listed as Warnings
 #    and returned by the testall() function as an array of strings
 
@@ -126,9 +127,14 @@ function tests();
     colProd(TC, TC2, j1, j2) ≈ s ? OK() : OH(name*" Method 2 complex case")
 
 
+    name="function colNorm"; newTest(name)
+    colNorm(X, 2)      ≈ norm(X[:, 2]) ? OK()  : OH(name*" Method 1 real case")
+    colNorm(XC, 2)     ≈ norm(XC[:, 2]) ? OK() : OH(name*" Method 1 complex case")
+
     name="function sumOfSqr"; newTest(name)
     sumOfSqr(Matrix(P_))  ≈ 68    ? OK() : OH(name*" Method 1 real case")
     sumOfSqr(P_)          ≈ 68    ? OK() : OH(name*" Method 2 real case")
+    #sumOfSqr(LowerTriangular(P_)) ≈ 34 ? OK() : OH(name*" Method 2 real case b")
     sumOfSqr(P_, 2)       ≈ 24    ? OK() : OH(name*" Method 3 real case")
     sumOfSqr(P_, 1:2)     ≈ 38    ? OK() : OH(name*" Method 4 real case")
     sumOfSqr(Matrix(PC_)) ≈ 68.18 ? OK() : OH(name*" Method 1 complex case")
@@ -145,11 +151,6 @@ function tests();
     A=real(A)
     s=sum(A[i, i]^2 for i in 1:size(A, 1))
     sumOfSqrDiag(A)     ≈ s  ? OK() : OH(name*" Method 2")
-
-
-    name="function colNorm"; newTest(name)
-    colNorm(X, 2)      ≈ norm(X[:, 2]) ? OK()  : OH(name*" Method 1 real case")
-    colNorm(XC, 2)     ≈ norm(XC[:, 2]) ? OK() : OH(name*" Method 1 complex case")
 
 
     name="function sumOfSqrTril"; newTest(name)
@@ -231,15 +232,15 @@ function tests();
 
 
     name="function powerIterations"; newTest(name)
-    Λ, U, iterations, convergence=powIter(P_, size(P_, 2), evalues=true; tol=tol=1e-9)
+    Λ, U, iterations, convergence=powIter(P_, size(P_, 2), evalues=true)
     sort(diag(Λ))≈eigvals(P_) && U*Λ*U'≈P_ ? OK() : OH(name*" Real Input Method 1")
-    Λ, U, iterations, convergence=powIter(PC_, size(PC_, 2), evalues=true; tol=tol=1e-9)
+    Λ, U, iterations, convergence=powIter(PC_, size(PC_, 2), evalues=true)
     sort(diag(Λ))≈eigvals(PC_) && U*Λ*U'≈PC_ ? OK() : OH(name*" Complex Input Method 1")
-    Λ, U, iterations, convergence=powIter(ℍ(P_), size(P_, 2), evalues=true; tol=tol=1e-9)
+    Λ, U, iterations, convergence=powIter(ℍ(P_), size(P_, 2), evalues=true)
     sort(diag(Λ))≈eigvals(P_) && U*Λ*U'≈P_ ? OK() : OH(name*" Real Input Method 2")
-    Λ, U, iterations, convergence=powIter(ℍ(PC_), size(PC_, 2), evalues=true; tol=tol=1e-9)
+    Λ, U, iterations, convergence=powIter(ℍ(PC_), size(PC_, 2), evalues=true)
     sort(diag(Λ))≈eigvals(PC_) && U*Λ*U'≈PC_ ? OK() : OH(name*" Complex Input Method 2")
-    Λ, U, iterations, convergence=powIter(LowerTriangular(P_), size(P_, 2), evalues=true; tol=tol=1e-9)
+    Λ, U, iterations, convergence=powIter(LowerTriangular(P_), size(P_, 2), evalues=true)
     sort(diag(Λ))≈eigvals(P_) && U*Λ*U'≈P_ ? OK() : OH(name*" Real Input Method 3")
 
 
@@ -485,7 +486,7 @@ end
 
 OK()=print("⭐ ")
 
-RUN()=print("▶ ")
+RUN()=print("☆ ")
 
 function OH(name::String)
     print("⛔ ")

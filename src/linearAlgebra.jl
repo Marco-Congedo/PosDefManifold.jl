@@ -25,16 +25,15 @@
 ## 1. Matrix Normalizations
 #  ------------------------
 """
-    det1!(P::ℍ)
+    det1(X::𝕄)
+    det1(X::ℍ)
 
- Given a positive definite matrix ``P``, return the best approximant to
- ``P`` from the set of matrices in the [special linear group](https://bit.ly/2W5jDZ6),
+ Given a real or complex square `Matrix` or `Hermitian` matrix ``X``,
+ return the best approximant to
+ ``X`` from the set of matrices in the [special linear group](https://bit.ly/2W5jDZ6),
  i.e., the closer matrix having det=1. See Bhatia and Jain (2014)[🎓].
 
- ``P`` must be flagged as Hermitian. See [typecasting matrices](@ref).
- However a catch-all method is defined.
-
- **See** [det](https://bit.ly/2Y4MnTF).
+  **See** [det](https://bit.ly/2Y4MnTF).
 
  **See also**: [`tr1`](@ref).
 
@@ -45,21 +44,20 @@
     det(Q) # must be 1
 
 """
-det1(P::ℍ) = ℍ(triu(P)/det(P)^(1/size(P, 1)))
+det1(X::ℍ) = ℍ(triu(X)/det(X)^(1/size(X, 1)))
 
-det1(P) = P/det(P)^(1/size(P, 1))
+det1(X::𝕄) = X/det(X)^(1/size(X, 1))
 
 
 """
-    tr1(P::ℍ)
+    tr1(X::ℍ)
+    tr1(X::𝕄)
 
- Given a positive definite matrix ``P``, return the trace-normalized ``P``
+ Given a real or complex square `Matrix` or `Hermitian` matrix ``X``,
+ return the trace-normalized ``X``
  (trace=1).
 
- ``P`` must be flagged as Hermitian. See [typecasting matrices](@ref).
- However a catch-all method is defined.
-
- **See**: [Julia trace function](https://bit.ly/2HoOLiM).
+  **See**: [Julia trace function](https://bit.ly/2HoOLiM).
 
  **See also**: [`tr`](@ref), [`det1`](@ref).
 
@@ -70,18 +68,19 @@ det1(P) = P/det(P)^(1/size(P, 1))
     tr(Q)  # must be 1
 
 """
-tr1(P::ℍ) = ℍ(triu(P)/tr(P))
+tr1(X::ℍ) = ℍ(triu(X)/tr(X))
 
-tr1(P) = P/tr(P)
+tr1(X::𝕄) = X/tr(X)
 
 
 """
-    (1) normalizeCol!(X::Matrix, j::Int)
-    (2) normalizeCol!(X::Matrix, j::Int, by::Number)
-    (3) normalizeCol!(X::Matrix, range::UnitRange)
-    (4) normalizeCol!(X::Matrix, range::UnitRange, by::Number)
+    (1) normalizeCol!(X::𝕄, j::Int)
+    (2) normalizeCol!(X::𝕄, j::Int, by::Number)
+    (3) normalizeCol!(X::𝕄, range::UnitRange)
+    (4) normalizeCol!(X::𝕄, range::UnitRange, by::Number)
 
- Given a general matrix ``X``,
+
+ Given a `Matrix` ``X``,
  - (1) normalize the ``j^{th}``column
  - (2) divide the elements of the ``j^{th}`` column by number ``by``
  - (3) normalize the columns in ``range``
@@ -92,16 +91,14 @@ tr1(P) = P/tr(P)
 
  ``range`` is a [UnitRange](https://bit.ly/2HSfK5J) type.
 
-  No range check nor type check is performed.
-  A catch-all method is defined, but keep in mind that Julia
-  does not allow normalizing the columns of `Hermitian` matrices.
-  (see [typecasting matrices](@ref)).
+ Julia does not allow normalizing the columns of `Hermitian` matrices.
+ (see [typecasting matrices](@ref)).
 
-  **See** [norm](https://bit.ly/2TaAkR0) and [randn](https://bit.ly/2I1Vgrg) for the example
+ **See** [norm](https://bit.ly/2TaAkR0) and [randn](https://bit.ly/2I1Vgrg) for the example
 
-  **See also**: [`colNorm`](@ref), [`colProd`](@ref).
+ **See also**: [`colNorm`](@ref), [`colProd`](@ref).
 
-  ## Examples
+ ## Examples
     using PosDefManifold
     X=randn(10, 20)
     normalizeCol!(X, 2)                  # (1) normalize columns 2
@@ -112,27 +109,19 @@ tr1(P) = P/tr(P)
     normalizeCol!(X, 3:6, (2.0 + 0.5im)) # (4) divide columns 3 to 5 by (2.0 + 0.5im)
 
 """
-function normalizeCol!(X::Matrix{T}, j::Int) where T<:RealOrComplex
+function normalizeCol!(X::𝕄, j::Int)
     w=colNorm(X, j)
     for i=1:size(X, 1) @inbounds X[i, j]/=w end
 end
 
-function normalizeCol!(X, j::Int)
-    w=colNorm(X, j)
-    for i=1:size(X, 1) @inbounds X[i, j]/=w end
-end
+normalizeCol!(X::𝕄, j::Int, by::Number) =
+             for i=1:size(X, 1) @inbounds X[i, j]/=by end
 
-normalizeCol!(X::Matrix{T}, j::Int, by::Number) where T<:RealOrComplex = for i=1:size(X, 1) @inbounds X[i, j]/=by end
+normalizeCol!(X::𝕄, range::UnitRange) =
+             for j in range normalizeCol!(X, j) end
 
-normalizeCol!(X, j::Int, by::Number) = for i=1:size(X, 1) @inbounds X[i, j]/=by end
-
-normalizeCol!(X::Matrix{T}, range::UnitRange) where T<:RealOrComplex = for j in range normalizeCol!(X, j) end
-
-normalizeCol!(X, range::UnitRange) = for j in range normalizeCol!(X, j) end
-
-normalizeCol!(X::Matrix{T}, range::UnitRange, by::Number) where T<:RealOrComplex = for j in range normalizeCol!(X, j, by) end
-
-normalizeCol!(X, range::UnitRange, by::Number) = for j in range normalizeCol!(X, j, by) end
+normalizeCol!(X::𝕄, range::UnitRange, by::Number) =
+             for j in range normalizeCol!(X, j, by) end
 
 
 #  -------------------------------
@@ -201,17 +190,17 @@ end
 #  -------------------------------
 
 """
-    (1) colProd(X::Matrix, j::Int, l::Int)
-    (2) colProd(X::Matrix, j::Int, l::Int)
+    (1) colProd(X::Union{𝕄, ℍ, j::Int, l::Int)
+    (2) colProd(X::Union{𝕄, ℍ, Y::Union{𝕄, ℍ, j::Int, l::Int)
 
- (1) Given a general matrix ``X``, comprised of real or complex elements,
+ (1) Given a real or complex `Matrix` or `Hermitian` matrix ``X``,
  return the dot product of the ``j^{th}`` and ``l^{th}`` columns, defined as,
 
  ``\\sum_{i=1}^{r} \\big(x_{ij}^*x_{il}\\big), ``
 
  where ``r`` is the number of rows of ``X`` and ``^*`` the complex conjugate.
 
- (2) Given two general matrices ``X`` and ``Y``, comprised of real or complex elements,
+ (2) Given real or complex `Matrix` or `Hermitian` matrices ``X`` and ``Y``,
  return the dot product of the ``j^{th}`` column of ``X`` and the ``l^{th}`` column
  of ``Y``, defined as,
 
@@ -219,8 +208,8 @@ end
 
  where ``r`` is the number of rows of ``X`` and of ``Y`` and ``^*`` the complex conjugate.
 
- ``X`` and of ``Y`` may have a different number of columns.
- A catch-all method is defined.
+ ``X`` and of ``Y`` may have a different number of columns, but must have
+ the same number of rows.
 
  Arguments ``j`` and ``l`` must be positive integers in range
  (1) `j,l in 1:size(X, 2)` and (2) `j in 1:size(X, 2), l in 1:size(Y, 2)`.
@@ -235,26 +224,20 @@ end
     q=colProd(X, Y, 2, 25)
 
 """
-colProd(X::Matrix{T}, j::Int, l::Int) where T<:RealOrComplex =
+colProd(X::Union{𝕄, ℍ}, j::Int, l::Int) =
         𝚺(conj(x1)*x2 for (x1, x2) in zip(X[:, j], X[:, l]))
 
-colProd(X, j::Int, l::Int) =
-        𝚺(conj(x1)*x2 for (x1, x2) in zip(X[:, j], X[:, l]))
-
-colProd(X::Matrix{T}, Y::Matrix{T}, j::Int, l::Int) where T<:RealOrComplex =
-        𝚺(conj(x1)*x2 for (x1, x2) in zip(X[:, j], Y[:, l]))
-
-colProd(X, Y, j::Int, l::Int) =
+colProd(X::Union{𝕄, ℍ}, Y::Union{𝕄, ℍ}, j::Int, l::Int) =
         𝚺(conj(x1)*x2 for (x1, x2) in zip(X[:, j], Y[:, l]))
 
 
 """
-    colNorm(X::Matrix, j::Int)
+    colNorm(X::Union{𝕄, ℍ}, j::Int)
 
- Return the Euclidean norm of the ``j^{th}`` column of general matrix ``X``.
- No range check nor type check is performed. A catch-all method is defined.
+ Given a real or complex `Matrix` or `Hermitian` matrix ``X``,
+ return the Euclidean norm of its ``j^{th}`` column.
 
- **See also**: [`normalizeCol!`](@ref), [`colProd`](@ref).
+ **See also**: [`normalizeCol!`](@ref), [`colProd`](@ref), [`sumOfSqr`](@ref).
 
  ## Examples
     using PosDefManifold
@@ -262,42 +245,34 @@ colProd(X, Y, j::Int, l::Int) =
     normOfSecondColumn=colNorm(X, 2)
 
 """
-colNorm(X::Matrix{T}, j::Int) where T<:RealOrComplex = √sumOfSqr(X, j)
-
-colNorm(X, j::Int) = √sumOfSqr(X, j)
+colNorm(X::Union{𝕄, ℍ}, j::Int) = √sumOfSqr(X, j)
 
 
 """
     (1) sumOfSqr(A::Array)
-    (2) sumOfSqr(X::Matrix, j::Int)
-    (3) sumOfSqr(X::Matrix, range::UnitRange)
+    (2) sumOfSqr(H::Union{ℍ, 𝕃})
+    (3) sumOfSqr(X::Union{𝕄, ℍ}, j::Int)
+    (4) sumOfSqr(X::Union{𝕄, ℍ}, range::UnitRange)
 
  Return
  - (1) the sum of square of the elements in an array ``A`` of any dimensions.
- - (2) the sum of square of the ``j^{th}`` column of a matrix ``X``.
- - (3) the sum of square of the columns of ``X`` in a given range.
+ - (2) as (1), but for an `Hermitian` or `LowerTriangular` matrix ``H``, using only the lower triangular part.
+ - (2) the sum of square of the ``j^{th}`` column of a `Matrix` or `Hermitian` ``X``.
+ - (3) the sum of square of the columns of a `Matrix` or `Hermitian` ``X`` in a given range.
 
- Note that only (1) works for arrays of any dimensions and that
- if ``A`` is a matrix (1) returns the square of the [Frobenius norm](https://bit.ly/2Fi10eH):
+ All methods support real and complex matrices.
+
+ Only method (1) works for arrays of any dimensions.
+
+ Method (2) and (1) if ``A`` is a matrix return the square of the
+ [Frobenius norm](https://bit.ly/2Fi10eH):
  ``\\sum |a_{ij}|^2. ``
 
- For (1), if ``A`` is a matrix flagged by Julia as `Hermtian` or as
- `LowerTriangular`, only the lower triangular part of ``A`` is used.
+ For method (3) ``j`` is a positive integer in range `1:size(X, 1)`.
 
-**Arguments**
+ For method (4) ``range`` is a [UnitRange type](https://bit.ly/2HDoFbk).
 
- (1)  `(A)`:
- - ``A`` is an array of any dimensions (e.g., a vector, matrix or tensor), real or complex.
-
- (2) `(X, j)`:
- - ``X`` is a generic matrix, real or complex;
- - ``j`` is a positive integer in range `1:size(X, 2)`.
-
- (3) `(X, range)`:
- - ``X`` is a generic matrix, real or complex;;
- - ``range`` is a [UnitRange type](https://bit.ly/2HDoFbk).
-
- **See also**: [`sumOfSqrDiag`](@ref), [`sumOfSqrTril`](@ref).
+ **See also**: [`colNorm`](@ref), [`sumOfSqrDiag`](@ref), [`sumOfSqrTril`](@ref).
 
  ## Examples
     using PosDefManifold
@@ -307,42 +282,44 @@ colNorm(X, j::Int) = √sumOfSqr(X, j)
     sum2=sumOfSqr(X, 2:4)   # (3) sum of squares of elements in column 2 to 4
 
 """
-sumOfSqr(A::Array{T}) where T<:RealOrComplex = 𝚺(abs2(a) for a in A)
+sumOfSqr(A::Array) = 𝚺(abs2(a) for a in A)
 
 function sumOfSqr(H::Union{ℍ, 𝕃})
     r=size(H, 1)
-    s=eltype(H)(0)
-    for j=1:size(H, 2)-1
-        @inbounds s+=abs2(H[j, j])
-        for i=j+1:r @inbounds s+=2*abs2(H[i, j]) end
+    s=real(eltype(H))(0)
+
+    if H isa Hermitian
+        for j=1:size(H, 2)-1
+            @inbounds s+=abs2(H[j, j])
+            for i=j+1:r @inbounds s+=2*abs2(H[i, j]) end
+        end
+
+    elseif H isa LowerTriangular
+        for j=1:size(H, 2)-1
+            @inbounds s+=abs2(H[j, j])
+            for i=j+1:r @inbounds s+=abs2(H[i, j]) end
+        end
     end
     @inbounds s+=abs2(H[r, r])
     return s
 end
 
-sumOfSqr(X::Matrix{T}, j::Int) where T<:RealOrComplex = 𝚺(abs2.(X[:, j]))
+sumOfSqr(X::Union{𝕄, ℍ}, j::Int) = 𝚺(abs2.(X[:, j]))
 
-sumOfSqr(H::ℍ, j::Int) = 𝚺(abs2.(H[:, j]))
-
-sumOfSqr(X::Matrix{T}, range::UnitRange) where T<:RealOrComplex =
-         𝚺(sumOfSqr(X, j) for j in range)
-
-sumOfSqr(H::ℍ, range::UnitRange) = 𝚺(sumOfSqr(H, j) for j in range)
+sumOfSqr(X::Union{𝕄, ℍ}, range::UnitRange) = 𝚺(sumOfSqr(X, j) for j in range)
 
 
 """
-    (1) sumOfSqrDiag(X::Matrix)
-    (2) sumOfSqrDiag(D::Diagonal)
+    (1) sumOfSqrDiag(X::𝕄)
+    (2) sumOfSqrDiag(X::Union{𝔻, ℍ, 𝕃})
 
  **alias**: `ssd`
 
- Return (1) the sum of squares of the diagonal elements in general matrix ``X``
- comprised of real or complex numbers.
+ (1) Sum of squares of the diagonal elements in real or complex `Matrix` ``X``.
  If ``X`` is rectangular, the main diagonal is considered.
 
- It also return (2) the sum of squares of real diagonal matrix ``Λ``.
-
- No range check nor type check is performed. A catch-all method is defined.
+ (2) Sum of squares of the main diagonal of real or complex `Diagonal`,
+ `Hermitian` or `LowerTriangular` matrix ``X``.
 
  **See also**: [`sumOfSqr`](@ref), [`sumOfSqrTril`](@ref).
 
@@ -353,28 +330,29 @@ sumOfSqr(H::ℍ, range::UnitRange) = 𝚺(sumOfSqr(H, j) for j in range)
     sumDiag2=sumOfSqrDiag(𝔻(X)) # (2) 𝔻=LinearAlgebra.Diagonal
 
 """
-sumOfSqrDiag(X::Matrix{T}) where T<:RealOrComplex =
-             𝚺(abs2(X[i, i]) for i=1:minimum(size(X)))
+sumOfSqrDiag(X::𝕄) = 𝚺(abs2(X[i, i]) for i=1:minimum(size(X)))
 
-sumOfSqrDiag(Λ::Diagonal) = 𝚺(abs2(Λ[i, i]) for i=1:size(Λ, 1))
-
-sumOfSqrDiag(X) = 𝚺(abs2(X[i, i]) for i=1:minimum(size(X)))
+sumOfSqrDiag(X::Union{𝔻, ℍ, 𝕃}) = 𝚺(abs2(X[i, i]) for i=1:size(X, 1))
 
 ssd=sumOfSqrDiag
 
 """
-    sumOfSqrTril(X::Matrix, k::Int=0)
+    sumOfSqrTril(X::Union{𝕄, 𝔻, ℍ, 𝕃}, k::Int=0)
 
 **alias**: `sst`
 
- Given a general matrix ``X``, return the sum of squares of the elements
- in the lower triangle ``X`` up to the ``k^{th}`` underdiagonal.
+ Given a real or complex `Matrix`, `Diagonal`, `Hermitian` or
+ `LowerTriangular` matrix ``X``,
+ return the sum of squares of the elements
+ in its lower triangle up to the ``k^{th}`` underdiagonal.
 
- ``X`` may be rectangular. ``k`` must be in range `1-size(X, 1):0`.
+ `Matrix` ``X`` may be rectangular.
 
-  See julia [tril(M, k::Integer)](https://bit.ly/2Tbx8o7) function
+ ``k`` must be in range `1-size(X, 1):c-1` for ``X`` `Matrix`, `Diagonal` or
+ `Hermitian`, in range `1-size(X, 1):0` for ``X`` `LowerTriangular`.
+
+ See julia [tril(M, k::Integer)](https://bit.ly/2Tbx8o7) function
  for numbering of diagonals.
-  No range check nor type check is performed. A catch-all method is defined.
 
  **See also**: [`sumOfSqr`](@ref), [`sumOfSqrDiag`](@ref).
 
@@ -393,38 +371,29 @@ ssd=sumOfSqrDiag
     # 50.0 = 1²+2²+2²+4²+5²
 
 """
-function sumOfSqrTril(X::Matrix{T}, k::Int=0) where T<:RealOrComplex
-    (r, c)=size(X)
-    if k<(1-r) || k>(c-1)
-        @warn "in LinearAmgebraInP.sumOfSqrTRil function: argument k is out of bounds"
-    else
-        s=0.0; @inbounds for j=1:c, i=max(j-k, 1):r s+=abs2(X[i, j]) end
+function sumOfSqrTril(X::Union{𝕄, 𝔻, ℍ, 𝕃}, k::Int=0)
+    (r, c) = size(X)
+    X isa(𝕃) ? range = (1-r:0) : range = (1-r:c-1)
+    if k in range
+        s=eltype(X)(0)
+        @inbounds for j=1:c, i=max(j-k, 1):r s+=abs2(X[i, j]) end
         return s
+    else
+        @error "in LinearAmgebraInP.sumOfSqrTRil function: argument k is out of bounds"
     end
 end
-
-function sumOfSqrTril(X, k::Int=0)
-    (r, c)=size(X)
-    if k<(1-r) || k>(c-1)
-        @warn "in LinearAmgebraInP.sumOfSqrTRil function (catch-all input): argument k is out of bounds"
-    else
-        s=0.0; @inbounds for j=1:c, i=max(j-k, 1):r s+=abs2(X[i, j]) end
-        return s
-    end
-end
-
 sst=sumOfSqrTril
 
 """
     (1) tr(P::ℍ, Q::ℍ)
-    (2) tr(P::ℍ, Q::Matrix)
+    (2) tr(P::ℍ, Q::𝕄)
 
- Given (1) two positive definite matrix ``P`` and ``Q``,
+ Given (1) two `Hermitian` positive definite matrix ``P`` and ``Q``,
  return the trace of the product ``PQ``.
  This is real even if ``P`` and ``Q`` are complex.
 
  ``P`` must always be flagged as `Hermitian`. See [typecasting matrices](@ref).
- In (2) ``Q`` is a generic `Matrix` object,
+ In (2) ``Q`` is a `Matrix` object,
  in which case return
  - a real trace if the product ``PQ`` is real or if it has all positive real eigenvalues.
  - a complex trace if the product ``PQ`` is not real and has complex eigenvalues.
@@ -432,7 +401,7 @@ sst=sumOfSqrTril
  ## Math
  Let ``P`` and ``Q`` be `Hermitian` matrices, using the properties of the trace
  (e.g., the cyclic property and the similarity invariance) you can use this
- function to fast compute the trace of many expressions. For example:
+ function to fast compute the trace of several expressions. For example:
 
  ``\\textrm{tr}(PQ)=\\textrm{tr}(P^{1/2}QP^{1/2})``
 
@@ -454,12 +423,9 @@ sst=sumOfSqrTril
     tr(sqr(P), Q) ≈ tr(P*Q*P) ? println(" ⭐ ") : println(" ⛔ ")
 
 """
-function tr(P::ℍ, Q::ℍ)
-    a = 𝚺(colProd(P, Q, i, i) for i=1:size(P, 2))
-    if real(a)<0 return a else return real(a) end;
-end
+tr(P::ℍ, Q::ℍ) = real(𝚺(colProd(P, Q, i, i) for i=1:size(P, 2)))
 
-function tr(P::ℍ, Q::Matrix)
+function tr(P::ℍ, Q::𝕄)
     λ = [colProd(P, Q, i, i) for i=1:size(P, 2)]
     OK=true
     for l in λ
@@ -473,23 +439,25 @@ end
 
 
 """
-    quadraticForm(v::Vector{T}, X::Matrix{T}) where T<:RealOrComplex
+    quadraticForm(v::Vector{T}, X::Union(𝕄{T}, ℍ{T}) where T<:RealOrComplex
+    quadraticForm(v::Vector{T}, L::𝕃{T}) where T<:Real
 
  **alias**: `qufo`
 
- Given a vector ``v`` and a matrix ``X``, compute the quadratic form
+ (1) Given a real or complex vector ``v`` and `Hermitian` matrix ``X``,
+ compute the quadratic form
 
  ``v^*Xv``.
 
- ``v`` and ``X`` may be real or complex. If they are real, only the
+ If ``v`` and ``X`` are real and ``X`` is `Hermitian`, only the
  lower triangular part of ``X`` is used.
 
- ``X`` may be a generic `Matrix`, may be flagged by Julia as an `Hermitian`
- matrix or as a `LowerTriangular` matrix. In the latter case it must be real.
+ (2) Compute the quadratic form given a real vector ``v``
+ and the `LowerTriangular` view ``L`` of a real matrix.
 
  ## Math
 
- For ``v`` and ``X`` real, the quadratic form is
+ For ``v`` and ``X`` real and ``X`` symmetric, the quadratic form is
 
  ```sum_i(v_i^2x_{ii})+sum_i>j(2v_iv_jx_{ij})``.
 
@@ -505,40 +473,34 @@ end
     q1 ≈ q2 ? println(" ⭐ ") : println(" ⛔ ")
 
 """
-function quadraticForm(v::Vector{T}, X::Matrix{T}) where T<:RealOrComplex
-    if T<:Real
-        r=length(v)
-        s=0.
-        for i=1:r @inbounds s+=(v[i]^2 * X[i, i]) end # Diagonal
-        for j=1:r-1, i=j+1:r @inbounds s+=2*v[i]*v[j]*X[i, j] end # Off-diagonal
-        return s
+function quadraticForm(v::Vector{T}, X::Union{𝕄{T}, ℍ{T}}) where T<:RealOrComplex
+    if T<:Real && X isa(ℍ)
+        return quadraticForm(v, 𝕃(X))
     else
         return v'*X*v
     end
 end
 
-quadraticForm(v::Vector{T}, P::ℍ{T}) where T<:RealOrComplex =
-              quadraticForm(v, Matrix(P))
-
-quadraticForm(v::Vector{T}, L::𝕃{T}) where T<:Real =
-              quadraticForm(v, Matrix(L))
-
+function quadraticForm(v::Vector{T}, L::𝕃{T}) where T<:Real
+    r=length(v)
+    s=0.
+    for i=1:r @inbounds s+=(v[i]^2 * L[i, i]) end # Diagonal
+    for j=1:r-1, i=j+1:r @inbounds s+=2*v[i]*v[j]*L[i, j] end # Off-diagonal
+    return s
+end
 qufo=quadraticForm
 
 
 """
     fidelity(P::ℍ, Q::ℍ)
 
- Given two positive definte matrices ``P`` and ``Q``, return their *fidelity*:
+ Given two positive definte `Hermitian` matrices ``P`` and ``Q``,
+ return their *fidelity*:
 
   ``tr\\big(P^{1/2}QP^{1/2}\\big)^{1/2}.``
 
   This is used in quantum physics and is related to the
  [Wasserstein](@ref) metric. See for example Bhatia, Jain and Lim (2019b)[🎓](@ref).
-
- ``P`` and ``Q`` must be flagged as `Hermitian`.
- See [typecasting matrices](@ref),
- however a catch-all method is defined.
 
  ## Examples
     using PosDefManifold
@@ -557,21 +519,24 @@ end
 ## 4. Diagonal functions of matrices
 #  ---------------------------------
 """
-    (1) fDiagonal(func::Function, X::ℍ, k::Int=0)
+    (1) fDiagonal(func::Function, X::𝔻, k::Int=0)
     (2) fDiagonal(func::Function, X::𝕃, k::Int=0)
-    (3) fDiagonal(func::Function, X::Diagonal, k::Int=0)
-    (4) fDiagonal(func::Function, X::Matrix, k::Int=0)
+    (3) fDiagonal(func::Function, X::Union{𝕄, ℍ}, k::Int=0)
+
 
  **alias**: `𝑓𝔻`
 
  Applies function `func` element-wise to the elements of the ``k^{th}``
- diagonal of matrix ``X`` (square in (1-3) and of dimension *r⋅c* in (4))
+ diagonal of matrix ``X`` (square in all cases but for the 𝕄=`Matrix` argument,
+ in which case it may be of dimension *r⋅c*)
  and return a diagonal matrix with these elements.
 
  See julia [tril(M, k::Integer)](https://bit.ly/2Tbx8o7) function
  for numbering of diagonals.
 
- If the matrix is Diagonal (3) `k` must be zero.
+ Bt default the main diagonal is considered.
+
+ If the matrix is Diagonal (1) `k` must be zero (main diagonal).
  If the matrix is lower triangular (2) `k` cannot be positive.
 
  Note that if ``X`` is rectangular the dimension of the result depends
@@ -595,17 +560,15 @@ end
     Δ=fDiagonal(log, Λ)     # diagonal matrix with the log of the eigenvalues
     Δ=fDiagonal(x->x^2, Λ)  # using an anonymous function for the square of the eigenvalues
 """
-fDiagonal(func::Function, D::𝔻, k::Int=0) = 𝔻(func.(D))
+fDiagonal(func::Function, X::𝔻, k::Int=0) = 𝔻(func.(X))
 
-function fDiagonal(func::Function, L::𝕃, k::Int=0)
+function fDiagonal(func::Function, X::𝕃, k::Int=0)
  if k>0 @error("in function fDiagonal (linearAlgebra.jl): k argument cannot be positive.")
- else return 𝔻(func.(diag(L, k)))
+ else return 𝔻(func.(diag(X, k)))
  end
 end
 
-fDiagonal(func::Function, P::ℍ, k::Int=0) = 𝔻(func.(diag(P, k)))
-
-fDiagonal(func::Function, X::Matrix{T}, k::Int=0) where T<:RealOrComplex= 𝔻(func.(diag(X, k)))
+fDiagonal(func::Function, X::Union{𝕄, ℍ}, k::Int=0) = 𝔻(func.(diag(X, k)))
 
 𝑓𝔻=fDiagonal
 
@@ -615,7 +578,7 @@ fDiagonal(func::Function, X::Matrix{T}, k::Int=0) where T<:RealOrComplex= 𝔻(f
 ## 5. Unitary functions of matrices
 #  -------------------------------
 """
-    mgs(T::Matrix, numCol::Int=0)
+    mgs(T::𝕄, numCol::Int=0)
 
  Modified (stabilized) [Gram-Schmidt orthogonalization](https://bit.ly/2YE6zvy)
  of the columns of square or tall matrix ``T``, which can be comprised of real
@@ -636,7 +599,7 @@ fDiagonal(func::Function, X::Matrix{T}, k::Int=0) where T<:RealOrComplex= 𝔻(f
     U'U ≈ I ? println(" ⭐ ") : println(" ⛔ ")
 
 """
-function mgs(T::Matrix, numCol::Int=0)
+function mgs(T::𝕄, numCol::Int=0)
     r=size(T, 1)
     if numCol != 0 && numCol in 2:size(T, 2) c=numCol else c=size(T, 2) end
     U=Matrix{eltype(T)}(undef, r, c)
@@ -663,7 +626,7 @@ end # mgs function
 """
     evd(S::ℍ)
 
- Given a positive semi-definite matrix ``S``,
+ Given a positive semi-definite `Hermitian` matrix ``S``,
  returns a 2-tuple ``(Λ, U)``, where ``U`` is the matrix holding in columns
  the eigenvectors and ``Λ`` is the matrix holding the eigenvalues on the diagonal.
  This is the output of Julia `eigen` function in ``UΛU'=S`` form.
@@ -739,7 +702,7 @@ end
 """
 function spectralFunctions(P::ℍ, func::Function)
     F = eigen(P)
-    ispos(F.values, msg="function spectralFunctions: at least one eigenvalue is smaller than the default tolerance")
+    ispos(F.values, msg="function "*string(func)*": at least one eigenvalue is smaller than the default tolerance")
     # optimize by computing only the upper trinagular part
     return ℍ(F.vectors * 𝔻(func.(F.values)) * F.vectors')
 end
@@ -749,7 +712,7 @@ end
     pow(P::ℍ, p)        # one argument
     pow(P::ℍ, args...)  # several arguments
 
- Given a positive definite matrix ``P``, return the power
+ Given a positive definite `Hermitian` matrix ``P``, return the power
  ``P^{r_1}, P^{r_2},...``
  for any number of exponents ``r_1, r_2,...``.
  It returns a tuple of as many elements as arguments passed after ``P``.
@@ -786,7 +749,8 @@ end
 """
     invsqrt(P::ℍ)
 
- Given a positive definite matrix ``P``, compute the inverse of the principal
+ Given a positive definite `Hermitian` matrix ``P``,
+ compute the inverse of the principal
  square root ``P^{-1/2}``.
 
  ``P`` must be flagged as Hermitian. See [typecasting matrices](@ref).
@@ -808,7 +772,7 @@ invsqrt(P::ℍ) = spectralFunctions(P, x->1/sqrt(x));
 """
     sqr(P::ℍ)
 
- Given a positive definite matrix ``P``, compute its square ``P^{2}``.
+ Given a positive definite `Hermitian` matrix ``P``, compute its square ``P^{2}``.
 
  ``P`` must be flagged as Hermitian. See [typecasting matrices](@ref).
 
@@ -825,19 +789,21 @@ sqr(P::ℍ) = ℍ(P*P)
 
 
 """
-    powerIterations(H, q;
-            <evalues=false, tol::Real=0, maxiter=300, ⍰=false>)
+    powerIterations(H::Union{ℍ, 𝕄}, q::Int;
+                    <evalues=false, tol::Real=0, maxiter=300, ⍰=false>)
+
+    powerIterations(L::𝕃{T}, q::Int;
+                    <evalues=false, tol::Real=0, maxiter=300, ⍰=false) where T<:Real>
 
  **alias**: `powIter`
 
  Compute the ``q`` eigenvectors associated to the ``q`` largest (real) eigenvalues
- of matrix ``H`` using the [power iterations](https://bit.ly/2JSo0pb) +
+ of real or complex `Hermitian` matrix or `Matrix` ``H`` using the
+ [power iterations](https://bit.ly/2JSo0pb) +
  [Gram-Schmidt orthogonalization](https://bit.ly/2YE6zvy) as suggested by Strang.
- The eigenvectors are returned with the same type as ``H``.
+ The eigenvectors are returned with the same type as the elements of ``H``.
 
- ``H`` must have real eigenvalues. It may be a generic `Matrix` object or may be
- flagged by Julia as `Hermitian`. See [typecasting matrices](@ref).
- In both cases it must be a symmetric matrix if it is real
+ ``H`` must have real eigenvalues, that is, it must be a symmetric matrix if it is real
  or an Hermitian matrix if it is complex. ``H`` may also be `LowerTriangular`,
  but only if it is real (see below).
 
@@ -868,10 +834,10 @@ sqr(P::ℍ) = ℍ(P*P)
     using LinearAlgebra, PosDefManifold
     # Generate an Hermitian (complex) matrix
     H=randP(ComplexF64, 10);
-    # all eigenvectors
-    U, iterations, convergence=powIter(H, size(H, 2), ⍰=true)
     # 3 eigenvectors and eigenvalues
-    Λ, U, iterations, convergence=powIter(H, 3, evalues=true);
+    U, iterations, convergence=powIter(H, 3, ⍰=true)
+    # all eigenvectors
+    Λ, U, iterations, convergence=powIter(H, size(H, 2), evalues=true, ⍰=true);
     U'*U ≈ I && U*Λ*U'≈H ? println(" ⭐ ") : println(" ⛔ ")
 
     # passing a `Matrix` object
@@ -882,8 +848,8 @@ sqr(P::ℍ) = ℍ(P*P)
     Λ, U, iterations, convergence=powIter(L, 3, evalues=true)
 
 """
-function powerIterations(H::Matrix, q::Int;
-                         evalues=false, tol::Real=0, maxiter=300, ⍰=false)
+function powerIterations(H::𝕄, q::Int;
+  evalues=false, tol::Real=0, maxiter=300, ⍰=false)
 
     (n, q², type) = size(H, 1), q^2, eltype(H)
     tol==0 ? tolerance = √eps(real(type)) : tolerance = tol
@@ -897,12 +863,12 @@ function powerIterations(H::Matrix, q::Int;
     while true
         # power iteration of q vectors and their Gram-Schmidt Orthogonalization
         type<:Real ? 💡=mgs(BLAS.symm('L', 'L', H, U)) : 💡=mgs(H*U)
-        conv=norm((💡)' * U-I) / q²
-        saddlePoint = conv ≈ oldconv  && @info(msg1, iter)
-        overRun     = iter == maxiter && @warn(msg2, iter)
+        conv = √norm((💡)' * U-I) / q²
+        (saddlePoint = conv ≈ oldconv)  && @info(msg1, iter)
+        (overRun     = iter == maxiter) && @warn(msg2, iter)
         #diverged    = conv > oldconv && @warn(msg3, iter)
         ⍰ && println("iteration: ", iter, "; convergence: ", conv)
-        if conv<=tolerance || saddlePoint==true ||  overRun==true
+        if conv<=tolerance || saddlePoint==true || overRun==true
             break
         else U = 💡 end
         oldconv=conv
@@ -916,29 +882,28 @@ function powerIterations(H::Matrix, q::Int;
     end
 end
 
+
 powerIterations(H::ℍ, q::Int;
         evalues=false, tol::Real=0, maxiter=300, ⍰=false) =
     powerIterations(Matrix(H), q; evalues=evalues, tol=tol, maxiter=maxiter, ⍰=⍰)
 
 powerIterations(L::𝕃{T}, q::Int;
         evalues=false, tol::Real=0, maxiter=300, ⍰=false) where T<:Real =
-    powerIterations(Matrix(L), q; evalues=evalues, tol=tol, maxiter=maxiter, ⍰=⍰)
+    powerIterations(𝕄(Symmetric(L, :L)), q; evalues=evalues, tol=tol, maxiter=maxiter, ⍰=⍰)
 
 powIter=powerIterations
+
 
 #  -----------------------------------------------
 ## 8. Decompositions involving triangular matrices
 #  -----------------------------------------------
 """
-    choL(P::Union{ℍ, Matrix})
+    choL(P::ℍ)
 
- Given a positive matrix ``P``, return the *Cholesky lower triangular factor* ``L``
+ Given a real or complex positive definite `Hermitian` matrix ``P``,
+ return the *Cholesky lower triangular factor* ``L``
  such that ``LL'=P``. To obtain ``L'`` or both ``L`` and ``L'``, use instead
  julia function [cholesky(P)](https://bit.ly/2u9Hw5P).
-
- ``P`` sould be flagged as `Hermitian` - see
- [typecasting matrices](@ref) - but a method for generic matrices
- is also provided.
 
  On output, ``L`` is of type [`LowerTriangular`](https://bit.ly/2U511f3).
 
@@ -949,7 +914,7 @@ powIter=powerIterations
     L*L'≈ P ? println(" ⭐ ") : println(" ⛔ ")
 
 """
-function choL(P::Union{ℍ, Matrix})
+function choL(P::ℍ)
     choP = cholesky(P)
     return choP.L
 end
