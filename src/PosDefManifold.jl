@@ -23,6 +23,7 @@ const maxpos=1e15
 # aliases
 𝚺 = sum             # alias for sum, tab-completition: \bfSigma
 𝛍 = mean            # alias for mean, tab-completition: \bfmu
+𝕄 = Matrix	         # alias for Matrix, tab-completion: \bbM
 𝔻 = Diagonal	     # alias for Diagonal, tab-completition: \bbD
 ℍ = Hermitian       # alias for Hermitian, tab completion \bbH
 𝕃 = LowerTriangular # alias for LowerTriangular, tab completition \bbL
@@ -65,6 +66,7 @@ export
     #aliases
     𝚺,
     𝛍,
+    𝕄,
     𝔻,
     ℍ,
     𝕃,
