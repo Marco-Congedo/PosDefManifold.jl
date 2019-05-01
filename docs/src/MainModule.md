@@ -6,13 +6,13 @@ It uses the following standard Julia packages:
 
 | using  |
 |:----------:|
-| [Linear Algebra](https://bit.ly/2W5Wq8W) |
+| [LinearAlgebra](https://bit.ly/2W5Wq8W) |
 | [Statistics](https://bit.ly/2Oem3li) |
 
 Examples in some units of **PosDefManifold** also uses the `Plots` package.
 
 The main module does not contains functions, but it declares all **constant**,
-**types** and **aliases** of Julia functions and types used in all units.
+**types** and **aliases** of Julia functions used in all units.
 
 | Contents  |
 |:----------:|
@@ -34,10 +34,10 @@ The main module does not contains functions, but it declares all **constant**,
 |:----------:| ----------- | ----------- | ----------- | ----------- |
 |`𝚺` |[`sum`](https://bit.ly/2FcsAJg)|Base| \bfSigma | ⛔ |
 |`𝛍`|[`mean`](https://bit.ly/2TOakA0)|Statistics| \bfmu | ⛔ |
-|`𝕄`|[`Matrix`](https://docs.julialang.org/en/v1/base/arrays/#Base.Matrix)|base| \bbM | ⛔ |
+|`𝕄`|[`Matrix`](https://docs.julialang.org/en/v1/base/arrays/#Base.Matrix)|Base| \bbM | ⛔ |
 |`𝔻`|[`Diagonal`](https://bit.ly/2Jovxf8)|LinearAlgebra| \bbD | ⛔ |
 |`ℍ`|[`Hermitian`](https://bit.ly/2JOiROX)|LinearAlgebra| \bbH | ✓ |
-|`𝕃`|[`LowerTriangular`](https://docs.julialang.org/en/v1/stdlib/LinearAlgebra/#LinearAlgebra.LowerTriangular)|LinearAlgebra| \bbH | ✓ |
+|`𝕃`|[`LowerTriangular`](https://docs.julialang.org/en/v1/stdlib/LinearAlgebra/#LinearAlgebra.LowerTriangular)|LinearAlgebra| \bbH | ⛔ |
 
 
 All packages above are built-in julia packages.
@@ -52,7 +52,7 @@ All packages above are built-in julia packages.
   ChoEuclidean =3
   logEuclidean =4
   LogCholesky  =5
-  Fisher       =6 # default metric
+  Fisher       =6
   logdet0      =7
   Jeffrey      =8
   VonNeumann   =9
@@ -83,26 +83,29 @@ end
 
     d=distance(metric, P).
 
-To know what is the current metric, get it as a string as:
+To know what is the current metric, you can get it as a string using:
 
     s=string(metric)
 
-To see the list of metrics in type Metric ask:
+To see the list of metrics in type Metric use:
 
-   instances(Metric)
+    instances(Metric)
 
 #### RealOrComplex type
- `RealOrComplex=Union{Real, Complex}` is the Union of Real and Complex Types.
+ `RealOrComplex=Union{Real, Complex}`
+
+ This is the Union of Real and Complex Types.
 
 #### ℍVector type
- `ℍVector=Vector{ℍ}` is a vector of Hermitian matrices.
- Julia sees is at: `Array{Hermitian,1}`.See [aliases](@ref) for the ℍ symbol and
- [typecasting matrices](@ref) for the use of Hermitian matrices
+ `ℍVector=Vector{ℍ}`
+
+ This is a vector of Hermitian matrices.
+ Julia sees is at: `Array{Hermitian,1}`.See [aliases](@ref) for the ℍ symbol and [typecasting matrices](@ref) for the use of Hermitian matrices
  in **PosDefManifold**.
 
 **ℍVector₂ type**
-  `ℍVector₂=Vector{ℍVector}` is a vector of [ℍVector type](@ref) objects, i.e.,
-  a vector of vectors of Hermitian matrices.
+
+  `ℍVector₂=Vector{ℍVector}` is a vector of [ℍVector type](@ref) objects, i.e., a vector of vectors of Hermitian matrices.
   Julia sees it as: `Array{Array{Hermitian,1},1}`. Note that `ℍVector₂`
   is not a matrix of Hermitian matrices since the several `ℍVector` objects
   it holds do not need to have the same length.
@@ -110,15 +113,12 @@ To see the list of metrics in type Metric ask:
 ### tips & tricks
 
 #### typecasting matrices
- Several functions in **PosDefManifold** implement multiple dispatch and can handle  
- several kinds of matrices as input, however the core functions for manipulating  
- objects on the Riemannian manifold of positive definite matrices act by definition
- on positive definite matrices only.
+ Several functions in **PosDefManifold** implement multiple dispatch and can handle several kinds of matrices as input, however the core functions for manipulating objects on the Riemannian manifold of positive definite matrices act by definition on positive definite matrices only.
  Those matrices must therefore be either
- *symmetric positive definite (real)* or *Hermitian (complex)*.
+ *symmetric positive definite (SPD, real)* or *Hermitian positive definite (HPD, complex)*.
  Such matrices are uniformly identified in **PosDefManifold** as being of the `Hermitian` type, using the standard [LinearAlgebra](https://bit.ly/2JOiROX) package.
  The alias `ℍ` is used consistently in the code (see [aliases](@ref)).
- If the input is not flagged, the functions restricting the input to *positive definite matrices* will give an error.
+ If the input is not flagged as `Hermitian`, the functions restricting the input to *positive definite matrices* will give an error.
 
  **Example**
 
@@ -155,8 +155,16 @@ To see the list of metrics in type Metric ask:
      3.74948  6.4728   6.21635
      4.54381  6.21635  8.91504
 
- Similarly, if you want to construct an [ℍVector type] from, say, two Hermitian
- matrices `P` and `Q`, don't write `A=[P, Q]`, but rather `A=ℍVector([P, Q])`.
+ Similarly, if you want to construct an [ℍVector type](@ref) from, say, two Hermitian matrices `P` and `Q`, don't write `A=[P, Q]`, but rather `A=ℍVector([P, Q])`. In fact,
+ the first is seen by Julia as
+
+    2-element Array{Hermitian{Float64,Array{Float64,2}},1},
+
+ while the latter as
+
+    2-element Array{Hermitian,1},
+
+ which is the type expected in all functions taking an `ℍVector type` as argument.
 
  Other functions act on generic matrices (of type [Matrix](https://docs.julialang.org/en/v1/base/arrays/#Base.Matrix)).
  To those functions you can pass any matrix.
@@ -171,22 +179,12 @@ To see the list of metrics in type Metric ask:
     julia> norm(X[:, 1])
     1.0
 
- Another example when typecasting is useful: functions like the [`gram`](@ref) function takes a `Matrix` type as argument (since `X` is expected to be a data matrix),
- like in
+  Some more examples:
 
-    H=gram(X).
 
- The following would not work though:
-```
- H=gram(X')
-```
+ - Typecasting `Adjoint` matrices:
 
- since `X'` is an `Adjoint` type. The problem is fixed by typecasting the
- adjoint matrix, such as
-
-  H=gram(Matrix(X')).
-
- Some more examples:
+   Matrix(X')
 
  - here is how to get an `Hermitian` matrix out of the
  diagonal part of an `Hermitian` matrix H:
@@ -196,7 +194,7 @@ To see the list of metrics in type Metric ask:
  - here is how to get a `LowerTriangular` matrix out of an
  `Hermitian` matrix H:
 
-   LowerTriangular(Matrix(H)).
+    LowerTriangular(Matrix(H)).
 
  For example, you can use this to pass a full inter-distance matrix to the [`laplacian`](@ref) function to obtain the Laplacian matrix.
 
@@ -207,8 +205,8 @@ This is reported in the help section of the concerned functions.
 When this is the case, you can set the number of threads
 the BLAS library should use by:
 
-   using LinearAlgebra
-   BLAS.set_num_threads(n)
+    using LinearAlgebra
+    BLAS.set_num_threads(n)
 
 where `n` is the number of threads.
 By default, **PosDefManifold** emplys 3/4 of the threads available

@@ -63,8 +63,8 @@ end
  (no need to call this funtion then).
 
  For the [logdet zero](@ref) and [Jeffrey](@ref) metric no closed form expression
- for the geodesic is available (to the best of authors' knowledge),
- so in this case the geodesic is found as the weighted mean using [`mean(@ref)`].
+ for the geodesic is available to the best of authors' knowledge,
+ so in this case the geodesic is found as the weighted mean using [`mean`](@ref).
  For the [Von Neumann](@ref) not even an expression for the mean is available,
  so in this case the geodesic is not provided and a *warning* is printed.
 
@@ -81,7 +81,7 @@ end
 |Euclidean| ``bP + aQ`` |
 |invEuclidean| ``\\big(bP^{-1} + aQ^{-1}\\big)^{-1}``|
 |ChoEuclidean| ``TT^*``, where ``T=bL_P + aL_Q``|
-|logEuclidean| ``\\text{exp}\\big(b\\text{log}(P) + a\\text{log}(Q)\\big)``|
+|logEuclidean| ``\\text{exp}\\big(b\\hspace{2pt}\\text{log}(P) + a\\hspace{2pt}\\text{log}(Q)\\big)``|
 |logCholesky| ``TT^*``, where ``T=S_P+a(S_Q-S_P)+D_P\\hspace{2pt}\\text{exp}\\big(a(\\text{log}D_Q-\\text{log}D_P)\\big)``|
 |Fisher | ``P^{1/2} \\big(P^{-1/2} Q P^{-1/2}\\big)^a P^{1/2}``|
 |logdet0| uses weighted mean algorithm [`logdet0Mean`](@ref) |
@@ -343,7 +343,7 @@ distance(metric::Metric, P::ℍ, Q::ℍ) = √(distanceSqr(metric, P, Q))
 
  **alias**: `distance²Mat`
 
- Given a 1d array `𝐏` of ``k`` positive definite matrices
+ Given a 1d array ``𝐏`` of ``k`` positive definite matrices
  ``{P_1,...,P_k}`` of [ℍVector type](@ref), create the ``k⋅k`` real
  `LowerTriangular` matrix comprising elements ``δ^2(P_i, P_j)\\textrm{, for all }i>=j``.
 
@@ -432,7 +432,7 @@ distance²Mat=distanceSqrMat
     (2) distanceMat(metric::Metric, 𝐏::ℍVector, type::Type{T}) where T<:AbstractFloat
 
 
- Given a 1d array `𝐏` of ``k`` positive definite matrices
+ Given a 1d array ``𝐏`` of ``k`` positive definite matrices
  ``{P_1,...,P_k}`` of [ℍVector type](@ref), create the ``k⋅k`` real
  `LowerTriangular` matrix comprising elements
  ``δ(P_i, P_j)\\textrm{, for all }i>=j``.
@@ -460,7 +460,7 @@ distance²Mat=distanceSqrMat
     # or, using unicode: Δ=distanceMat(Fisher, 𝐏)
 
     # return a matrix of type Float64
-    DsqrF64=distanceSqrMat(Fisher, Pset, Float64)
+    DsqrF64=distanceMat(Fisher, Pset, Float64)
 
 """
 distanceMat(metric::Metric, 𝐏::ℍVector, type::Type{T}) where T<:AbstractFloat =
@@ -472,7 +472,7 @@ distanceMat(metric::Metric, 𝐏::ℍVector)=sqrt.(distanceSqrMat(metric, 𝐏))
 """
     laplacian(Δ²:𝕃)
 
- Given a matrix of squared inter-distances ``Δ^2``,
+ Given a `LowerTriangular` matrix of squared inter-distances ``Δ^2``,
  return the lower triangular part of the *normalized Laplacian*.
  The elements of the Laplacian are of the same type as the elements of ``Δ^2``.
  The result is a `LowerTriangular` matrix.
@@ -606,7 +606,7 @@ laplacianEM=laplacianEigenMaps
     (2) spectralEmbedding(metric::Metric, 𝐏::ℍVector, q::Int, type::Type{T};
                          <tol::Real=0, maxiter=300, ⍰=false>) where T<:Real
 
- Given a 1d array `𝐏` of ``k`` positive definite matrices ``{P_1,...,P_k}``
+ Given a 1d array ``𝐏`` of ``k`` positive definite matrices ``{P_1,...,P_k}``
  (real or complex), compute its *eigen maps* in ``q`` dimensions.
 
  This function runs one after the other the functions:
@@ -614,8 +614,9 @@ laplacianEM=laplacianEigenMaps
  - [`laplacian`](@ref) (compute the normalized Laplacian),
  - [`laplacianEigenMaps`](@ref) (get the eigen maps).
 
- By default all computations above are done with Float32 precision.
- Another real type can be requested using method (2)
+ By default all computations above are done with `Float32` precision.
+ Another real type can be requested using method (2), where the `type` argument
+ is defined.
 
   Return the 4-tuple `(Λ, U, iterations, convergence)`, where:
  - ``Λ`` is a ``q⋅q`` diagonal matrix holding on diagonal the eigenvalues corresponding to the ``q`` dimensions of the Laplacian eigen maps,
@@ -625,7 +626,7 @@ laplacianEM=laplacianEigenMaps
 
  **Arguments** `(metric, 𝐏, q, <tol::Real=0, maxiter=300, ⍰=false>)`:
  - `metric` is the metric of type [Metric::Enumerated type](@ref) used for computing the inter-distances,
- - `𝐏` is a 1d array of ``k`` positive matrices of [ℍVector type](@ref),
+ - ``𝐏`` is a 1d array of ``k`` positive matrices of [ℍVector type](@ref),
  - ``q`` is the dimension of the Laplacian eigen maps;
  - The following are *<optional keyword arguments>* for the power method iterative algorithm:
    * `tol` is the tolerance for convergence of the power method (see below),
@@ -822,9 +823,9 @@ end # function
 """
     means(metric::Metric, ℘::ℍVector₂)
 
- Given a 2d array `℘` of positive definite matrices as an [ℍVector₂ type](@ref)
+ Given a 2d array ``℘`` of positive definite matrices as an [ℍVector₂ type](@ref)
  compute the [Fréchet mean](@ref) for as many [ℍVector type](@ref) object
- as hold in `℘`, using the specified `metric` of type
+ as hold in ``℘``, using the specified `metric` of type
  [Metric::Enumerated type](@ref).
   Return the means in a vector of Hermitian matrices, that is, as an `ℍVector` type.
 
@@ -856,19 +857,21 @@ means(metric::Metric, ℘::ℍVector₂)=ℍVector([mean(metric, 𝐏) for 𝐏 
     generalizedMean(𝐏::ℍVector, p::Real;
                    <w::Vector=[], ✓w=true>)
 
- Given a 1d array `𝐏` of ``k`` positive definite matrices ``𝐏={P_1,...,P_k}``
- of [ℍVector type](@ref) and optional non-negative real weights vector ``w={w_1,...,w_k}``,
- return the *weighted generalized mean* ``G`` with real parameter ``p``, that is,
+ Given a 1d array ``𝐏={P_1,...,P_k}`` of ``k`` positive definite matrices of
+ [ℍVector type](@ref) and optional non-negative real weights vector
+ ``w={w_1,...,w_k}``, return the *weighted generalized means* ``G``
+ with real parameter ``p``, that is,
 
  ``G=\\big(\\sum_{i=1}^{k}w_iP_i^p\\big)^{1/p}``.
 
  If you don't pass a weight vector with *<optional keyword argument>* ``w``,
- return the *unweighted generalized mean*.
+ return the *unweighted generalized mean*
 
  ``G=\\big(\\sum_{i=1}^{k}P_i^p\\big)^{1/p}``.
 
  If *<optional keword argument>* `✓w=true` (default), the weights are
- normalized so as to sum up to 1, otherwise they are used as they are passed.
+ normalized so as to sum up to 1, otherwise they are used as they are passed
+ and should be already normalized.
  This option is provided to allow
  calling this function repeatedly without normalizing the weights each time.
 
@@ -929,8 +932,8 @@ end # function
     logdet0Mean(𝐏::ℍVector;
                <w::Vector=[], ✓w=true, init=nothing, tol::Real=0, ⍰=false>)
 
- Given a 1d array ``𝐏`` of ``k`` positive definite matrices ``𝐏={P_1,...,P_k}``
- of [ℍVector type](@ref) and optional non-negative real weights vector ``w={w_1,...,w_k}``,
+ Given a 1d array ``𝐏={P_1,...,P_k}`` of ``k`` positive definite matrices of
+ [ℍVector type](@ref) and optional non-negative real weights vector ``w={w_1,...,w_k}``,
  return the 3-tuple ``(G, iter, conv)``, where ``G`` is the mean according
  to the [logdet zero](@ref) metric and ``iter``, ``conv`` are the number of iterations
  and convergence attained by the algorithm.
@@ -1026,7 +1029,7 @@ end
     wasMean(𝐏::ℍVector;
            <w::Vector=[], ✓w=true, init=nothing, tol::Real=0, ⍰=false>)
 
- Given a 1d array `𝐏` of ``k`` positive definite matrices ``𝐏={P_1,...,P_k}``
+ Given a 1d array ``𝐏={P_1,...,P_k}`` of ``k`` positive definite matrices
  of [ℍVector type](@ref) and optional non-negative real weights vector ``w={w_1,...,w_k}``,
  return the 3-tuple ``(G, iter, conv)``, where ``G`` is the mean according
  to the [Wasserstein](@ref) metric and ``iter``, ``conv`` are the number of iterations
@@ -1122,7 +1125,7 @@ end
     powerMean(𝐏::ℍVector, p::Real;
              <w::Vector=[], ✓w=true, init=nothing, tol::Real=0, ⍰=false>)
 
- Given a 1d array `𝐏` of ``k`` positive definite matrices ``𝐏={P_1,...,P_k}``
+ Given a 1d array ``𝐏={P_1,...,P_k}`` of ``k`` positive definite matrices
  of [ℍVector type](@ref),
  an optional non-negative real weights vector ``w={w_1,...,w_k}`` and
  a real parameter `p` ``\\in[-1, 1]``, return the
@@ -1134,12 +1137,12 @@ end
 
  ``G=\\sum_{i=1}^{k}(w_iG\\textrm{#}_pP_i)``,
 
- where ``G\\textrm{#}_pP_i`` is the [Fisher](@ref) geodesic equation.
+ where ``G\\textrm{#}_pP_i`` is the [Fisher](@ref) [geodesic](@ref) equation.
  In particular:
 
- - with ``p=-1`` this is the *harmonic mean* (see the [inverse Euclidean](@ref))
- - with ``p=+1`` this is the *arithmetic mean* (see the [Euclidean](@ref))
- - at the limit of ``p`` evaluated at zero from both side this is the *geometric mean* (see the [Fisher](@ref) metric).
+ - with ``p=-1`` this is the *harmonic mean* (see the [inverse Euclidean](@ref) metric),
+ - with ``p=+1`` this is the *arithmetic mean* (see the [Euclidean](@ref) metric),
+ - at the limit of ``p`` evaluated at zero from both side this is the *geometric mean* (see [Fisher](@ref) metric).
 
  For estimating power means for ``p\\in(-1, 1)``, this function implements
  the  fixed-point iterative algorithm of (Congedo et *al.*, 2017b)[🎓](@ref).
@@ -1339,7 +1342,7 @@ end
 """
     vecP(S::ℍ)
 
- *Vectorize* a tangent vector (matrix) ``S`` (*i.e.*, an `Hermitian` matrix):  mat -> vec.
+ *Vectorize* a tangent vector (which is an `Hermitian` matrix) ``S``:  mat -> vec.
 
  It gives weight ``1`` to diagonal elements and √2 to off-diagonal elements
  (Barachant et *al.*, 2012)[🎓](@ref).
@@ -1374,9 +1377,9 @@ vecP(S::ℍ)=[(if i==j return S[i, j] else return (S[i, j])*sqrt2 end) for j=1:s
 
  If ``ς=vecP(S)`` and ``S`` is a ``n⋅n`` Hermitian matrix,
  ``ς``  is a tangent vector of size ``n(n+1)/2``.
- The result of calling ``matP(ς)`` is then ``n⋅n`` matrix ``S``.
+ The result of calling `matP(ς)` is then ``n⋅n`` matrix ``S``.
 
- P.S.: This function needs to be rewritten more efficiently
+ **To Do**: This function needs to be rewritten more efficiently
 
  ## Examples
     using PosDefManifold
@@ -1424,11 +1427,12 @@ end
 
  ``\\textrm{argmin}_Uδ(P,U^*QU)``,
 
- where ``U`` varies over the set of unitary matrices ``𝐔`` and ``δ(.,.)`` is a
+ where ``U`` varies over the set of unitary matrices and ``δ(.,.)`` is a
  distance or divergence function.
+
  ``U^*QU`` is named in physics the *unitary orbit* of ``Q``.
 
- If the argument 'extremum' is passed as "max", it returns instead the solution of
+ If the argument `extremum` is passed as "max", it returns instead the solution of
 
  ``\\textrm{argmax}_Uδ(P,U^*QU)``.
 

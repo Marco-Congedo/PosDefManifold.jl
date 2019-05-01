@@ -39,7 +39,7 @@ normalizeCol!
 
 | Function   | Description |
 |:----------:| ----------- |
-| [`ispos`](@ref) | Check whether the argument is comprised of all positive elements|
+| [`ispos`](@ref) | Check whether a real vector or diagonal matrix are comprised of all positive elements|
 
 ```@docs
 ispos
@@ -75,7 +75,7 @@ fidelity
 
 | Function   | Description |
 |:----------:| ----------- |
-| [`fDiagonal`](@ref) | Elemen-wise functions of matrix diagonals|
+| [`fDiagonal`](@ref), `𝑓𝔻` | Elemen-wise functions of matrix diagonals|
 
 ⋅
 
