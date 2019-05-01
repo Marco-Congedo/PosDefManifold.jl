@@ -31,7 +31,8 @@
  Given a real or complex square `Matrix` or `Hermitian` matrix ``X``,
  return the best approximant to
  ``X`` from the set of matrices in the [special linear group](https://bit.ly/2W5jDZ6),
- i.e., the closer matrix having det=1. See Bhatia and Jain (2014)[🎓].
+ *i.e.*, the closer matrix having determinant equal to 1.
+ See Bhatia and Jain (2014)[🎓].
 
   **See** [det](https://bit.ly/2Y4MnTF).
 
@@ -91,8 +92,9 @@ tr1(X::𝕄) = X/tr(X)
 
  ``range`` is a [UnitRange](https://bit.ly/2HSfK5J) type.
 
- Julia does not allow normalizing the columns of `Hermitian` matrices.
- (see [typecasting matrices](@ref)).
+!!! note "Nota Bene"
+    Julia does not allow normalizing the columns of `Hermitian` matrices.
+    If you want to call this function for an `Hermitian` matrix see [typecasting matrices](@ref).
 
  **See** [norm](https://bit.ly/2TaAkR0) and [randn](https://bit.ly/2I1Vgrg) for the example
 
@@ -138,17 +140,19 @@ normalizeCol!(X::𝕄, range::UnitRange, by::Number) =
 ```
 
  Return ``true`` if all numbers in (1) real vector ``λ`` or in (2) real diagonal
- matrix ``Λ`` are not inferior to ``tol``, otherwise return ``false``. This may be used,
+ matrix ``Λ`` are not inferior to ``tol``, otherwise return ``false``. This is used,
  for example, in spectral functions to check that all eigenvalues are positive.
- ``tol`` defaults to the square root of `Base.eps` of the type of ``λ`` (1)
- or ``Λ`` (2). This corresponds to requiring positivity beyond about half of
- the significant digits.
+
+!!! note "Nota Bene"
+    ``tol`` defaults to the square root of `Base.eps` of the type of ``λ`` (1)
+     or ``Λ`` (2). This corresponds to requiring positivity beyond about half of
+     the significant digits.
 
  The following are *<optional keyword arguments>*:
 
  - If ``rev=true`` the (1) elements in ``λ`` or (2) the diagonal elements in ``Λ`` will be chacked in reverse order.
  This is done for allowing a very fast
- check when the elements are sorted where to start checking.
+ check when the elements are sorted and it is known where to start checking.
 
  If the result is ``false``:
  - if ``🔔=true`` a bell character will be printed. In most systems this will ring a bell on the computer.
@@ -191,14 +195,14 @@ end
 
 """
     (1) colProd(X::Union{𝕄, ℍ, j::Int, l::Int)
-    (2) colProd(X::Union{𝕄, ℍ, Y::Union{𝕄, ℍ, j::Int, l::Int)
+    (2) colProd(X::Union{𝕄, ℍ, Y::Union{𝕄, ℍ}, j::Int, l::Int)
 
  (1) Given a real or complex `Matrix` or `Hermitian` matrix ``X``,
  return the dot product of the ``j^{th}`` and ``l^{th}`` columns, defined as,
 
  ``\\sum_{i=1}^{r} \\big(x_{ij}^*x_{il}\\big), ``
 
- where ``r`` is the number of rows of ``X`` and ``^*`` the complex conjugate.
+ where ``r`` is the number of rows of ``X`` and ``^*`` denotes complex conjugate.
 
  (2) Given real or complex `Matrix` or `Hermitian` matrices ``X`` and ``Y``,
  return the dot product of the ``j^{th}`` column of ``X`` and the ``l^{th}`` column
@@ -206,13 +210,16 @@ end
 
  ``\\sum_{i=1}^{r} \\big(x_{ij}^*y_{il}\\big), ``
 
- where ``r`` is the number of rows of ``X`` and of ``Y`` and ``^*`` the complex conjugate.
+ where ``r`` is the number of rows of ``X`` and of ``Y`` and ``^*`` denotes
+ the complex conjugate.
 
- ``X`` and of ``Y`` may have a different number of columns, but must have
- the same number of rows.
+!!! note "Nota Bene"
+    ``X`` and of ``Y`` may have a different number of columns, but must have
+    the same number of rows.
 
  Arguments ``j`` and ``l`` must be positive integers in range
- (1) `j,l in 1:size(X, 2)` and (2) `j in 1:size(X, 2), l in 1:size(Y, 2)`.
+ - (1) `j,l in 1:size(X, 2)`,
+ - (2) `j in 1:size(X, 2), l in 1:size(Y, 2)`.
 
  **See also**: [`normalizeCol!`](@ref), [`colNorm`](@ref).
 
@@ -256,7 +263,7 @@ colNorm(X::Union{𝕄, ℍ}, j::Int) = √sumOfSqr(X, j)
 
  Return
  - (1) the sum of square of the elements in an array ``A`` of any dimensions.
- - (2) as (1), but for an `Hermitian` or `LowerTriangular` matrix ``H``, using only the lower triangular part.
+ - (2) as in (1), but for an `Hermitian` or `LowerTriangular` matrix ``H``, using only the lower triangular part.
  - (2) the sum of square of the ``j^{th}`` column of a `Matrix` or `Hermitian` ``X``.
  - (3) the sum of square of the columns of a `Matrix` or `Hermitian` ``X`` in a given range.
 
@@ -264,13 +271,13 @@ colNorm(X::Union{𝕄, ℍ}, j::Int) = √sumOfSqr(X, j)
 
  Only method (1) works for arrays of any dimensions.
 
- Method (2) and (1) if ``A`` is a matrix return the square of the
+ For method (2) and (1), if ``A`` is a matrix return the square of the
  [Frobenius norm](https://bit.ly/2Fi10eH):
  ``\\sum |a_{ij}|^2. ``
 
- For method (3) ``j`` is a positive integer in range `1:size(X, 1)`.
+ For method (3), ``j`` is a positive integer in range `1:size(X, 1)`.
 
- For method (4) ``range`` is a [UnitRange type](https://bit.ly/2HDoFbk).
+ For method (4), ``range`` is a [UnitRange type](https://bit.ly/2HDoFbk).
 
  **See also**: [`colNorm`](@ref), [`sumOfSqrDiag`](@ref), [`sumOfSqrTril`](@ref).
 
@@ -348,8 +355,9 @@ ssd=sumOfSqrDiag
 
  `Matrix` ``X`` may be rectangular.
 
- ``k`` must be in range `1-size(X, 1):c-1` for ``X`` `Matrix`, `Diagonal` or
- `Hermitian`, in range `1-size(X, 1):0` for ``X`` `LowerTriangular`.
+ ``k`` must be in range
+ - `1-size(X, 1):c-1` for ``X`` `Matrix`, `Diagonal` or `Hermitian`,
+ - `1-size(X, 1):0` for ``X`` `LowerTriangular`.
 
  See julia [tril(M, k::Integer)](https://bit.ly/2Tbx8o7) function
  for numbering of diagonals.
@@ -447,7 +455,9 @@ end
  (1) Given a real or complex vector ``v`` and `Hermitian` matrix ``X``,
  compute the quadratic form
 
- ``v^*Xv``.
+ ``v^HXv``,
+
+ where the superscript *H* denotes complex conjugate transpose.
 
  If ``v`` and ``X`` are real and ``X`` is `Hermitian`, only the
  lower triangular part of ``X`` is used.
@@ -459,7 +469,7 @@ end
 
  For ``v`` and ``X`` real and ``X`` symmetric, the quadratic form is
 
- ```sum_i(v_i^2x_{ii})+sum_i>j(2v_iv_jx_{ij})``.
+ ``\\sum_i(v_i^2x_{ii})+\\sum_{i>j}(2v_iv_jx_{ij})``.
 
 
  ## Examples
@@ -535,9 +545,8 @@ end
  for numbering of diagonals.
 
  Bt default the main diagonal is considered.
-
- If the matrix is Diagonal (1) `k` must be zero (main diagonal).
- If the matrix is lower triangular (2) `k` cannot be positive.
+ - If the matrix is Diagonal (1) ``k`` must be zero (main diagonal).
+ - If the matrix is lower triangular (2) ``k`` cannot be positive.
 
  Note that if ``X`` is rectangular the dimension of the result depends
  on the size of ``X`` and on the chosen diagonal.
@@ -670,24 +679,26 @@ end
 
  ``P`` must be flagged as Hermitian. See [typecasting matrices](@ref).
 
- The definition of spectral functions for a positive definite matrix ``P``
- is at it follows:
-
- ``f\\big(P\\big)=Uf\\big(Λ\\big)U',``
-
- where ``U`` is the matrix holding in columns the eigenvectors of ``P``,
- ``Λ`` is the matrix holding on diagonal its eigenvalues and ``f`` is
- a function applying element-wise to the eigenvalues.
-
-
- **Arguments** `(P, func)`;
- - ``P`` is a positive matrix.
- - `func is the function that will be applied on the eigenvalues
+  **Arguments** `(P, func)`;
+ - ``P`` is a positive matrix,
+ - `func` is the function that will be applied on the eigenvalues.
 
 !!! note "Nota Bene"
     The function `func` must support the `func.` syntax and therefore
     must be able to apply element-wise to the eigenvalues
     (those include anonymous functions).
+
+ ### Maths
+
+ The definition of spectral functions for a positive definite matrix ``P``
+ is at it follows:
+
+ ``f\\big(P\\big)=Uf\\big(Λ\\big)U^H,``
+
+ where ``U`` is the matrix holding in columns the eigenvectors of ``P``,
+ ``Λ`` is the matrix holding on diagonal its eigenvalues and ``f`` is
+ a function applying element-wise to the eigenvalues.
+
 
  **See also**: [`evd`](@ref).
 
@@ -793,40 +804,41 @@ sqr(P::ℍ) = ℍ(P*P)
                     <evalues=false, tol::Real=0, maxiter=300, ⍰=false>)
 
     powerIterations(L::𝕃{T}, q::Int;
-                    <evalues=false, tol::Real=0, maxiter=300, ⍰=false) where T<:Real>
+                    <evalues=false, tol::Real=0, maxiter=300, ⍰=false)> where T<:Real
 
  **alias**: `powIter`
 
- Compute the ``q`` eigenvectors associated to the ``q`` largest (real) eigenvalues
+ (1) Compute the ``q`` eigenvectors associated to the ``q`` largest (real) eigenvalues
  of real or complex `Hermitian` matrix or `Matrix` ``H`` using the
  [power iterations](https://bit.ly/2JSo0pb) +
  [Gram-Schmidt orthogonalization](https://bit.ly/2YE6zvy) as suggested by Strang.
  The eigenvectors are returned with the same type as the elements of ``H``.
 
  ``H`` must have real eigenvalues, that is, it must be a symmetric matrix if it is real
- or an Hermitian matrix if it is complex. ``H`` may also be `LowerTriangular`,
- but only if it is real (see below).
+ or an Hermitian matrix if it is complex.
+
+ (2) as in (1), but using only the `LowerTriangular` view ``L`` of a matrix.
+ This option is available only for real matrices (see below).
 
  The following are *<optional keyword arguments>*:
- - ``tol`` is the tolerance for the convergence of the power method (see below).
- - ``maxiter`` is the maximum number of iterations allowed for the power method
- - if ``⍰=true``, the convergence of all iterations will be printed.
- - if ``evalues=true``, return the 4-tuple ``(Λ, U, iterations, covergence)``
- - if ``evalues=false`` return the 3-tuple ``(U, iterations, covergence)``
+ - ``tol`` is the tolerance for the convergence of the power method (see below),
+ - ``maxiter`` is the maximum number of iterations allowed for the power method,
+ - if ``⍰=true``, the convergence of all iterations will be printed,
+ - if ``evalues=true``, return the 4-tuple ``(Λ, U, iterations, covergence)``,
+ - if ``evalues=false`` return the 3-tuple ``(U, iterations, covergence)``.
 
 
 !!! note "Nota Bene"
     Differently from the [`evd`](@ref) function, the eigenvectors and
     eigenvalues are sorted by decreasing order of eigenvalues.
 
-    If ``H`` is real, only its lower triangular part is used.
+    If ``H`` is real, only its lower triangular part is used like in (2).
     In this case a BLAS routine is used for computing the power iterations.
     See [BLAS routines](@ref).
 
     ``tol`` defaults to the square root of `Base.eps` of the type of ``H``.
     This corresponds to requiring equality for the convergence criterion
     over two successive iterations of about half the significant digits.
-
 
 **See also**: [`mgs`](@ref).
 
@@ -902,7 +914,7 @@ powIter=powerIterations
 
  Given a real or complex positive definite `Hermitian` matrix ``P``,
  return the *Cholesky lower triangular factor* ``L``
- such that ``LL'=P``. To obtain ``L'`` or both ``L`` and ``L'``, use instead
+ such that ``LL^H=P``. To obtain ``L^H`` or both ``L`` and ``L^H``, use instead
  julia function [cholesky(P)](https://bit.ly/2u9Hw5P).
 
  On output, ``L`` is of type [`LowerTriangular`](https://bit.ly/2U511f3).
