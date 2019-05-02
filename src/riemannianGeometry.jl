@@ -160,6 +160,9 @@ end # function
 """
     (1) distanceSqr(metric::Metric, P::ℍ)
     (2) distanceSqr(metric::Metric, P::ℍ, Q::ℍ)
+    (3) distanceSqr(metric::Metric, D::𝔻{T}) where T<:Real
+    (4) distanceSqr(metric::Metric, D::𝔻{T}, E::𝔻{T}) where T<:Real
+
 
  **alias**: `distance²`
 
@@ -174,6 +177,9 @@ end # function
 
  ``P`` in (1) and ``P``, ``Q`` in (2) must be flagged by julia as `Hermitian`.
  See [typecasting matrices](@ref).
+
+ (3) and (4) are specialized methods of (1) and (2), respectively,
+ for `Diagonal` matrices.
 
  **Maths**
 
@@ -232,7 +238,6 @@ end # function
 
 """
 function distanceSqr(metric::Metric, P::ℍ)
-
     if      metric==Euclidean
     return  sumOfSqr(P-I)
 
@@ -250,7 +255,7 @@ function distanceSqr(metric::Metric, P::ℍ)
 
     elseif  metric==logCholesky
             LP=choL(P)
-    return  sumOfSqrTril(LP, -1) + sumOfSqrDiag(𝑓𝔻(log, LP))
+    return  sumOfSqrTril(LP, -1) + sumOfSqrDiag(𝑓𝔻(log, P))
 
     elseif  metric==Jeffrey
     return  0.5*(tr(P) + tr(inv(P))) - size(P, 1)
@@ -266,6 +271,24 @@ function distanceSqr(metric::Metric, P::ℍ)
              (PosDefManifold Package): the chosen 'metric' does not exist")
     end # if
 end #function
+
+
+function distanceSqr(metric::Metric, D::𝔻{T}) where T<:Real
+    if      metric==Euclidean           return  ssd(D-I)
+    elseif  metric==invEuclidean        return  ssd(inv(D)-I)
+    elseif  metric in (logEuclidean, Fisher, logCholesky)  return  ssd(log(D))
+    elseif  metric==logdet0             return  logdet((D+I)/2) - logdet(D)/2
+    elseif  metric==ChoEuclidean        return  ssd(choL(D)-I)
+    elseif  metric==Jeffrey             return  0.5*(tr(D) + tr(inv(D))) - size(D, 1)
+    elseif  metric==VonNeumann
+            𝓵D=log(D)
+    return  0.5*(tr(D*𝓵D) - tr(𝓵D))
+    elseif  metric==Wasserstein         return  tr(D) + size(D, 1) - 2*tr(sqrt(D))
+    else    @warn("in RiemannianGeometryP.distanceSqr function
+             (PosDefManifold Package): the chosen 'metric' does not exist")
+    end # if
+end #function
+
 
 function distanceSqr(metric::Metric, P::ℍ, Q::ℍ)
     if      metric==Euclidean
@@ -289,21 +312,37 @@ function distanceSqr(metric::Metric, P::ℍ, Q::ℍ)
     elseif  metric==logCholesky
             LP = choL(P)
             LQ = choL(Q)
-    return  sst(tril(LP,-1)-tril(LQ,-1), -1) + ssd(𝑓𝔻(log, LP)-𝑓𝔻(log, LQ))
+    return  sst(tril(LP,-1)-tril(LQ,-1), -1) + ssd(𝑓𝔻(log, P)-𝑓𝔻(log, Q))
 
-    elseif  metric==Jeffrey
-            n=size(P, 1)  #using formula tr(Q⁻¹P)/2 + tr(P⁻¹Q)/2 -n
-    return  0.5*(tr(inv(Q), P) + tr(inv(P), Q)) - n
+    elseif  metric==Jeffrey #using formula tr(Q⁻¹P)/2 + tr(P⁻¹Q)/2 -n
+    return  0.5*(tr(inv(Q), P) + tr(inv(P), Q)) - size(P, 1)
 
-    elseif  metric==VonNeumann      # using formula: tr(PlogP - PlogQ + QlogQ - QlogP)/2=
-            n=size(P, 1)            # (tr(P(logP - LoqQ)) + tr(Q(logQ - logP)))/2=
-            R=log(P)-log(Q)         # (tr(P(logP - LoqQ)) - tr(Q(logP - LoqQ)))/2
-    return  0.5*real( tr(P, R) - tr(Q, R) )
+    elseif  metric==VonNeumann              # using formula: tr(PlogP - PlogQ + QlogQ - QlogP)/2=
+            R=log(P)-log(Q)                 # (tr(P(logP - LoqQ)) + tr(Q(logQ - logP)))/2=
+    return  0.5*real( tr(P, R) - tr(Q, R) ) # (tr(P(logP - LoqQ)) - tr(Q(logP - LoqQ)))/2
 
     elseif  metric==Wasserstein
             P½=sqrt(P)
     return  tr(P) + tr(Q) -2*real(tr(sqrt(ℍ(P½*Q*P½))))
 
+    else    @warn("in RiemannianGeometryP.distanceSqr function
+                    (PosDefManifold Package): the chosen 'metric' does not exist")
+    end #if
+end # function
+
+
+function distanceSqr(metric::Metric, D::𝔻{T}, E::𝔻{T}) where T<:Real
+    if      metric==Euclidean           return  ssd(D - E)
+    elseif  metric==invEuclidean        return  ssd(inv(D) - inv(E))
+    elseif  metric in (logEuclidean, logCholesky) return  ssd(log(D) - log(E))
+    elseif  metric==Fisher              return  tr((log(inv(E)*D))^2)
+    elseif  metric==logdet0             return  logdet((D + E) / 2) - logdet(D * E)/2
+    elseif  metric==ChoEuclidean        return  ssd(choL(D) - choL(E))
+    elseif  metric==Jeffrey             return  0.5*(tr(inv(E)*D) + tr(inv(D)*E)) - size(D, 1)
+    elseif  metric==VonNeumann
+            R=log(D)-log(E)
+            return  0.5*(tr(D*R) - tr(E*R))
+    elseif  metric==Wasserstein         return  tr(D) + tr(E) -2*tr(sqrt(D*E))
     else    @warn("in RiemannianGeometryP.distanceSqr function
                     (PosDefManifold Package): the chosen 'metric' does not exist")
     end #if
@@ -314,6 +353,9 @@ distance²=distanceSqr # alias
 """
     (1) distance(metric::Metric, P::ℍ)
     (2) distance(metric::Metric, P::ℍ, Q::ℍ)
+    (3) distance(metric::Metric, D::𝔻{T}) where T<:Real
+    (4) distance(metric::Metric, D::𝔻{T}, E::𝔻{T}) where T<:Real
+
 
  (1) Return ``δ(P, I)``, the *distance* between positive definite matrix ``P`` and
  the identity matrix.
@@ -321,14 +363,19 @@ distance²=distanceSqr # alias
  (2) Return ``δ(P, Q)``, the *distance* between positive definite
  matrices ``P`` and ``Q``.
 
+ (3) and (4) are specialized methods of (1) and (2), respectively,
+ for `Diagonal` matrices.
+
  This is the square root of [`distanceSqr`](@ref)
  and is invoked with the same syntax therein.
 
  **See also**: [`distanceMat`](@ref).
 """
 distance(metric::Metric, P::ℍ) = √(distanceSqr(metric, P))
+distance(metric::Metric, D::𝔻{T}) where T<:Real = √(distanceSqr(metric, D))
 
 distance(metric::Metric, P::ℍ, Q::ℍ) = √(distanceSqr(metric, P, Q))
+distance(metric::Metric, D::𝔻{T}, E::𝔻{T}) where T<:Real = √(distanceSqr(metric, D, E))
 
 
 
@@ -395,7 +442,7 @@ function distanceSqrMat(metric::Metric, 𝐏::ℍVector, type::Type{T}) where T<
     elseif  metric==logCholesky
             𝐏L=[choL(P) for P in 𝐏]
             for j=1:k-1, i=j+1:k
-                △[i, j]=sst(tril(𝐏L[i], -1)-tril(𝐏L[j], -1), -1) + ssd(𝑓𝔻(log, 𝐏L[i])-𝑓𝔻(log, 𝐏L[j])) end
+                △[i, j]=sst(tril(𝐏L[i], -1)-tril(𝐏L[j], -1), -1) + ssd(𝑓𝔻(log, 𝐏[i])-𝑓𝔻(log, 𝐏[j])) end
 
     elseif  metric==Jeffrey
             𝐏𝓲=[inv(P) for P in 𝐏]
@@ -1234,7 +1281,7 @@ function powerMean(𝐏::ℍVector, p::Real;
               H=𝚺(ω*pow(ℍ(X*P*X), absp) for (ω, P) in zip(v, 𝒫))
           end
           💡 = (pow(ℍ(H), r))*X
-          conv = √norm(H-I)/sqrtn # relative difference to identity
+          conv = √(norm(H-I)/sqrtn) # relative difference to identity
           ⍰ && println("iteration: ", iter, "; convergence: ", conv)
           (diverging = conv > oldconv) && ⍰ && @warn("powerMean diverged at:", iter)
           (overRun = iter == maxiter) && @warn("powerMean: reached the max number of iterations before convergence:", iter)
