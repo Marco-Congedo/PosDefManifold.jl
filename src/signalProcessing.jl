@@ -56,11 +56,13 @@ randEigvals(n::Int; df::Int=2, eigvalsSNR::Real=10e3) =
 randλ=randEigvals
 
 """
-    randEigvalsMat(n::Int; <df::Int=2, eigvalsSNR::Real=10e3>)
+    (1) randEigvalsMat(n::Int; <df::Int=2, eigvalsSNR::Real=10e3>)
+    (2) randEigvalsMat(n::Int, k::Int; <df::Int=2, eigvalsSNR::Real=10e3>)
 
  **alias**: `randΛ`
 
- Generate an ``n⋅n`` diagonal matrix of random real positive eigenvalues.
+ (1) Generate an ``n⋅n`` diagonal matrix of random real positive eigenvalues.
+ (2) An array 1d (of [𝔻Vector type](@ref)) of ``k`` matrices of the kind in (1)
 
  The eigenvalues are generated according to model
 
@@ -99,6 +101,7 @@ randλ=randEigvals
 
  ## Examples
     using PosDefManifold
+    # (1)
     n=3;
     U=randU(n);
     Λ=randΛ(n, eigvalsSNR=100)
@@ -106,8 +109,19 @@ randλ=randEigvals
     using LinearAlgebra
     Q=ℍ(U*Λ*U') # generate an SPD matrix and flag it as 'Hermitian'
 
+    # (2) generate an array of 10 matrices of simulated eigenvalues
+    Dvec=randΛ(n, 10)
+
 """
 randEigvalsMat(n::Int; df::Int=2, eigvalsSNR::Real=10e3)=𝔻(randλ(n, df=df, eigvalsSNR=eigvalsSNR))
+
+function randEigvalsMat(n::Int, k::Int; df::Int=2, eigvalsSNR::Real=10e3)
+    𝐃=𝔻Vector(undef, k)
+    for j in 1:k
+        𝐃[j]=randEigvalsMat(n, df=df, eigvalsSNR=eigvalsSNR)
+    end
+    return 𝐃
+end
 
 randΛ=randEigvalsMat
 

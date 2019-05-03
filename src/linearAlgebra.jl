@@ -257,27 +257,31 @@ colNorm(X::Union{𝕄, ℍ}, j::Int) = √sumOfSqr(X, j)
 
 """
     (1) sumOfSqr(A::Array)
-    (2) sumOfSqr(H::Union{ℍ, 𝕃})
-    (3) sumOfSqr(X::Union{𝕄, ℍ}, j::Int)
-    (4) sumOfSqr(X::Union{𝕄, ℍ}, range::UnitRange)
+    (2) sumOfSqr(H::ℍ)
+    (3) sumOfSqr(L::𝕃)
+    (4) sumOfSqr(D::𝔻)
+    (5) sumOfSqr(X::Union{𝕄, ℍ}, j::Int)
+    (6) sumOfSqr(X::Union{𝕄, ℍ}, range::UnitRange)
+
+**alias**: `sos`
 
  Return
  - (1) the sum of square of the elements in an array ``A`` of any dimensions.
- - (2) as in (1), but for an `Hermitian` or `LowerTriangular` matrix ``H``, using only the lower triangular part.
- - (2) the sum of square of the ``j^{th}`` column of a `Matrix` or `Hermitian` ``X``.
- - (3) the sum of square of the columns of a `Matrix` or `Hermitian` ``X`` in a given range.
+ - (2) as in (1), but for an `Hermitian` matrix ``H``, using only the lower triangular part.
+ - (3) as in (1), but for a `LowerTriangular` matrix ``L``.
+ - (4) as in (1), but for a `Diagonal` matrix ``D`` (sum of squares of diagonal elements).
+ - (5) the sum of square of the ``j^{th}`` column of a `Matrix` or `Hermitian` ``X``.
+ - (6) the sum of square of the columns of a `Matrix` or `Hermitian` ``X`` in a given range.
 
  All methods support real and complex matrices.
 
  Only method (1) works for arrays of any dimensions.
 
- For method (2) and (1), if ``A`` is a matrix return the square of the
- [Frobenius norm](https://bit.ly/2Fi10eH):
- ``\\sum |a_{ij}|^2. ``
+ Methods (1)-(4) return the square of the [Frobenius norm](https://bit.ly/2Fi10eH).
 
- For method (3), ``j`` is a positive integer in range `1:size(X, 1)`.
+ For method (5), ``j`` is a positive integer in range `1:size(X, 1)`.
 
- For method (4), ``range`` is a [UnitRange type](https://bit.ly/2HDoFbk).
+ For method (6), ``range`` is a [UnitRange type](https://bit.ly/2HDoFbk).
 
  **See also**: [`colNorm`](@ref), [`sumOfSqrDiag`](@ref), [`sumOfSqrTril`](@ref).
 
@@ -291,30 +295,32 @@ colNorm(X::Union{𝕄, ℍ}, j::Int) = √sumOfSqr(X, j)
 """
 sumOfSqr(A::Array) = 𝚺(abs2(a) for a in A)
 
-function sumOfSqr(H::Union{ℍ, 𝕃})
+function sumOfSqr(H::ℍ)
     r=size(H, 1)
     s=real(eltype(H))(0)
-
-    if H isa Hermitian
-        for j=1:size(H, 2)-1
-            @inbounds s+=abs2(H[j, j])
-            for i=j+1:r @inbounds s+=2*abs2(H[i, j]) end
-        end
-
-    elseif H isa LowerTriangular
-        for j=1:size(H, 2)-1
-            @inbounds s+=abs2(H[j, j])
-            for i=j+1:r @inbounds s+=abs2(H[i, j]) end
-        end
+    for j=1:size(H, 2)-1
+        @inbounds s+=abs2(H[j, j])
+        for i=j+1:r @inbounds s+=2*abs2(H[i, j]) end
     end
     @inbounds s+=abs2(H[r, r])
     return s
 end
 
+function sumOfSqr(L::𝕃)
+    s=real(eltype(L))(0)
+    for j=1:size(L, 2), i=j:size(L, 1)
+        @inbounds s+=abs2(L[i, j])
+    end
+    return s
+end
+
+sumOfSqr(D::𝔻) = sumOfSqrDiag(D)
+
 sumOfSqr(X::Union{𝕄, ℍ}, j::Int) = 𝚺(abs2.(X[:, j]))
 
 sumOfSqr(X::Union{𝕄, ℍ}, range::UnitRange) = 𝚺(sumOfSqr(X, j) for j in range)
 
+sos=sumOfSqr
 
 """
     (1) sumOfSqrDiag(X::𝕄)
@@ -395,6 +401,8 @@ sst=sumOfSqrTril
 """
     (1) tr(P::ℍ, Q::ℍ)
     (2) tr(P::ℍ, Q::𝕄)
+    (3) tr(D::𝔻{T}, H::Union{ℍ, 𝕄}) where T<:Real
+    (4) tr(H::Union{ℍ, 𝕄}, D::𝔻{T}) where T<:Real
 
  Given (1) two `Hermitian` positive definite matrix ``P`` and ``Q``,
  return the trace of the product ``PQ``.
@@ -405,6 +413,10 @@ sst=sumOfSqrTril
  in which case return
  - a real trace if the product ``PQ`` is real or if it has all positive real eigenvalues.
  - a complex trace if the product ``PQ`` is not real and has complex eigenvalues.
+
+ Methods (3) and (4) return the trace of the product ``DH`` or ``HD``,
+ where ``D`` is a real `Diagonal`matrix and ``H`` an ``Hermitian``
+ or ``Matrix`` object. The result if of the same type as the elements of ``H``.
 
  ## Math
  Let ``P`` and ``Q`` be `Hermitian` matrices, using the properties of the trace
@@ -444,6 +456,16 @@ function tr(P::ℍ, Q::𝕄)
     end
     if OK return real(𝚺(λ)) else return 𝚺(λ) end
 end
+
+
+function tr(D::𝔻{T}, H::Union{ℍ, 𝕄}) where T<:Real
+    s=eltype(H)(0)
+    for i=1:size(D, 1) @inbounds s += D[i, i] * H[i, i] end
+    return s
+end
+
+tr(H::Union{ℍ, 𝕄}, D::𝔻{T}) where T<:Real = tr(D, H)
+
 
 
 """
@@ -569,7 +591,7 @@ end
     Δ=fDiagonal(log, Λ)     # diagonal matrix with the log of the eigenvalues
     Δ=fDiagonal(x->x^2, Λ)  # using an anonymous function for the square of the eigenvalues
 """
-fDiagonal(func::Function, X::𝔻, k::Int=0) = 𝔻(func.(X))
+fDiagonal(func::Function, X::𝔻, k::Int=0) = func.(X)
 
 function fDiagonal(func::Function, X::𝕃, k::Int=0)
  if k>0 @error("in function fDiagonal (linearAlgebra.jl): k argument cannot be positive.")
@@ -663,9 +685,10 @@ end
 
 
 """
-    spectralFunctions(P::ℍ, func)
+    (1) spectralFunctions(P::ℍ, func)
+    (2) spectralFunctions(D::𝔻{T}, func) where T<:Real
 
- This is the *mother function* for all spectral functions of eigenvalues implemented
+ (1) This is the *mother function* for all spectral functions of eigenvalues implemented
  in this library, which are:
  - `pow`     (power),
  - `isqrt`   (inverse square root).
@@ -677,11 +700,13 @@ end
  besides those and those already implemented in the standard package `LinearAlgebra`.
  In general, you won't call it directly.
 
- ``P`` must be flagged as Hermitian. See [typecasting matrices](@ref).
+ `func` is the function that will be applied on the eigenvalues.
 
-  **Arguments** `(P, func)`;
- - ``P`` is a positive matrix,
- - `func` is the function that will be applied on the eigenvalues.
+ ``P`` must be flagged as Hermitian. See [typecasting matrices](@ref).
+ It must be a positive definite or positive semi-definite matrix,
+ depending on 'func'.
+
+ A special method is provided for real `Diagonal` matrices (2).
 
 !!! note "Nota Bene"
     The function `func` must support the `func.` syntax and therefore
@@ -718,21 +743,25 @@ function spectralFunctions(P::ℍ, func::Function)
     return ℍ(F.vectors * 𝔻(func.(F.values)) * F.vectors')
 end
 
+spectralFunctions(D::𝔻{T}, func::Function) where T<:Real = func.(D)
+
+
+
 
 """
-    pow(P::ℍ, p)        # one argument
-    pow(P::ℍ, args...)  # several arguments
+    (1) pow(P::ℍ, args...)
+    (2) pow(D::𝔻{T}, args...) where T<:Real
 
- Given a positive definite `Hermitian` matrix ``P``, return the power
+ (1) Given a positive semi-definite `Hermitian` matrix ``P``, return the power
  ``P^{r_1}, P^{r_2},...``
  for any number of exponents ``r_1, r_2,...``.
  It returns a tuple of as many elements as arguments passed after ``P``.
 
  ``P`` must be flagged as Hermitian. See [typecasting matrices](@ref).
 
- **Arguments** `(P, arg1, arg2,...)`
- - ``P`` is a positive matrix.
- - ``arg1, arg2,...`` are real numbers.
+ ``arg1, arg2,...`` are real numbers.
+
+ A special method is provided for real `Diagonal` matrices (2).
 
  **See also**: [`invsqrt`](@ref).
 
@@ -748,6 +777,9 @@ end
 
 """
 pow(P::ℍ, p)=spectralFunctions(P, x->x^p) # one argument
+
+pow(D::𝔻{T}, p)  where T<:Real = spectralFunctions(D, x->x^p) # one argument
+
 function pow(P::ℍ, args...)               # several arguments
     (Λ, U) = evd(P)
     ispos(Λ, msg="function Rpow: at least one eigenvalue is smaller than the default tolerance")
@@ -755,16 +787,22 @@ function pow(P::ℍ, args...)               # several arguments
     return  (ℍ(U * Λ^p * U') for p in args)
 end
 
-
+function pow(D::𝔻{T}, args...) where T<:Real  # several arguments
+    ispos(D, msg="function Rpow: at least one eigenvalue is smaller than the default tolerance")
+    return  (D^p for p in args)
+end
 
 """
-    invsqrt(P::ℍ)
+    (1) invsqrt(P::ℍ)
+    (2) invsqrt(D{T}::𝔻) where T<:Real
 
  Given a positive definite `Hermitian` matrix ``P``,
  compute the inverse of the principal
  square root ``P^{-1/2}``.
 
  ``P`` must be flagged as Hermitian. See [typecasting matrices](@ref).
+
+ A special method is provided for real `Diagonal` matrices (2).
 
  **See**: [typecasting matrices](@ref).
 
@@ -777,15 +815,22 @@ end
     Q*P*Q ≈ I ? println(" ⭐ ") : println(" ⛔ ")
 
 """
-invsqrt(P::ℍ) = spectralFunctions(P, x->1/sqrt(x));
+invsqrt(P::ℍ) = spectralFunctions(P, x->1/sqrt(x))
+
+invsqrt(D::𝔻{T}) where T<:Real = spectralFunctions(D, x->1/sqrt(x))
+
 
 
 """
-    sqr(P::ℍ)
+    (1) sqr(P::ℍ)
+    (2) sqr(D::𝔻{T}) where T<:Real
 
- Given a positive definite `Hermitian` matrix ``P``, compute its square ``P^{2}``.
+ (1) Given a positive semi-definite `Hermitian` matrix ``P``,
+ compute its square ``P^{2}``.
 
  ``P`` must be flagged as Hermitian. See [typecasting matrices](@ref).
+
+ A special method is provided for real `Diagonal` matrices (2).
 
  **See also**: [`pow`](@ref).
 
@@ -797,6 +842,8 @@ invsqrt(P::ℍ) = spectralFunctions(P, x->1/sqrt(x));
 
 """
 sqr(P::ℍ) = ℍ(P*P)
+
+sqr(D::𝔻{T}) where T<:Real = D*D
 
 
 """
@@ -910,14 +957,17 @@ powIter=powerIterations
 ## 8. Decompositions involving triangular matrices
 #  -----------------------------------------------
 """
-    choL(P::ℍ)
+    (1) choL(P::ℍ)
+    (2) choL(D::𝔻{T}) where T<:Real
 
- Given a real or complex positive definite `Hermitian` matrix ``P``,
+ (1) Given a real or complex positive definite `Hermitian` matrix ``P``,
  return the *Cholesky lower triangular factor* ``L``
  such that ``LL^H=P``. To obtain ``L^H`` or both ``L`` and ``L^H``, use instead
  julia function [cholesky(P)](https://bit.ly/2u9Hw5P).
 
  On output, ``L`` is of type [`LowerTriangular`](https://bit.ly/2U511f3).
+
+ (2) For a real `Diagonal` matrix ``D``, return ``D^{1/2}``.
 
  ## Examples
     using PosDefManifold
@@ -930,3 +980,5 @@ function choL(P::ℍ)
     choP = cholesky(P)
     return choP.L
 end
+
+choL(D::𝔻{T}) where T<:Real = √D
