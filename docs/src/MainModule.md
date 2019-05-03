@@ -99,7 +99,7 @@ To see the list of metrics in type Metric use:
 #### 𝔻Vector type
   `𝔻Vector=Vector{𝔻}`
 
-  This is a vector of `Diagonal` matrices, alias of `HermitianVector`.
+  This is a vector of `Diagonal` matrices, alias of `DiagonalVector`.
   Julia sees is at: `Array{Diagonal,1}`.See [aliases](@ref) for the 𝔻 symbol and [typecasting matrices](@ref) for the use of Diagonal matrices in **PosDefManifold**.
 
  **𝔻Vector₂ type**
@@ -194,7 +194,7 @@ To see the list of metrics in type Metric use:
 
  - Typecasting `Adjoint` matrices:
 
-   Matrix(X')
+    Matrix(X')
 
  - here is how to get an `Hermitian` matrix out of the
  diagonal part of an `Hermitian` matrix H:
