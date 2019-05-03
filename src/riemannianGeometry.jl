@@ -57,7 +57,7 @@ end
  - with ``a=1`` we move up to ``Q``,
  - with ``a=1/2`` we move to the mid-point of ``P`` and ``Q`` (mean).
 
- Using the Fisher metric argument `a` can be *any* real number, for instance:
+ Using the Fisher metric, argument `a` can be *any* real number, for instance:
  - with ``0<a<1`` we move toward ``Q`` (*attraction*),
  - with ``a>1`` we move over and beyond ``Q`` (*extrapolation*),
  - with ``a<0`` we move back away from Q (*repulsion*).
@@ -68,11 +68,12 @@ end
  Note that if ``Q=I``, the Fisher geodesic move is simply ``P^a``
  (no need to call this funtion then).
 
- For the [logdet zero](@ref) and [Jeffrey](@ref) metric no closed form expression
- for the geodesic is available to the best of authors' knowledge,
- so in this case the geodesic is found as the weighted mean using [`mean`](@ref).
- For the [Von Neumann](@ref) not even an expression for the mean is available,
- so in this case the geodesic is not provided and a *warning* is printed.
+!!! note "Nota Bene"
+    For the [logdet zero](@ref) and [Jeffrey](@ref) metric no closed form expression
+    for the geodesic is available to the best of authors' knowledge,
+    so in this case the geodesic is found as the weighted mean using [`mean`](@ref).
+    For the [Von Neumann](@ref) not even an expression for the mean is available,
+    so in this case the geodesic is not provided and a *warning* is printed.
 
  (2) Like in (1), but for two real positive definite diagonal matrices
  ``D`` and ``E``.
@@ -210,7 +211,8 @@ end # function
  See [typecasting matrices](@ref).
 
  (3) and (4) are specialized methods of (1) and (2), respectively,
- for `Diagonal` matrices.
+ for real positive definite `Diagonal` matrices.
+ See [ℍVector type](@ref) and [𝔻Vector type](@ref).
 
  **Maths**
 
@@ -377,7 +379,7 @@ distance²=distanceSqr # alias
  matrices ``P`` and ``Q``.
 
  (3) and (4) are specialized methods of (1) and (2), respectively,
- for `Diagonal` matrices.
+ for real positive definite `Diagonal` matrices.
 
  This is the square root of [`distanceSqr`](@ref)
  and is invoked with the same syntax therein.
@@ -415,7 +417,7 @@ distance(metric::Metric, D::𝔻{T}, E::𝔻{T}) where T<:Real = √(distanceSqr
  Only the lower triangular part is computed in order to optimize memory use.
 
  By default, the result matrix is of type `Float32`. The type can be changed
- to another real type using method (2).
+ to another real `type` using method (2).
 
  **See**: [distance](@ref).
 
@@ -505,7 +507,7 @@ distance²Mat=distanceSqrMat
  Only the lower triangular part is computed in order to optimize memory use.
 
  By default, the result matrix is of type `Float32`. The type can be changed
- to another real type using method (2).
+ to another real `type` using method (2).
 
  The elements of this matrix are the square root of
  [`distanceSqrMat`](@ref).
@@ -948,7 +950,7 @@ end # function
  compute the [Fréchet mean](@ref) for as many [ℍVector type](@ref) objects
  as hold in ``𝒫``, using the specified `metric` of type
  [Metric::Enumerated type](@ref).
- Return the means in a vector of `Hermitia`n matrices, that is, as an `ℍVector` type.
+ Return the means in a vector of `Hermitian` matrices, that is, as an `ℍVector` type.
 
  (2) Given a 2d array ``𝒟`` of real positive definite matrices as an [𝔻Vector₂ type](@ref)
  compute the [Fréchet mean](@ref) for as many [𝔻Vector type](@ref) objects
@@ -1016,7 +1018,8 @@ means(metric::Metric, 𝒟::𝔻Vector₂)=𝔻Vector([mean(metric, 𝐃) for �
  - For ``p=-1`` the generalized mean is the [inverse Euclidean](@ref) mean.
  - For ``p=0`` the generalized mean is the [log Euclidean](@ref) mean, which is the [Fisher](@ref) mean when matrices in 𝐏 all pair-wise commute.
 
- Notice that when matrices in 𝐏 all pair-wise commute,
+ Notice that when matrices in 𝐏 all pair-wise commute, for instance if the
+ matrices are diagonal,
  the generalized means coincide with the [power means](@ref)
  for any ``p∈[-1, 1]`` and for ``p=0.5`` it coincides also with the
  *Wasserstein* mean. For this reason the generalized means are used
@@ -1085,9 +1088,6 @@ suggested by (Moakher, 2012, p315)[🎓](@ref), yielding iterations
 
  ``G ← \\frac{1}{2}\\big(\\sum_{i=1}^{k}w_i(P_i+G)^{-1}\\big)^{-1}``.
 
- (2) Like method (1), but for a 1d array ``𝐃={D_1,...,D_k}`` of ``k``
- real positive definite diagonal matrices of [𝔻Vector type](@ref).
-
  If you don't pass a weight vector with *<optional keyword argument>* ``w``,
  return the *unweighted logdet zero mean*.
 
@@ -1111,6 +1111,9 @@ suggested by (Moakher, 2012, p315)[🎓](@ref), yielding iterations
     of data input ``𝐏``. This corresponds to requiring equality for the
     convergence criterion over two successive iterations
     of about half of the significant digits.
+
+ (2) Like method (1), but for a 1d array ``𝐃={D_1,...,D_k}`` of ``k``
+ real positive definite diagonal matrices of [𝔻Vector type](@ref).
 
  **See**: [logdet zero](@ref) metric, [modified Bhattacharyya mean](@ref).
 
