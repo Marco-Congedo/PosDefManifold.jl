@@ -304,7 +304,7 @@ For the latter, the solution is implemented via the fixed-point MPM algorithm
 
 If matrices ``P_1, P_2,...,P_k`` all pair-wise commute,
 the special case ``p=\frac{1}{2}`` yields the following
-instance of [power means](@ref):
+instance of [power means](@ref) (and of [generalized means](@ref)):
 
 ``\big(\sum_{i=1}^{k}w_iP_i^{1/2}\big)^{1/2}``.
 

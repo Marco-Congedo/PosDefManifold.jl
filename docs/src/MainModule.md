@@ -96,19 +96,29 @@ To see the list of metrics in type Metric use:
 
  This is the Union of Real and Complex Types.
 
+#### 𝔻Vector type
+  `𝔻Vector=Vector{𝔻}`
+
+  This is a vector of `Diagonal` matrices, alias of `HermitianVector`.
+  Julia sees is at: `Array{Diagonal,1}`.See [aliases](@ref) for the 𝔻 symbol and [typecasting matrices](@ref) for the use of Diagonal matrices in **PosDefManifold**.
+
+ **𝔻Vector₂ type**
+
+ `𝔻Vector₂=Vector{𝔻Vector}` is a vector of [𝔻Vector type](@ref) objects, i.e., a vector of vectors of `Diagonal` matrices.
+ It is the alias of `DiagonalVector₂`.
+ Julia sees it as: `Array{Array{Diagonal,1},1}`. Note that `𝔻Vector₂` is not a matrix of Hermitian matrices since the several `ℍVector` objects it holds do not need to have the same length.
+
 #### ℍVector type
  `ℍVector=Vector{ℍ}`
 
- This is a vector of Hermitian matrices.
- Julia sees is at: `Array{Hermitian,1}`.See [aliases](@ref) for the ℍ symbol and [typecasting matrices](@ref) for the use of Hermitian matrices
- in **PosDefManifold**.
+ This is a vector of `Hermitian` matrices, alias of `HermitianVector`.
+ Julia sees is at: `Array{Hermitian,1}`.See [aliases](@ref) for the ℍ symbol and [typecasting matrices](@ref) for the use of Hermitian matrices in **PosDefManifold**.
 
 **ℍVector₂ type**
 
-  `ℍVector₂=Vector{ℍVector}` is a vector of [ℍVector type](@ref) objects, i.e., a vector of vectors of Hermitian matrices.
-  Julia sees it as: `Array{Array{Hermitian,1},1}`. Note that `ℍVector₂`
-  is not a matrix of Hermitian matrices since the several `ℍVector` objects
-  it holds do not need to have the same length.
+ `ℍVector₂=Vector{ℍVector}` is a vector of [ℍVector type](@ref) objects, i.e., a vector of vectors of `Hermitian` matrices.
+ It is the alias of `HermitianVector₂`.
+ Julia sees it as: `Array{Array{Hermitian,1},1}`. Note that `ℍVector₂` is not a matrix of Hermitian matrices since the several `ℍVector` objects it holds do not need to have the same length.
 
 ### tips & tricks
 

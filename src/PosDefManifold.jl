@@ -31,21 +31,29 @@ const maxpos=1e15
 # types
 
 RealOrComplex=Union{Real, Complex}
-ℍVector=Vector{ℍ}           # vector of Hermitian matrices
-ℍVector₂=Vector{ℍVector}    # vector of vectors of Hermitian matrices
+
+DiagonalVector=Vector{𝔻}        # vector of Diagonal Matrices
+𝔻Vector=DiagonalVector          # alias
+DiagonalVector₂=Vector{𝔻Vector} # vector of vectors of Diagonal matrices
+𝔻Vector₂=DiagonalVector₂        # alias
+
+HermitianVector=Vector{ℍ}        # vector of Hermitian matrices
+ℍVector=HermitianVector          # alias
+HermitianVector₂=Vector{ℍVector} # vector of vectors of Hermitian matrices
+ℍVector₂=HermitianVector₂        # alias
 
 
 @enum Metric begin
-    Euclidean    =1  # distance: δ_e; mean: Arithmetic
-    invEuclidean =2  # distance: δ_i; mean: Harmonic
-    ChoEuclidean =3  # distance: δ_c; mean: Cholesky Euclidean
-    logEuclidean =4  # distance: δ_l; mean: Log Euclidean
-    logCholesky  =5  # distance: δ_c; mean: Log-Cholesky
-    Fisher       =6  # distance: δ_f; mean: Fisher (Cartan, Karcher, Pusz-Woronowicz,...)
-    logdet0      =7  # distance: δ_s; mean: LogDet (S, α, Bhattacharyya, Jensen,...)
-    Jeffrey      =8  # distance: δ_j; mean: Jeffrey (symmetrized Kullback-Leibler)
-    VonNeumann   =9  # distance: δ_v; mean: Not Availale
-    Wasserstein  =10 # distance: δ_w; mean: Wasserstein (Bures, Hellinger, ...)
+    Euclidean    =  1  # distance: δ_e; mean: Arithmetic
+    invEuclidean =  2  # distance: δ_i; mean: Harmonic
+    ChoEuclidean =  3  # distance: δ_c; mean: Cholesky Euclidean
+    logEuclidean =  4  # distance: δ_l; mean: Log Euclidean
+    logCholesky  =  5  # distance: δ_c; mean: Log-Cholesky
+    Fisher       =  6  # distance: δ_f; mean: Fisher (Cartan, Karcher, Pusz-Woronowicz,...)
+    logdet0      =  7  # distance: δ_s; mean: LogDet (S, α, Bhattacharyya, Jensen,...)
+    Jeffrey      =  8  # distance: δ_j; mean: Jeffrey (symmetrized Kullback-Leibler)
+    VonNeumann   =  9  # distance: δ_v; mean: Not Availale
+    Wasserstein  = 10 # distance: δ_w; mean: Wasserstein (Bures, Hellinger, ...)
     #...
 end
 
@@ -73,8 +81,10 @@ export
 
     #types
     RealOrComplex,
-    ℍVector,
-    ℍVector₂,
+    DiagonalVector, 𝔻Vector,
+    DiagonalVector₂, 𝔻Vector₂,
+    HermitianVector, ℍVector,
+    HermitianVector₂, ℍVector₂,
     Metric,
         Euclidean,
         invEuclidean,
@@ -92,7 +102,7 @@ export
     tr1,
     normalizeCol!,
     colProd,
-    sumOfSqr,
+    sumOfSqr, sos,
     sumOfSqrDiag, ssd,
     colNorm,
     sumOfSqrTril, sst,

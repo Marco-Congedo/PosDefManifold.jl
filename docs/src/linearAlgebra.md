@@ -50,7 +50,7 @@ ispos
 | Function   | Description |
 |:----------:| ----------- |
 | [`colProd`](@ref) | Sum of products of the elements in two columns |
-| [`sumOfSqr`](@ref) | Sum of squares of all elements or of specified columns |
+| [`sumOfSqr`](@ref), `sos` | Sum of squares of all elements or of specified columns |
 | [`sumOfSqrDiag`](@ref), `ssd` | Sum of squares of the diagonal elements |
 | [`colNorm`](@ref) | Eucliden norm of a column |
 | [`sumOfSqrTril`](@ref), `sst` | Sum of squares of the lower triangle elements up to a given underdiagonal |

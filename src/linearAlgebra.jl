@@ -263,6 +263,8 @@ colNorm(X::Union{𝕄, ℍ}, j::Int) = √sumOfSqr(X, j)
     (5) sumOfSqr(X::Union{𝕄, ℍ}, j::Int)
     (6) sumOfSqr(X::Union{𝕄, ℍ}, range::UnitRange)
 
+**alias**: `sos`
+
  Return
  - (1) the sum of square of the elements in an array ``A`` of any dimensions.
  - (2) as in (1), but for an `Hermitian` matrix ``H``, using only the lower triangular part.
@@ -318,6 +320,7 @@ sumOfSqr(X::Union{𝕄, ℍ}, j::Int) = 𝚺(abs2.(X[:, j]))
 
 sumOfSqr(X::Union{𝕄, ℍ}, range::UnitRange) = 𝚺(sumOfSqr(X, j) for j in range)
 
+sos=sumOfSqr
 
 """
     (1) sumOfSqrDiag(X::𝕄)
@@ -398,6 +401,8 @@ sst=sumOfSqrTril
 """
     (1) tr(P::ℍ, Q::ℍ)
     (2) tr(P::ℍ, Q::𝕄)
+    (3) tr(D::𝔻{T}, H::Union{ℍ, 𝕄}) where T<:Real
+    (4) tr(H::Union{ℍ, 𝕄}, D::𝔻{T}) where T<:Real
 
  Given (1) two `Hermitian` positive definite matrix ``P`` and ``Q``,
  return the trace of the product ``PQ``.
@@ -408,6 +413,10 @@ sst=sumOfSqrTril
  in which case return
  - a real trace if the product ``PQ`` is real or if it has all positive real eigenvalues.
  - a complex trace if the product ``PQ`` is not real and has complex eigenvalues.
+
+ Methods (3) and (4) return the trace of the product ``DH`` or ``HD``,
+ where ``D`` is a real `Diagonal`matrix and ``H`` an ``Hermitian``
+ or ``Matrix`` object. The result if of the same type as the elements of ``H``.
 
  ## Math
  Let ``P`` and ``Q`` be `Hermitian` matrices, using the properties of the trace
@@ -447,6 +456,16 @@ function tr(P::ℍ, Q::𝕄)
     end
     if OK return real(𝚺(λ)) else return 𝚺(λ) end
 end
+
+
+function tr(D::𝔻{T}, H::Union{ℍ, 𝕄}) where T<:Real
+    s=eltype(H)(0)
+    for i=1:size(D, 1) @inbounds s += D[i, i] * H[i, i] end
+    return s
+end
+
+tr(H::Union{ℍ, 𝕄}, D::𝔻{T}) where T<:Real = tr(D, H)
+
 
 
 """

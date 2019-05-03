@@ -78,9 +78,11 @@ function tests();
     𝐏C=randP(ComplexF64, 10, 4)
     𝐐=randP(10, 4)
     𝐐C=randP(ComplexF64, 10, 4)
+    𝐃=randΛ(10, 4)
+    𝐄=randΛ(10, 4)
 
     # functions in LinearAlgebrainP.jl
-    print("Testing functions in unit 'LinearAlgebrainP.jl'")
+    print("   Unit 'LinearAlgebrainP.jl'")
 
     ## 1. Matrix Normalizations
 
@@ -174,6 +176,12 @@ function tests();
     tr(PC, QC) ≈ tr(PC*QC) ? OK() : OH(name*" Method 1 complex case")
     tr(P, X) ≈ tr(P*X) ? OK() : OH(name*" Method 2 real case")
     tr(PC, XC) ≈ tr(PC*XC) ? OK() : OH(name*" Method 2 complex case")
+    tr(D_, P_) ≈ tr(D_*P_) ? OK() : OH(name*" Method 3 real case")
+    tr(D_, PC_) ≈ tr(D_*PC_) ? OK() : OH(name*" Method 3 complex case")
+    tr(P_, D_) ≈ tr(D_*P_) ? OK() : OH(name*" Method 4 real case")
+    tr(PC_, D_) ≈ tr(D_*PC_) ? OK() : OH(name*" Method 4 complex case")
+
+
 
 
     name="function quadraticForm"; newTest(name)
@@ -279,7 +287,7 @@ function tests();
 
     # functions in SignalProcessinginP.jl
     println(" ")
-    print("Testing functions in unit 'SignalProcessinginP.jl'")
+    print("   Unit 'SignalProcessinginP.jl'")
 
     name="function randλ"; newTest(name);
     randλ(10); RUN()
@@ -287,6 +295,8 @@ function tests();
 
     name="function randΛ"; newTest(name);
     randΛ(10); RUN()
+    randΛ(10, 2); RUN()
+
 
 
     name="function randU"; newTest(name);
@@ -337,11 +347,12 @@ function tests();
 
     # functions in RiemannianGeometryinP.jl
     println(" ")
-    print("Testing functions in unit 'RiemannianGeometryinP.jl'")
+    print("   Unit 'RiemannianGeometryinP.jl'")
 
     name="function geodesic"; newTest(name);
     (geodesic(m, P, Q, 0.5) for m in metrics if m≠9); RUN()
     (geodesic(m, PC, QC, 0.5) for m in metrics if m≠9); RUN()
+    (geodesic(m, 𝐃[1], 𝐃[2], 0.5) for m in metrics if m≠9); RUN()
 
 
     name="function distanceSqr (Hermitian input)"; newTest(name);
@@ -406,16 +417,29 @@ function tests();
     spectralEmbedding(logEuclidean, 𝐏, 2); RUN()
 
 
-    name="function mean"; newTest(name);
+    name="function mean I"; newTest(name);
     (mean(m, P, Q) for m in metrics); RUN()
     (mean(m, 𝐏) for m in metrics); RUN()
     (mean(m, PC, QC) for m in metrics); RUN()
     (mean(m, 𝐏C) for m in metrics); RUN()
+    (mean(m, 𝐃) for m in metrics); RUN()
+    name="function mean II"; newTest(name);
+    k=length(𝐃)
+    for m in metrics
+        if string(m)≠"VonNeumann"
+            D1=mean(m, 𝐃)
+            𝐃H=Vector{Hermitian}(undef, k)
+            for i=1:k 𝐃H[i]=Hermitian(Matrix(𝐃[i])) end
+            D2=mean(m, 𝐃H)
+            norm(D1-D2)/k<0.0001 ? OK() : OH(name*" Real Diagonal Input, metric "*string(m))
+        end
+    end
 
 
     name="function means"; newTest(name);
     means(logEuclidean, ℍVector₂([𝐏, 𝐐])); RUN()
     means(logEuclidean, ℍVector₂([𝐏C, 𝐐C])); RUN()
+    means(logEuclidean, 𝔻Vector₂([𝐃, 𝐄])); RUN()
 
 
     name="function generalizedMean"; newTest(name);
@@ -436,6 +460,8 @@ function tests();
     ℍ( (ℍ(0.2*PC_^p)+ℍ(0.8*QC_^p))  )^(1/p) ≈ generalizedMean(𝐏, p; w=w) ? OK() : OH(name*" Complex Input 3")
     ℍ( (ℍ(0.2*PC_^p)+ℍ(0.8*QC_^p))  )^(1/p) ≉ generalizedMean(𝐏, p; w=w, ✓w=false) ? OK() : OH(name*" Complex Input 4")
     ℍ( (ℍ(0.4*PC_^p)+ℍ(1.6*QC_^p))  )^(1/p) ≈ generalizedMean(𝐏, p; w=w, ✓w=false) ? OK() : OH(name*" Complex Input 5")
+    ((𝐃[1]^p+𝐃[2]^p)/2)^(1/p) ≈ generalizedMean(𝔻Vector([𝐃[1], 𝐃[2]]), p) ? OK() : OH(name*" Real Diagonal Input")
+
 
 
     name="function logdet0Mean"; newTest(name);
@@ -452,16 +478,21 @@ function tests();
     GM ≈ ldG ? OK() : OH(name*" Complex Input 1")
     ldG, iter, conv = logdet0Mean(ℍVector([PC_, QC_]); w=w) # weighted logdet0 mean for k=2
     GM ≈ ldG ? OK() : OH(name*" Complex Input 2")
+    GM=(inv(𝐃[1])*𝐃[2])^0.5*𝐃[1]  # Fisher mean for k=2
+    ldG, iter, conv = logdet0Mean(𝔻Vector([𝐃[1], 𝐃[2]])) # logdet0 mean for k=2
+    GM ≈ ldG ? OK() : OH(name*" Real Diagonal Input")
 
 
     name="function wasMean"; newTest(name);
     wasMean(ℍVector([P_, Q_])); RUN()
     wasMean(ℍVector([PC_, QC_])); RUN()
+    wasMean(𝐃); RUN()
 
 
     name="function powerMean"; newTest(name);
     powerMean(ℍVector([P_, Q_]), 0.5); RUN()
     powerMean(ℍVector([PC_, QC_]), 0.5); RUN()
+    powerMean(𝐃, 0.5); RUN()
 
 
     name="function logMap"; newTest(name);
@@ -511,6 +542,8 @@ function tests();
 
     name="function procrustes"; newTest(name);
     procrustes(P, Q); RUN()
+    procrustes(PC, QC); RUN()
+
 
 end # function tests
 
