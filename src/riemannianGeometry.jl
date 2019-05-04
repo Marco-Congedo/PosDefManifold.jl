@@ -994,7 +994,7 @@ means(metric::Metric, 𝒟::𝔻Vector₂)=𝔻Vector([mean(metric, 𝐃) for �
 
  **See**: [generalized means](@ref).
 
- **See also**: [`powerMean`](@ref).
+ **See also**: [`powerMean`](@ref), [`wasMean`](@ref), [`mean`](@ref).
 
  ## Examples
     using LinearAlgebra, Statistics, PosDefManifold
@@ -1081,7 +1081,10 @@ end # function
  (2) Like method (1), but for a 1d array ``𝐃={D_1,...,D_k}`` of ``k``
  real positive definite diagonal matrices of [𝔻Vector type](@ref).
 
- **See**: [powerMean](@ref).
+ **See**: [Fisher](@ref) metric.
+
+ **See also**: [`powerMean`](@ref), [`wasMean`](@ref), [`logdet0Mean`](@ref),
+ [`mean`](@ref).
 
  ## Examples
     using LinearAlgebra, PosDefManifold
@@ -1186,6 +1189,9 @@ suggested by (Moakher, 2012, p315)[🎓](@ref), yielding iterations
  real positive definite diagonal matrices of [𝔻Vector type](@ref).
 
  **See**: [logdet zero](@ref) metric, [modified Bhattacharyya mean](@ref).
+
+ **See also**: [`powerMean`](@ref), [`wasMean`](@ref), [`logdet0Mean`](@ref),
+ [`mean`](@ref).
 
  ## Examples
     using LinearAlgebra, PosDefManifold
@@ -1292,6 +1298,9 @@ end
  the 3-tuple ``(G, 1, 0)``. See [modified Bhattacharyya mean](@ref).
 
  **See**: [Wasserstein](@ref) metric.
+
+ **See also**: [`powerMean`](@ref), [`wasMean`](@ref), [`logdet0Mean`](@ref), 
+ [`mean`](@ref).
 
  ## Examples
     using LinearAlgebra, PosDefManifold
@@ -1414,6 +1423,9 @@ wasMean(𝐃::𝔻Vector;
  the 3-tuple ``(G, 1, 0)``. See [generalized means](@ref).
 
  **See**: [power means](@ref), [generalized means](@ref), [modified Bhattacharyya mean](@ref).
+
+ **See also**: [`generalizedMean`](@ref), [`wasMean`](@ref), [`logdet0Mean`](@ref),
+ [`mean`](@ref).
 
  ## Examples
     using LinearAlgebra, PosDefManifold
