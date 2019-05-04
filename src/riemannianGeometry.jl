@@ -1055,7 +1055,7 @@ end # function
 ``G ←G^{1/2}\\textrm{exp}\\big(\\sum_{i=1}^{k}w_i\\textrm{log}(G^{-1/2} P_i G^{-1/2})\\big)G^{1/2}.``
 
  If you don't pass a weight vector with *<optional keyword argument>* ``w``,
- return the *unweighted logdet zero mean*.
+ return the *unweighted geometric mean*.
 
  If *<optional keword argument>* `✓w=true` (default), the weights are
  normalized so as to sum up to 1, otherwise they are used as they are passed
@@ -1299,7 +1299,7 @@ end
 
  **See**: [Wasserstein](@ref) metric.
 
- **See also**: [`powerMean`](@ref), [`wasMean`](@ref), [`logdet0Mean`](@ref), 
+ **See also**: [`powerMean`](@ref), [`wasMean`](@ref), [`logdet0Mean`](@ref),
  [`mean`](@ref).
 
  ## Examples
