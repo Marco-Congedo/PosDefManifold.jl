@@ -883,9 +883,9 @@ sqr(D::𝔻{T}) where T<:Real = D*D
     In this case a BLAS routine is used for computing the power iterations.
     See [BLAS routines](@ref).
 
-    ``tol`` defaults to the square root of `Base.eps` of the type of ``H``.
+    ``tol`` defaults to 10 times the square root of `Base.eps` of the type of ``H``.
     This corresponds to requiring equality for the convergence criterion
-    over two successive iterations of about half the significant digits.
+    over two successive iterations of about half the significant digits minus 1.
 
 **See also**: [`mgs`](@ref).
 
@@ -911,7 +911,7 @@ function powerIterations(H::𝕄, q::Int;
   evalues=false, tol::Real=0, maxiter=300, ⍰=false)
 
     (n, q², type) = size(H, 1), q^2, eltype(H)
-    tol==0 ? tolerance = √eps(real(type)) : tolerance = tol
+    tol==0 ? tolerance = √eps(real(type))*10 : tolerance = tol
     msg1="Power Iterations reached a saddle point at:"
     msg2="Power Iterations reached the max number of iterations at:"
     U=randn(type, n, q) # initialization
