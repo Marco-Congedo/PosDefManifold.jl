@@ -217,8 +217,13 @@ The solution is the unique positive definite matrix **G** satisfying
 
 ``\sum_{i=1}^{k}w_i\textrm{log}\big(G^{-1/2} P_i G^{-1/2}\big)=0.``
 
-For estimating it, *PosDefManifold* implements a dedicated version of the MPM algorithm
-(Congedo et *al.*, 2017b)[🎓](@ref).
+For estimating it, *PosDefManifold* implements the well-known gradient descent
+algorithm, resulting in iterations:
+
+``G ←G^{1/2}\textrm{exp}\big(\sum_{i=1}^{k}w_i\textrm{log}(G^{-1/2} P_i G^{-1/2})\big)G^{1/2}.``
+
+Alternatively, and more efficiently, one can ask for an approximate solution
+invoking the MPM algorithm (Congedo et *al.*, 2017b)[🎓](@ref), which is also implemented (in order to estimate the geometric mean use function [`powerMean`](@ref) with parameter ``p=0`` or with a very small value of ``p``).
 
 This mean is known under many different names (Fisher, Rao, Fisher-Rao, Pusz-Woronowicz,
 Cartan, Fréchet, Karcher, **geometric**....).  

@@ -44,6 +44,7 @@ spectralEmbedding
 mean
 means
 generalizedMean
+geometricMean
 logdet0Mean
 wasMean
 powerMean
