@@ -140,11 +140,11 @@ function geodesic(metric::Metric, P::ℍ, Q::ℍ, a::Real)
             Z=choL(P)b + choL(Q)a
     return  ℍ(Z*Z')
 
-elseif  metric==logCholesky # ???
+    elseif  metric==logCholesky
             LP=choL(P)
             LQ=choL(Q)
             slLP=tril(LP,-1)
-            Z=slLP+a*(tril(LQ,-1)-slLP)+𝑓𝔻(x->x, LP)*exp((𝑓𝔻(log, LQ)a-𝑓𝔻(log, LP)))
+            Z=slLP + a*(tril(LQ,-1)-slLP) +𝑓𝔻(x->x, LP)*exp((𝑓𝔻(log, LQ)a-𝑓𝔻(log, LP)))
     return  ℍ(Z*Z')
 
     elseif  metric==Wasserstein
@@ -173,8 +173,8 @@ function geodesic(metric::Metric, D::𝔻{T}, E::𝔻{T}, a::Real) where T<:Real
     elseif  metric==ChoEuclidean
             Z=(√D)b + (√E)a;     return  Z*Z
     elseif  metric==logCholesky # ???
-            LD=choL(D)
-            LE=choL(E)
+            LD=sqrt(D)
+            LE=sqrt(E)
             Z=𝑓𝔻(x->x, LD)*exp((𝑓𝔻(log, LE)a-𝑓𝔻(log, LD)))
                                  return  Z*Z
     elseif  metric==Wasserstein  return (b^2)D + (a^2)E + (a*b)(D*E)
@@ -277,7 +277,8 @@ function distanceSqr(metric::Metric, P::ℍ)
                        Fisher)      return  𝚺(log.(eigvals(P)).^2)
     elseif  metric==logdet0         return  real(logdet(0.5(P+I)) - 0.5logdet(P))
     elseif  metric==ChoEuclidean    return  sos(choL(P)-I)
-    elseif  metric==logCholesky     return  sst(choL(P), -1) + ssd(𝑓𝔻(log, P))
+    elseif  metric==logCholesky
+            LP=choL(P);             return  sst(LP, -1) + ssd(𝑓𝔻(log, LP))
     elseif  metric==Jeffrey         return  0.5(tr(P) + tr(inv(P))) - size(P, 1)
     elseif  metric==VonNeumann
             𝓵P=ℍ(log(P));           return  0.5(tr(P, 𝓵P) - tr(𝓵P))
@@ -289,17 +290,17 @@ end #function
 
 
 function distanceSqr(metric::Metric, D::𝔻{T}) where T<:Real
-    if      metric==Euclidean       return  ssd(D-I)
-    elseif  metric==invEuclidean    return  ssd(inv(D)-I)
+    if      metric==Euclidean        return  ssd(D-I)
+    elseif  metric==invEuclidean     return  ssd(inv(D)-I)
     elseif  metric in (logEuclidean,
-                             Fisher,
-                        logCholesky)return  ssd(log(D))
-    elseif  metric==logdet0         return  logdet(0.5(D+I)) - 0.5logdet(D)
-    elseif  metric==ChoEuclidean    return  ssd(√(D)-I)
-    elseif  metric==Jeffrey         return  0.5(tr(D) + tr(inv(D))) - size(D, 1)
+                             Fisher) return  ssd(log(D))
+    elseif  metric==logdet0          return  logdet(0.5(D+I)) - 0.5logdet(D)
+    elseif  metric==ChoEuclidean     return  ssd(√(D)-I)
+    elseif  metric==logCholesky      return  ssd(𝑓𝔻(log, √(D)))
+    elseif  metric==Jeffrey          return  0.5(tr(D) + tr(inv(D))) - size(D, 1)
     elseif  metric==VonNeumann
-            𝓵D=log(D);              return  0.5(tr(D*𝓵D) - tr(𝓵D))
-    elseif  metric==Wasserstein     return  tr(D) + size(D, 1) - 2tr(sqrt(D))
+            𝓵D=log(D);               return  0.5(tr(D*𝓵D) - tr(𝓵D))
+    elseif  metric==Wasserstein      return  tr(D) + size(D, 1) - 2tr(sqrt(D))
     else    @warn("in RiemannianGeometryP.distanceSqr function
              (PosDefManifold Package): the chosen 'metric' does not exist")
     end # if
@@ -313,8 +314,9 @@ function distanceSqr(metric::Metric, P::ℍ, Q::ℍ)
     elseif  metric==Fisher       return  𝚺(log.(eigvals(P, Q)).^2)
     elseif  metric==logdet0      return  real(logdet(0.5(P + Q)) - 0.5logdet(P * Q))
     elseif  metric==ChoEuclidean return  sos(choL(P)-choL(Q))
-    elseif  metric==logCholesky  return  sst(tril(choL(P), -1) - tril(choL(Q),-1), -1)
-                                       + ssd(𝑓𝔻(log, P) - 𝑓𝔻(log, Q))
+    elseif  metric==logCholesky
+            LP=choL(P); LQ=choL(Q);
+                                 return  sst(tril(LP, -1) - tril(LQ, -1), -1) + ssd(𝑓𝔻(log, LP) - 𝑓𝔻(log, LQ))
     elseif  metric==Jeffrey      return  0.5(tr(inv(Q), P) + tr(inv(P), Q)) - size(P, 1) #using formula tr(Q⁻¹P)/2 + tr(P⁻¹Q)/2 -n
     elseif  metric==VonNeumann              # using formula: tr(PlogP - PlogQ + QlogQ - QlogP)/2=(tr(P(logP - LoqQ)) + tr(Q(logQ - logP)))/2=
             R=log(P)-log(Q);     return  0.5real( tr(P, R) - tr(Q, R) )  # (tr(P(logP - LoqQ)) - tr(Q(logP - LoqQ)))/2
@@ -327,17 +329,17 @@ end # function
 
 
 function distanceSqr(metric::Metric, D::𝔻{T}, E::𝔻{T}) where T<:Real
-    if      metric==Euclidean     return  ssd(D - E)
-    elseif  metric==invEuclidean  return  ssd(inv(D) - inv(E))
+    if      metric==Euclidean    return  ssd(D - E)
+    elseif  metric==invEuclidean return  ssd(inv(D) - inv(E))
     elseif  metric in (Fisher,
-                 logEuclidean,
-                  logCholesky)    return  ssd(log(D) - log(E))
-    elseif  metric==logdet0       return  logdet(0.5(D + E)) - 0.5logdet(D * E)
-    elseif  metric==ChoEuclidean  return  ssd(√(D) - √(E))
-    elseif  metric==Jeffrey       return  0.5(tr(inv(E) * D) + tr(inv(D) * E)) - size(D, 1)
+                 logEuclidean)   return  ssd(log(D) - log(E))
+    elseif  metric==logdet0      return  logdet(0.5(D + E)) - 0.5logdet(D * E)
+    elseif  metric==ChoEuclidean return  ssd(√(D) - √(E))
+    elseif  metric==logCholesky  return  ssd(𝑓𝔻(log, √(D)) - 𝑓𝔻(log, √(E)))
+    elseif  metric==Jeffrey      return  0.5(tr(inv(E) * D) + tr(inv(D) * E)) - size(D, 1)
     elseif  metric==VonNeumann
-            R=log(D)-log(E);      return  0.5(tr(D * R) - tr(E * R))
-    elseif  metric==Wasserstein   return  tr(D) + tr(E) - 2tr(sqrt(D*E))
+            R=log(D)-log(E);     return  0.5(tr(D * R) - tr(E * R))
+    elseif  metric==Wasserstein  return  tr(D) + tr(E) - 2tr(sqrt(D*E))
     else    @warn("in RiemannianGeometryP.distanceSqr function
                     (PosDefManifold Package): the chosen 'metric' does not exist")
     end #if
@@ -435,28 +437,23 @@ function distanceSqrMat(metric::Metric, 𝐏::ℍVector, type::Type{T}) where T<
 
     elseif  metric==logCholesky
             𝐏L=[choL(P) for P in 𝐏]
-            for j=1:k-1, i=j+1:k
-                △[i, j]=sst(tril(𝐏L[i], -1)-tril(𝐏L[j], -1), -1) + ssd(𝑓𝔻(log, 𝐏[i])-𝑓𝔻(log, 𝐏[j])) end
+            for j=1:k-1, i=j+1:k △[i, j]=sst(tril(𝐏L[i], -1)-tril(𝐏L[j], -1), -1) + ssd(𝑓𝔻(log, 𝐏L[i])-𝑓𝔻(log, 𝐏L[j])) end
 
     elseif  metric==Jeffrey
             𝐏𝓲=[inv(P) for P in 𝐏]
-            for j=1:k-1, i=j+1:k
-                △[i, j]=0.5(tr(𝐏𝓲[j], 𝐏[i]) + tr(𝐏𝓲[i], 𝐏[j])) - n end
+            for j=1:k-1, i=j+1:k △[i, j]=0.5(tr(𝐏𝓲[j], 𝐏[i]) + tr(𝐏𝓲[i], 𝐏[j])) - n end
 
     elseif  metric==VonNeumann  # using formula: tr( PlogP + QLoqQ - PlogQ - QlogP)/2
             𝐏𝓵=[ℍ(log(P))  for P in 𝐏] # delete ℍ()?
             ℒ=[P*log(P) for P in 𝐏]
-            for j=1:k-1, i=j+1:k
-                △[i, j]=0.5real(tr(ℒ[i])+tr(ℒ[j])-tr(𝐏[i], 𝐏𝓵[j])-tr(𝐏[j], 𝐏𝓵[i])) end
+            for j=1:k-1, i=j+1:k △[i, j]=0.5real(tr(ℒ[i])+tr(ℒ[j])-tr(𝐏[i], 𝐏𝓵[j])-tr(𝐏[j], 𝐏𝓵[i])) end
 
     elseif  metric==Wasserstein
             𝐏½=[sqrt(P) for P in 𝐏]
-            for j=1:k-1, i=j+1:k
-                △[i, j]=tr(𝐏[i]) + tr(𝐏[j]) -2tr(sqrt(ℍ(𝐏½[i] * 𝐏[j] * 𝐏½[i]))) end
+            for j=1:k-1, i=j+1:k △[i, j]=tr(𝐏[i]) + tr(𝐏[j]) -2tr(sqrt(ℍ(𝐏½[i] * 𝐏[j] * 𝐏½[i]))) end
 
      elseif  metric in (Euclidean, Fisher, logdet0)
-             for j in 1:k-1, i in j+1:k
-                △[i, j]=distanceSqr(metric, 𝐏[i], 𝐏[j])  end
+             for j in 1:k-1, i in j+1:k △[i, j]=distanceSqr(metric, 𝐏[i], 𝐏[j])  end
 
      else    @warn("in RiemannianGeometryP.distanceSqrMat or .distanceMat function
                      (PosDefManifold Package): the chosen 'metric' does not exist")
@@ -845,13 +842,12 @@ function mean(metric::Metric, 𝐏::ℍVector;
         else            L = 𝚺(ω*choL(P) for (ω, P) in zip(v, 𝐏))
         end
         return ℍ(L*L')
-    elseif metric == logCholesky # ???
+    elseif metric == logCholesky
         L𝐏=[choL(P) for P in 𝐏]
         if isempty(w)
             Z=𝛍(tril(L,-1) for L in L𝐏) + exp(mean(𝑓𝔻(log, L) for L in L𝐏))
         else
-            Z=𝚺(ω*tril(L,-1) for (ω, L) in zip(v, L𝐏))
-                + exp(𝚺(ω*𝑓𝔻(log, L) for (ω, L) in zip(v, L𝐏)))
+            Z=𝚺(ω*tril(L,-1) for (ω, L) in zip(v, L𝐏)) + exp(𝚺(ω*𝑓𝔻(log, L) for (ω, L) in zip(v, L𝐏)))
         end
         return ℍ(Z*Z')
     elseif metric == Jeffrey
