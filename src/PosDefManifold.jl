@@ -107,7 +107,7 @@ export
     colNorm,
     sumOfSqrTril, sst,
     tr,
-    quadraticForm, qufo,
+    quadraticForm, qf,
     fidelity,
     fDiagonal, 𝑓𝔻,
     mgs,
@@ -131,9 +131,9 @@ export
     trade,
 
     # from RiemannianGeometry.jl
+    geodesic,
     distanceSqr, distance²,
     distance,
-    geodesic,
     distanceSqrMat, distance²Mat,
     distanceMat,
     laplacian,
