@@ -472,7 +472,7 @@ tr(H::Union{ℍ, 𝕄}, D::𝔻{T}) where T<:Real = tr(D, H)
     quadraticForm(v::Vector{T}, X::Union(𝕄{T}, ℍ{T}) where T<:RealOrComplex
     quadraticForm(v::Vector{T}, L::𝕃{T}) where T<:Real
 
- **alias**: `qufo`
+ **alias**: `qf`
 
  (1) Given a real or complex vector ``v`` and `Hermitian` matrix ``X``,
  compute the quadratic form
