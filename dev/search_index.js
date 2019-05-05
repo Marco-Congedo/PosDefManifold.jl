@@ -389,7 +389,7 @@ var documenterSearchIndex = {"docs": [
     "page": "riemannianGeometry.jl",
     "title": "Geodesic equations",
     "category": "section",
-    "text": "geodesic"
+    "text": "Function Description\ngeodesic Geodesic equations (weighted mean of two positive definite matrices) for any metric⋅geodesic"
 },
 
 {
@@ -413,7 +413,7 @@ var documenterSearchIndex = {"docs": [
     "page": "riemannianGeometry.jl",
     "title": "Distances",
     "category": "section",
-    "text": "distanceSqr\ndistance"
+    "text": "Function Description\ndistanceSqr, distance² Squared distance between positive definite matrices\ndistance Distance between positive definite matrices⋅distanceSqr\ndistance"
 },
 
 {
@@ -461,7 +461,7 @@ var documenterSearchIndex = {"docs": [
     "page": "riemannianGeometry.jl",
     "title": "Graphs and Laplacians",
     "category": "section",
-    "text": "distanceSqrMat\ndistanceMat\nlaplacian\nlaplacianEigenMaps\nspectralEmbedding"
+    "text": "Function Description\ndistanceSqrMat, distance²Mat Lower triangular matrix of all squared inter-distances\ndistanceMat Lower triangular matrix of all inter-distances\nlaplacian Laplacian of a squared inter-distances matrix\nlaplacianEigenMaps, laplacianEM Eigen maps (eigenvectors) of a Laplacian\nspectralEmbedding Spectral Embedding (all the above function run in series)⋅distanceSqrMat\ndistanceMat\nlaplacian\nlaplacianEigenMaps\nspectralEmbedding"
 },
 
 {
@@ -525,7 +525,7 @@ var documenterSearchIndex = {"docs": [
     "page": "riemannianGeometry.jl",
     "title": "Means",
     "category": "section",
-    "text": "mean\nmeans\ngeneralizedMean\ngeometricMean\nlogdet0Mean\nwasMean\npowerMean"
+    "text": "Function Description\nmean Weighted Fréchet mean (wFm) of a matrix set using any metric\nmeans as above for several sets at once\ngeneralizedMean Generalized wFm of a matrix set\ngeometricMean wFm of a matrix set according to the Fisher metric (iterative)\nlogdet0Mean wFm of a matrix set according to the logdet0 metric (iterative)\nwasMean wFm of a matrix set according to the Wasserstein metric (iterative)\npowerMean Power wFm of a matrix set (iterative)⋅mean\nmeans\ngeneralizedMean\ngeometricMean\nlogdet0Mean\nwasMean\npowerMean"
 },
 
 {
@@ -565,7 +565,7 @@ var documenterSearchIndex = {"docs": [
     "page": "riemannianGeometry.jl",
     "title": "Tangent Space operations",
     "category": "section",
-    "text": "logMap\nexpMap\nvecP\nmatP"
+    "text": "Function Description\nlogMap Logarithmic map (from manifold to tangent space)\nexpMap Exponential map (from tangent space to manifold)\nvecP vectorization of matrices in the tangent space\nmatP matrization of matrices in the tangent space (inverse of `vecp)⋅logMap\nexpMap\nvecP\nmatP"
 },
 
 {
@@ -581,7 +581,7 @@ var documenterSearchIndex = {"docs": [
     "page": "riemannianGeometry.jl",
     "title": "Procrustes problems",
     "category": "section",
-    "text": "procrustes"
+    "text": "Function Description\nprocrustes Solution to the Procrustes problem in the manifold of positive definite matrices⋅procrustes"
 },
 
 {
@@ -701,7 +701,7 @@ var documenterSearchIndex = {"docs": [
     "page": "linearAlgebra.jl",
     "title": "PosDefManifold.quadraticForm",
     "category": "function",
-    "text": "quadraticForm(v::Vector{T}, X::Union(𝕄{T}, ℍ{T}) where T<:RealOrComplex\nquadraticForm(v::Vector{T}, L::𝕃{T}) where T<:Real\n\nalias: qufo\n\n(1) Given a real or complex vector v and Hermitian matrix X,  compute the quadratic form\n\nv^HXv,\n\nwhere the superscript H denotes complex conjugate transpose.\n\nIf v and X are real and X is Hermitian, only the  lower triangular part of X is used.\n\n(2) Compute the quadratic form given a real vector v  and the LowerTriangular view L of a real matrix.\n\nMath\n\nFor v and X real and X symmetric, the quadratic form is\n\nsum_i(v_i^2x_ii)+sum_ij(2v_iv_jx_ij).\n\nExamples\n\nusing PosDefManifold\nP=randP(5) # generate a random real positive definite matrix 5x5\nv=randn(5)\nq1=quadraticForm(v, P) # or q1=quad(v, P)\n# obtain a lower Triangular view of P\nL=LowerTriangular(Matrix(P)) # or L=𝕃(Matrix(P))\nq2=quadraticForm(v, L)\nq1 ≈ q2 ? println(\" ⭐ \") : println(\" ⛔ \")\n\n\n\n\n\n"
+    "text": "quadraticForm(v::Vector{T}, X::Union(𝕄{T}, ℍ{T}) where T<:RealOrComplex\nquadraticForm(v::Vector{T}, L::𝕃{T}) where T<:Real\n\nalias: qf\n\n(1) Given a real or complex vector v and Hermitian matrix X,  compute the quadratic form\n\nv^HXv,\n\nwhere the superscript H denotes complex conjugate transpose.\n\nIf v and X are real and X is Hermitian, only the  lower triangular part of X is used.\n\n(2) Compute the quadratic form given a real vector v  and the LowerTriangular view L of a real matrix.\n\nMath\n\nFor v and X real and X symmetric, the quadratic form is\n\nsum_i(v_i^2x_ii)+sum_ij(2v_iv_jx_ij).\n\nExamples\n\nusing PosDefManifold\nP=randP(5) # generate a random real positive definite matrix 5x5\nv=randn(5)\nq1=quadraticForm(v, P) # or q1=quad(v, P)\n# obtain a lower Triangular view of P\nL=LowerTriangular(Matrix(P)) # or L=𝕃(Matrix(P))\nq2=quadraticForm(v, L)\nq1 ≈ q2 ? println(\" ⭐ \") : println(\" ⛔ \")\n\n\n\n\n\n"
 },
 
 {
@@ -717,7 +717,7 @@ var documenterSearchIndex = {"docs": [
     "page": "linearAlgebra.jl",
     "title": "Scalar functions of matrices",
     "category": "section",
-    "text": "Function Description\ncolProd Sum of products of the elements in two columns\nsumOfSqr, sos Sum of squares of all elements or of specified columns\nsumOfSqrDiag, ssd Sum of squares of the diagonal elements\ncolNorm Eucliden norm of a column\nsumOfSqrTril, sst Sum of squares of the lower triangle elements up to a given underdiagonal\ntr Fast trace of the product of two Hermitian matrices\nquadraticForm, qufo Fast quadratic form\nfidelity (Quantum) Fidelity of two positive matrices⋅colProd\nsumOfSqr\nsumOfSqrDiag\ncolNorm\nsumOfSqrTril\ntr\nquadraticForm\nfidelity"
+    "text": "Function Description\ncolProd Sum of products of the elements in two columns\nsumOfSqr, ss Sum of squares of all elements or of specified columns\nsumOfSqrDiag, ssd Sum of squares of the diagonal elements\ncolNorm Eucliden norm of a column\nsumOfSqrTril, sst Sum of squares of the lower triangle elements up to a given underdiagonal\ntr Fast trace of the product of two Hermitian matrices\nquadraticForm, qf Fast quadratic form\nfidelity (Quantum) Fidelity of two positive matrices⋅colProd\nsumOfSqr\nsumOfSqrDiag\ncolNorm\nsumOfSqrTril\ntr\nquadraticForm\nfidelity"
 },
 
 {
