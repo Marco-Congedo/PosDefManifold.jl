@@ -271,12 +271,12 @@ end # function
 
 """
 function distanceSqr(metric::Metric, P::ℍ)
-    if      metric==Euclidean       return  sos(P-I)
-    elseif  metric==invEuclidean    return  sos(inv(P)-I)
+    if      metric==Euclidean       return  ss(P-I)
+    elseif  metric==invEuclidean    return  ss(inv(P)-I)
     elseif  metric in (logEuclidean,
                        Fisher)      return  𝚺(log.(eigvals(P)).^2)
     elseif  metric==logdet0         return  real(logdet(0.5(P+I)) - 0.5logdet(P))
-    elseif  metric==ChoEuclidean    return  sos(choL(P)-I)
+    elseif  metric==ChoEuclidean    return  ss(choL(P)-I)
     elseif  metric==logCholesky
             LP=choL(P);             return  sst(LP, -1) + ssd(𝑓𝔻(log, LP))
     elseif  metric==Jeffrey         return  0.5(tr(P) + tr(inv(P))) - size(P, 1)
@@ -308,12 +308,12 @@ end #function
 
 
 function distanceSqr(metric::Metric, P::ℍ, Q::ℍ)
-    if      metric==Euclidean    return  sos(ℍ(P - Q))
-    elseif  metric==invEuclidean return  sos(ℍ(inv(P) - inv(Q)))
-    elseif  metric==logEuclidean return  sos(ℍ(log(P) - log(Q)))
+    if      metric==Euclidean    return  ss(ℍ(P - Q))
+    elseif  metric==invEuclidean return  ss(ℍ(inv(P) - inv(Q)))
+    elseif  metric==logEuclidean return  ss(ℍ(log(P) - log(Q)))
     elseif  metric==Fisher       return  𝚺(log.(eigvals(P, Q)).^2)
     elseif  metric==logdet0      return  real(logdet(0.5(P + Q)) - 0.5logdet(P * Q))
-    elseif  metric==ChoEuclidean return  sos(choL(P)-choL(Q))
+    elseif  metric==ChoEuclidean return  ss(choL(P)-choL(Q))
     elseif  metric==logCholesky
             LP=choL(P); LQ=choL(Q);
                                  return  sst(tril(LP, -1) - tril(LQ, -1), -1) + ssd(𝑓𝔻(log, LP) - 𝑓𝔻(log, LQ))
@@ -425,15 +425,15 @@ function distanceSqrMat(metric::Metric, 𝐏::ℍVector, type::Type{T}) where T<
 
     if      metric == invEuclidean
             𝐏𝓲=[inv(P) for P in 𝐏]
-            for j=1:k-1, i=j+1:k △[i, j]=sos(ℍ(𝐏𝓲[i] - 𝐏𝓲[j]))  end
+            for j=1:k-1, i=j+1:k △[i, j]=ss(ℍ(𝐏𝓲[i] - 𝐏𝓲[j]))  end
 
     elseif  metric == logEuclidean
             𝐏𝓵=[log(P) for P in 𝐏]
-            for j=1:k-1, i=j+1:k △[i, j]=sos(ℍ(𝐏𝓵[i] - 𝐏𝓵[j]))  end
+            for j=1:k-1, i=j+1:k △[i, j]=ss(ℍ(𝐏𝓵[i] - 𝐏𝓵[j]))  end
 
     elseif  metric == ChoEuclidean
             𝐏L=[choL(P) for P in 𝐏]
-            for j=1:k-1, i=j+1:k △[i, j]=sos(𝐏L[i] - 𝐏L[j])  end
+            for j=1:k-1, i=j+1:k △[i, j]=ss(𝐏L[i] - 𝐏L[j])  end
 
     elseif  metric==logCholesky
             𝐏L=[choL(P) for P in 𝐏]
@@ -1069,10 +1069,10 @@ end # function
     If the algorithm diverges a **warning** is printed indicating the iteration
     when this happened.
 
-    ``tol`` defaults to 10 times the square root of `Base.eps` of the nearest real type
-    of data input ``𝐏``. This corresponds to requiring equality for the
-    convergence criterion over two successive iterations
-    of about half of the significant digits minus one.
+    ``tol`` defaults to 100 times the square root of `Base.eps` of the nearest
+    real type of data input ``𝐏``. This corresponds to requiring the relative
+    convergence criterion over two successive iterations to vanish for about
+    half the significant digits minus 2.
 
  (2) Like method (1), but for a 1d array ``𝐃={D_1,...,D_k}`` of ``k``
  real positive definite diagonal matrices of [𝔻Vector type](@ref).
@@ -1111,13 +1111,13 @@ function geometricMean(𝐏::ℍVector;
     isempty(w) ? v=[] : v = _getWeights(w, ✓w, k)
     init == nothing ? M = mean(logEuclidean, 𝐏; w=v, ✓w=false) : M = ℍ(init)
     💡 = similar(M, eltype(M))
-    tol==0 ? tolerance = √eps(real(eltype(𝐏[1])))*10 : tolerance = tol
+    tol==0 ? tolerance = √eps(real(eltype(𝐏[1])))*1e2 : tolerance = tol
     ⍰ && @info("Iterating geometricMean Fixed-Point...")
 
     while true
-        M½, M½ⁱ=pow(M, 0.5, -0.5)
+        M½, M⁻½=pow(M, 0.5, -0.5)
         #M -< M^1/2 {  exp[epsilon( 1/n{sum(i=1 to n) ln(M^-1/2 Mi M^-1/2)} )] } M^1/2
-        isempty(w) ? 💡 = ℍ(M½*exp(ℍ(𝛍(log(ℍ(M½ⁱ*P*M½ⁱ)) for P in 𝐏)))*M½) : 💡 = ℍ(M½*exp(ℍ(𝚺(ω * log(ℍ(M½ⁱ*P*M½ⁱ)) for (ω, P) in zip(v, 𝐏))))*M½)
+        isempty(w) ? 💡 = ℍ(M½*exp(ℍ(𝛍(log(ℍ(M⁻½*P*M⁻½)) for P in 𝐏)))*M½) : 💡 = ℍ(M½*exp(ℍ(𝚺(ω * log(ℍ(M⁻½*P*⁻M½)) for (ω, P) in zip(v, 𝐏))))*M½)
         conv = √norm(💡-M)/norm(M)
         ⍰ && println("iteration: ", iter, "; convergence: ", conv)
         (diverging = conv > oldconv) && ⍰ && @warn("geometricMean diverged at:", iter)
@@ -1176,10 +1176,10 @@ suggested by (Moakher, 2012, p315)[🎓](@ref), yielding iterations
     If the algorithm diverges a **warning** is printed indicating the iteration
     when this happened.
 
-    ``tol`` defaults to 10 times the square root of `Base.eps` of the nearest real type
-    of data input ``𝐏``. This corresponds to requiring equality for the
-    convergence criterion over two successive iterations
-    of about half of the significant digits minus 1.
+    ``tol`` defaults to 100 times the square root of `Base.eps` of the nearest
+    real type of data input ``𝐏``. This corresponds to requiring the relative
+    convergence criterion over two successive iterations to vanish for about
+    half the significant digits minus 2.
 
  (2) Like method (1), but for a 1d array ``𝐃={D_1,...,D_k}`` of ``k``
  real positive definite diagonal matrices of [𝔻Vector type](@ref).
@@ -1221,7 +1221,7 @@ function logdet0Mean(𝐏::Union{ℍVector, 𝔻Vector};
     isempty(w) ? v=[] : v = _getWeights(w, ✓w, k)
     init == nothing ? M = mean(logEuclidean, 𝐏; w=v, ✓w=false) : M = 𝕋(init)
     💡 = similar(M, eltype(M))
-    tol==0 ? tolerance = √eps(real(eltype(𝐏[1])))*10 : tolerance = tol
+    tol==0 ? tolerance = √eps(real(eltype(𝐏[1])))*1e2 : tolerance = tol
     ⍰ && @info("Iterating logDet0Mean Fixed-Point...")
 
     while true
@@ -1283,9 +1283,10 @@ end
     If the algorithm diverges a **warning** is printed indicating the iteration
     when this happened.
 
-    ``tol`` defaults to 10 times the square root of `Base.eps` of the nearest real type
-    of data input ``𝐏``. This corresponds to requiring nullity for the
-    convergence criterion beyond about half of the significant digits minus 1.
+    ``tol`` defaults to 100 times the square root of `Base.eps` of the nearest
+    real type of data input ``𝐏``. This corresponds to requiring the relative
+    convergence criterion over two successive iterations to vanish for about
+    half the significant digits minus 2.
 
  (2) Like in (1), but for a 1d array ``𝐃={D_1,...,D_k}`` of ``k``
  real positive definite diagonal matrices of [𝔻Vector type](@ref).
@@ -1326,7 +1327,7 @@ function wasMean(𝐏::ℍVector;
     isempty(w) ? v=[] : v = _getWeights(w, ✓w, k)
     init == nothing ? M = generalizedMean(𝐏, 0.5; w=v, ✓w=false) : M = ℍ(init)
     💡 = similar(M, eltype(M))
-    tol==0 ? tolerance = √eps(real(eltype(𝐏[1])))*10 : tolerance = tol
+    tol==0 ? tolerance = √eps(real(eltype(𝐏[1])))*1e2 : tolerance = tol
     ⍰ && @info("Iterating wasMean Fixed-Point...")
 
     while true
@@ -1408,9 +1409,10 @@ wasMean(𝐃::𝔻Vector;
     If the algorithm diverges a **warning** is printed indicating the iteration
     when this happened.
 
-    ``tol`` defaults to 10 times the square root of `Base.eps` of the nearest real type
-    of data input ``𝐏``. This corresponds to requiring nullity for the
-    convergence criterion beyond about half of the significant digits minus 1.
+    ``tol`` defaults to 100 times the square root of `Base.eps` of the nearest
+    real type of data input ``𝐏``. This corresponds to requiring the relative
+    convergence criterion over two successive iterations to vanish for about
+    half the significant digits minus 2.
 
  (2) Like in (1), but for a 1d array ``𝐃={D_1,...,D_k}`` of ``k``
  real positive definite diagonal matrices of [𝔻Vector type](@ref).
@@ -1469,7 +1471,7 @@ function powerMean(𝐏::ℍVector, p::Real;
        p<0 ? X=ℍ(M^(0.5)) : X=ℍ(M^(-0.5))
        💡, H, 𝒫 = similar(X), similar(X), similar(𝐏)
        p<0 ? 𝒫=[inv(P) for P in 𝐏] : 𝒫=𝐏
-       tol==0 ? tolerance = √eps(real(eltype(𝐏[1])))*10 : tolerance = tol
+       tol==0 ? tolerance = √eps(real(eltype(𝐏[1])))*1e2 : tolerance = tol
        ⍰ && @info("Iterating powerMean Fixed-Point...")
 
        while true
@@ -1479,7 +1481,7 @@ function powerMean(𝐏::ℍVector, p::Real;
               H=𝚺(ω*pow(ℍ(X*P*X), absp) for (ω, P) in zip(v, 𝒫))
           end
           💡 = (pow(ℍ(H), r))*X
-          conv = √(norm(H-I)/sqrtn) # relative difference to identity
+          conv = √norm(H-I)/sqrtn # relative difference to identity
           ⍰ && println("iteration: ", iter, "; convergence: ", conv)
           (diverging = conv > oldconv) && ⍰ && @warn("powerMean diverged at:", iter)
           (overRun = iter == maxiter) && @warn("powerMean: reached the max number of iterations before convergence:", iter)
