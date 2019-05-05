@@ -102,7 +102,7 @@ export
     tr1,
     normalizeCol!,
     colProd,
-    sumOfSqr, sos,
+    sumOfSqr, ss,
     sumOfSqrDiag, ssd,
     colNorm,
     sumOfSqrTril, sst,

@@ -194,8 +194,8 @@ end
 #  -------------------------------
 
 """
-    (1) colProd(X::Union{𝕄, ℍ, j::Int, l::Int)
-    (2) colProd(X::Union{𝕄, ℍ, Y::Union{𝕄, ℍ}, j::Int, l::Int)
+    (1) colProd(X::Union{𝕄, ℍ}, j::Int, l::Int)
+    (2) colProd(X::Union{𝕄, ℍ}, Y::Union{𝕄, ℍ}, j::Int, l::Int)
 
  (1) Given a real or complex `Matrix` or `Hermitian` matrix ``X``,
  return the dot product of the ``j^{th}`` and ``l^{th}`` columns, defined as,
@@ -263,7 +263,7 @@ colNorm(X::Union{𝕄, ℍ}, j::Int) = √sumOfSqr(X, j)
     (5) sumOfSqr(X::Union{𝕄, ℍ}, j::Int)
     (6) sumOfSqr(X::Union{𝕄, ℍ}, range::UnitRange)
 
-**alias**: `sos`
+**alias**: `ss`
 
  Return
  - (1) the sum of square of the elements in an array ``A`` of any dimensions.
@@ -320,7 +320,7 @@ sumOfSqr(X::Union{𝕄, ℍ}, j::Int) = 𝚺(abs2.(X[:, j]))
 
 sumOfSqr(X::Union{𝕄, ℍ}, range::UnitRange) = 𝚺(sumOfSqr(X, j) for j in range)
 
-sos=sumOfSqr
+ss=sumOfSqr
 
 """
     (1) sumOfSqrDiag(X::𝕄)
@@ -823,14 +823,16 @@ invsqrt(D::𝔻{T}) where T<:Real = spectralFunctions(D, x->1/sqrt(x))
 
 """
     (1) sqr(P::ℍ)
-    (2) sqr(D::𝔻{T}) where T<:Real
+    (2) sqr(X::Union{𝕄, 𝕃, 𝔻{T}}) where T<:Real
 
  (1) Given a positive semi-definite `Hermitian` matrix ``P``,
  compute its square ``P^{2}``.
 
  ``P`` must be flagged as Hermitian. See [typecasting matrices](@ref).
 
- A special method is provided for real `Diagonal` matrices (2).
+ A method is provided also for generic matrices of the `Matrix` type,
+ `LowerTriangular` matrices and real `Diagonal` matrices (2). The output
+ is of the same type as the input.
 
  **See also**: [`pow`](@ref).
 
@@ -843,7 +845,7 @@ invsqrt(D::𝔻{T}) where T<:Real = spectralFunctions(D, x->1/sqrt(x))
 """
 sqr(P::ℍ) = ℍ(P*P)
 
-sqr(D::𝔻{T}) where T<:Real = D*D
+sqr(X::Union{𝕄, 𝕃, 𝔻{T}}) where T<:Real = X*X
 
 
 """
@@ -883,9 +885,10 @@ sqr(D::𝔻{T}) where T<:Real = D*D
     In this case a BLAS routine is used for computing the power iterations.
     See [BLAS routines](@ref).
 
-    ``tol`` defaults to 10 times the square root of `Base.eps` of the type of ``H``.
-    This corresponds to requiring equality for the convergence criterion
-    over two successive iterations of about half the significant digits minus 1.
+    ``tol`` defaults to 100 times the square root of `Base.eps` of the type
+    of ``H``. This corresponds to requiring the relative convergence criterion
+    over two successive iterations to vanish for about half the significant
+    digits minus 2.
 
 **See also**: [`mgs`](@ref).
 
@@ -910,8 +913,8 @@ sqr(D::𝔻{T}) where T<:Real = D*D
 function powerIterations(H::𝕄, q::Int;
   evalues=false, tol::Real=0, maxiter=300, ⍰=false)
 
-    (n, q², type) = size(H, 1), q^2, eltype(H)
-    tol==0 ? tolerance = √eps(real(type))*10 : tolerance = tol
+    (n, sqrtn, type) = size(H, 1), √(size(H, 1)), eltype(H)
+    tol==0 ? tolerance = √eps(real(type))*1e2 : tolerance = tol
     msg1="Power Iterations reached a saddle point at:"
     msg2="Power Iterations reached the max number of iterations at:"
     U=randn(type, n, q) # initialization
@@ -922,7 +925,7 @@ function powerIterations(H::𝕄, q::Int;
     while true
         # power iteration of q vectors and their Gram-Schmidt Orthogonalization
         type<:Real ? 💡=mgs(BLAS.symm('L', 'L', H, U)) : 💡=mgs(H*U)
-        conv = √norm((💡)' * U-I) / q²
+        conv = √norm((💡)' * U - I) / sqrtn # relative difference to identity
         (saddlePoint = conv ≈ oldconv)  && @info(msg1, iter)
         (overRun     = iter == maxiter) && @warn(msg2, iter)
         #diverged    = conv > oldconv && @warn(msg3, iter)
