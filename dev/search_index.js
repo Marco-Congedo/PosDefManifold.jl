@@ -429,7 +429,7 @@ var documenterSearchIndex = {"docs": [
     "page": "riemannianGeometry.jl",
     "title": "PosDefManifold.distanceSqrMat⏩",
     "category": "function",
-    "text": "(1) distanceSqrMat⏩(metric::Metric, 𝐏::ℍVector)    (2) distanceSqrMat⏩(metric::Metric, 𝐏::ℍVector, type::Type{T}) where T<:AbstractFloat\n\nalias: distance²Mat⏩\n\nMulti-threaded version of distanceSqrMat, called with the same syntax therein.\n\nThis function is still experimental and is not tested in the test.jl unit. You should check the result against the distanceSqrMat function.\n\n\n\n\n\n"
+    "text": "    (1) distanceSqrMat⏩(metric::Metric, 𝐏::ℍVector)\n    (2) distanceSqrMat⏩(metric::Metric, 𝐏::ℍVector, type::Type{T}) where T<:AbstractFloat\n\nalias: distance²Mat⏩\n\nMulti-threaded version of distanceSqrMat, called with the same syntax therein.\n\nThis function is still experimental and is not tested in the test.jl  unit. You should check the result against the distanceSqrMat function.\n\n\n\n\n\n\n\n"
 },
 
 {
