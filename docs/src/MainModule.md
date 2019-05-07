@@ -9,7 +9,8 @@ It uses the following standard Julia packages:
 | [LinearAlgebra](https://bit.ly/2W5Wq8W) |
 | [Statistics](https://bit.ly/2Oem3li) |
 
-Examples in some units of **PosDefManifold** also uses the `Plots` package.
+Examples in some units of **PosDefManifold** also uses the `Plots` package. Take a look at this [tutorial](https://cleytonfar.github.io/posts/using-julia-for-data-science-part-03/)
+for an introduction to data plotting with Julia.
 
 The main module does not contains functions, but it declares all **constant**,
 **types** and **aliases** of Julia functions used in all units.

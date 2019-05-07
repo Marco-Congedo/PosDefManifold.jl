@@ -24,6 +24,7 @@
 #  ------------------------
 ## 1. Matrix Normalizations
 #  ------------------------
+
 """
     det1(X::𝕄)
     det1(X::ℍ)
@@ -782,13 +783,13 @@ pow(D::𝔻{T}, p)  where T<:Real = spectralFunctions(D, x->x^p) # one argument
 
 function pow(P::ℍ, args...)               # several arguments
     (Λ, U) = evd(P)
-    ispos(Λ, msg="function Rpow: at least one eigenvalue is smaller than the default tolerance")
+    ispos(Λ, msg="function pow: at least one eigenvalue is smaller than the default tolerance")
     # optimize by computing only the upper trinagular part
     return  (ℍ(U * Λ^p * U') for p in args)
 end
 
 function pow(D::𝔻{T}, args...) where T<:Real  # several arguments
-    ispos(D, msg="function Rpow: at least one eigenvalue is smaller than the default tolerance")
+    ispos(D, msg="function pow: at least one eigenvalue is smaller than the default tolerance")
     return  (D^p for p in args)
 end
 
