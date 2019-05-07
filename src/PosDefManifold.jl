@@ -10,10 +10,10 @@
 
 module PosDefManifold
 
-using LinearAlgebra, Statistics
+using LinearAlgebra, Statistics, Base.Threads
 
 # Special instructions
-BLAS.set_num_threads(Int(round(Sys.CPU_THREADS*3/4)))
+BLAS.set_num_threads(Sys.CPU_THREADS)
 
 # constants
 const sqrt2=√2
@@ -134,6 +134,7 @@ export
     distanceSqr, distance²,
     distance,
     distanceSqrMat, distance²Mat,
+    distanceSqrMat⏩, distance²Mat⏩,
     distanceMat,
     laplacian,
     laplacianEigenMaps, laplacianEM,

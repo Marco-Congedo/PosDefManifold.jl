@@ -48,6 +48,7 @@ distance
 | Function   | Description |
 |:----------:|:----------- |
 | [`distanceSqrMat`](@ref), `distance²Mat` | Lower triangular matrix of all squared inter-distances|
+| [`distanceSqrMat⏩`](@ref), `distance²Mat⏩` | Multi-threaded version of `distanceSqrMat`. Still experimental.|
 | [`distanceMat`](@ref) | Lower triangular matrix of all inter-distances|
 | [`laplacian`](@ref) | Laplacian of a squared inter-distances matrix|
 | [`laplacianEigenMaps`](@ref), `laplacianEM` | Eigen maps (eigenvectors) of a Laplacian|
@@ -57,6 +58,7 @@ distance
 
 ```@docs
 distanceSqrMat
+distanceSqrMat⏩
 distanceMat
 laplacian
 laplacianEigenMaps

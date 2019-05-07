@@ -220,5 +220,5 @@ the BLAS library should use by:
     BLAS.set_num_threads(n)
 
 where `n` is the number of threads.
-By default, **PosDefManifold** emplys 3/4 of the threads available
-on your computer rounded to the nearest integer.
+By default, **PosDefManifold** employs all CPU threads available
+on your computer (i.e., the output of `Sys.CPU_THREADS`).

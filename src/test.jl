@@ -382,7 +382,7 @@ function tests();
     name="function distanceSqrMat (I)"; newTest(name);
     k=length(𝐏)
     for m in metrics
-            D=distanceSqrMat(m, 𝐏)
+            D=distanceSqrMat(m, 𝐏, Float64)
             manualD=LowerTriangular(Matrix{Float64}(undef, k, k))
             for j=1:k, i=j:k manualD[i, j]=distanceSqr(m, 𝐏[i], 𝐏[j]) end
             manualD≈D ? OK() : OH(name*" Real Input, metric "*string(m))
@@ -392,7 +392,7 @@ function tests();
     name="function distanceSqrMat (II)"; newTest(name);
     k=length(𝐏C)
     for m in metrics
-            D=distanceSqrMat(m, 𝐏C)
+            D=distanceSqrMat(m, 𝐏C, Float64)
             manualD=LowerTriangular(Matrix{Float64}(undef, k, k))
             for j=1:k, i=j:k manualD[i, j]=distanceSqr(m, 𝐏C[i], 𝐏C[j]) end
             manualD≈D ? OK() : OH(name*" Complex Input, metric "*string(m))
@@ -548,7 +548,8 @@ function tests();
 
     name="function softmax"; newTest(name);
     g=[1.0, 2.0, 3.0, 4.0, 1.0, 2.0, 3.0]
-    h= [0.0236405, 0.0642617, 0.174681, 0.474833, 0.0236405, 0.0642617, 0.174681]
+    h= [0.0236405430216, 0.0642616585105, 0.17468129856, 0.47483299974438,
+        0.0236405430216, 0.0642616585105, 0.17468129856]
     hh=softmax(g)
     hh ≈ h ? OK() : OH(name)
 
