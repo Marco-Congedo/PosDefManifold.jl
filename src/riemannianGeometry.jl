@@ -467,9 +467,10 @@ distance²Mat=distanceSqrMat
 
 
 """
+```
     (1) distanceSqrMat⏩(metric::Metric, 𝐏::ℍVector)
     (2) distanceSqrMat⏩(metric::Metric, 𝐏::ℍVector, type::Type{T}) where T<:AbstractFloat
-
+```
  **alias**: `distance²Mat⏩`
 
  Multi-threaded version of [`distanceSqrMat`](@ref), called with the same syntax therein.
