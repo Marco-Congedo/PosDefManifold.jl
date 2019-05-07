@@ -82,16 +82,22 @@ tr1(X::𝕄) = X/tr(X)
     (4) normalizeCol!(X::𝕄, range::UnitRange, by::Number)
 
 
- Given a `Matrix` ``X``,
- - (1) normalize the ``j^{th}``column
+ Given a `Matrix` ``X``or real or complex elements,
+ - (1) normalize the ``j^{th}`` column to unit norm
  - (2) divide the elements of the ``j^{th}`` column by number ``by``
- - (3) normalize the columns in ``range``
+ - (3) normalize the columns in ``range`` to unit norm
  - (4) divide the elements of columns in ``range``  by number ``by``.
 
  ``by`` is a number of abstract supertype [Number](https://bit.ly/2JwXjGr).
  It should be an integer, real or complex number.
+ For efficiency, it should be of the same type as the elements of ``X``.
 
  ``range`` is a [UnitRange](https://bit.ly/2HSfK5J) type.
+
+ Methods (1) and (3) call the
+ [BLAS.nrm2](https://docs.julialang.org/en/v1/stdlib/LinearAlgebra/#LinearAlgebra.BLAS.nrm2)
+ routine for computing the norm of concerned columns.
+ See [BLAS routines](@ref).
 
 !!! note "Nota Bene"
     Julia does not allow normalizing the columns of `Hermitian` matrices.
@@ -112,18 +118,21 @@ tr1(X::𝕄) = X/tr(X)
     normalizeCol!(X, 3:6, (2.0 + 0.5im)) # (4) divide columns 3 to 5 by (2.0 + 0.5im)
 
 """
-function normalizeCol!(X::𝕄, j::Int)
+function normalizeCol!(X::𝕄{T}, j::Int) where T<:RealOrComplex
     w=colNorm(X, j)
     for i=1:size(X, 1) @inbounds X[i, j]/=w end
 end
 
-normalizeCol!(X::𝕄, j::Int, by::Number) =
+normalizeCol!(X::𝕄{T}, j::Int, by::Number) where T<:RealOrComplex =
              for i=1:size(X, 1) @inbounds X[i, j]/=by end
 
-normalizeCol!(X::𝕄, range::UnitRange) =
-             for j in range normalizeCol!(X, j) end
+function normalizeCol!(X::𝕄{T}, range::UnitRange) where T<:RealOrComplex
+    l=range[1]-1
+    w=[colNorm(X, j) for j in range]
+    for j in range normalizeCol!(X, j, w[j-l]) end
+end
 
-normalizeCol!(X::𝕄, range::UnitRange, by::Number) =
+normalizeCol!(X::𝕄{T}, range::UnitRange, by::Number) where T<:RealOrComplex =
              for j in range normalizeCol!(X, j, by) end
 
 
@@ -245,6 +254,10 @@ colProd(X::Union{𝕄, ℍ}, Y::Union{𝕄, ℍ}, j::Int, l::Int) =
  Given a real or complex `Matrix` or `Hermitian` matrix ``X``,
  return the Euclidean norm of its ``j^{th}`` column.
 
+ This function calls the
+ [BLAS.nrm2](https://docs.julialang.org/en/v1/stdlib/LinearAlgebra/#LinearAlgebra.BLAS.nrm2)
+ routine. See [BLAS routines](@ref).
+
  **See also**: [`normalizeCol!`](@ref), [`colProd`](@ref), [`sumOfSqr`](@ref).
 
  ## Examples
@@ -253,7 +266,7 @@ colProd(X::Union{𝕄, ℍ}, Y::Union{𝕄, ℍ}, j::Int, l::Int) =
     normOfSecondColumn=colNorm(X, 2)
 
 """
-colNorm(X::Union{𝕄, ℍ}, j::Int) = √sumOfSqr(X, j)
+colNorm(X::Union{𝕄, ℍ}, j::Int) = BLAS.nrm2(size(X, 1), X[:, j], 1)
 
 
 """
@@ -470,29 +483,39 @@ tr(H::Union{ℍ, 𝕄}, D::𝔻{T}) where T<:Real = tr(D, H)
 
 
 """
-    quadraticForm(v::Vector{T}, X::Union(𝕄{T}, ℍ{T}) where T<:RealOrComplex
-    quadraticForm(v::Vector{T}, L::𝕃{T}) where T<:Real
+    (1) quadraticForm(v::Vector{T}, P::ℍ{T}) where T<: Real
+    (2) quadraticForm(v::Vector{T}, L::𝕃{T}) where T<: Real
+    (3) quadraticForm(v::Vector{T}, X::𝕄{T}, forceLower::Bool) where T<: Real
+    (4) quadraticForm(v::Vector{T}, X::Union{𝕄{T}, ℍ{S}})
+                            where T<: RealOrComplex where S<: Complex
+
 
  **alias**: `qf`
 
- (1) Given a real or complex vector ``v`` and `Hermitian` matrix ``X``,
+ (1) Given a real vector ``v`` and a real `Hermitian` ``P``,
  compute the quadratic form
 
- ``v^HXv``,
+ ``v^HPv``,
 
- where the superscript *H* denotes complex conjugate transpose.
+ where the superscript *H* denotes complex conjugate transpose,
+ using only the lower triangular part of ``P``.
 
- If ``v`` and ``X`` are real and ``X`` is `Hermitian`, only the
- lower triangular part of ``X`` is used.
+ (2) As in (1), given a real vector ``v``
+ and the `LowerTriangular` view ``L`` of a real symmetric matrix.
 
- (2) Compute the quadratic form given a real vector ``v``
- and the `LowerTriangular` view ``L`` of a real matrix.
+ (3) As in (1), given a real vector ``v``
+ and a real generic `Matrix`, if `forceLower=true`.
+
+ (4) Generic method for computing the quadratic form for a real or complex
+ `Matrix` or a complex `Hermitian` matrix. The whole matrix is used.
 
  ## Math
 
  For ``v`` and ``X`` real and ``X`` symmetric, the quadratic form is
 
  ``\\sum_i(v_i^2x_{ii})+\\sum_{i>j}(2v_iv_jx_{ij})``.
+
+ This is used in (1) &nd (2).
 
 
  ## Examples
@@ -506,22 +529,25 @@ tr(H::Union{ℍ, 𝕄}, D::𝔻{T}) where T<:Real = tr(D, H)
     q1 ≈ q2 ? println(" ⭐ ") : println(" ⛔ ")
 
 """
-function quadraticForm(v::Vector{T}, X::Union{𝕄{T}, ℍ{T}}) where T<:RealOrComplex
-    if T<:Real && X isa(ℍ)
-        return quadraticForm(v, 𝕃(X))
-    else
-        return v'*X*v
-    end
-end
+
+quadraticForm(v::Vector{T}, P::ℍ{T}) where T<:Real = quadraticForm(v, 𝕃(P))
+
+quadraticForm(v::Vector{T}, X::𝕄{T}, forceLower::Bool) where T<: Real = forceLower==true ? quadraticForm(v, 𝕃(X)) : v'*X*v
+
+quadraticForm(v::Vector{T}, X::Union{𝕄{T}, ℍ{S}}) where T<:RealOrComplex where S<:Complex = v'*X*v
 
 function quadraticForm(v::Vector{T}, L::𝕃{T}) where T<:Real
     r=length(v)
-    s=0.
-    for i=1:r @inbounds s+=(v[i]^2 * L[i, i]) end # Diagonal
-    for j=1:r-1, i=j+1:r @inbounds s+=2*v[i]*v[j]*L[i, j] end # Off-diagonal
+    s=eltype(L)(0)
+    for j=1:r-1
+        @inbounds s+=(v[j]^2 * L[j, j])
+        for i=j+1:r @inbounds s+=2*v[i]*v[j]*L[i, j]
+        end
+    end
+    @inbounds s+=(v[r]^2 * L[r, r])
     return s
 end
-qufo=quadraticForm
+qf=quadraticForm
 
 
 """
@@ -859,7 +885,7 @@ sqr(X::Union{𝕄, 𝕃, 𝔻{T}}) where T<:Real = X*X
  **alias**: `powIter`
 
  (1) Compute the ``q`` eigenvectors associated to the ``q`` largest (real) eigenvalues
- of real or complex `Hermitian` matrix or `Matrix` ``H`` using the
+ of real or complex `Hermitian` or `Matrix` ``H`` using the
  [power iterations](https://bit.ly/2JSo0pb) +
  [Gram-Schmidt orthogonalization](https://bit.ly/2YE6zvy) as suggested by Strang.
  The eigenvectors are returned with the same type as the elements of ``H``.
@@ -882,9 +908,12 @@ sqr(X::Union{𝕄, 𝕃, 𝔻{T}}) where T<:Real = X*X
     Differently from the [`evd`](@ref) function, the eigenvectors and
     eigenvalues are sorted by decreasing order of eigenvalues.
 
-    If ``H`` is real, only its lower triangular part is used like in (2).
-    In this case a BLAS routine is used for computing the power iterations.
-    See [BLAS routines](@ref).
+    If ``H`` is `Hermitian` and real, only its lower triangular part is used
+    for computing the power iterations, like in (2). In this case the
+    [BLAS.symm](https://docs.julialang.org/en/v1/stdlib/LinearAlgebra/#LinearAlgebra.BLAS.symm)
+    routine is used.
+    Otherwise the [BLAS.gemm](https://docs.julialang.org/en/v1/stdlib/LinearAlgebra/#LinearAlgebra.BLAS.gemm)
+    routine is used. See [BLAS routines](@ref).
 
     ``tol`` defaults to 100 times the square root of `Base.eps` of the type
     of ``H``. This corresponds to requiring the relative convergence criterion
@@ -924,8 +953,8 @@ function powerIterations(H::𝕄, q::Int;
     (iter, conv, oldconv) = 1, 0., maxpos
     ⍰ && @info("Running Power Iterations...")
     while true
-        # power iteration of q vectors and their Gram-Schmidt Orthogonalization
-        type<:Real ? 💡=mgs(BLAS.symm('L', 'L', H, U)) : 💡=mgs(H*U)
+        # power iteration U-<H*U of the q vectors of U and their Gram-Schmidt Orth.
+        type<:Real ? 💡=mgs(BLAS.symm('L', 'L', H, U)) : 💡=mgs(BLAS.gemm('N', 'N', H, U))
         conv = √norm((💡)' * U - I) / sqrtn # relative difference to identity
         (saddlePoint = conv ≈ oldconv)  && @info(msg1, iter)
         (overRun     = iter == maxiter) && @warn(msg2, iter)
@@ -940,7 +969,7 @@ function powerIterations(H::𝕄, q::Int;
     if evalues == false
         return (💡, iter, conv)
     else
-        type<:Real ? d=[quadraticForm(💡[:, i], H) for i=1:q] : d=[💡[:, i]'*H*💡[:, i] for i =1:q]
+        type<:Real ? d=[qf(💡[:, i], H, true) for i=1:q] : d=[qf(💡[:, i], H) for i =1:q]
         return (𝔻(real(d)), 💡, iter, conv)
     end
 end
@@ -952,7 +981,7 @@ powerIterations(H::ℍ, q::Int;
 
 powerIterations(L::𝕃{T}, q::Int;
         evalues=false, tol::Real=0, maxiter=300, ⍰=false) where T<:Real =
-    powerIterations(𝕄(Symmetric(L, :L)), q; evalues=evalues, tol=tol, maxiter=maxiter, ⍰=⍰)
+    powerIterations(𝕄(L), q; evalues=evalues, tol=tol, maxiter=maxiter, ⍰=⍰)
 
 powIter=powerIterations
 
