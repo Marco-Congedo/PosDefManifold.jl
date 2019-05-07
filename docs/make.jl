@@ -12,7 +12,7 @@ makedocs(
       "riemannianGeometry.md",
       "linearAlgebra.md",
       "signalProcessing.md",
-      "classification.md"
+      "classification.md",
       "test.md"
    ]
 )
