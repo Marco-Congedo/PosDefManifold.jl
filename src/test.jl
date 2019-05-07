@@ -82,7 +82,7 @@ function tests();
     𝐄=randΛ(10, 4)
 
     # functions in LinearAlgebrainP.jl
-    print("   Unit 'LinearAlgebrainP.jl'")
+    print("   Unit 'linearAlgebra.jl'")
 
     ## 1. Matrix Normalizations
 
@@ -241,7 +241,6 @@ function tests();
     D½*D½ⁱ≈I && D½*D½≈D_ ?  OK() : OH(name*" Real Input method 2")
 
 
-
     name="function invsqrt"; newTest(name)
     P½ⁱ=invsqrt(P_)
     P½ⁱ*P_*P½ⁱ'≈I ? OK() : OH(name*" Real Input method 1")
@@ -249,7 +248,6 @@ function tests();
     P½ⁱ*PC_*P½ⁱ'≈I ? OK() : OH(name*" Complex Input method 1")
     D½ⁱ=invsqrt(D_)
     D½ⁱ*D_*D½ⁱ'≈I ? OK() : OH(name*" Real Input method 2")
-
 
 
     name="function sqr"; newTest(name)
@@ -287,7 +285,7 @@ function tests();
 
     # functions in SignalProcessinginP.jl
     println(" ")
-    print("   Unit 'SignalProcessinginP.jl'")
+    print("   Unit 'signalProcessing.jl'")
 
     name="function randλ"; newTest(name);
     randλ(10); RUN()
@@ -347,7 +345,7 @@ function tests();
 
     # functions in RiemannianGeometryinP.jl
     println(" ")
-    print("   Unit 'RiemannianGeometryinP.jl'")
+    print("   Unit 'riemannianGeometry.jl'")
 
     name="function geodesic"; newTest(name);
     (geodesic(m, P, Q, 0.5) for m in metrics if m≠9); RUN()
@@ -543,6 +541,16 @@ function tests();
     name="function procrustes"; newTest(name);
     procrustes(P, Q); RUN()
     procrustes(PC, QC); RUN()
+
+    # functions in classification.jl
+    println(" ")
+    print("   Unit 'classification.jl'")
+
+    name="function softmax"; newTest(name);
+    g=[1.0, 2.0, 3.0, 4.0, 1.0, 2.0, 3.0]
+    h= [0.0236405, 0.0642617, 0.174681, 0.474833, 0.0236405, 0.0642617, 0.174681]
+    hh=softmax(g)
+    hh ≈ h ? OK() : OH(name)
 
 
 end # function tests

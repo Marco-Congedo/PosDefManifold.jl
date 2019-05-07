@@ -69,7 +69,6 @@ export
     invsqrt2,
     minpos,
     maxpos,
-    ghostMat,
 
     #aliases
     𝚺,
@@ -152,6 +151,9 @@ export
     matP,
     procrustes,
 
+    # from classification.jl
+    softmax,
+
     # from Test.jl
     testall
 
@@ -159,6 +161,7 @@ export
 include("linearAlgebra.jl")
 include("signalProcessing.jl")
 include("riemannianGeometry.jl")
+include("classification.jl")
 include("test.jl")
 
 println("\n⭐ "," Welcome to the PosDefManifold package", " ⭐\n")

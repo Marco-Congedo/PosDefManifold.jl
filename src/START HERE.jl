@@ -46,7 +46,8 @@ begin
     #1) run the following three lines
     push!(LOAD_PATH, srcDir)
 
-    using Documenter, DocumenterTools, Statistics, Revise,
+    using Documenter, DocumenterTools, Statistics,
+    Revise,
     PosDefManifold, LinearAlgebra, BenchmarkTools
     cd(docsDir)
 

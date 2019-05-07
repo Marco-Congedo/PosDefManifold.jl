@@ -29,7 +29,7 @@ For starting using this package, browse the code units listed here below and exe
 
 ## Code units
 
-**PosDefManifold** includes five code units (.jl files):
+**PosDefManifold** includes six code units (.jl files):
 
 | Unit   | Description |
 |:----------:| ----------- |
@@ -37,12 +37,20 @@ For starting using this package, browse the code units listed here below and exe
 | [riemannianGeometry.jl](@ref) | The fundamental unit collecting all functions acting on the **P** manifold |
 | [linearAlgebra.jl](@ref) | Collection of linear algebra routines |
 | [signalProcessing.jl](@ref) | Collection of signal processing routines |
+| [classification.jl](@ref) | Collection of classification routines |
 | [test.jl](@ref) | Unit performing all tests |
 
 ## Contents
 
 ```@contents
-Pages = [ "index.md", "introToRiemannianGeometry.md", "MainModule.md", "riemannianGeometry.md", "linearAlgebra.md", "signalProcessing.md", "test.md"]
+Pages = [       "index.md",
+                "introToRiemannianGeometry.md",
+                "MainModule.md",
+                "riemannianGeometry.md",
+                "linearAlgebra.md",
+                "signalProcessing.md",
+                "classification.md",
+                "test.md"]
 Depth = 1
 ```
 
