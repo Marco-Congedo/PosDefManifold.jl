@@ -380,7 +380,6 @@ distance(metric::Metric, D::𝔻{T}, E::𝔻{T}) where T<:Real = √(distanceSqr
 # 3. Inter-distance matrix, Laplacian and Spectral Embedding
 # -----------------------------------------------------------
 
-# Fast computation of inter_distance matrices
 """
     (1) distanceSqrMat(metric::Metric, 𝐏::ℍVector)
     (2) distanceSqrMat(metric::Metric, 𝐏::ℍVector, type::Type{T}) where T<:AbstractFloat
@@ -461,14 +460,83 @@ function distanceSqrMat(metric::Metric, 𝐏::ℍVector, type::Type{T}) where T<
 
      return △
 end #function
+
 distanceSqrMat(metric::Metric, 𝐏::ℍVector) = distanceSqrMat(metric, 𝐏, Float32)
+
 distance²Mat=distanceSqrMat
+
+
+"""
+    (1) distanceSqrMat⏩(metric::Metric, 𝐏::ℍVector)
+    (2) distanceSqrMat⏩(metric::Metric, 𝐏::ℍVector, type::Type{T}) where T<:AbstractFloat
+
+ **alias**: `distance²Mat⏩`
+
+ Multi-threaded version of [`distanceSqrMat`](@ref), called with the same syntax therein.
+
+ This function is still experimental and is not tested in the [test.jl](@ref)
+ unit. You should check the result against the `distanceSqrMat` function.
+
+ """
+function distanceSqrMat⏩(metric::Metric, 𝐏::ℍVector, type::Type{T}) where T<:AbstractFloat
+    n, k=_attributes(𝐏)
+    △=𝕃{type}(diagm(0 => zeros(k)))
+
+    if      metric == invEuclidean
+            𝐏𝓲=ℍVector(undef, k)
+            Threads.@threads for j=1:k 𝐏𝓲[j]=inv(𝐏[j]) end
+            Threads.@threads for j=1:k-1 for i=j+1:k △[i, j]=ss(ℍ(𝐏𝓲[i] - 𝐏𝓲[j])) end end
+
+    elseif  metric == logEuclidean
+            𝐏𝓵=ℍVector(undef, k)
+            Threads.@threads for j=1:k 𝐏𝓵[j]=log(𝐏[j]) end
+            Threads.@threads for j=1:k-1 for i=j+1:k △[i, j]=ss(ℍ(𝐏𝓵[i] - 𝐏𝓵[j])) end end
+
+    elseif  metric == ChoEuclidean
+            𝐏L=ℍVector(undef, k)
+            for j=1:k 𝐏L[j]=choL(𝐏[j]) end
+            Threads.@threads for j=1:k-1 for i=j+1:k △[i, j]=ss(𝐏L[i] - 𝐏L[j]) end end
+
+    elseif  metric==logCholesky
+            𝐏L=ℍVector(undef, k)
+            for j=1:k 𝐏L[j]=choL(𝐏[j]) end
+            Threads.@threads for j=1:k-1 for i=j+1:k △[i, j]=sst(tril(𝐏L[i], -1)-tril(𝐏L[j], -1), -1) + ssd(𝑓𝔻(log, 𝐏L[i])-𝑓𝔻(log, 𝐏L[j])) end end
+
+    elseif  metric==Jeffrey
+            𝐏𝓲=ℍVector(undef, k)
+            Threads.@threads for j=1:k 𝐏𝓲[j]=inv(𝐏[j]) end
+            Threads.@threads for j=1:k-1 for i=j+1:k △[i, j]=0.5(tr(𝐏𝓲[j], 𝐏[i]) + tr(𝐏𝓲[i], 𝐏[j])) - n end end
+
+    elseif  metric==VonNeumann  # using formula: tr( PlogP + QLoqQ - PlogQ - QlogP)/2
+            𝐏𝓵=ℍVector(undef, k)
+            for j=1:k 𝐏𝓵[j]=log(𝐏[j]) end
+            ℒ=ℍVector(undef, k)
+            for j=1:k ℒ[j]=𝐏[j]*log(𝐏[j]) end
+            Threads.@threads for j=1:k-1 for i=j+1:k △[i, j]=0.5real(tr(ℒ[i])+tr(ℒ[j])-tr(𝐏[i], 𝐏𝓵[j])-tr(𝐏[j], 𝐏𝓵[i])) end end
+
+    elseif  metric==Wasserstein
+            𝐏½=ℍVector(undef, k)
+            Threads.@threads for j=1:k 𝐏½[j]=sqrt(𝐏[j]) end
+            Threads.@threads for j=1:k-1 for i=j+1:k △[i, j]=tr(𝐏[i]) + tr(𝐏[j]) -2tr(sqrt(ℍ(𝐏½[i] * 𝐏[j] * 𝐏½[i]))) end end
+
+     elseif  metric in (Euclidean, Fisher, logdet0)
+             Threads.@threads for j in 1:k-1 for i in j+1:k △[i, j]=distanceSqr(metric, 𝐏[i], 𝐏[j])  end end
+
+     else    @warn("in RiemannianGeometryP.distanceSqrMat or .distanceMat function
+                     (PosDefManifold Package): the chosen 'metric' does not exist")
+     end # If
+
+     return △
+end #function
+
+distanceSqrMat⏩(metric::Metric, 𝐏::ℍVector) = distanceSqrMat⏩(metric, 𝐏, Float32)
+
+distance²Mat⏩=distanceSqrMat⏩
 
 
 """
     (1) distanceMat(metric::Metric, 𝐏::ℍVector)
     (2) distanceMat(metric::Metric, 𝐏::ℍVector, type::Type{T}) where T<:AbstractFloat
-
 
  Given a 1d array ``𝐏`` of ``k`` positive definite matrices
  ``{P_1,...,P_k}`` of [ℍVector type](@ref), create the ``k⋅k`` real
@@ -505,6 +573,7 @@ distanceMat(metric::Metric, 𝐏::ℍVector, type::Type{T}) where T<:AbstractFlo
             sqrt.(distanceSqrMat(metric, 𝐏, type))
 
 distanceMat(metric::Metric, 𝐏::ℍVector)=sqrt.(distanceSqrMat(metric, 𝐏))
+
 
 
 """

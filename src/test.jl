@@ -382,7 +382,7 @@ function tests();
     name="function distanceSqrMat (I)"; newTest(name);
     k=length(𝐏)
     for m in metrics
-            D=distanceSqrMat(m, 𝐏)
+            D=distanceSqrMat(m, 𝐏, Float64)
             manualD=LowerTriangular(Matrix{Float64}(undef, k, k))
             for j=1:k, i=j:k manualD[i, j]=distanceSqr(m, 𝐏[i], 𝐏[j]) end
             manualD≈D ? OK() : OH(name*" Real Input, metric "*string(m))
@@ -392,7 +392,7 @@ function tests();
     name="function distanceSqrMat (II)"; newTest(name);
     k=length(𝐏C)
     for m in metrics
-            D=distanceSqrMat(m, 𝐏C)
+            D=distanceSqrMat(m, 𝐏C, Float64)
             manualD=LowerTriangular(Matrix{Float64}(undef, k, k))
             for j=1:k, i=j:k manualD[i, j]=distanceSqr(m, 𝐏C[i], 𝐏C[j]) end
             manualD≈D ? OK() : OH(name*" Complex Input, metric "*string(m))

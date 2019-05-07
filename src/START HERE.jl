@@ -47,8 +47,8 @@ begin
     push!(LOAD_PATH, srcDir)
 
     using Documenter, DocumenterTools, Statistics,
-    Revise,
-    PosDefManifold, LinearAlgebra, BenchmarkTools
+    Base.Threads, PosDefManifold, LinearAlgebra, BenchmarkTools, Revise
+
     cd(docsDir)
 
     #2) copy and run the following line from the REPL
