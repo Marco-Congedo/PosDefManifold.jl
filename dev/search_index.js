@@ -45,7 +45,7 @@ var documenterSearchIndex = {"docs": [
     "page": "PosDefManifold Documentation",
     "title": "Code units",
     "category": "section",
-    "text": "PosDefManifold includes five code units (.jl files):Unit Description\nMainModule (PosDefManifold.jl) Main module, constants, types, aliases, tips & tricks\nriemannianGeometry.jl The fundamental unit collecting all functions acting on the P manifold\nlinearAlgebra.jl Collection of linear algebra routines\nsignalProcessing.jl Collection of signal processing routines\ntest.jl Unit performing all tests"
+    "text": "PosDefManifold includes six code units (.jl files):Unit Description\nMainModule (PosDefManifold.jl) Main module, constants, types, aliases, tips & tricks\nriemannianGeometry.jl The fundamental unit collecting all functions acting on the P manifold\nlinearAlgebra.jl Collection of linear algebra routines\nsignalProcessing.jl Collection of signal processing routines\nclassification.jl Collection of classification routines\ntest.jl Unit performing all tests"
 },
 
 {
@@ -53,7 +53,7 @@ var documenterSearchIndex = {"docs": [
     "page": "PosDefManifold Documentation",
     "title": "Contents",
     "category": "section",
-    "text": "Pages = [ \"index.md\", \"introToRiemannianGeometry.md\", \"MainModule.md\", \"riemannianGeometry.md\", \"linearAlgebra.md\", \"signalProcessing.md\", \"test.md\"]\nDepth = 1"
+    "text": "Pages = [       \"index.md\",\n                \"introToRiemannianGeometry.md\",\n                \"MainModule.md\",\n                \"riemannianGeometry.md\",\n                \"linearAlgebra.md\",\n                \"signalProcessing.md\",\n                \"classification.md\",\n                \"test.md\"]\nDepth = 1"
 },
 
 {
@@ -277,7 +277,7 @@ var documenterSearchIndex = {"docs": [
     "page": "MainModule (PosDefManifold.jl)",
     "title": "MainModule (PosDefManifold.jl)",
     "category": "section",
-    "text": "This is the main unit containing the PosDefManifold module.It uses the following standard Julia packages:using\nLinearAlgebra\nStatisticsExamples in some units of PosDefManifold also uses the Plots package.The main module does not contains functions, but it declares all constant, types and aliases of Julia functions used in all units.Contents\nconstants\naliases\ntypes\ntips & tricks"
+    "text": "This is the main unit containing the PosDefManifold module.It uses the following standard Julia packages:using\nLinearAlgebra\nStatisticsExamples in some units of PosDefManifold also uses the Plots package. Take a look at this tutorial for an introduction to data plotting with Julia.The main module does not contains functions, but it declares all constant, types and aliases of Julia functions used in all units.Contents\nconstants\naliases\ntypes\ntips & tricks"
 },
 
 {
@@ -525,7 +525,7 @@ var documenterSearchIndex = {"docs": [
     "page": "riemannianGeometry.jl",
     "title": "Means",
     "category": "section",
-    "text": "Function Description\nmean Weighted Fréchet mean (wFm) of a matrix set using any metric\nmeans as above for several sets at once\ngeneralizedMean Generalized wFm of a matrix set\ngeometricMean wFm of a matrix set according to the Fisher metric (iterative)\nlogdet0Mean wFm of a matrix set according to the logdet0 metric (iterative)\nwasMean wFm of a matrix set according to the Wasserstein metric (iterative)\npowerMean Power wFm of a matrix set (iterative)⋅mean\nmeans\ngeneralizedMean\ngeometricMean\nlogdet0Mean\nwasMean\npowerMean"
+    "text": "Function Description\nmean Weighted Fréchet mean (wFm) of a matrix set using any metric\nmeans As above for several sets at once\ngeneralizedMean Generalized wFm of a matrix set\ngeometricMean wFm of a matrix set according to the Fisher metric (iterative)\nlogdet0Mean wFm of a matrix set according to the logdet0 metric (iterative)\nwasMean wFm of a matrix set according to the Wasserstein metric (iterative)\npowerMean Power wFm of a matrix set (iterative)⋅mean\nmeans\ngeneralizedMean\ngeometricMean\nlogdet0Mean\nwasMean\npowerMean"
 },
 
 {
@@ -913,6 +913,38 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "classification/#",
+    "page": "classification.jl",
+    "title": "classification.jl",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "classification/#classification.jl-1",
+    "page": "classification.jl",
+    "title": "classification.jl",
+    "category": "section",
+    "text": "Unit for classification and related functions.Category Output\n1. Probability functions taking probabilities as input or output"
+},
+
+{
+    "location": "classification/#PosDefManifold.softmax",
+    "page": "classification.jl",
+    "title": "PosDefManifold.softmax",
+    "category": "function",
+    "text": "softmax(χ::Vector{T}) where T<:Real\n\nGiven a real vector of k non-negative scores χ=c_1c_k,  return the vector π=p_1p_k of their  softmax probabilities,  as per\n\np_i=fractextrme^c_isum_i=1^ktextrme^c_i.\n\nExamples\n\nχ=[1.0, 2.3, 0.4, 5.0]\nπ=softmax(χ)\n\n\n\n\n\n"
+},
+
+{
+    "location": "classification/#Probability-1",
+    "page": "classification.jl",
+    "title": "Probability",
+    "category": "section",
+    "text": "Function Description\nsoftmax compute softmax probabilitiesDocumentation:softmax"
+},
+
+{
     "location": "test/#",
     "page": "test.jl",
     "title": "test.jl",
@@ -925,7 +957,7 @@ var documenterSearchIndex = {"docs": [
     "page": "test.jl",
     "title": "test.jl",
     "category": "section",
-    "text": "Most functions in PosDefManifold are tested, both for real and complex data input. This unit declares the function testall() that performs all tests.Some functions are fully tested, the others are just executed. Unce you ran it, for each method of each function, a ⭐ sign is printed if the test is succesful, while a ⛔ sign is printed if the test is not succesful. a ☆ sign is printed if the function has been executed correctly. If there are fails, the concerned functions will be listed as Warnings.The first time you execute the test it will take some time."
+    "text": "Most functions in PosDefManifold are tested, both for real and complex data input. This unit declares the function testall() that performs all tests.Some functions are fully tested, the others are just executed. Unce you ran it, for each method of each function, a ⭐ sign is printed if the test is succesful, while a ⛔ sign is printed if the test is not succesful. A ☆ sign is printed if the function has been executed correctly.If there are fails, the concerned functions will be listed as Warnings.The first time you execute the test it will take some time."
 },
 
 ]}
