@@ -529,7 +529,6 @@ tr(H::Union{ℍ, 𝕄}, D::𝔻{T}) where T<:Real = tr(D, H)
     q1 ≈ q2 ? println(" ⭐ ") : println(" ⛔ ")
 
 """
-
 quadraticForm(v::Vector{T}, P::ℍ{T}) where T<:Real = quadraticForm(v, 𝕃(P))
 
 quadraticForm(v::Vector{T}, X::𝕄{T}, forceLower::Bool) where T<: Real = forceLower==true ? quadraticForm(v, 𝕃(X)) : v'*X*v
