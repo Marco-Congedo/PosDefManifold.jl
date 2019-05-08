@@ -293,7 +293,7 @@ var documenterSearchIndex = {"docs": [
     "page": "MainModule (PosDefManifold.jl)",
     "title": "aliases",
     "category": "section",
-    "text": "alias Julia function in Package tab-completition REPL support\n𝚺 sum Base \\bfSigma ⛔\n𝛍 mean Statistics \\bfmu ⛔\n𝕄 Matrix Base \\bbM ⛔\n𝔻 Diagonal LinearAlgebra \\bbD ⛔\nℍ Hermitian LinearAlgebra \\bbH ✓\n𝕃 LowerTriangular LinearAlgebra \\bbH ⛔All packages above are built-in julia packages."
+    "text": "alias Julia function in Package tab-completition REPL support\n𝚺 sum Base \\bfSigma ⛔\n𝛍 mean Statistics \\bfmu ⛔\n𝕄 Matrix Base \\bbM ⛔\n𝔻 Diagonal LinearAlgebra \\bbD ⛔\nℍ Hermitian LinearAlgebra \\bbH ✓\n𝕃 LowerTriangular LinearAlgebra \\bbH ⛔\n❗ Threads.@threads Base.Threads  ✓All packages above are built-in julia packages."
 },
 
 {
