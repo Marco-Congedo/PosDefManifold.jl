@@ -39,6 +39,8 @@ The main module does not contains functions, but it declares all **constant**,
 |`𝔻`|[`Diagonal`](https://bit.ly/2Jovxf8)|LinearAlgebra| \bbD | ⛔ |
 |`ℍ`|[`Hermitian`](https://bit.ly/2JOiROX)|LinearAlgebra| \bbH | ✓ |
 |`𝕃`|[`LowerTriangular`](https://docs.julialang.org/en/v1/stdlib/LinearAlgebra/#LinearAlgebra.LowerTriangular)|LinearAlgebra| \bbH | ⛔ |
+|`❗`|[`Threads.@threads`](https://docs.julialang.org/en/v1/base/multi-threading/#Base.Threads.@threads)|Base.Threads| | ✓ |
+
 
 
 All packages above are built-in julia packages.

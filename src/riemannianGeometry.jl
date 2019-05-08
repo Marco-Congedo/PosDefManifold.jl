@@ -466,6 +466,44 @@ distanceSqrMat(metric::Metric, 𝐏::ℍVector) = distanceSqrMat(metric, 𝐏, F
 distance²Mat=distanceSqrMat
 
 
+
+# create t=nthreads() ranges partitioning the columns of a lower triangular
+# matrix {strictly lower is strictlyLower=true} in such a way that the t ranges
+# comprise a number of elements of the matrix as similar as possible to each other.
+# The long line in the function is the zero of the derivative of the cost
+# function [n(x+1)+x(x+1)/2-n(n+1)/2t]²
+# { [n(x+1)+x(x+1)/2-n(n+1)/2t]² if the matrix is strictly lower triangular },
+# where n(x+1)+x(x+1)/2 {nx+x(x+1)/2} is the number of elements in the
+# first x columns and n(n+1)/2t {n(n-1)/2t} is the average number of
+# elements in t partitions.
+# Such derivative is used iteratively to find all the t ranges
+# This function returns an array of t ranges indexing the columns of the partitions.
+# Example: _partitionTril4threads(20) # using t=4 threads
+# outputs ranges 1:2, 3:5, 6:10, 11:20, comprising, respectively
+# 39, 51, 54, 55 elements of a 20x20 lower triangular matrix,
+# which has 190 elements (expected number of elements per partition=190/4=47.5)
+# Usage: looping over columns of a trianguar matrix L of dimension nxn:
+# ranges=_partitionTril4threads(n)
+# Threads.@threads for r=1:length(ranges) for k in ranges[r] ... end end
+function _partitionTril4threads(n::Int, strictlyLower::Bool=false)
+    thr=nthreads()
+    n<thr ? thr=n : nothing
+    ranges=Vector(undef, thr)
+    (a, b, i, k) = 4n^2, 4n, 1, 0
+    strictlyLower ? b=-b : nothing
+    for r=1:thr-1
+        t = thr-r+1
+        j=Int(round(max(-((sqrt((a+b+1)t^2+(-a-b)t)+(-2n+1)t)/(2t)), 1)))
+        k+=j
+        ranges[r]=i:k
+        i=k+1
+    end
+    ranges[thr]=i:n
+    return ranges
+end
+
+
+
 """
 ```
     (1) distanceSqrMat⏩(metric::Metric, 𝐏::ℍVector)
@@ -482,48 +520,37 @@ distance²Mat=distanceSqrMat
 function distanceSqrMat⏩(metric::Metric, 𝐏::ℍVector, type::Type{T}) where T<:AbstractFloat
     n, k=_attributes(𝐏)
     △=𝕃{type}(diagm(0 => zeros(k)))
+    R=_partitionTril4threads(k, true) # ranges
+    m=length(R)
 
     if      metric == invEuclidean
             𝐏𝓲=ℍVector(undef, k)
-            Threads.@threads for j=1:k 𝐏𝓲[j]=inv(𝐏[j]) end
-            Threads.@threads for j=1:k-1 for i=j+1:k △[i, j]=ss(ℍ(𝐏𝓲[i] - 𝐏𝓲[j])) end end
+            @threads for j=1:k 𝐏𝓲[j]=inv(𝐏[j]) end
+            @threads for r=1:m for j in R[r], i=j+1:k △[i, j]=ss(ℍ(𝐏𝓲[i] - 𝐏𝓲[j])) end end
 
     elseif  metric == logEuclidean
             𝐏𝓵=ℍVector(undef, k)
-            Threads.@threads for j=1:k 𝐏𝓵[j]=log(𝐏[j]) end
-            Threads.@threads for j=1:k-1 for i=j+1:k △[i, j]=ss(ℍ(𝐏𝓵[i] - 𝐏𝓵[j])) end end
+            @threads for j=1:k 𝐏𝓵[j]=log(𝐏[j]) end
+            @threads for r=1:m for j in R[r], i=j+1:k △[i, j]=ss(ℍ(𝐏𝓵[i] - 𝐏𝓵[j])) end end
 
-    elseif  metric == ChoEuclidean
-            𝐏L=ℍVector(undef, k)
-            for j=1:k 𝐏L[j]=choL(𝐏[j]) end
-            Threads.@threads for j=1:k-1 for i=j+1:k △[i, j]=ss(𝐏L[i] - 𝐏L[j]) end end
-
-    elseif  metric==logCholesky
-            𝐏L=ℍVector(undef, k)
-            for j=1:k 𝐏L[j]=choL(𝐏[j]) end
-            Threads.@threads for j=1:k-1 for i=j+1:k △[i, j]=sst(tril(𝐏L[i], -1)-tril(𝐏L[j], -1), -1) + ssd(𝑓𝔻(log, 𝐏L[i])-𝑓𝔻(log, 𝐏L[j])) end end
+    elseif  metric in (ChoEuclidean, logCholesky, VonNeumann)
+            @warn("in RiemannianGeometry.distanceSqrMat⏩ function
+                            (PosDefManifold Package): the chosen 'metric' is not supported")
 
     elseif  metric==Jeffrey
             𝐏𝓲=ℍVector(undef, k)
-            Threads.@threads for j=1:k 𝐏𝓲[j]=inv(𝐏[j]) end
-            Threads.@threads for j=1:k-1 for i=j+1:k △[i, j]=0.5(tr(𝐏𝓲[j], 𝐏[i]) + tr(𝐏𝓲[i], 𝐏[j])) - n end end
-
-    elseif  metric==VonNeumann  # using formula: tr( PlogP + QLoqQ - PlogQ - QlogP)/2
-            𝐏𝓵=ℍVector(undef, k)
-            for j=1:k 𝐏𝓵[j]=log(𝐏[j]) end
-            ℒ=ℍVector(undef, k)
-            for j=1:k ℒ[j]=𝐏[j]*log(𝐏[j]) end
-            Threads.@threads for j=1:k-1 for i=j+1:k △[i, j]=0.5real(tr(ℒ[i])+tr(ℒ[j])-tr(𝐏[i], 𝐏𝓵[j])-tr(𝐏[j], 𝐏𝓵[i])) end end
+            @threads for j=1:k 𝐏𝓲[j]=inv(𝐏[j]) end
+            @threads for r=1:m for j in R[r], i=j+1:k △[i, j]=0.5(tr(𝐏𝓲[j], 𝐏[i]) + tr(𝐏𝓲[i], 𝐏[j])) - n end end
 
     elseif  metric==Wasserstein
             𝐏½=ℍVector(undef, k)
-            Threads.@threads for j=1:k 𝐏½[j]=sqrt(𝐏[j]) end
-            Threads.@threads for j=1:k-1 for i=j+1:k △[i, j]=tr(𝐏[i]) + tr(𝐏[j]) -2tr(sqrt(ℍ(𝐏½[i] * 𝐏[j] * 𝐏½[i]))) end end
+            @threads for j=1:k 𝐏½[j]=sqrt(𝐏[j]) end
+            @threads for r=1:m for j in R[r], i=j+1:k △[i, j]=tr(𝐏[i]) + tr(𝐏[j]) -2tr(sqrt(ℍ(𝐏½[i] * 𝐏[j] * 𝐏½[i]))) end end
 
-     elseif  metric in (Euclidean, Fisher, logdet0)
-             Threads.@threads for j in 1:k-1 for i in j+1:k △[i, j]=distanceSqr(metric, 𝐏[i], 𝐏[j])  end end
+     elseif metric in (Euclidean, Fisher, logdet0)
+            @threads for r=1:m for j in R[r], i=j+1:k △[i, j]=distanceSqr(metric, 𝐏[i], 𝐏[j]) end end
 
-     else    @warn("in RiemannianGeometryP.distanceSqrMat or .distanceMat function
+     else   @warn("in RiemannianGeometry.distanceSqrMat or .distanceMat function
                      (PosDefManifold Package): the chosen 'metric' does not exist")
      end # If
 
@@ -1722,15 +1749,15 @@ function matP(ς::Vector)
   n=Int((-1+√(1+8*length(ς)))/2) # Size of the matrix whose vectorization vector v has size length(v)
   S=Matrix{eltype(ς)}(undef, n, n)
   l=0
-  @inbounds for j in 1:n-1
+  for j in 1:n-1
     l=l+1
-    S[j, j]=ς[l]
+    @inbounds S[j, j]=ς[l]
     for i in j+1:n
       l=l+1
-      S[i, j]=invsqrt2*ς[l]
+      @inbounds S[i, j]=invsqrt2*ς[l]
     end
   end
-  S[n, n]=ς[end]
+  @inbounds S[n, n]=ς[end]
   return ℍ(S, :L)
 end
 

@@ -404,7 +404,7 @@ function sumOfSqrTril(X::Union{𝕄, 𝔻, ℍ, 𝕃}, k::Int=0)
     X isa(𝕃) ? range = (1-r:0) : range = (1-r:c-1)
     if k in range
         s=eltype(X)(0)
-        @inbounds for j=1:c, i=max(j-k, 1):r s+=abs2(X[i, j]) end
+        for j=1:c, i=max(j-k, 1):r @inbounds s+=abs2(X[i, j]) end
         return s
     else
         @error "in LinearAmgebraInP.sumOfSqrTRil function: argument k is out of bounds"
