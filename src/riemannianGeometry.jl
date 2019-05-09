@@ -1133,6 +1133,8 @@ end # function
     (2) geometricMean(𝐃::𝔻Vector;
                      <w::Vector=[], ✓w=true, init=nothing, tol::Real=0, ⍰=false>)
 
+ **alias**: `gmean`
+
  (1) Given a 1d array ``𝐏={P_1,...,P_k}`` of ``k`` positive definite matrices of
  [ℍVector type](@ref) and optional non-negative real weights vector ``w={w_1,...,w_k}``,
  return the 3-tuple ``(G, iter, conv)``, where ``G`` is the mean according
@@ -1203,18 +1205,32 @@ end # function
 """
 function geometricMean(𝐏::ℍVector;
                        w::Vector=[], ✓w=true, init=nothing, tol::Real=0, ⍰=false)
-    (maxiter, iter, conv, oldconv) = 500, 1, 0., maxpos
-    n, k = _attributes(𝐏)
+    (maxiter, iter, conv, oldconv, (n, k)) = 500, 1, 0., maxpos, _attributes(𝐏)
+    multiThreaded=false; if k>2 && nthreads() > 1 multiThreaded=true end
+    tol==0 ? tolerance = √eps(real(eltype(𝐏[1])))*1e2 : tolerance = tol
     isempty(w) ? v=[] : v = _getWeights(w, ✓w, k)
     init == nothing ? M = mean(logEuclidean, 𝐏; w=v, ✓w=false) : M = ℍ(init)
     💡 = similar(M, eltype(M))
-    tol==0 ? tolerance = √eps(real(eltype(𝐏[1])))*1e2 : tolerance = tol
-    ⍰ && @info("Iterating geometricMean Fixed-Point...")
+    if multiThreaded S, 𝐐 = similar(M, eltype(M)), similar(𝐏) end
+    ⍰ && multiThreaded && @info("Iterating multi-threaded geometricMean Fixed-Point...")
+    ⍰ && !multiThreaded && @info("Iterating geometricMean Fixed-Point...")
 
     while true
         M½, M⁻½=pow(M, 0.5, -0.5)
         #M -< M^1/2 {  exp[epsilon( 1/n{sum(i=1 to n) ln(M^-1/2 Mi M^-1/2)} )] } M^1/2
-        isempty(w) ? 💡 = ℍ(M½*exp(ℍ(𝛍(log(ℍ(M⁻½*P*M⁻½)) for P in 𝐏)))*M½) : 💡 = ℍ(M½*exp(ℍ(𝚺(ω * log(ℍ(M⁻½*P*⁻M½)) for (ω, P) in zip(v, 𝐏))))*M½)
+        if multiThreaded
+          if isempty(w)
+            @threads for i=1:k 𝐐[i] = log(ℍ(M⁻½*𝐏[i]*M⁻½)) end
+            S=ℍ(𝛍(𝐐))
+          else
+            @threads for i=1:k 𝐐[i] = v[i]*log(ℍ(M⁻½*𝐏[i]*M⁻½)) end
+            S=ℍ(𝚺(𝐐))
+          end
+          💡 = ℍ(M½*exp(S)*M½)
+        else
+            isempty(w) ? 💡 = ℍ(M½*exp(ℍ(𝛍(log(ℍ(M⁻½*P*M⁻½)) for P in 𝐏)))*M½) : 💡 = ℍ(M½*exp(ℍ(𝚺(ω * log(ℍ(M⁻½*P*⁻M½)) for (ω, P) in zip(v, 𝐏))))*M½)
+        end
+
         conv = √norm(💡-M)/norm(M)
         ⍰ && println("iteration: ", iter, "; convergence: ", conv)
         (diverging = conv > oldconv) && ⍰ && @warn("geometricMean diverged at:", iter)
@@ -1227,11 +1243,12 @@ function geometricMean(𝐏::ℍVector;
     return (💡, iter, conv)
 end
 
+
 geometricMean(𝐃::𝔻Vector;
               w::Vector=[], ✓w=true, init=nothing, tol::Real=0, ⍰=false) =
               mean(logEuclidean, 𝐃; w=v, ✓w=false), 1, 0
 
-
+gMean=geometricMean
 
 """
     (1) logdet0Mean(𝐏::ℍVector;

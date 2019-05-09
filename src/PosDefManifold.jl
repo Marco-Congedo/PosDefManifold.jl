@@ -12,13 +12,14 @@ module PosDefManifold
 
 using LinearAlgebra, Statistics, Base.Threads
 
-# Special instructions
+# Special instructions and variables
 BLAS.set_num_threads(Sys.CPU_THREADS)
 
 # constants
 const sqrt2=√2
 const invsqrt2=1/sqrt2
 const maxpos=1e15
+
 
 # aliases
 𝚺 = sum                 # tab-completition: \bfSigma
@@ -142,7 +143,7 @@ export
     mean,
     means,
     generalizedMean,
-    geometricMean,
+    geometricMean, gMean,
     logdet0Mean,
     wasMean,
     powerMean,

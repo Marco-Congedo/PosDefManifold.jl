@@ -29,6 +29,7 @@ The main module does not contains functions, but it declares all **constant**,
 |`invsqrt2`|1/√2 | 0.7071067811865475 |
 |`maxpos`| 1e15 | 100000000000000|
 
+
 ### aliases
 
 | alias   | Julia function | in Package | tab-completition | REPL support |
