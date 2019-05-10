@@ -73,7 +73,7 @@ spectralEmbedding
 | [`means`](@ref) | As above for several sets at once |
 | [`generalizedMean`](@ref) | Generalized wFm of a matrix set |
 | [`geometricMean`](@ref), `gMean` | wFm of a matrix set according to the Fisher metric (iterative)|
-| [`logdet0Mean`](@ref) | wFm of a matrix set according to the logdet0 metric (iterative)|
+| [`logdet0Mean`](@ref), `ld0Mean` | wFm of a matrix set according to the logdet0 metric (iterative)|
 | [`wasMean`](@ref) | wFm of a matrix set according to the Wasserstein metric (iterative)|
 | [`powerMean`](@ref) | Power wFm of a matrix set (iterative)|
 

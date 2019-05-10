@@ -117,35 +117,32 @@ function geodesic(metric::Metric, P::ℍ, Q::ℍ, a::Real)
     if a ≈ 1 return Q end
     b = 1-a
 
-    if      metric==Euclidean
-    return  Pb + Qa
+    if      metric==Euclidean return P*b + Q*a
 
-    elseif  metric==invEuclidean
-    return  inv( ℍ(inv(P)b + inv(Q)a) )
+    elseif  metric==invEuclidean return inv( ℍ(inv(P)b + inv(Q)a) )
 
-    elseif  metric==logEuclidean
-    return  ℍ( exp( ℍ(log(P)b + log(Q)a) ) )
+    elseif  metric==logEuclidean return ℍ( exp( ℍ(log(P)b + log(Q)a) ) )
 
     elseif  metric==Fisher
             P½, P⁻½ = pow(P, 0.5, -0.5)
-    return  ℍ( P½ * (P⁻½ * Q * P⁻½)^a * P½ )
+            return ℍ( P½ * (P⁻½ * Q * P⁻½)^a * P½ )
 
     elseif  metric in (logdet0, Jeffrey)
-    return  mean(metric, ℍVector([P, Q]), w=[b, a], ✓w=false)
+            return mean(metric, ℍVector([P, Q]), w=[b, a], ✓w=false)
 
     elseif  metric==VonNeumann
             @warn("An expression for the geodesic is not available for the Von Neumann metric")
 
     elseif  metric==ChoEuclidean
             Z=choL(P)b + choL(Q)a
-    return  ℍ(Z*Z')
+            return ℍ(Z*Z')
 
     elseif  metric==logCholesky
             LP=choL(P)
             LQ=choL(Q)
             slLP=tril(LP,-1)
             Z=slLP + a*(tril(LQ,-1)-slLP) +𝑓𝔻(x->x, LP)*exp((𝑓𝔻(log, LQ)a-𝑓𝔻(log, LP)))
-    return  ℍ(Z*Z')
+            return ℍ(Z*Z')
 
     elseif  metric==Wasserstein
             if isreal(P) && isreal(Q)
@@ -159,25 +156,26 @@ function geodesic(metric::Metric, P::ℍ, Q::ℍ, a::Real)
 end # function
 
 function geodesic(metric::Metric, D::𝔻{T}, E::𝔻{T}, a::Real) where T<:Real
-    if a ≈ 0 return D end
-    if a ≈ 1 return E end
+    if      a ≈ 0 return D end
+    if      a ≈ 1 return E end
     b = 1-a
-    if      metric==Euclidean    return  Db + Ea
-    elseif  metric==invEuclidean return  inv( inv(D)b + inv(E)a )
+    if      metric==Euclidean    return D*b + E*a
+    elseif  metric==invEuclidean return inv( inv(D)b + inv(E)a )
     elseif  metric in (Fisher,
-                 logEuclidean)   return  exp( log(D)b + log(E)a )
+                 logEuclidean)   return exp( log(D)b + log(E)a )
     elseif  metric in (logdet0,
-                       Jeffrey)  return  mean(metric, 𝔻Vector([D, E]), w=[b, a], ✓w=false)
+                       Jeffrey)  return mean(metric, 𝔻Vector([D, E]), w=[b, a], ✓w=false)
     elseif  metric==VonNeumann
             @warn("An expression for the geodesic is not available for the Von neumann metric")
     elseif  metric==ChoEuclidean
-            Z=(√D)b + (√E)a;     return  Z*Z
+            Z=(√D)b + (√E)a;     return Z*Z
     elseif  metric==logCholesky # ???
             LD=sqrt(D)
             LE=sqrt(E)
             Z=𝑓𝔻(x->x, LD)*exp((𝑓𝔻(log, LE)a-𝑓𝔻(log, LD)))
-                                 return  Z*Z
-    elseif  metric==Wasserstein  return (b^2)D + (a^2)E + (a*b)(D*E)
+                                 return Z*Z
+    elseif  metric==Wasserstein
+                                 return (b^2)D + (a^2)E + (a*b)(D*E)
     else    @warn("in RiemannianGeometryP.geodesic function
                  (PosDefManifold Package): the chosen 'metric' does not exist")
     end # if
@@ -271,18 +269,18 @@ end # function
 
 """
 function distanceSqr(metric::Metric, P::ℍ)
-    if      metric==Euclidean       return  ss(P-I)
-    elseif  metric==invEuclidean    return  ss(inv(P)-I)
+    if      metric==Euclidean       return ss(P-I)
+    elseif  metric==invEuclidean    return ss(inv(P)-I)
     elseif  metric in (logEuclidean,
-                       Fisher)      return  𝚺(log.(eigvals(P)).^2)
-    elseif  metric==logdet0         return  real(logdet(0.5(P+I)) - 0.5logdet(P))
-    elseif  metric==ChoEuclidean    return  ss(choL(P)-I)
+                       Fisher)      return 𝚺(log.(eigvals(P)).^2)
+    elseif  metric==logdet0         return real(logdet(0.5(P+I)) - 0.5logdet(P))
+    elseif  metric==ChoEuclidean    return ss(choL(P)-I)
     elseif  metric==logCholesky
-            LP=choL(P);             return  sst(LP, -1) + ssd(𝑓𝔻(log, LP))
-    elseif  metric==Jeffrey         return  0.5(tr(P) + tr(inv(P))) - size(P, 1)
+            LP=choL(P);             return sst(LP, -1) + ssd(𝑓𝔻(log, LP))
+    elseif  metric==Jeffrey         return 0.5(tr(P) + tr(inv(P))) - size(P, 1)
     elseif  metric==VonNeumann
-            𝓵P=ℍ(log(P));           return  0.5(tr(P, 𝓵P) - tr(𝓵P))
-    elseif  metric==Wasserstein     return  tr(P) + size(P, 1) - 2tr(sqrt(P))
+            𝓵P=ℍ(log(P));           return 0.5(tr(P, 𝓵P) - tr(𝓵P))
+    elseif  metric==Wasserstein     return tr(P) + size(P, 1) - 2tr(sqrt(P))
     else    @warn("in RiemannianGeometryP.distanceSqr function
              (PosDefManifold Package): the chosen 'metric' does not exist")
     end # if
@@ -423,36 +421,36 @@ function distanceSqrMat(metric::Metric, 𝐏::ℍVector, type::Type{T}) where T<
     △=𝕃{type}(diagm(0 => zeros(k)))
 
     if      metric == invEuclidean
-            𝐏𝓲=[inv(P) for P in 𝐏]
+            𝐏𝓲=map(inv, 𝐏)
             for j=1:k-1, i=j+1:k △[i, j]=ss(ℍ(𝐏𝓲[i] - 𝐏𝓲[j]))  end
 
     elseif  metric == logEuclidean
-            𝐏𝓵=[log(P) for P in 𝐏]
+            𝐏𝓵=map(log, 𝐏)
             for j=1:k-1, i=j+1:k △[i, j]=ss(ℍ(𝐏𝓵[i] - 𝐏𝓵[j]))  end
 
     elseif  metric == ChoEuclidean
-            𝐏L=[choL(P) for P in 𝐏]
+            𝐏L=map(choL, 𝐏)
             for j=1:k-1, i=j+1:k △[i, j]=ss(𝐏L[i] - 𝐏L[j])  end
 
     elseif  metric==logCholesky
-            𝐏L=[choL(P) for P in 𝐏]
+            𝐏L=map(choL, 𝐏)
             for j=1:k-1, i=j+1:k △[i, j]=sst(tril(𝐏L[i], -1)-tril(𝐏L[j], -1), -1) + ssd(𝑓𝔻(log, 𝐏L[i])-𝑓𝔻(log, 𝐏L[j])) end
 
     elseif  metric==Jeffrey
-            𝐏𝓲=[inv(P) for P in 𝐏]
+            𝐏𝓲=map(inv, 𝐏)
             for j=1:k-1, i=j+1:k △[i, j]=0.5(tr(𝐏𝓲[j], 𝐏[i]) + tr(𝐏𝓲[i], 𝐏[j])) - n end
 
     elseif  metric==VonNeumann  # using formula: tr( PlogP + QLoqQ - PlogQ - QlogP)/2
-            𝐏𝓵=[ℍ(log(P))  for P in 𝐏] # delete ℍ()?
+            𝐏𝓵=[ℍ(log(P)) for P in 𝐏] # delete ℍ()?
             ℒ=[P*log(P) for P in 𝐏]
             for j=1:k-1, i=j+1:k △[i, j]=0.5real(tr(ℒ[i])+tr(ℒ[j])-tr(𝐏[i], 𝐏𝓵[j])-tr(𝐏[j], 𝐏𝓵[i])) end
 
     elseif  metric==Wasserstein
-            𝐏½=[sqrt(P) for P in 𝐏]
+            𝐏½=map(sqrt, 𝐏)
             for j=1:k-1, i=j+1:k △[i, j]=tr(𝐏[i]) + tr(𝐏[j]) -2tr(sqrt(ℍ(𝐏½[i] * 𝐏[j] * 𝐏½[i]))) end
 
-     elseif  metric in (Euclidean, Fisher, logdet0)
-             for j in 1:k-1, i in j+1:k △[i, j]=distanceSqr(metric, 𝐏[i], 𝐏[j])  end
+     elseif metric in (Euclidean, Fisher, logdet0)
+            for j in 1:k-1, i in j+1:k △[i, j]=distanceSqr(metric, 𝐏[i], 𝐏[j])  end
 
      else    @warn("in RiemannianGeometryP.distanceSqrMat or .distanceMat function
                      (PosDefManifold Package): the chosen 'metric' does not exist")
@@ -907,53 +905,45 @@ mean(metric::Metric, D::𝔻{T}, E::𝔻{T}) where T<:Real = geodesic(metric, D,
 function mean(metric::Metric, 𝐏::ℍVector;
               w::Vector=[], ✓w=true)
     # iterative solutions
-    if      metric == Fisher
-            (G, iter, conv)=geometricMean(𝐏; w=w, ✓w=✓w)
-            return G
-    elseif  metric == logdet0
-            (G, iter, conv)=logdet0Mean(𝐏; w=w, ✓w=✓w)
-            return G
-    elseif  metric == Wasserstein
-            (G, iter, conv)=wasMean(𝐏; w=w, ✓w=✓w)
-            return G
-    end
+    if  metric == Fisher
+            (G, iter, conv)=gMean(𝐏; w=w, ✓w=✓w); return G end
+    if  metric == logdet0
+            (G, iter, conv)=logdet0Mean(𝐏; w=w, ✓w=✓w); return G end
+    if  metric == Wasserstein
+            (G, iter, conv)=wasMean(𝐏; w=w, ✓w=✓w); return G end
 
-    # closed-form expressions
+    # closed-form expressions and exit
     n, k = _attributes(𝐏)
     isempty(w) ? nothing : v = _getWeights(w, ✓w, k)
 
     if  metric == Euclidean
-        if isempty(w)   return ℍ(𝛍(𝐏))
-        else            return ℍ(𝚺(ω*P for (ω, P) in zip(v, 𝐏)))
-        end
+        isempty(w) ? ℍ(𝛍(𝐏)) : ℍ(𝚺(map(*, v, 𝐏)))
+
     elseif metric == invEuclidean
-        if isempty(w)   return inv(ℍ(𝛍(inv, 𝐏)))
-        else            return inv(ℍ(𝚺(ω*inv(P) for (ω, P) in zip(v, 𝐏))))
-        end
+        isempty(w) ? inv(ℍ(𝛍(inv, 𝐏))) : inv(ℍ(𝚺(map(*, v, map(inv, 𝐏)))))
+
     elseif metric == logEuclidean
-        if isempty(w)   return ℍ(exp(ℍ(𝛍(log, 𝐏))))
-        else            return ℍ(exp(ℍ(𝚺(ω*log(P) for (ω, P) in zip(v, 𝐏)))))
-        end
+        isempty(w) ? ℍ(exp(ℍ(𝛍(log, 𝐏)))) : ℍ(exp(ℍ(𝚺(map(*, v, map(log, 𝐏))))))
+
     elseif metric == ChoEuclidean
-        if isempty(w)   L = 𝛍(choL, 𝐏)
-        else            L = 𝚺(ω*choL(P) for (ω, P) in zip(v, 𝐏))
-        end
-        return ℍ(L*L')
+        isempty(w) ? L = 𝛍(choL, 𝐏) : L = 𝚺(map(*, v, map(choL, 𝐏)))
+        ℍ(L*L')
+
     elseif metric == logCholesky
-        L𝐏=[choL(P) for P in 𝐏]
+        L𝐏=map(choL, 𝐏)
         if isempty(w)
-            Z=𝛍(tril(L,-1) for L in L𝐏) + exp(mean(𝑓𝔻(log, L) for L in L𝐏))
+            Z=𝛍(tril(L,-1) for L in L𝐏) + exp(𝛍(𝑓𝔻(log, L) for L in L𝐏))
         else
             Z=𝚺(ω*tril(L,-1) for (ω, L) in zip(v, L𝐏)) + exp(𝚺(ω*𝑓𝔻(log, L) for (ω, L) in zip(v, L𝐏)))
         end
-        return ℍ(Z*Z')
+        ℍ(Z*Z')
+
     elseif metric == Jeffrey
-        P=mean(Euclidean, 𝐏; w=w, ✓w=✓w)
-        Q=mean(invEuclidean, 𝐏; w=w, ✓w=✓w)
-        P½, P⁻½=pow(P, 0.5, -0.5)
-        return ℍ(P½ * sqrt(ℍ(P⁻½ * Q * P⁻½)) * P½)
+        mean(Fisher, mean(Euclidean, 𝐏; w=w, ✓w=✓w), mean(invEuclidean, 𝐏; w=w, ✓w=✓w))
+
     elseif metric == VonNeumann
         @warn "function RiemannianGeometryP.mean and .geodesic not defined for metric $metric"
+
     else
         @warn "in RiemannianGeometryP.mean function: the chosen 'metric' does not exist"
     end # if metric
@@ -963,36 +953,33 @@ end # function
 function mean(metric::Metric, 𝐃::𝔻Vector;
               w::Vector=[], ✓w=true)
     # iterative solutions
-    if      metric == logdet0
-            (G, iter, conv)=logdet0Mean(𝐃; w=w, ✓w=✓w)
-            return G
+    if metric == logdet0
+            (G, iter, conv)=logdet0Mean(𝐃; w=w, ✓w=✓w); return G end
 
-    # closed-form expressions
     isempty(w) ? nothing : v = _getWeights(w, ✓w, k)
-    elseif metric == Euclidean
-        if isempty(w)   return 𝛍(𝐃)
-        else            return 𝚺(ω*D for (ω, D) in zip(v, 𝐃))
-        end
+    # closed-form expressions and exit
+    if     metric == Euclidean
+        isempty(w) ? 𝛍(𝐃) : 𝚺(map(*, v, 𝐃))
+
     elseif metric == invEuclidean
-        if isempty(w)   return inv(𝛍(inv, 𝐃))
-        else            return inv(𝚺(ω*inv(D) for (ω, D) in zip(v, 𝐃)))
-        end
+        isempty(w) ? inv(𝛍(inv, 𝐃)) : inv(𝚺(map(*, v, map(inv, 𝐃))))
+
     elseif metric in (logEuclidean, Fisher, logCholesky)
-        if isempty(w)   return exp(𝛍(log, 𝐃))
-        else            return exp(𝚺(ω*log(D) for (ω, D) in zip(v, 𝐃)))
-        end
+        isempty(w) ? exp(𝛍(log, 𝐃)) : exp(𝚺(map(*, v, map(log, 𝐃))))
+
     elseif metric == ChoEuclidean
-        if isempty(w)   L = 𝛍(sqrt, 𝐃)
-        else            L = 𝚺(ω*sqrt(D) for (ω, D) in zip(v, 𝐃))
-        end
-        return L*L
+        isempty(w) ? L = 𝛍(sqrt, 𝐃) : L = 𝚺(map(*, v, map(sqrt, 𝐃)))
+        L*L
+
     elseif metric == Jeffrey
         D=mean(Euclidean, 𝐃; w=w, ✓w=✓w)
-        E=mean(invEuclidean, 𝐃; w=w, ✓w=✓w)
-        return D*((inv(D)*E)^0.5)
+        D*((inv(D)*mean(invEuclidean, 𝐃; w=w, ✓w=✓w))^0.5)
+
     elseif metric == VonNeumann
         @warn "function RiemannianGeometryP.mean and .geodesic not defined for metric $metric"
-    elseif  metric == Wasserstein return generalizedMean(𝐃, 0.5; w=w, ✓w=✓w)
+
+    elseif  metric == Wasserstein generalizedMean(𝐃, 0.5; w=w, ✓w=✓w)
+
     else
         @warn "in RiemannianGeometryP.mean function: the chosen 'metric' does not exist"
     end # if metric
@@ -1111,16 +1098,16 @@ means(metric::Metric, 𝒟::𝔻Vector₂)=𝔻Vector([mean(metric, 𝐃) for �
 function generalizedMean(𝐏::Union{ℍVector, 𝔻Vector}, p::Real;
                          w::Vector=[], ✓w=true)
     𝐏[1] isa 𝔻 ? 𝕋=𝔻 : 𝕋=ℍ
-    if     p == -1 return mean(invEuclidean, 𝐏; w=w, ✓w=✓w)
-    elseif p ==  0 return mean(logEuclidean, 𝐏; w=w, ✓w=✓w)
-    elseif p ==  1 return mean(Euclidean, 𝐏;    w=w, ✓w=✓w)
+    if     p == -1 mean(invEuclidean, 𝐏; w=w, ✓w=✓w)
+    elseif p ==  0 mean(logEuclidean, 𝐏; w=w, ✓w=✓w)
+    elseif p ==  1 mean(Euclidean, 𝐏;    w=w, ✓w=✓w)
     else
         n, k=_attributes(𝐏)
         if isempty(w)
-            return 𝕋(𝛍(P^p for P in 𝐏))^(1/p)
+            𝕋(𝛍(P^p for P in 𝐏))^(1/p)
         else
             v=_getWeights(w, ✓w, k)
-            return 𝕋(𝚺(ω*P^p for (ω, P) in zip(v, 𝐏)))^(1/p)
+            𝕋(𝚺(ω*P^p for (ω, P) in zip(v, 𝐏)))^(1/p)
         end # if w
     end # if p
 end # function
@@ -1128,7 +1115,7 @@ end # function
 
 """
     (1) geometricMean(𝐏::ℍVector;
-                     <w::Vector=[], ✓w=true, init=nothing, tol::Real=0, ⍰=false>)
+                     <w::Vector=[], ✓w=true, init=nothing, tol::Real=0, ⍰=false, ⏩=false>)
 
     (2) geometricMean(𝐃::𝔻Vector;
                      <w::Vector=[], ✓w=true, init=nothing, tol::Real=0, ⍰=false>)
@@ -1162,6 +1149,12 @@ end # function
  - `init` is a matrix to be used as initialization for the mean. If no matrix is provided, the [log Euclidean](@ref) mean will be used,
  - `tol` is the tolerance for the convergence (see below).
  - if `⍰` is true, the convergence attained at each iteration is printed.
+ - if ⏩=true the iterations are multi-threaded.
+
+!!! warning "Multi-Threading"
+    [Multi-threading](https://docs.julialang.org/en/v1/manual/parallel-computing/#Multi-Threading-(Experimental)-1)
+    is still experimental in julia. You should check that you obtain a correct
+    result.
 
 !!! note "Nota Bene"
     In normal circumstances this algorithm converges monothonically.
@@ -1204,9 +1197,10 @@ end # function
 
 """
 function geometricMean(𝐏::ℍVector;
-                       w::Vector=[], ✓w=true, init=nothing, tol::Real=0, ⍰=false)
+         w::Vector=[], ✓w=true, init=nothing, tol::Real=0, ⍰=false, ⏩=false)
     (maxiter, iter, conv, oldconv, (n, k)) = 500, 1, 0., maxpos, _attributes(𝐏)
-    multiThreaded=false; if k>2 && nthreads() > 1 multiThreaded=true end
+    multiThreaded=false
+    ⏩ && k>2 && nthreads() > 1 ? multiThreaded=true : multiThreaded=false
     tol==0 ? tolerance = √eps(real(eltype(𝐏[1])))*1e2 : tolerance = tol
     isempty(w) ? v=[] : v = _getWeights(w, ✓w, k)
     init == nothing ? M = mean(logEuclidean, 𝐏; w=v, ✓w=false) : M = ℍ(init)
@@ -1219,16 +1213,20 @@ function geometricMean(𝐏::ℍVector;
         M½, M⁻½=pow(M, 0.5, -0.5)
         #M -< M^1/2 {  exp[epsilon( 1/n{sum(i=1 to n) ln(M^-1/2 Mi M^-1/2)} )] } M^1/2
         if multiThreaded
-          if isempty(w)
-            @threads for i=1:k 𝐐[i] = log(ℍ(M⁻½*𝐏[i]*M⁻½)) end
-            S=ℍ(𝛍(𝐐))
-          else
-            @threads for i=1:k 𝐐[i] = v[i]*log(ℍ(M⁻½*𝐏[i]*M⁻½)) end
-            S=ℍ(𝚺(𝐐))
-          end
-          💡 = ℍ(M½*exp(S)*M½)
+            if isempty(w)
+                @threads for i=1:k 𝐐[i] = log(ℍ(M⁻½*𝐏[i]*M⁻½)) end
+                S=ℍ(𝛍(𝐐))
+            else
+                @threads for i=1:k 𝐐[i] = v[i]*log(ℍ(M⁻½*𝐏[i]*M⁻½)) end
+                S=ℍ(𝚺(𝐐))
+            end
+            💡 = ℍ(M½*exp(S)*M½)
         else
-            isempty(w) ? 💡 = ℍ(M½*exp(ℍ(𝛍(log(ℍ(M⁻½*P*M⁻½)) for P in 𝐏)))*M½) : 💡 = ℍ(M½*exp(ℍ(𝚺(ω * log(ℍ(M⁻½*P*⁻M½)) for (ω, P) in zip(v, 𝐏))))*M½)
+            if isempty(w)
+                💡 = ℍ(M½*exp(ℍ(𝛍(log(ℍ(M⁻½*P*M⁻½)) for P in 𝐏)))*M½)
+            else
+                💡 = ℍ(M½*exp(ℍ(𝚺(ω * log(ℍ(M⁻½*P*⁻M½)) for (ω, P) in zip(v, 𝐏))))*M½)
+            end
         end
 
         conv = √norm(💡-M)/norm(M)
@@ -1256,6 +1254,8 @@ gMean=geometricMean
 
     (2) logdet0Mean(𝐃::𝔻Vector;
                    <w::Vector=[], ✓w=true, init=nothing, tol::Real=0, ⍰=false>)
+
+ **alias**: `ld0Mean`
 
  (1) Given a 1d array ``𝐏={P_1,...,P_k}`` of ``k`` positive definite matrices of
  [ℍVector type](@ref) and optional non-negative real weights vector ``w={w_1,...,w_k}``,
@@ -1355,6 +1355,8 @@ function logdet0Mean(𝐏::Union{ℍVector, 𝔻Vector};
 
     return (💡, iter, conv)
 end
+
+ld0Mean=logdet0Mean
 
 
 """
