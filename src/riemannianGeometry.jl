@@ -1198,9 +1198,10 @@ end # function
 """
 function geometricMean(𝐏::ℍVector;
          w::Vector=[], ✓w=true, init=nothing, tol::Real=0, ⍰=false, ⏩=false)
-    (maxiter, iter, conv, oldconv, (n, k)) = 500, 1, 0., maxpos, _attributes(𝐏)
-    multiThreaded=false
-    ⏩ && k>2 && nthreads() > 1 ? multiThreaded=true : multiThreaded=false
+
+    (maxiter, iter, conv, oldconv) = 500, 1, 0., maxpos
+    (n, k) = _attributes(𝐏)
+    multiThreaded=false; ⏩ && k>2 && nthreads() > 1 ? multiThreaded=true : nothing
     tol==0 ? tolerance = √eps(real(eltype(𝐏[1])))*1e2 : tolerance = tol
     isempty(w) ? v=[] : v = _getWeights(w, ✓w, k)
     init == nothing ? M = mean(logEuclidean, 𝐏; w=v, ✓w=false) : M = ℍ(init)
@@ -1225,7 +1226,7 @@ function geometricMean(𝐏::ℍVector;
             if isempty(w)
                 💡 = ℍ(M½*exp(ℍ(𝛍(log(ℍ(M⁻½*P*M⁻½)) for P in 𝐏)))*M½)
             else
-                💡 = ℍ(M½*exp(ℍ(𝚺(ω * log(ℍ(M⁻½*P*⁻M½)) for (ω, P) in zip(v, 𝐏))))*M½)
+                💡 = ℍ(M½*exp(ℍ(𝚺(ω * log(ℍ(M⁻½*P*M⁻½)) for (ω, P) in zip(v, 𝐏))))*M½)
             end
         end
 
