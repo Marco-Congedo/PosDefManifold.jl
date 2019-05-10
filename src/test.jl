@@ -429,7 +429,7 @@ function tests();
             𝐃H=Vector{Hermitian}(undef, k)
             for i=1:k 𝐃H[i]=Hermitian(Matrix(𝐃[i])) end
             D2=mean(m, 𝐃H)
-            norm(D1-D2)/k<0.0001 ? OK() : OH(name*" Real Diagonal Input, metric "*string(m))
+            norm(𝕄(D1)-𝕄(D2))/k<0.0001 ? OK() : OH(name*" Real Diagonal Input, metric "*string(m))
         end
     end
 

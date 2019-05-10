@@ -216,12 +216,15 @@ To see the list of metrics in type Metric use:
 #### BLAS routines
 Some functions in **PosDefManifold** call BLAS routines for optimal performnce.
 This is reported in the help section of the concerned functions.
-When this is the case, you can set the number of threads
+In most functions julia calls BLAS routines automatically.
+You can set the number of threads
 the BLAS library should use by:
 
     using LinearAlgebra
     BLAS.set_num_threads(n)
 
 where `n` is the number of threads.
-By default, **PosDefManifold** employs all CPU threads available
-on your computer (i.e., the output of `Sys.CPU_THREADS`).
+By default, **PosDefManifold** reserves to BLAS
+all CPU threads available on your computer (i.e., the output of `Sys.CPU_THREADS`) minus Threads.nthreads().
+See this [post](https://discourse.julialang.org/t/issue-number-of-threads/14593), this [post](https://discourse.julialang.org/t/customize-number-of-threads-interactively/11574/2) and julia
+[doc on threads](https://docs.julialang.org/en/v1/manual/parallel-computing/#Multi-Threading-(Experimental)-1).

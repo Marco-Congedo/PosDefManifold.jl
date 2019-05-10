@@ -13,7 +13,7 @@ module PosDefManifold
 using LinearAlgebra, Statistics, Base.Threads
 
 # Special instructions and variables
-BLAS.set_num_threads(Sys.CPU_THREADS)
+BLAS.set_num_threads(Sys.CPU_THREADS-Threads.nthreads())
 
 # constants
 const sqrt2=√2
@@ -144,7 +144,7 @@ export
     means,
     generalizedMean,
     geometricMean, gMean,
-    logdet0Mean,
+    logdet0Mean, ld0Mean,
     wasMean,
     powerMean,
     logMap,
