@@ -150,7 +150,7 @@ function geodesic(metric::Metric, P::ℍ, Q::ℍ, a::Real)
             else    return ℍ( (b^2)*P + (a^2)*Q + (a*b)*(√(P*Q)+√(Q*P)) )
             end
 
-    else    @warn("in RiemannianGeometryP.geodesic function
+    else    @error("in RiemannianGeometryP.geodesic function
                  (PosDefManifold Package): the chosen 'metric' does not exist")
     end # if
 end # function
@@ -166,7 +166,7 @@ function geodesic(metric::Metric, D::𝔻{T}, E::𝔻{T}, a::Real) where T<:Real
     elseif  metric in (logdet0,
                        Jeffrey)  return mean(metric, 𝔻Vector([D, E]), w=[b, a], ✓w=false)
     elseif  metric==VonNeumann
-            @warn("An expression for the geodesic is not available for the Von neumann metric")
+            @warn("An expression for the geodesic is not available for the Von Neumann metric")
     elseif  metric==ChoEuclidean
             Z=(√D)b + (√E)a;     return Z*Z
     elseif  metric==logCholesky # ???
@@ -176,7 +176,7 @@ function geodesic(metric::Metric, D::𝔻{T}, E::𝔻{T}, a::Real) where T<:Real
                                  return Z*Z
     elseif  metric==Wasserstein
                                  return (b^2)D + (a^2)E + (a*b)(D*E)
-    else    @warn("in RiemannianGeometryP.geodesic function
+    else    @error("in RiemannianGeometryP.geodesic function
                  (PosDefManifold Package): the chosen 'metric' does not exist")
     end # if
 end # function
@@ -281,7 +281,7 @@ function distanceSqr(metric::Metric, P::ℍ)
     elseif  metric==VonNeumann
             𝓵P=ℍ(log(P));           return 0.5(tr(P, 𝓵P) - tr(𝓵P))
     elseif  metric==Wasserstein     return tr(P) + size(P, 1) - 2tr(sqrt(P))
-    else    @warn("in RiemannianGeometryP.distanceSqr function
+    else    @error("in RiemannianGeometryP.distanceSqr function
              (PosDefManifold Package): the chosen 'metric' does not exist")
     end # if
 end #function
@@ -299,7 +299,7 @@ function distanceSqr(metric::Metric, D::𝔻{T}) where T<:Real
     elseif  metric==VonNeumann
             𝓵D=log(D);               return  0.5(tr(D*𝓵D) - tr(𝓵D))
     elseif  metric==Wasserstein      return  tr(D) + size(D, 1) - 2tr(sqrt(D))
-    else    @warn("in RiemannianGeometryP.distanceSqr function
+    else    @error("in RiemannianGeometryP.distanceSqr function
              (PosDefManifold Package): the chosen 'metric' does not exist")
     end # if
 end #function
@@ -320,7 +320,7 @@ function distanceSqr(metric::Metric, P::ℍ, Q::ℍ)
             R=log(P)-log(Q);     return  0.5real( tr(P, R) - tr(Q, R) )  # (tr(P(logP - LoqQ)) - tr(Q(logP - LoqQ)))/2
     elseif  metric==Wasserstein
             P½=sqrt(P);          return  tr(P) + tr(Q) - 2real(tr(sqrt(ℍ(P½ * Q * P½))))
-    else    @warn("in RiemannianGeometryP.distanceSqr function
+    else    @error("in RiemannianGeometryP.distanceSqr function
                     (PosDefManifold Package): the chosen 'metric' does not exist")
     end #if
 end # function
@@ -338,7 +338,7 @@ function distanceSqr(metric::Metric, D::𝔻{T}, E::𝔻{T}) where T<:Real
     elseif  metric==VonNeumann
             R=log(D)-log(E);     return  0.5(tr(D * R) - tr(E * R))
     elseif  metric==Wasserstein  return  tr(D) + tr(E) - 2tr(sqrt(D*E))
-    else    @warn("in RiemannianGeometryP.distanceSqr function
+    else    @error("in RiemannianGeometryP.distanceSqr function
                     (PosDefManifold Package): the chosen 'metric' does not exist")
     end #if
 end # function
@@ -378,93 +378,6 @@ distance(metric::Metric, D::𝔻{T}, E::𝔻{T}) where T<:Real = √(distanceSqr
 # 3. Inter-distance matrix, Laplacian and Spectral Embedding
 # -----------------------------------------------------------
 
-"""
-    (1) distanceSqrMat(metric::Metric, 𝐏::ℍVector)
-    (2) distanceSqrMat(metric::Metric, 𝐏::ℍVector, type::Type{T}) where T<:AbstractFloat
-
- **alias**: `distance²Mat`
-
- Given a 1d array ``𝐏`` of ``k`` positive definite matrices
- ``{P_1,...,P_k}`` of [ℍVector type](@ref), create the ``k⋅k`` real
- `LowerTriangular` matrix comprising elements ``δ^2(P_i, P_j)\\textrm{, for all }i>=j``.
-
- This is the lower triangular matrix holding all *squared inter-distances*
- (zero on diagonal), using the
- specified `metric`, of type [Metric::Enumerated type](@ref),
- giving rise to distance function ``δ``. See [`distanceSqr`](@ref).
-
- Only the lower triangular part is computed in order to optimize memory use.
-
- By default, the result matrix is of type `Float32`. The type can be changed
- to another real `type` using method (2).
-
- **See**: [distance](@ref).
-
- **See also**: [`laplacian`](@ref), [`laplacianEigenMaps`](@ref), [`spectralEmbedding`](@ref).
-
- ## Examples
-    using PosDefManifold
-    # Generate a set of 4 random 10x10 SPD matrices
-    Pset=randP(10, 4) # or, using unicode: 𝐏=randP(10, 4)
-    # Compute the squared inter-distance matrix according to the log Euclidean metric.
-    # This is much faster as compared to the Fisher metric and in general
-    # it is a good approximation.
-    Dsqr=distanceSqrMat(logEuclidean, Pset)
-    # or, using unicode: Δ²=distanceSqrMat(logEuclidean, 𝐏)
-
-    # return a matrix of type Float64
-    DsqrF64=distanceSqrMat(logEuclidean, Pset, Float64)
-
-"""
-function distanceSqrMat(metric::Metric, 𝐏::ℍVector, type::Type{T}) where T<:AbstractFloat
-    n, k=_attributes(𝐏)
-    △=𝕃{type}(diagm(0 => zeros(k)))
-
-    if      metric == invEuclidean
-            𝐏𝓲=map(inv, 𝐏)
-            for j=1:k-1, i=j+1:k △[i, j]=ss(ℍ(𝐏𝓲[i] - 𝐏𝓲[j]))  end
-
-    elseif  metric == logEuclidean
-            𝐏𝓵=map(log, 𝐏)
-            for j=1:k-1, i=j+1:k △[i, j]=ss(ℍ(𝐏𝓵[i] - 𝐏𝓵[j]))  end
-
-    elseif  metric == ChoEuclidean
-            𝐏L=map(choL, 𝐏)
-            for j=1:k-1, i=j+1:k △[i, j]=ss(𝐏L[i] - 𝐏L[j])  end
-
-    elseif  metric==logCholesky
-            𝐏L=map(choL, 𝐏)
-            for j=1:k-1, i=j+1:k △[i, j]=sst(tril(𝐏L[i], -1)-tril(𝐏L[j], -1), -1) + ssd(𝑓𝔻(log, 𝐏L[i])-𝑓𝔻(log, 𝐏L[j])) end
-
-    elseif  metric==Jeffrey
-            𝐏𝓲=map(inv, 𝐏)
-            for j=1:k-1, i=j+1:k △[i, j]=0.5(tr(𝐏𝓲[j], 𝐏[i]) + tr(𝐏𝓲[i], 𝐏[j])) - n end
-
-    elseif  metric==VonNeumann  # using formula: tr( PlogP + QLoqQ - PlogQ - QlogP)/2
-            𝐏𝓵=[ℍ(log(P)) for P in 𝐏] # delete ℍ()?
-            ℒ=[P*log(P) for P in 𝐏]
-            for j=1:k-1, i=j+1:k △[i, j]=0.5real(tr(ℒ[i])+tr(ℒ[j])-tr(𝐏[i], 𝐏𝓵[j])-tr(𝐏[j], 𝐏𝓵[i])) end
-
-    elseif  metric==Wasserstein
-            𝐏½=map(sqrt, 𝐏)
-            for j=1:k-1, i=j+1:k △[i, j]=tr(𝐏[i]) + tr(𝐏[j]) -2tr(sqrt(ℍ(𝐏½[i] * 𝐏[j] * 𝐏½[i]))) end
-
-     elseif metric in (Euclidean, Fisher, logdet0)
-            for j in 1:k-1, i in j+1:k △[i, j]=distanceSqr(metric, 𝐏[i], 𝐏[j])  end
-
-     else    @warn("in RiemannianGeometryP.distanceSqrMat or .distanceMat function
-                     (PosDefManifold Package): the chosen 'metric' does not exist")
-     end # If
-
-     return △
-end #function
-
-distanceSqrMat(metric::Metric, 𝐏::ℍVector) = distanceSqrMat(metric, 𝐏, Float32)
-
-distance²Mat=distanceSqrMat
-
-
-
 # create t=nthreads() ranges partitioning the columns of a lower triangular
 # matrix {strictly lower is strictlyLower=true} in such a way that the t ranges
 # comprise a number of elements of the matrix as similar as possible to each other.
@@ -501,68 +414,162 @@ function _partitionTril4threads(n::Int, strictlyLower::Bool=false)
 end
 
 
+"""
+    (1) distanceSqrMat(metric::Metric, 𝐏::ℍVector;
+                                        <⏩=false>)
+    (2) distanceSqrMat(type::Type{T}, metric::Metric, 𝐏::ℍVector;
+                                        <⏩=false>) where T<:AbstractFloat
+
+ **alias**: `distance²Mat`
+
+ Given a 1d array ``𝐏`` of ``k`` positive definite matrices
+ ``{P_1,...,P_k}`` of [ℍVector type](@ref), create the ``k⋅k`` real
+ `LowerTriangular` matrix comprising elements ``δ^2(P_i, P_j)\\textrm{, for all }i>=j``.
+
+ This is the lower triangular matrix holding all *squared inter-distances*
+ (zero on diagonal), using the
+ specified `metric`, of type [Metric::Enumerated type](@ref),
+ giving rise to distance function ``δ``. See [`distanceSqr`](@ref).
+
+ Only the lower triangular part is computed in order to optimize memory use.
+
+ By default, the result matrix is of type `Float32`. The type can be changed
+ to another real `type` using method (2).
+
+ <optional keyword arguments>:
+ - if ⏩=true the computation of inter-distances is multi-threaded.
+
+!!! warning "Multi-Threading"
+    [Multi-threading](https://docs.julialang.org/en/v1/manual/parallel-computing/#Multi-Threading-(Experimental)-1)
+    is still experimental in julia. You should check the result on each computer.
+    Multi-threading is automatically disabled if `k<4` or if Julia
+    uses only one thread. See [Threads](@ref).
+
+ **See**: [distance](@ref).
+
+ **See also**: [`laplacian`](@ref), [`laplacianEigenMaps`](@ref), [`spectralEmbedding`](@ref).
+
+ ## Examples
+    using PosDefManifold
+    # Generate a set of 8 random 10x10 SPD matrices
+    Pset=randP(10, 8) # or, using unicode: 𝐏=randP(10, 8)
+    # Compute the squared inter-distance matrix according to the log Euclidean metric.
+    # This is much faster as compared to the Fisher metric and in general
+    # it is a good approximation.
+    Dsqr=distanceSqrMat(logEuclidean, Pset)
+    # or, using unicode: Δ²=distanceSqrMat(logEuclidean, 𝐏)
+
+    # return a matrix of type Float64
+    Dsqr64=distanceSqrMat(Float64, logEuclidean, Pset)
+
+    # Multi-threaded
+    Dsqr=distanceSqrMat(Fisher, Pset; ⏩=true)
+
 
 """
-```
-    (1) distanceSqrMat⏩(metric::Metric, 𝐏::ℍVector)
-    (2) distanceSqrMat⏩(metric::Metric, 𝐏::ℍVector, type::Type{T}) where T<:AbstractFloat
-```
- **alias**: `distance²Mat⏩`
+function distanceSqrMat(type::Type{T}, metric::Metric, 𝐏::ℍVector;
+                                 ⏩=false) where T<:AbstractFloat
+   n, k=_attributes(𝐏)
+   △=𝕃{type}(diagm(0 => zeros(k)))
+   ⏩ && k>3 && nthreads() > 1 ? threaded=true : threaded=false
+   if threaded R=_partitionTril4threads(k, true); m=length(R) end # ranges
 
- Multi-threaded version of [`distanceSqrMat`](@ref), called with the same syntax therein.
+   if     metric == invEuclidean
+       if threaded
+           𝐏𝓲=ℍVector(undef, k)
+           @threads for j=1:k 𝐏𝓲[j]=inv(𝐏[j]) end
+           @threads for r=1:m for j in R[r], i=j+1:k △[i, j]=ss(ℍ(𝐏𝓲[i] - 𝐏𝓲[j])) end end
+       else
+           𝐏𝓲=map(inv, 𝐏)
+           for j=1:k-1, i=j+1:k △[i, j]=ss(ℍ(𝐏𝓲[i] - 𝐏𝓲[j]))  end
+       end
 
- This function is still experimental and is not tested in the [test.jl](@ref)
- unit. You should check the result against the `distanceSqrMat` function.
+   elseif metric == logEuclidean
+       if threaded
+           𝐏𝓵=ℍVector(undef, k)
+           @threads for j=1:k 𝐏𝓵[j]=ℍ(log(𝐏[j])) end
+           @threads for r=1:m for j in R[r], i=j+1:k △[i, j]=ss(ℍ(𝐏𝓵[i] - 𝐏𝓵[j])) end end
+       else
+           𝐏𝓵=map(log, 𝐏)
+           for j=1:k-1, i=j+1:k △[i, j]=ss(ℍ(𝐏𝓵[i] - 𝐏𝓵[j]))  end
+       end
 
- """
-function distanceSqrMat⏩(metric::Metric, 𝐏::ℍVector, type::Type{T}) where T<:AbstractFloat
-    n, k=_attributes(𝐏)
-    △=𝕃{type}(diagm(0 => zeros(k)))
-    R=_partitionTril4threads(k, true) # ranges
-    m=length(R)
+   elseif metric == ChoEuclidean
+       if threaded
+           𝐏L=𝕃Vector(undef, k)
+           @threads for j=1:k 𝐏L[j]=choL(𝐏[j]) end
+           @threads for r=1:m for j in R[r], i=j+1:k △[i, j]=ss(𝐏L[i] - 𝐏L[j]) end end
+       else
+           𝐏L=map(choL, 𝐏)
+           for j=1:k-1, i=j+1:k △[i, j]=ss(𝐏L[i] - 𝐏L[j])  end
+       end
 
-    if      metric == invEuclidean
-            𝐏𝓲=ℍVector(undef, k)
-            @threads for j=1:k 𝐏𝓲[j]=inv(𝐏[j]) end
-            @threads for r=1:m for j in R[r], i=j+1:k △[i, j]=ss(ℍ(𝐏𝓲[i] - 𝐏𝓲[j])) end end
+   elseif metric==logCholesky
+       if threaded
+           𝐏L=𝕃Vector(undef, k)
+           @threads for j=1:k 𝐏L[j]=choL(𝐏[j]) end
+           @threads for r=1:m for j in R[r], i=j+1:k △[i, j]=sst(tril(𝐏L[i], -1)-tril(𝐏L[j], -1), -1) + ssd(𝑓𝔻(log, 𝐏L[i])-𝑓𝔻(log, 𝐏L[j])) end end
+       else
+           𝐏L=map(choL, 𝐏)
+           for j=1:k-1, i=j+1:k △[i, j]=sst(tril(𝐏L[i], -1)-tril(𝐏L[j], -1), -1) + ssd(𝑓𝔻(log, 𝐏L[i])-𝑓𝔻(log, 𝐏L[j])) end
+       end
 
-    elseif  metric == logEuclidean
-            𝐏𝓵=ℍVector(undef, k)
-            @threads for j=1:k 𝐏𝓵[j]=log(𝐏[j]) end
-            @threads for r=1:m for j in R[r], i=j+1:k △[i, j]=ss(ℍ(𝐏𝓵[i] - 𝐏𝓵[j])) end end
+   elseif metric==Jeffrey
+       if threaded
+           𝐏𝓲=ℍVector(undef, k)
+           @threads for j=1:k 𝐏𝓲[j]=inv(𝐏[j]) end
+           @threads for r=1:m for j in R[r], i=j+1:k △[i, j]=0.5(tr(𝐏𝓲[j], 𝐏[i]) + tr(𝐏𝓲[i], 𝐏[j])) - n end end
+       else
+           𝐏𝓲=map(inv, 𝐏)
+           for j=1:k-1, i=j+1:k △[i, j]=0.5(tr(𝐏𝓲[j], 𝐏[i]) + tr(𝐏𝓲[i], 𝐏[j])) - n end
+       end
 
-    elseif  metric in (ChoEuclidean, logCholesky, VonNeumann)
-            @warn("in RiemannianGeometry.distanceSqrMat⏩ function
-                            (PosDefManifold Package): the chosen 'metric' is not supported")
+   elseif metric==VonNeumann  # using formula: tr( PlogP + QLoqQ - PlogQ - QlogP)/2
+       if threaded
+           𝐏𝓵=ℍVector(undef, k)
+           v=Vector(undef, k)
+           @threads for j=1:k 𝐏𝓵[j]=ℍ(log(𝐏[j])); v[j]=tr(𝐏[j], 𝐏𝓵[j]) end
+           @threads for r=1:m for j in R[r], i=j+1:k △[i, j]=0.5*real(v[i]+v[j]-tr(𝐏[i], 𝐏𝓵[j])-tr(𝐏[j], 𝐏𝓵[i])) end end
+       else
+           𝐏𝓵=[ℍ(log(P)) for P in 𝐏]
+           v=[tr(𝐏[i], 𝐏𝓵[i]) for i=1:length(𝐏)]
+           for j=1:k-1, i=j+1:k △[i, j]=0.5real(v[i]+v[j]-tr(𝐏[i], 𝐏𝓵[j])-tr(𝐏[j], 𝐏𝓵[i])) end
+       end
 
-    elseif  metric==Jeffrey
-            𝐏𝓲=ℍVector(undef, k)
-            @threads for j=1:k 𝐏𝓲[j]=inv(𝐏[j]) end
-            @threads for r=1:m for j in R[r], i=j+1:k △[i, j]=0.5(tr(𝐏𝓲[j], 𝐏[i]) + tr(𝐏𝓲[i], 𝐏[j])) - n end end
+   elseif metric==Wasserstein
+       if threaded
+           𝐏½=ℍVector(undef, k)
+           @threads for j=1:k 𝐏½[j]=sqrt(𝐏[j]) end
+           @threads for r=1:m for j in R[r], i=j+1:k △[i, j]=tr(𝐏[i]) + tr(𝐏[j]) -2tr(sqrt(ℍ(𝐏½[i] * 𝐏[j] * 𝐏½[i]))) end end
+       else
+           𝐏½=map(sqrt, 𝐏)
+           for j=1:k-1, i=j+1:k △[i, j]=tr(𝐏[i]) + tr(𝐏[j]) -2tr(sqrt(ℍ(𝐏½[i] * 𝐏[j] * 𝐏½[i]))) end
+       end
 
-    elseif  metric==Wasserstein
-            𝐏½=ℍVector(undef, k)
-            @threads for j=1:k 𝐏½[j]=sqrt(𝐏[j]) end
-            @threads for r=1:m for j in R[r], i=j+1:k △[i, j]=tr(𝐏[i]) + tr(𝐏[j]) -2tr(sqrt(ℍ(𝐏½[i] * 𝐏[j] * 𝐏½[i]))) end end
+   elseif metric in (Euclidean, Fisher, logdet0)
+       if threaded
+           @threads for r=1:m for j in R[r], i=j+1:k △[i, j]=distanceSqr(metric, 𝐏[i], 𝐏[j]) end end
+       else
+           for j in 1:k-1, i in j+1:k △[i, j]=distanceSqr(metric, 𝐏[i], 𝐏[j])  end
+       end
 
-     elseif metric in (Euclidean, Fisher, logdet0)
-            @threads for r=1:m for j in R[r], i=j+1:k △[i, j]=distanceSqr(metric, 𝐏[i], 𝐏[j]) end end
-
-     else   @warn("in RiemannianGeometry.distanceSqrMat or .distanceMat function
+   else   @error("in RiemannianGeometryP.distanceSqrMat or .distanceMat function
                      (PosDefManifold Package): the chosen 'metric' does not exist")
-     end # If
+   end # If metric
 
-     return △
+   return △
 end #function
 
-distanceSqrMat⏩(metric::Metric, 𝐏::ℍVector) = distanceSqrMat⏩(metric, 𝐏, Float32)
+distanceSqrMat(metric::Metric, 𝐏::ℍVector; ⏩=false) = distanceSqrMat(Float32, metric, 𝐏; ⏩=⏩)
 
-distance²Mat⏩=distanceSqrMat⏩
+distance²Mat=distanceSqrMat
 
 
 """
-    (1) distanceMat(metric::Metric, 𝐏::ℍVector)
-    (2) distanceMat(metric::Metric, 𝐏::ℍVector, type::Type{T}) where T<:AbstractFloat
+    (1) distanceMat(metric::Metric, 𝐏::ℍVector;
+                                    <⏩=true>)
+    (2) distanceMat(type::Type{T}, metric::Metric, 𝐏::ℍVector;
+                                    <⏩=true>) where T<:AbstractFloat
 
  Given a 1d array ``𝐏`` of ``k`` positive definite matrices
  ``{P_1,...,P_k}`` of [ℍVector type](@ref), create the ``k⋅k`` real
@@ -582,6 +589,15 @@ distance²Mat⏩=distanceSqrMat⏩
  The elements of this matrix are the square root of
  [`distanceSqrMat`](@ref).
 
+ <optional keyword arguments>:
+ - if ⏩=true the computation of inter-distances is multi-threaded.
+
+!!! warning "Multi-Threading"
+    [Multi-threading](https://docs.julialang.org/en/v1/manual/parallel-computing/#Multi-Threading-(Experimental)-1)
+    is still experimental in julia. You should check the result on each computer.
+    Multi-threading is automatically disabled if `k<4` or if Julia
+    uses only one thread. See [Threads](@ref).
+
  **See**: [distance](@ref).
 
  ## Examples
@@ -592,13 +608,15 @@ distance²Mat⏩=distanceSqrMat⏩
     # or, using unicode: Δ=distanceMat(Fisher, 𝐏)
 
     # return a matrix of type Float64
-    DsqrF64=distanceMat(Fisher, Pset, Float64)
+    D64=distanceMat(Float64, Fisher, Pset)
+
+    # Multi-threaded
+    D64=distanceMat(Fisher, Pset; ⏩=true)
 
 """
-distanceMat(metric::Metric, 𝐏::ℍVector, type::Type{T}) where T<:AbstractFloat =
-            sqrt.(distanceSqrMat(metric, 𝐏, type))
+distanceMat(type::Type{T}, metric::Metric, 𝐏::ℍVector; ⏩=false) where T<:AbstractFloat = sqrt.(distanceSqrMat(type, metric, 𝐏; ⏩=⏩))
 
-distanceMat(metric::Metric, 𝐏::ℍVector)=sqrt.(distanceSqrMat(metric, 𝐏))
+distanceMat(metric::Metric, 𝐏::ℍVector; ⏩=false)=sqrt.(distanceSqrMat(metric, 𝐏, ⏩=⏩))
 
 
 
@@ -917,17 +935,20 @@ function mean(metric::Metric, 𝐏::ℍVector;
     isempty(w) ? nothing : v = _getWeights(w, ✓w, k)
 
     if  metric == Euclidean
-        isempty(w) ? ℍ(𝛍(𝐏)) : ℍ(𝚺(map(*, v, 𝐏)))
+        if isempty(w)   return ℍ(𝛍(𝐏))
+        else            return ℍ(𝚺(map(*, v, 𝐏))) end
 
     elseif metric == invEuclidean
-        isempty(w) ? inv(ℍ(𝛍(inv, 𝐏))) : inv(ℍ(𝚺(map(*, v, map(inv, 𝐏)))))
+        if isempty(w)   return inv(ℍ(𝛍(inv, 𝐏)))
+        else            return inv(ℍ(𝚺(map(*, v, map(inv, 𝐏))))) end
 
     elseif metric == logEuclidean
-        isempty(w) ? ℍ(exp(ℍ(𝛍(log, 𝐏)))) : ℍ(exp(ℍ(𝚺(map(*, v, map(log, 𝐏))))))
+        if isempty(w)   return ℍ(exp(ℍ(𝛍(log, 𝐏))))
+        else            return ℍ(exp(ℍ(𝚺(map(*, v, map(log, 𝐏)))))) end
 
     elseif metric == ChoEuclidean
         isempty(w) ? L = 𝛍(choL, 𝐏) : L = 𝚺(map(*, v, map(choL, 𝐏)))
-        ℍ(L*L')
+        return ℍ(L*L')
 
     elseif metric == logCholesky
         L𝐏=map(choL, 𝐏)
@@ -936,16 +957,16 @@ function mean(metric::Metric, 𝐏::ℍVector;
         else
             Z=𝚺(ω*tril(L,-1) for (ω, L) in zip(v, L𝐏)) + exp(𝚺(ω*𝑓𝔻(log, L) for (ω, L) in zip(v, L𝐏)))
         end
-        ℍ(Z*Z')
+        return ℍ(Z*Z')
 
     elseif metric == Jeffrey
-        mean(Fisher, mean(Euclidean, 𝐏; w=w, ✓w=✓w), mean(invEuclidean, 𝐏; w=w, ✓w=✓w))
+        return mean(Fisher, mean(Euclidean, 𝐏; w=w, ✓w=✓w), mean(invEuclidean, 𝐏; w=w, ✓w=✓w))
 
     elseif metric == VonNeumann
         @warn "function RiemannianGeometryP.mean and .geodesic not defined for metric $metric"
 
     else
-        @warn "in RiemannianGeometryP.mean function: the chosen 'metric' does not exist"
+        @error "in RiemannianGeometryP.mean function: the chosen 'metric' does not exist"
     end # if metric
 end # function
 
@@ -956,20 +977,21 @@ function mean(metric::Metric, 𝐃::𝔻Vector;
     if metric == logdet0
             (G, iter, conv)=logdet0Mean(𝐃; w=w, ✓w=✓w); return G end
 
+    n, k = _attributes(𝐃)
     isempty(w) ? nothing : v = _getWeights(w, ✓w, k)
     # closed-form expressions and exit
     if     metric == Euclidean
-        isempty(w) ? 𝛍(𝐃) : 𝚺(map(*, v, 𝐃))
+        if isempty(w) return 𝛍(𝐃) else return 𝚺(map(*, v, 𝐃)) end
 
     elseif metric == invEuclidean
-        isempty(w) ? inv(𝛍(inv, 𝐃)) : inv(𝚺(map(*, v, map(inv, 𝐃))))
+        if isempty(w) return inv(𝛍(inv, 𝐃)) else return inv(𝚺(map(*, v, map(inv, 𝐃)))) end
 
     elseif metric in (logEuclidean, Fisher, logCholesky)
-        isempty(w) ? exp(𝛍(log, 𝐃)) : exp(𝚺(map(*, v, map(log, 𝐃))))
+        if isempty(w) return exp(𝛍(log, 𝐃)) else return exp(𝚺(map(*, v, map(log, 𝐃)))) end
 
     elseif metric == ChoEuclidean
         isempty(w) ? L = 𝛍(sqrt, 𝐃) : L = 𝚺(map(*, v, map(sqrt, 𝐃)))
-        L*L
+        return L*L
 
     elseif metric == Jeffrey
         D=mean(Euclidean, 𝐃; w=w, ✓w=✓w)
@@ -981,7 +1003,7 @@ function mean(metric::Metric, 𝐃::𝔻Vector;
     elseif  metric == Wasserstein generalizedMean(𝐃, 0.5; w=w, ✓w=✓w)
 
     else
-        @warn "in RiemannianGeometryP.mean function: the chosen 'metric' does not exist"
+        @error "in RiemannianGeometryP.mean function: the chosen 'metric' does not exist"
     end # if metric
 end # function
 
@@ -1098,16 +1120,16 @@ means(metric::Metric, 𝒟::𝔻Vector₂)=𝔻Vector([mean(metric, 𝐃) for �
 function generalizedMean(𝐏::Union{ℍVector, 𝔻Vector}, p::Real;
                          w::Vector=[], ✓w=true)
     𝐏[1] isa 𝔻 ? 𝕋=𝔻 : 𝕋=ℍ
-    if     p == -1 mean(invEuclidean, 𝐏; w=w, ✓w=✓w)
-    elseif p ==  0 mean(logEuclidean, 𝐏; w=w, ✓w=✓w)
-    elseif p ==  1 mean(Euclidean, 𝐏;    w=w, ✓w=✓w)
+    if     p == -1 return mean(invEuclidean, 𝐏; w=w, ✓w=✓w)
+    elseif p ==  0 return mean(logEuclidean, 𝐏; w=w, ✓w=✓w)
+    elseif p ==  1 return mean(Euclidean, 𝐏;    w=w, ✓w=✓w)
     else
         n, k=_attributes(𝐏)
         if isempty(w)
-            𝕋(𝛍(P^p for P in 𝐏))^(1/p)
+            return 𝕋(𝛍(P^p for P in 𝐏))^(1/p)
         else
             v=_getWeights(w, ✓w, k)
-            𝕋(𝚺(ω*P^p for (ω, P) in zip(v, 𝐏)))^(1/p)
+            return 𝕋(𝚺(ω*P^p for (ω, P) in zip(v, 𝐏)))^(1/p)
         end # if w
     end # if p
 end # function
@@ -1153,8 +1175,9 @@ end # function
 
 !!! warning "Multi-Threading"
     [Multi-threading](https://docs.julialang.org/en/v1/manual/parallel-computing/#Multi-Threading-(Experimental)-1)
-    is still experimental in julia. You should check that you obtain a correct
-    result.
+    is still experimental in julia. You should check the result on each computer.
+    Multi-threading is automatically disabled if `k<3` or if Julia
+    uses only one thread. See [Threads](@ref).
 
 !!! note "Nota Bene"
     In normal circumstances this algorithm converges monothonically.
@@ -1195,25 +1218,31 @@ end # function
     Pset[1]=ℍ(Pset[1]+(randP(3)/100))
     G, iter, conv = geometricMean(Pset; w=weights, ✓w=false, ⍰=true, init=G)
 
+    # run multi-threaded when the number of matrices is high
+    using BenchmarkTools
+    Pset=randP(20, 160)
+    @benchmark(geometricMean(Pset)) # single-threaded
+    @benchmark(geometricMean(Pset; ⏩=true)) # multi-threaded
+
+
 """
 function geometricMean(𝐏::ℍVector;
          w::Vector=[], ✓w=true, init=nothing, tol::Real=0, ⍰=false, ⏩=false)
 
-    (maxiter, iter, conv, oldconv) = 500, 1, 0., maxpos
-    (n, k) = _attributes(𝐏)
-    multiThreaded=false; ⏩ && k>2 && nthreads() > 1 ? multiThreaded=true : nothing
+    (maxiter, iter, conv, oldconv, (n, k)) = 500, 1, 0., maxpos, _attributes(𝐏)
+    ⏩ && k>2 && nthreads() > 1 ? threaded=true : threaded=false
     tol==0 ? tolerance = √eps(real(eltype(𝐏[1])))*1e2 : tolerance = tol
     isempty(w) ? v=[] : v = _getWeights(w, ✓w, k)
-    init == nothing ? M = mean(logEuclidean, 𝐏; w=v, ✓w=false) : M = ℍ(init)
+    init == nothing ? M = mean(Jeffrey, 𝐏; w=v, ✓w=false) : M = ℍ(init)
     💡 = similar(M, eltype(M))
-    if multiThreaded S, 𝐐 = similar(M, eltype(M)), similar(𝐏) end
-    ⍰ && multiThreaded && @info("Iterating multi-threaded geometricMean Fixed-Point...")
-    ⍰ && !multiThreaded && @info("Iterating geometricMean Fixed-Point...")
+    if threaded S, 𝐐 = similar(M, eltype(M)), similar(𝐏) end
+    ⍰ && threaded && @info("Iterating multi-threaded geometricMean Fixed-Point...")
+    ⍰ && !threaded && @info("Iterating geometricMean Fixed-Point...")
 
     while true
         M½, M⁻½=pow(M, 0.5, -0.5)
         #M -< M^1/2 {  exp[epsilon( 1/n{sum(i=1 to n) ln(M^-1/2 Mi M^-1/2)} )] } M^1/2
-        if multiThreaded
+        if threaded
             if isempty(w)
                 @threads for i=1:k 𝐐[i] = log(ℍ(M⁻½*𝐏[i]*M⁻½)) end
                 S=ℍ(𝛍(𝐐))
@@ -1245,7 +1274,7 @@ end
 
 geometricMean(𝐃::𝔻Vector;
               w::Vector=[], ✓w=true, init=nothing, tol::Real=0, ⍰=false) =
-              mean(logEuclidean, 𝐃; w=v, ✓w=false), 1, 0
+              mean(logEuclidean, 𝐃; w=w, ✓w=false), 1, 0
 
 gMean=geometricMean
 

@@ -33,16 +33,25 @@ const maxpos=1e15
 
 RealOrComplex=Union{Real, Complex}
 
-DiagonalVector=Vector{𝔻}        # vector of Diagonal Matrices
-𝔻Vector=DiagonalVector          # alias
-DiagonalVector₂=Vector{𝔻Vector} # vector of vectors of Diagonal matrices
-𝔻Vector₂=DiagonalVector₂        # alias
+MatrixVector=Vector{𝕄}                 # vector of Matrices
+𝕄Vector=MatrixVector                   # alias
+MatrixVector₂=Vector{𝕄Vector}          # vector of vectors of Matrices
+𝕄Vector₂=MatrixVector₂                 # alias
 
-HermitianVector=Vector{ℍ}        # vector of Hermitian matrices
-ℍVector=HermitianVector          # alias
-HermitianVector₂=Vector{ℍVector} # vector of vectors of Hermitian matrices
-ℍVector₂=HermitianVector₂        # alias
+DiagonalVector=Vector{𝔻}               # vector of Diagonal Matrices
+𝔻Vector=DiagonalVector                 # alias
+DiagonalVector₂=Vector{𝔻Vector}        # vector of vectors of Diagonal matrices
+𝔻Vector₂=DiagonalVector₂               # alias
 
+LowerTriangularVector=Vector{𝕃}        # vector of LowerTriangular Matrices
+𝕃Vector=LowerTriangularVector          # alias
+LowerTriangularVector₂=Vector{𝕃Vector} # vector of vectors of Diagonal matrices
+𝕃Vector₂=LowerTriangularVector₂        # alias
+
+HermitianVector=Vector{ℍ}               # vector of Hermitian matrices
+ℍVector=HermitianVector                 # alias
+HermitianVector₂=Vector{ℍVector}        # vector of vectors of Hermitian matrices
+ℍVector₂=HermitianVector₂               # alias
 
 @enum Metric begin
     Euclidean    =  1  # distance: δ_e; mean: Arithmetic
@@ -81,8 +90,12 @@ export
 
     #types
     RealOrComplex,
+    MatrixVector, 𝕄Vector,
+    MatrixVector₂, 𝕄Vector₂,
     DiagonalVector, 𝔻Vector,
     DiagonalVector₂, 𝔻Vector₂,
+    LowerTriangularVector, 𝕃Vector,
+    LowerTriangularVector₂, 𝕃Vector₂,
     HermitianVector, ℍVector,
     HermitianVector₂, ℍVector₂,
     Metric,
@@ -109,7 +122,8 @@ export
     tr,
     quadraticForm, qf,
     fidelity,
-    fDiagonal, 𝑓𝔻,
+    fDiag, 𝑓𝔻,
+    DiagOfProd, dop,
     mgs,
     evd,
     spectralFunctions,
@@ -135,7 +149,6 @@ export
     distanceSqr, distance²,
     distance,
     distanceSqrMat, distance²Mat,
-    distanceSqrMat⏩, distance²Mat⏩,
     distanceMat,
     laplacian,
     laplacianEigenMaps, laplacianEM,
@@ -167,5 +180,14 @@ include("classification.jl")
 include("test.jl")
 
 println("\n⭐ "," Welcome to the PosDefManifold package", " ⭐\n")
+@info(" ")
+println(" Your Machine ",gethostname()," (",Sys.MACHINE, ")")
+println(" runs on kernel ",Sys.KERNEL," with word size ",Sys.WORD_SIZE,".")
+println(" CPU  Threads: ",Sys.CPU_THREADS)
+# Sys.BINDIR # julia bin directory
+println(" Base.Threads: ", "$(Threads.nthreads())")
+println(" BLAS Threads: ", "$(Sys.CPU_THREADS-Threads.nthreads())", "\n")
+
+
 
 end # module

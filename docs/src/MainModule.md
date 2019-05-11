@@ -100,6 +100,23 @@ To see the list of metrics in type Metric use:
 
  This is the Union of Real and Complex Types.
 
+#### 𝕄Vector type
+   `𝕄Vector=Vector{𝕄}`
+
+   This is a vector of general `Matrix` matrices, alias of `MatrixVector`.
+   Julia sees is at: `Array{Array{T,2} where T,1}`.See [aliases](@ref) for the 𝕄 symbol and [typecasting matrices](@ref) for the use of matrices in **PosDefManifold**.
+
+  **𝕄Vector₂ type**
+
+  `𝕄Vector₂=Vector{𝕄Vector}` is a vector of [𝕄Vector type](@ref) objects,
+  i.e., a vector of vectors of Matrices.
+  It is the alias of `MAtrixVector₂`.
+  Julia sees it as: `Array{Array{Array{T,2} where T,1},1}`.
+  Note that `𝕄Vector₂` is not a
+  matrix of matrices since the several `𝕄Vector` objects it holds
+  do not need to have the same length.
+
+
 #### 𝔻Vector type
   `𝔻Vector=Vector{𝔻}`
 
@@ -108,9 +125,28 @@ To see the list of metrics in type Metric use:
 
  **𝔻Vector₂ type**
 
- `𝔻Vector₂=Vector{𝔻Vector}` is a vector of [𝔻Vector type](@ref) objects, i.e., a vector of vectors of `Diagonal` matrices.
+ `𝔻Vector₂=Vector{𝔻Vector}` is a vector of [𝔻Vector type](@ref) objects,
+ i.e., a vector of vectors of `Diagonal` matrices.
  It is the alias of `DiagonalVector₂`.
- Julia sees it as: `Array{Array{Diagonal,1},1}`. Note that `𝔻Vector₂` is not a matrix of Hermitian matrices since the several `ℍVector` objects it holds do not need to have the same length.
+ Julia sees it as: `Array{Array{Diagonal,1},1}`. Note that `𝔻Vector₂` is not a
+ matrix of Diagonal matrices since the several `𝔻Vector` objects it holds
+ do not need to have the same length.
+
+#### 𝕃Vector type
+   `𝕃Vector=Vector{𝕃}`
+
+ This is a vector of `LowerTriangular` matrices, alias of `LowerTriangularVector`.
+ Julia sees is at: `Array{LowerTriangular,1}`.See [aliases](@ref) for the 𝕃
+ symbol and [typecasting matrices](@ref) for the use of LowerTriangular matrices in **PosDefManifold**.
+
+ **𝕃Vector₂ type**
+
+ `𝕃Vector₂=Vector{𝕃Vector}` is a vector of [𝕃Vector type](@ref) objects, i.e.,
+ a vector of vectors of `LowerTriangular` matrices.
+ It is the alias of `LowerTriangularVector₂`.
+ Julia sees it as: `Array{Array{LowerTriangular,1},1}`. Note that `𝔻Vector₂`
+ is not a matrix of LowerTriangular matrices since the several `𝕃Vector`
+ objects it holds do not need to have the same length.
 
 #### ℍVector type
  `ℍVector=Vector{ℍ}`
@@ -213,7 +249,7 @@ To see the list of metrics in type Metric use:
  For example, you can use this to pass a full inter-distance matrix to the [`laplacian`](@ref) function to obtain the Laplacian matrix.
 
 
-#### BLAS routines
+#### Threads
 Some functions in **PosDefManifold** call BLAS routines for optimal performnce.
 This is reported in the help section of the concerned functions.
 In most functions julia calls BLAS routines automatically.
@@ -225,6 +261,11 @@ the BLAS library should use by:
 
 where `n` is the number of threads.
 By default, **PosDefManifold** reserves to BLAS
-all CPU threads available on your computer (i.e., the output of `Sys.CPU_THREADS`) minus Threads.nthreads().
+all CPU threads available on your computer (given by the output of `Sys.CPU_THREADS`) minus the number threads used by Julia
+for multi-threaded computations (given by the output of `Threads.nthreads()`).
+In Linux and OSX this latter number of threads defaults to one and is controlled by an environment variable, i.e.,
+
+   `export JULIA_NUM_THREADS=4`
+
 See this [post](https://discourse.julialang.org/t/issue-number-of-threads/14593), this [post](https://discourse.julialang.org/t/customize-number-of-threads-interactively/11574/2) and julia
 [doc on threads](https://docs.julialang.org/en/v1/manual/parallel-computing/#Multi-Threading-(Experimental)-1).

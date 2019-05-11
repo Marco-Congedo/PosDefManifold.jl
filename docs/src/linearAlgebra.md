@@ -75,12 +75,14 @@ fidelity
 
 | Function   | Description |
 |:----------:|:----------- |
-| [`fDiagonal`](@ref), `𝑓𝔻` | Elemen-wise functions of matrix diagonals|
+| [`fDiag`](@ref), `𝑓𝔻` | Elemen-wise functions of matrix diagonals|
+| [`DiagOfProd`](@ref), `dop` | Diagonal of the product of two matrices|
 
 ⋅
 
 ```@docs
-fDiagonal
+fDiag
+DiagOfProd
 ```
 
 ## Unitary functions of matrices

@@ -97,7 +97,7 @@ tr1(X::𝕄) = X/tr(X)
  Methods (1) and (3) call the
  [BLAS.nrm2](https://docs.julialang.org/en/v1/stdlib/LinearAlgebra/#LinearAlgebra.BLAS.nrm2)
  routine for computing the norm of concerned columns.
- See [BLAS routines](@ref).
+ See [Threads](@ref).
 
 !!! note "Nota Bene"
     Julia does not allow normalizing the columns of `Hermitian` matrices.
@@ -256,7 +256,7 @@ colProd(X::Union{𝕄, ℍ}, Y::Union{𝕄, ℍ}, j::Int, l::Int) =
 
  This function calls the
  [BLAS.nrm2](https://docs.julialang.org/en/v1/stdlib/LinearAlgebra/#LinearAlgebra.BLAS.nrm2)
- routine. See [BLAS routines](@ref).
+ routine. See [Threads](@ref).
 
  **See also**: [`normalizeCol!`](@ref), [`colProd`](@ref), [`sumOfSqr`](@ref).
 
@@ -446,7 +446,7 @@ sst=sumOfSqrTril
 
  **See**: [trace](https://bit.ly/2HoOLiM).
 
- **See also**: [`tr1`](@ref).
+ **See also**: [`DiagOfProd`](@ref), [`tr1`](@ref).
 
  ## Examples
     using PosDefManifold
@@ -457,7 +457,7 @@ sst=sumOfSqrTril
     tr(sqr(P), Q) ≈ tr(P*Q*P) ? println(" ⭐ ") : println(" ⛔ ")
 
 """
-tr(P::ℍ, Q::ℍ) = real(𝚺(colProd(P, Q, i, i) for i=1:size(P, 2)))
+tr(P::ℍ, Q::ℍ) = real(tr(DiagOfProd(P, Q)))
 
 function tr(P::ℍ, Q::𝕄)
     λ = [colProd(P, Q, i, i) for i=1:size(P, 2)]
@@ -577,10 +577,9 @@ end
 ## 4. Diagonal functions of matrices
 #  ---------------------------------
 """
-    (1) fDiagonal(func::Function, X::𝔻, k::Int=0)
-    (2) fDiagonal(func::Function, X::𝕃, k::Int=0)
-    (3) fDiagonal(func::Function, X::Union{𝕄, ℍ}, k::Int=0)
-
+    (1) fDiag(func::Function, X::𝔻, k::Int=0)
+    (2) fDiag(func::Function, X::𝕃, k::Int=0)
+    (3) fDiag(func::Function, X::Union{𝕄, ℍ}, k::Int=0)
 
  **alias**: `𝑓𝔻`
 
@@ -609,26 +608,46 @@ end
     (this includes anonymous functions). If the input matrix is complex, the function `func`
     must be able to support complex arguments.
 
+ **See also**: [`DiagOfProd`](@ref), [`tr`](@ref).
+
  ## Examples
     using PosDefManifold
     P=randP(5) # use P=randP(ComplexF64, 5) for generating an Hermitian matrix
-    D=fDiagonal(inv, P, -1) # diagonal matrix with the inverse of the first sub-diagonal of P
-    (Λ, U) = evd(P)         # Λ holds the eigenvalues of P, see evd
-    Δ=fDiagonal(log, Λ)     # diagonal matrix with the log of the eigenvalues
-    Δ=fDiagonal(x->x^2, Λ)  # using an anonymous function for the square of the eigenvalues
+    D=fDiag(inv, P, -1)   # diagonal matrix with the inverse of the first sub-diagonal of P
+    (Λ, U) = evd(P)       # Λ holds the eigenvalues of P, see evd
+    Δ=fDiag(log, Λ)       # diagonal matrix with the log of the eigenvalues
+    Δ=fDiag(x->x^2, Λ)    # using an anonymous function for the square of the eigenvalues
 """
-fDiagonal(func::Function, X::𝔻, k::Int=0) = func.(X)
+fDiag(func::Function, X::𝔻, k::Int=0) = func.(X)
 
-function fDiagonal(func::Function, X::𝕃, k::Int=0)
- if k>0 @error("in function fDiagonal (linearAlgebra.jl): k argument cannot be positive.")
+function fDiag(func::Function, X::𝕃, k::Int=0)
+ if k>0 @error("in function fDiag (linearAlgebra.jl): k argument cannot be positive.")
  else return 𝔻(func.(diag(X, k)))
  end
 end
 
-fDiagonal(func::Function, X::Union{𝕄, ℍ}, k::Int=0) = 𝔻(func.(diag(X, k)))
+fDiag(func::Function, X::Union{𝕄, ℍ}, k::Int=0) = 𝔻(func.(diag(X, k)))
+𝑓𝔻=fDiag
 
-𝑓𝔻=fDiagonal
 
+"""
+    DiagOfProd(P::ℍ, Q::ℍ)
+
+ **alias**: `dop`
+
+ Return the `Diagonal` matrix holding the diagonal of the product ``PQ``
+ of two `Hermitian` matrices `P` and `Q`. Only the diagoanl part
+ of the product is computed.
+
+ **See also**: [`tr`](@ref), [`fDiag`](@ref).
+
+ ## Examples
+    using PosDefManifold, LinearAlgebra
+    P, Q=randP(5), randP(5)
+    DiagOfProd(P, Q)≈Diagonal(P*Q) ? println("⭐ ") : println("⛔ ")
+"""
+DiagOfProd(P::ℍ, Q::ℍ)=𝔻([colProd(P, Q, i, i) for i=1:size(P, 1)])
+dop=DiagOfProd
 
 
 #  -------------------------------
@@ -912,7 +931,7 @@ sqr(X::Union{𝕄, 𝕃, 𝔻{T}}) where T<:Real = X*X
     [BLAS.symm](https://docs.julialang.org/en/v1/stdlib/LinearAlgebra/#LinearAlgebra.BLAS.symm)
     routine is used.
     Otherwise the [BLAS.gemm](https://docs.julialang.org/en/v1/stdlib/LinearAlgebra/#LinearAlgebra.BLAS.gemm)
-    routine is used. See [BLAS routines](@ref).
+    routine is used. See [Threads](@ref).
 
     ``tol`` defaults to 100 times the square root of `Base.eps` of the type
     of ``H``. This corresponds to requiring the relative convergence criterion

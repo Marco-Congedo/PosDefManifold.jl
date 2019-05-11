@@ -74,12 +74,13 @@ function tests();
 
     A3x2=[4. 3.; 2. 5.; 1. 2.]
 
-    𝐏=randP(10, 4)
-    𝐏C=randP(ComplexF64, 10, 4)
-    𝐐=randP(10, 4)
-    𝐐C=randP(ComplexF64, 10, 4)
-    𝐃=randΛ(10, 4)
-    𝐄=randΛ(10, 4)
+    𝐏=randP(8, 4)
+    𝐏C=randP(ComplexF64, 8, 4)
+    𝐐=randP(8, 4)
+    𝐐C=randP(ComplexF64, 8, 4)
+    𝐃=randΛ(8, 4)
+    𝐄=randΛ(8, 4)
+    weights=[0.1, 0.2, 0.3, 0.4]
 
     # functions in LinearAlgebrainP.jl
     print("   Unit 'linearAlgebra.jl'")
@@ -203,9 +204,14 @@ function tests();
 
     ## 4. Diagonal functions of matrices
 
-    name="function fDiagonal"; newTest(name)
-    D=fDiagonal(x->x^2, P_)
+    name="function fDiag"; newTest(name)
+    D=fDiag(x->x^2, P_)
     D≈Diagonal(diagm(0 => [9.,16.,25.])) ? OK() : OH(name)
+
+    name="function DiagOfProd"; newTest(name)
+    DiagOfProd(P, Q)≈Diagonal(P*Q) ? OK() : OH(name*" Real Input")
+    DiagOfProd(PC, QC)≈Diagonal(PC*QC) ? OK() : OH(name*" Complex Input")
+
 
     ## 5. Unitary functions of matrices
 
@@ -320,16 +326,16 @@ function tests();
     signalPlusNoiseVar=tr(PC)
     signalVar/(signalPlusNoiseVar-signalVar) ≈ 10 ? OK() : OH(name*" Complex Input Method 1")
 
-    𝐏=randP(5, 20)
-    signalVar=𝚺(tr(P) for P in 𝐏)
-    regularize!(𝐏, SNR=10)
-    signalPlusNoiseVar=𝚺(tr(P) for P in 𝐏)
+    𝐏2=randP(5, 20)
+    signalVar=𝚺(tr(P) for P in 𝐏2)
+    regularize!(𝐏2, SNR=10)
+    signalPlusNoiseVar=𝚺(tr(P) for P in 𝐏2)
     signalVar/(signalPlusNoiseVar-signalVar) ≈ 10 ? OK() : OH(name*" Real Input Method 2")
 
-    𝐏=randP(ComplexF64, 5, 20)
-    signalVar=𝚺(tr(P) for P in 𝐏)
-    regularize!(𝐏, SNR=10)
-    signalPlusNoiseVar=𝚺(tr(P) for P in 𝐏)
+    𝐏C2=randP(ComplexF64, 5, 20)
+    signalVar=𝚺(tr(P) for P in 𝐏C2)
+    regularize!(𝐏C2, SNR=10)
+    signalPlusNoiseVar=𝚺(tr(P) for P in 𝐏C2)
     signalVar/(signalPlusNoiseVar-signalVar) ≈ 10 ? OK() : OH(name*" Real Input Method 2")
 
 
@@ -358,10 +364,12 @@ function tests();
     for m in metrics distanceSqr(m, P, Q) end; RUN()
     for m in metrics distanceSqr(m, PC) end; RUN()
     for m in metrics distanceSqr(m, PC, QC) end; RUN()
+
     name="function distanceSqr (Diagonal input I)"; newTest(name);
     for m in metrics
          distanceSqr(m, D_)≈distanceSqr(m, ℍ(𝕄(D_))) ? OK() : OH(name*", metric "*string(m))
     end
+
     name="function distanceSqr (Diagonal input II)"; newTest(name);
     for m in metrics
          distanceSqr(m, D_, E_)≈distanceSqr(m, ℍ(𝕄(D_)), ℍ(𝕄(E_))) ? OK() : OH(name*", metric "*string(m))
@@ -374,33 +382,89 @@ function tests();
     for m in metrics distance(m, P, Q) end; RUN()
     for m in metrics distance(m, PC) end; RUN()
     for m in metrics distance(m, PC, QC); end; RUN()
+
     name="function distance (Diagonal input)"; newTest(name);
-    #for m in metrics distance(m, D_) end; RUN()
-    #for m in metrics distance(m, D_, E_) end; RUN()
+    for m in metrics distance(m, D_) end; RUN()
+    for m in metrics distance(m, D_, E_) end; RUN()
 
 
     name="function distanceSqrMat (I)"; newTest(name);
     k=length(𝐏)
     for m in metrics
-            D=distanceSqrMat(m, 𝐏, Float64)
+            D=distanceSqrMat(Float64, m, 𝐏)
             manualD=LowerTriangular(Matrix{Float64}(undef, k, k))
             for j=1:k, i=j:k manualD[i, j]=distanceSqr(m, 𝐏[i], 𝐏[j]) end
             manualD≈D ? OK() : OH(name*" Real Input, metric "*string(m))
     end
 
+    name="function distanceSqrMat (I ⏩ )"; newTest(name);
+    k=length(𝐏)
+    for m in metrics
+            D=distanceSqrMat(Float64, m, 𝐏, ⏩=true)
+            manualD=LowerTriangular(Matrix{Float64}(undef, k, k))
+            for j=1:k, i=j:k manualD[i, j]=distanceSqr(m, 𝐏[i], 𝐏[j]) end
+            manualD≈D ? OK() : OH(name*" Real Input, metric "*string(m))
+    end
 
     name="function distanceSqrMat (II)"; newTest(name);
     k=length(𝐏C)
     for m in metrics
-            D=distanceSqrMat(m, 𝐏C, Float64)
+            D=distanceSqrMat(Float64, m, 𝐏C)
             manualD=LowerTriangular(Matrix{Float64}(undef, k, k))
             for j=1:k, i=j:k manualD[i, j]=distanceSqr(m, 𝐏C[i], 𝐏C[j]) end
             manualD≈D ? OK() : OH(name*" Complex Input, metric "*string(m))
     end
 
+    name="function distanceSqrMat (II ⏩ )"; newTest(name);
+    k=length(𝐏C)
+    for m in metrics
+            D=distanceSqrMat(Float64, m, 𝐏C, ⏩=true)
+            manualD=LowerTriangular(Matrix{Float64}(undef, k, k))
+            for j=1:k, i=j:k manualD[i, j]=distanceSqr(m, 𝐏C[i], 𝐏C[j]) end
+            manualD≈D ? OK() : OH(name*" Complex Input, metric "*string(m))
+    end
 
-    name="function distanceMat"; newTest(name); SKIP()
+#=
 
+    name="function distanceMat (I)"; newTest(name);
+    k=length(𝐏)
+    for m in metrics
+            E2=distanceMat(Float64, m, 𝐏)
+            manualE2=LowerTriangular(Matrix{Float64}(undef, k, k))
+            for j=1:k, i=j:k manualE2[i, j]=distance(m, 𝐏[i], 𝐏[j]) end
+            manualE2≈E2 ? OK() : OH(name*" Real Input, metric "*string(m))
+    end
+
+
+
+    name="function distanceMat (I ⏩ )"; newTest(name);
+    k=length(𝐏)
+    for m in metrics
+            E2=distanceMat(Float64, m, 𝐏, ⏩=true)
+            manualE2=LowerTriangular(Matrix{Float64}(undef, k, k))
+            for j=1:k, i=j:k manualE2[i, j]=distance(m, 𝐏[i], 𝐏[j]) end
+            manualE2≈E2 ? OK() : OH(name*" Real Input, metric "*string(m))
+    end
+
+    name="function distanceMat (II)"; newTest(name);
+    k=length(𝐏C)
+    for m in metrics
+            E2=distanceMat(Float64, m, 𝐏C)
+            manualE2=LowerTriangular(Matrix{Float64}(undef, k, k))
+            for j=1:k, i=j:k manualE2[i, j]=distance(m, 𝐏C[i], 𝐏C[j]) end
+            manualE2≈E2 ? OK() : OH(name*" Complex Input, metric "*string(m))
+    end
+
+    name="function distanceMat (II ⏩ )"; newTest(name);
+    k=length(𝐏C)
+    for m in metrics
+            E2=distanceMat(Float64, m, 𝐏C, ⏩=true)
+            manualE2=LowerTriangular(Matrix{Float64}(undef, k, k))
+            for j=1:k, i=j:k manualE2[i, j]=distance(m, 𝐏C[i], 𝐏C[j]) end
+            manualE2≈E2 ? OK() : OH(name*" Complex Input, metric "*string(m))
+    end
+
+=#
 
     name="function laplacian"; newTest(name);
     Dsqr=distanceSqrMat(logEuclidean, 𝐏)
@@ -441,26 +505,40 @@ function tests();
 
 
     name="function generalizedMean"; newTest(name);
-    𝐏=ℍVector([P_, Q_])
+    𝐏2=ℍVector([P_, Q_])
     w=[0.2, 0.8]
     p=0.5
-    ℍ( (P_^p+Q_^p)/2) ^(1/p) ≈ generalizedMean(𝐏, p) ? OK() : OH(name*" Real Input 1")
-    ℍ( (ℍ(0.2*P_^p)+ℍ(0.8*Q_^p))  )^(1/p) ≈ generalizedMean(𝐏, p; w=w, ✓w=false) ? OK() : OH(name*" Real Input 2")
+    ℍ( (P_^p+Q_^p)/2) ^(1/p) ≈ generalizedMean(𝐏2, p) ? OK() : OH(name*" Real Input 1")
+    ℍ( (ℍ(0.2*P_^p)+ℍ(0.8*Q_^p))  )^(1/p) ≈ generalizedMean(𝐏2, p; w=w, ✓w=false) ? OK() : OH(name*" Real Input 2")
     w=w.*2.0
-    ℍ( (ℍ(0.2*P_^p)+ℍ(0.8*Q_^p))  )^(1/p) ≈ generalizedMean(𝐏, p; w=w) ? OK() : OH(name*" Real Input 3")
-    ℍ( (ℍ(0.2*P_^p)+ℍ(0.8*Q_^p))  )^(1/p) ≉ generalizedMean(𝐏, p; w=w, ✓w=false) ? OK() : OH(name*" Real Input 4")
-    ℍ( (ℍ(0.4*P_^p)+ℍ(1.6*Q_^p))  )^(1/p) ≈ generalizedMean(𝐏, p; w=w, ✓w=false) ? OK() : OH(name*" Real Input 5")
-    𝐏=ℍVector([PC_, QC_])
+    ℍ( (ℍ(0.2*P_^p)+ℍ(0.8*Q_^p))  )^(1/p) ≈ generalizedMean(𝐏2, p; w=w) ? OK() : OH(name*" Real Input 3")
+    ℍ( (ℍ(0.2*P_^p)+ℍ(0.8*Q_^p))  )^(1/p) ≉ generalizedMean(𝐏2, p; w=w, ✓w=false) ? OK() : OH(name*" Real Input 4")
+    ℍ( (ℍ(0.4*P_^p)+ℍ(1.6*Q_^p))  )^(1/p) ≈ generalizedMean(𝐏2, p; w=w, ✓w=false) ? OK() : OH(name*" Real Input 5")
+    𝐏2=ℍVector([PC_, QC_])
     w=[0.2, 0.8]
-    ℍ( (PC_^p+QC_^p)/2) ^(1/p) ≈ generalizedMean(𝐏, p) ? OK() : OH(name*" Complex Input 1")
-    ℍ( (ℍ(0.2*PC_^p)+ℍ(0.8*QC_^p))  )^(1/p) ≈ generalizedMean(𝐏, p; w=w, ✓w=false) ? OK() : OH(name*" Complex Input 2")
+    ℍ( (PC_^p+QC_^p)/2) ^(1/p) ≈ generalizedMean(𝐏2, p) ? OK() : OH(name*" Complex Input 1")
+    ℍ( (ℍ(0.2*PC_^p)+ℍ(0.8*QC_^p))  )^(1/p) ≈ generalizedMean(𝐏2, p; w=w, ✓w=false) ? OK() : OH(name*" Complex Input 2")
     w=w.*2.0
-    ℍ( (ℍ(0.2*PC_^p)+ℍ(0.8*QC_^p))  )^(1/p) ≈ generalizedMean(𝐏, p; w=w) ? OK() : OH(name*" Complex Input 3")
-    ℍ( (ℍ(0.2*PC_^p)+ℍ(0.8*QC_^p))  )^(1/p) ≉ generalizedMean(𝐏, p; w=w, ✓w=false) ? OK() : OH(name*" Complex Input 4")
-    ℍ( (ℍ(0.4*PC_^p)+ℍ(1.6*QC_^p))  )^(1/p) ≈ generalizedMean(𝐏, p; w=w, ✓w=false) ? OK() : OH(name*" Complex Input 5")
+    ℍ( (ℍ(0.2*PC_^p)+ℍ(0.8*QC_^p))  )^(1/p) ≈ generalizedMean(𝐏2, p; w=w) ? OK() : OH(name*" Complex Input 3")
+    ℍ( (ℍ(0.2*PC_^p)+ℍ(0.8*QC_^p))  )^(1/p) ≉ generalizedMean(𝐏2, p; w=w, ✓w=false) ? OK() : OH(name*" Complex Input 4")
+    ℍ( (ℍ(0.4*PC_^p)+ℍ(1.6*QC_^p))  )^(1/p) ≈ generalizedMean(𝐏2, p; w=w, ✓w=false) ? OK() : OH(name*" Complex Input 5")
     ((𝐃[1]^p+𝐃[2]^p)/2)^(1/p) ≈ generalizedMean(𝔻Vector([𝐃[1], 𝐃[2]]), p) ? OK() : OH(name*" Real Diagonal Input")
 
 
+
+    name="function geometricMean"; newTest(name);
+    geometricMean(𝐏); RUN()
+    geometricMean(𝐏, w=weights, ✓w=false);  RUN()
+    geometricMean(𝐏C); RUN()
+    geometricMean(𝐏C, w=weights, ✓w=false); RUN()
+    geometricMean(𝐃); RUN()
+    geometricMean(𝐃, w=weights, ✓w=false); RUN()
+
+    name="function geometricMean(⏩ )"; newTest(name);
+    geometricMean(𝐏; ⏩=true); RUN()
+    geometricMean(𝐏; w=weights, ✓w=false, ⏩=true); RUN()
+    geometricMean(𝐏C; ⏩=true); RUN()
+    geometricMean(𝐏C; w=weights, ✓w=false, ⏩=true); RUN()
 
     name="function logdet0Mean"; newTest(name);
     w=[0.5, 0.5]
@@ -482,15 +560,21 @@ function tests();
 
 
     name="function wasMean"; newTest(name);
-    wasMean(ℍVector([P_, Q_])); RUN()
-    wasMean(ℍVector([PC_, QC_])); RUN()
+    wasMean(𝐏); RUN()
+    wasMean(𝐏; w=weights); RUN()
+    wasMean(𝐏C); RUN()
+    wasMean(𝐏C; w=weights); RUN()
     wasMean(𝐃); RUN()
+    wasMean(𝐃; w=weights); RUN()
 
 
     name="function powerMean"; newTest(name);
-    powerMean(ℍVector([P_, Q_]), 0.5); RUN()
-    powerMean(ℍVector([PC_, QC_]), 0.5); RUN()
+    powerMean(𝐏, 0.5); RUN()
+    powerMean(𝐏, 0.5; w=weights); RUN()
+    powerMean(𝐏C, 0.5); RUN()
+    powerMean(𝐏C, 0.5; w=weights); RUN()
     powerMean(𝐃, 0.5); RUN()
+    powerMean(𝐃, 0.5; w=weights); RUN()
 
 
     name="function logMap"; newTest(name);
