@@ -83,11 +83,11 @@ function tests();
     weights=[0.1, 0.2, 0.3, 0.4]
 
     # functions in LinearAlgebrainP.jl
-    print("   Unit 'linearAlgebra.jl'")
+    print("- Unit 'linearAlgebra.jl'")
 
     ## 1. Matrix Normalizations
 
-    name="function det1"; newTest(name)
+    name="det1"; newTest(name)
     det(det1(P))  ≈ 1 ?  OK() : OH(name*" real case")
     det(det1(PC)) ≈ 1 ?  OK() : OH(name*" complex case")
 
@@ -97,7 +97,7 @@ function tests();
     tr(tr1(PC)) ≈ 1 ?    OK() : OH(name*" complex case")
 
 
-    name="function normalizeCol!"; newTest(name)
+    name="normalizeCol!"; newTest(name)
     j=rand(1:n)
     normalizeCol!(T, j)
     norm(T[:, j])       ≈ 1 ? OK() : OH(name*" Method 1 real case")
@@ -118,13 +118,13 @@ function tests();
 
     ## 2. Boolean functions of matrices
 
-    name="function ispos"; newTest(name)
+    name="ispos"; newTest(name)
     ispos(λ, 🔔=false) == false ? OK() : OH(name*" Method 1 real case")
     ispos(Λ, 🔔=false) == false ? OK() : OH(name*" Method 2 real case")
 
     ## 3. Scalar Functions of Matrices
 
-    name="function colProd"; newTest(name)
+    name="colProd"; newTest(name)
     j1=1; j2=rand(2:n);
     s=𝚺(T[:, j1].*T[:, j2])
     colProd(T, j1, j2) ≈ s ? OK() : OH(name*" Method 1 real case")
@@ -136,11 +136,11 @@ function tests();
     colProd(TC, TC2, j1, j2) ≈ s ? OK() : OH(name*" Method 2 complex case")
 
 
-    name="function colNorm"; newTest(name)
+    name="colNorm"; newTest(name)
     colNorm(X, 2)      ≈ norm(X[:, 2]) ? OK()  : OH(name*" Method 1 real case")
     colNorm(XC, 2)     ≈ norm(XC[:, 2]) ? OK() : OH(name*" Method 1 complex case")
 
-    name="function sumOfSqr"; newTest(name)
+    name="sumOfSqr"; newTest(name)
     sumOfSqr(Matrix(P_))  ≈ 68    ? OK() : OH(name*" Method 1 real case")
     sumOfSqr(P_)          ≈ 68    ? OK() : OH(name*" Method 2 real case")
     sumOfSqr(LowerTriangular(P_)) ≈ 59 ? OK() : OH(name*" Method 3 real case")
@@ -155,7 +155,7 @@ function tests();
     sumOfSqr(PC_, 1:3)    ≈ 68.18 ? OK() : OH(name*" Method 6 complex case")
 
 
-    name="function sumOfSqrDiag"; newTest(name)
+    name="sumOfSqrDiag"; newTest(name)
     sumOfSqrDiag(P_)    ≈ 50 ? OK() : OH(name*" Method 1 real case")
     A=randn(ComplexF64, 3, 3)
     s=sum(abs2(A[i, i]) for i in 1:size(A, 1))
@@ -165,14 +165,14 @@ function tests();
     sumOfSqrDiag(A)     ≈ s  ? OK() : OH(name*" Method 2")
 
 
-    name="function sumOfSqrTril"; newTest(name)
+    name="sumOfSqrTril"; newTest(name)
     sumOfSqrTril(A3x2, -1)≈ 9 ? OK() : OH(name*" Method 1 real case")
     A=randn(ComplexF64, 3, 2)
     s=sumOfSqr(A)-abs2(A[1, 2])
     sumOfSqrTril(A, 0)≈ s ? OK() : OH(name*" Method 1 complex case")
 
 
-    name="function tr"; newTest(name)
+    name="tr"; newTest(name)
     tr(P, Q) ≈ tr(P*Q) ? OK() : OH(name*" Method 1 real case")
     tr(PC, QC) ≈ tr(PC*QC) ? OK() : OH(name*" Method 1 complex case")
     tr(P, X) ≈ tr(P*X) ? OK() : OH(name*" Method 2 real case")
@@ -185,7 +185,7 @@ function tests();
 
 
 
-    name="function quadraticForm"; newTest(name)
+    name="quadraticForm"; newTest(name)
     v=randn(n)
     vC=randn(ComplexF64, n)
     quadraticForm(v, Matrix(P)) ≈ v'*P*v ? OK() : OH(name*" Method 1 real case")
@@ -196,7 +196,7 @@ function tests();
 
 
 
-    name="function fidelity"; newTest(name);
+    name="fidelity"; newTest(name);
     # Test compilation only
     f=fidelity(P, Q); RUN()
     f=fidelity(PC, QC); RUN()
@@ -204,18 +204,18 @@ function tests();
 
     ## 4. Diagonal functions of matrices
 
-    name="function fDiag"; newTest(name)
+    name="fDiag"; newTest(name)
     D=fDiag(x->x^2, P_)
     D≈Diagonal(diagm(0 => [9.,16.,25.])) ? OK() : OH(name)
 
-    name="function DiagOfProd"; newTest(name)
+    name="DiagOfProd"; newTest(name)
     DiagOfProd(P, Q)≈Diagonal(P*Q) ? OK() : OH(name*" Real Input")
     DiagOfProd(PC, QC)≈Diagonal(PC*QC) ? OK() : OH(name*" Complex Input")
 
 
     ## 5. Unitary functions of matrices
 
-    name="function mgs"; newTest(name)
+    name="mgs"; newTest(name)
     U=mgs(X)
     U'*U≈I ? OK() : OH(name*" Real Input")
     U=mgs(XC)
@@ -225,20 +225,20 @@ function tests();
 
     ## 7. Spectral decompositions of positive matrices
 
-    name="function evd"; newTest(name)
+    name="evd"; newTest(name)
     (Λ, U) = evd(P)
     U*Λ*U'≈P ? OK() : OH(name*" Real Input")
     (Λ, U) = evd(PC)
     U*Λ*U'≈PC ? OK() : OH(name*" Complex Input")
 
 
-    name="function spectralFunctions"; newTest(name);
+    name="spectralFunctions"; newTest(name);
     spectralFunctions(P, x->x+1); RUN()
     spectralFunctions(PC, abs2); RUN()
     spectralFunctions(D_, x->x+1); RUN()
 
 
-    name="function pow"; newTest(name)
+    name="pow"; newTest(name)
     P½, P½ⁱ=pow(P_, 0.5, -0.5)
     P½*P½ⁱ≈I && P½*P½≈P_ ?  OK() : OH(name*" Real Input method 1")
     P½, P½ⁱ=pow(PC_, 0.5, -0.5)
@@ -247,7 +247,7 @@ function tests();
     D½*D½ⁱ≈I && D½*D½≈D_ ?  OK() : OH(name*" Real Input method 2")
 
 
-    name="function invsqrt"; newTest(name)
+    name="invsqrt"; newTest(name)
     P½ⁱ=invsqrt(P_)
     P½ⁱ*P_*P½ⁱ'≈I ? OK() : OH(name*" Real Input method 1")
     P½ⁱ=invsqrt(PC_)
@@ -256,7 +256,7 @@ function tests();
     D½ⁱ*D_*D½ⁱ'≈I ? OK() : OH(name*" Real Input method 2")
 
 
-    name="function sqr"; newTest(name)
+    name="sqr"; newTest(name)
     P²=sqr(P_)
     P² ≈ P_*P_' ? OK() : OH(name*" Real Input method 1")
     P²=sqr(PC_)
@@ -265,7 +265,7 @@ function tests();
     D² ≈ D_*D_' ? OK() : OH(name*" Real Input method 2")
 
 
-    name="function powerIterations"; newTest(name)
+    name="powerIterations"; newTest(name)
     Λ, U, iterations, convergence=powIter(P_, size(P_, 2), evalues=true)
     sort(diag(Λ))≈eigvals(P_) && U*Λ*U'≈P_ ? OK() : OH(name*" Real Input Method 1")
     Λ, U, iterations, convergence=powIter(PC_, size(PC_, 2), evalues=true)
@@ -278,7 +278,7 @@ function tests();
     sort(diag(Λ))≈eigvals(P_) && U*Λ*U'≈P_ ? OK() : OH(name*" Real Input Method 3")
 
 
-    name="function choL"; newTest(name)
+    name="choL"; newTest(name)
     L=choL(P_)
     L*L'≈P_ ? OK() : OH(name*" Real Input method 1")
     L=choL(PC_)
@@ -291,31 +291,32 @@ function tests();
 
     # functions in SignalProcessinginP.jl
     println(" ")
-    print("   Unit 'signalProcessing.jl'")
+    print("\n- Unit 'signalProcessing.jl'")
 
-    name="function randλ"; newTest(name);
+    name="randλ"; newTest(name);
     randλ(10); RUN()
 
 
-    name="function randΛ"; newTest(name);
+
+    name="randΛ"; newTest(name);
     randΛ(10); RUN()
     randΛ(10, 2); RUN()
 
 
 
-    name="function randU"; newTest(name);
+    name="randU"; newTest(name);
     U=randU(10)
     U'*U≈I ? OK() : OH(name*" Real Input")
     U=randU(ComplexF64, 10)
     U'*U≈I ? OK() : OH(name*" Complex Input")
 
 
-    name="function randP"; newTest(name);
+    name="randP"; newTest(name);
     randP(3); RUN()
     randP(ComplexF64, 3); RUN()
 
 
-    name="function regularize!"; newTest(name)
+    name="regularize!"; newTest(name)
     signalVar=tr(P)
     regularize!(P, SNR=10)
     signalPlusNoiseVar=tr(P)
@@ -339,153 +340,146 @@ function tests();
     signalVar/(signalPlusNoiseVar-signalVar) ≈ 10 ? OK() : OH(name*" Real Input Method 2")
 
 
-    name="function gram"; newTest(name);
+    name="gram"; newTest(name);
     gram(T); RUN()
     gram(W); RUN()
 
 
-    name="function trade"; newTest(name);
+    name="trade"; newTest(name);
     trade(P); RUN()
     trade(PC); RUN()
 
 
     # functions in RiemannianGeometryinP.jl
     println(" ")
-    print("   Unit 'riemannianGeometry.jl'")
+    print("\n- Unit 'riemannianGeometry.jl'")
 
-    name="function geodesic"; newTest(name);
+    name="geodesic"; newTest(name);
     (geodesic(m, P, Q, 0.5) for m in metrics if m≠9); RUN()
     (geodesic(m, PC, QC, 0.5) for m in metrics if m≠9); RUN()
     (geodesic(m, 𝐃[1], 𝐃[2], 0.5) for m in metrics if m≠9); RUN()
 
 
-    name="function distanceSqr (Hermitian input)"; newTest(name);
+    name="distanceSqr (I)"; newTest(name);
     for m in metrics distanceSqr(m, P) end; RUN()
     for m in metrics distanceSqr(m, P, Q) end; RUN()
     for m in metrics distanceSqr(m, PC) end; RUN()
     for m in metrics distanceSqr(m, PC, QC) end; RUN()
 
-    name="function distanceSqr (Diagonal input I)"; newTest(name);
+    name="distanceSqr (II)"; newTest(name);
     for m in metrics
          distanceSqr(m, D_)≈distanceSqr(m, ℍ(𝕄(D_))) ? OK() : OH(name*", metric "*string(m))
     end
 
-    name="function distanceSqr (Diagonal input II)"; newTest(name);
+    name="distanceSqr (III)"; newTest(name);
     for m in metrics
          distanceSqr(m, D_, E_)≈distanceSqr(m, ℍ(𝕄(D_)), ℍ(𝕄(E_))) ? OK() : OH(name*", metric "*string(m))
     end
 
 
-    name="function distance (Hermitian input)"; newTest(name);
+    name="distance (I)"; newTest(name);
     # since it calls distanceSqr just check the call works
     for m in metrics distance(m, P) end; RUN()
     for m in metrics distance(m, P, Q) end; RUN()
     for m in metrics distance(m, PC) end; RUN()
     for m in metrics distance(m, PC, QC); end; RUN()
 
-    name="function distance (Diagonal input)"; newTest(name);
+    name="distance (II)"; newTest(name);
     for m in metrics distance(m, D_) end; RUN()
     for m in metrics distance(m, D_, E_) end; RUN()
 
-
-    name="function distanceSqrMat (I)"; newTest(name);
+    𝐏=randP(8, 4)
+    𝐏C=randP(ComplexF64, 8, 4)
     k=length(𝐏)
+    kC=length(𝐏C)
+
+    name="distanceSqrMat (I)"; newTest(name);
     for m in metrics
-            D=distanceSqrMat(Float64, m, 𝐏)
-            manualD=LowerTriangular(Matrix{Float64}(undef, k, k))
-            for j=1:k, i=j:k manualD[i, j]=distanceSqr(m, 𝐏[i], 𝐏[j]) end
-            manualD≈D ? OK() : OH(name*" Real Input, metric "*string(m))
+            L1=distanceSqrMat(Float64, m, 𝐏)
+            manualL1=𝕃{Float64}(diagm(0 => zeros(k)))
+            for j=1:k-1, i=j+1:k manualL1[i, j]=distanceSqr(m, 𝐏[i], 𝐏[j]) end
+            manualL1≈L1 ? OK() : OH(name*" Real Input, metric "*string(m))
     end
 
-    name="function distanceSqrMat (I ⏩ )"; newTest(name);
-    k=length(𝐏)
+    name="distanceSqrMat (I ⏩ )"; newTest(name);
     for m in metrics
-            D=distanceSqrMat(Float64, m, 𝐏, ⏩=true)
-            manualD=LowerTriangular(Matrix{Float64}(undef, k, k))
-            for j=1:k, i=j:k manualD[i, j]=distanceSqr(m, 𝐏[i], 𝐏[j]) end
-            manualD≈D ? OK() : OH(name*" Real Input, metric "*string(m))
+            L2=distanceSqrMat(Float64, m, 𝐏, ⏩=true)
+            manualL2=𝕃{Float64}(diagm(0 => zeros(k)))
+            for j=1:k-1, i=j+1:k manualL2[i, j]=distanceSqr(m, 𝐏[i], 𝐏[j]) end
+            manualL2≈L2 ? OK() : OH(name*" Real Input, metric "*string(m))
     end
 
-    name="function distanceSqrMat (II)"; newTest(name);
-    k=length(𝐏C)
+    name="distanceSqrMat (II)"; newTest(name);
     for m in metrics
-            D=distanceSqrMat(Float64, m, 𝐏C)
-            manualD=LowerTriangular(Matrix{Float64}(undef, k, k))
-            for j=1:k, i=j:k manualD[i, j]=distanceSqr(m, 𝐏C[i], 𝐏C[j]) end
-            manualD≈D ? OK() : OH(name*" Complex Input, metric "*string(m))
+            L3=distanceSqrMat(Float64, m, 𝐏C)
+            manualL3=𝕃{Float64}(diagm(0 => zeros(kC)))
+            for j=1:kC-1, i=j+1:kC manualL3[i, j]=distanceSqr(m, 𝐏C[i], 𝐏C[j]) end
+            manualL3≈L3 ? OK() : OH(name*" Complex Input, metric "*string(m))
     end
 
-    name="function distanceSqrMat (II ⏩ )"; newTest(name);
-    k=length(𝐏C)
+    name="distanceSqrMat (II ⏩ )"; newTest(name);
     for m in metrics
-            D=distanceSqrMat(Float64, m, 𝐏C, ⏩=true)
-            manualD=LowerTriangular(Matrix{Float64}(undef, k, k))
-            for j=1:k, i=j:k manualD[i, j]=distanceSqr(m, 𝐏C[i], 𝐏C[j]) end
-            manualD≈D ? OK() : OH(name*" Complex Input, metric "*string(m))
-    end
-
-#=
-
-    name="function distanceMat (I)"; newTest(name);
-    k=length(𝐏)
-    for m in metrics
-            E2=distanceMat(Float64, m, 𝐏)
-            manualE2=LowerTriangular(Matrix{Float64}(undef, k, k))
-            for j=1:k, i=j:k manualE2[i, j]=distance(m, 𝐏[i], 𝐏[j]) end
-            manualE2≈E2 ? OK() : OH(name*" Real Input, metric "*string(m))
+            L4=distanceSqrMat(Float64, m, 𝐏C, ⏩=true)
+            manualL4=𝕃{Float64}(diagm(0 => zeros(kC)))
+            for j=1:kC-1, i=j+1:kC manualL4[i, j]=distanceSqr(m, 𝐏C[i], 𝐏C[j]) end
+            manualL4≈L4 ? OK() : OH(name*" Complex Input, metric "*string(m))
     end
 
 
-
-    name="function distanceMat (I ⏩ )"; newTest(name);
-    k=length(𝐏)
+    name="distanceMat (I)"; newTest(name);
     for m in metrics
-            E2=distanceMat(Float64, m, 𝐏, ⏩=true)
-            manualE2=LowerTriangular(Matrix{Float64}(undef, k, k))
-            for j=1:k, i=j:k manualE2[i, j]=distance(m, 𝐏[i], 𝐏[j]) end
-            manualE2≈E2 ? OK() : OH(name*" Real Input, metric "*string(m))
+            L5=distanceMat(Float64, m, 𝐏)
+            manualL5=𝕃{Float64}(diagm(0 => zeros(k)))
+            for j=1:k-1, i=j+1:k manualL5[i, j]=distance(m, 𝐏[i], 𝐏[j]) end
+            manualL5≈L5 ? OK() : OH(name*" Real Input, metric "*string(m))
     end
 
-    name="function distanceMat (II)"; newTest(name);
-    k=length(𝐏C)
+    name="distanceMat (I ⏩ )"; newTest(name);
     for m in metrics
-            E2=distanceMat(Float64, m, 𝐏C)
-            manualE2=LowerTriangular(Matrix{Float64}(undef, k, k))
-            for j=1:k, i=j:k manualE2[i, j]=distance(m, 𝐏C[i], 𝐏C[j]) end
-            manualE2≈E2 ? OK() : OH(name*" Complex Input, metric "*string(m))
+            L6=distanceMat(Float64, m, 𝐏, ⏩=true)
+            manualL6=𝕃{Float64}(diagm(0 => zeros(k)))
+            for j=1:k-1, i=j+1:k manualL6[i, j]=distance(m, 𝐏[i], 𝐏[j]) end
+            manualL6≈L6 ? OK() : OH(name*" Real Input, metric "*string(m))
     end
 
-    name="function distanceMat (II ⏩ )"; newTest(name);
-    k=length(𝐏C)
+    name="distanceMat (II)"; newTest(name);
     for m in metrics
-            E2=distanceMat(Float64, m, 𝐏C, ⏩=true)
-            manualE2=LowerTriangular(Matrix{Float64}(undef, k, k))
-            for j=1:k, i=j:k manualE2[i, j]=distance(m, 𝐏C[i], 𝐏C[j]) end
-            manualE2≈E2 ? OK() : OH(name*" Complex Input, metric "*string(m))
+            L7=distanceMat(Float64, m, 𝐏C)
+            manualL7=𝕃{Float64}(diagm(0 => zeros(kC)))
+            for j=1:kC-1, i=j+1:kC manualL7[i, j]=distance(m, 𝐏C[i], 𝐏C[j]) end
+            manualL7≈L7 ? OK() : OH(name*" Complex Input, metric "*string(m))
     end
 
-=#
+    name="distanceMat (II ⏩ )"; newTest(name);
+    for m in metrics
+            L8=distanceMat(Float64, m, 𝐏C, ⏩=true)
+            manualL8=𝕃{Float64}(diagm(0 => zeros(kC)))
+            for j=1:kC-1, i=j+1:kC manualL8[i, j]=distance(m, 𝐏C[i], 𝐏C[j]) end
+            manualL8≈L8 ? OK() : OH(name*" Complex Input, metric "*string(m))
+    end
 
-    name="function laplacian"; newTest(name);
+
+
+    name="laplacian"; newTest(name);
     Dsqr=distanceSqrMat(logEuclidean, 𝐏)
     lap=laplacian(Dsqr); RUN()
 
 
-    name="function laplacianEigenMaps"; newTest(name);
+    name="laplacianEigenMaps"; newTest(name);
     laplacianEM(lap, 2); RUN()
 
 
-    name="function spectralEmbedding"; newTest(name);
+    name="spectralEmbedding"; newTest(name);
     spectralEmbedding(logEuclidean, 𝐏, 2); RUN()
 
 
-    name="function mean I"; newTest(name);
+    name="mean I"; newTest(name);
     (mean(m, P, Q) for m in metrics); RUN()
     (mean(m, 𝐏) for m in metrics); RUN()
     (mean(m, PC, QC) for m in metrics); RUN()
     (mean(m, 𝐏C) for m in metrics); RUN()
     (mean(m, 𝐃) for m in metrics); RUN()
-    name="function mean II"; newTest(name);
+    name="mean II"; newTest(name);
     k=length(𝐃)
     for m in metrics
         if string(m)≠"VonNeumann"
@@ -498,13 +492,13 @@ function tests();
     end
 
 
-    name="function means"; newTest(name);
+    name="means"; newTest(name);
     means(logEuclidean, ℍVector₂([𝐏, 𝐐])); RUN()
     means(logEuclidean, ℍVector₂([𝐏C, 𝐐C])); RUN()
     means(logEuclidean, 𝔻Vector₂([𝐃, 𝐄])); RUN()
 
 
-    name="function generalizedMean"; newTest(name);
+    name="generalizedMean"; newTest(name);
     𝐏2=ℍVector([P_, Q_])
     w=[0.2, 0.8]
     p=0.5
@@ -526,7 +520,7 @@ function tests();
 
 
 
-    name="function geometricMean"; newTest(name);
+    name="geometricMean"; newTest(name);
     geometricMean(𝐏); RUN()
     geometricMean(𝐏, w=weights, ✓w=false);  RUN()
     geometricMean(𝐏C); RUN()
@@ -534,13 +528,13 @@ function tests();
     geometricMean(𝐃); RUN()
     geometricMean(𝐃, w=weights, ✓w=false); RUN()
 
-    name="function geometricMean(⏩ )"; newTest(name);
+    name="geometricMean(⏩ )"; newTest(name);
     geometricMean(𝐏; ⏩=true); RUN()
     geometricMean(𝐏; w=weights, ✓w=false, ⏩=true); RUN()
     geometricMean(𝐏C; ⏩=true); RUN()
     geometricMean(𝐏C; w=weights, ✓w=false, ⏩=true); RUN()
 
-    name="function logdet0Mean"; newTest(name);
+    name="logdet0Mean"; newTest(name);
     w=[0.5, 0.5]
     P½, P½ⁱ=pow(P_, 0.5, -0.5)
     GM=P½*(P½ⁱ*Q_*P½ⁱ)^0.5*P½  # Fisher mean for k=2
@@ -559,7 +553,7 @@ function tests();
     GM ≈ ldG ? OK() : OH(name*" Real Diagonal Input")
 
 
-    name="function wasMean"; newTest(name);
+    name="wasMean"; newTest(name);
     wasMean(𝐏); RUN()
     wasMean(𝐏; w=weights); RUN()
     wasMean(𝐏C); RUN()
@@ -568,7 +562,7 @@ function tests();
     wasMean(𝐃; w=weights); RUN()
 
 
-    name="function powerMean"; newTest(name);
+    name="powerMean"; newTest(name);
     powerMean(𝐏, 0.5); RUN()
     powerMean(𝐏, 0.5; w=weights); RUN()
     powerMean(𝐏C, 0.5); RUN()
@@ -577,12 +571,12 @@ function tests();
     powerMean(𝐃, 0.5; w=weights); RUN()
 
 
-    name="function logMap"; newTest(name);
+    name="logMap"; newTest(name);
     logMap(Fisher, P, Q); RUN()
     logMap(Fisher, PC, QC); RUN()
 
 
-    name="function expMap"; newTest(name);
+    name="expMap"; newTest(name);
     expMap(Fisher, P, Q); RUN()
     expMap(Fisher, PC, QC); RUN()
 
@@ -603,12 +597,12 @@ function tests();
     end
 
 
-    name="function vecP"; newTest(name);
+    name="vecP"; newTest(name);
     v=vecP(P); RUN()
     vC=vecP(PC); RUN()
 
 
-    name="function matP"; newTest(name);
+    name="matP"; newTest(name);
     Pnew=matP(v); RUN()
     PCnew=matP(vC); RUN()
 
@@ -622,15 +616,15 @@ function tests();
         @warn("either vecP or matP or both do not give the expected output in the complex case")
     end
 
-    name="function procrustes"; newTest(name);
+    name="procrustes"; newTest(name);
     procrustes(P, Q); RUN()
     procrustes(PC, QC); RUN()
 
     # functions in classification.jl
     println(" ")
-    print("   Unit 'classification.jl'")
+    print("\n- Unit 'classification.jl'")
 
-    name="function softmax"; newTest(name);
+    name="softmax"; newTest(name);
     g=[1.0, 2.0, 3.0, 4.0, 1.0, 2.0, 3.0]
     h= [0.0236405430216, 0.0642616585105, 0.17468129856, 0.47483299974438,
         0.0236405430216, 0.0642616585105, 0.17468129856]
@@ -643,7 +637,7 @@ end # function tests
 function newTest(name::String)
     sleep(0.025)
     println(" ")
-    print(rpad(name*":", 30))
+    print(rpad(name*":", 24))
 end
 
 OK()=print("⭐ ")
@@ -661,7 +655,7 @@ failing_tests=[]
 
 function testall()
     println("\n⭐ "," PosDefManifold testing utility", "⭐\n")
-    println("Starting tests...")
+    println("Starting tests...\n")
     tests()
     # print out the tests that have failed (if any)
     println("\n")
