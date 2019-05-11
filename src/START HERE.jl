@@ -1,5 +1,16 @@
-# 1) hit SHIFT+ENTER
-# 2) in the REPL: CTRL+v, ENTER
+#   This unit allows to install the PosDefManifold package
+#   and to build the documentation locally.
+#   v 0.1.3 - last update 10th of Mai 2019
+#
+#   MIT License
+#   Copyright (c) 2019, Marco Congedo, CNRS, Grenobe, France:
+#   https://sites.google.com/site/marcocongedo/home
+#
+#   DIRECTIONS:
+#   1) If you have installed the PosDefPackage from github, uninstall it.
+#   2) Change the `juliaCodeDir` path here below to the path
+#           where the PosDefMaifold folder is located on your computer.
+#   3) Put the cursor in this unit and hit SHIFT+CTRL+ENTER
 
 begin
     projectName="PosDefManifold"
@@ -22,7 +33,7 @@ begin
     ispath(docsBuildDir)     || mkpath(docsBuildDir)
     ispath(docsSrcAssetsDir) || mkpath(docsSrcAssetsDir)
 
-    # Copy logo png file
+    # Copy logo png file if it does not exist
     path, ext=splitext(logoPngFile)
     destination=docsSrcAssetsDir*"logo.png"
     if isfile(logoPngFile) && !isfile(destination)
@@ -31,30 +42,24 @@ begin
         end
     end
 
-    #just
+    # just an alias for convenience
     wd=pwd()
-
-    println("\n Your Machine: ",gethostname(),", in ",Sys.MACHINE)
-    println(" Kernel: ",Sys.KERNEL,", with word size ",Sys.WORD_SIZE)
-    println(" CPU Threads: ",Sys.CPU_THREADS, "\n")
-    # Sys.BINDIR # julia bin directory
 
     #--------------------------------
     # for building the documentation:
     #--------------------------------
 
-    #1) run the following three lines
     push!(LOAD_PATH, srcDir)
 
     using Documenter, DocumenterTools, Statistics,
-    Base.Threads, PosDefManifold, LinearAlgebra, BenchmarkTools, Revise
+    Base.Threads, LinearAlgebra, BenchmarkTools, Revise,
+    PosDefManifold
 
     cd(docsDir)
 
-    #2) copy and run the following line from the REPL
     #chmod(projectDocDir, recursive=true)
     #chmod(projectDocBuildDir, recursive=true)
-    if Base.HOME_PROJECT[] !== nothing
+    if  Base.HOME_PROJECT[] !== nothing
         Base.HOME_PROJECT[] = abspath(Base.HOME_PROJECT[])
     end
 
