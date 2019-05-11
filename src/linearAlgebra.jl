@@ -446,7 +446,7 @@ sst=sumOfSqrTril
 
  **See**: [trace](https://bit.ly/2HoOLiM).
 
- **See also**: [DiagOfProd](@ref), [`tr1`](@ref).
+ **See also**: [`DiagOfProd`](@ref), [`tr1`](@ref).
 
  ## Examples
     using PosDefManifold

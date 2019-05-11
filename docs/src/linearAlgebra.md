@@ -76,7 +76,7 @@ fidelity
 | Function   | Description |
 |:----------:|:----------- |
 | [`fDiag`](@ref), `𝑓𝔻` | Elemen-wise functions of matrix diagonals|
-| [`DiagOfProd`](@ref), `dof` | Diagonal of the product of two matrices|
+| [`DiagOfProd`](@ref), `dop` | Diagonal of the product of two matrices|
 
 ⋅
 
