@@ -269,18 +269,19 @@ end # function
 
 """
 function distanceSqr(metric::Metric, P::ℍ)
-    if      metric==Euclidean       return ss(P-I)
-    elseif  metric==invEuclidean    return ss(inv(P)-I)
+    z=real(eltype(P))(0)
+    if      metric==Euclidean       return max(z, ss(P-I))
+    elseif  metric==invEuclidean    return max(z, ss(inv(P)-I))
     elseif  metric in (logEuclidean,
-                       Fisher)      return 𝚺(log.(eigvals(P)).^2)
-    elseif  metric==logdet0         return real(logdet(0.5(P+I)) - 0.5logdet(P))
-    elseif  metric==ChoEuclidean    return ss(choL(P)-I)
+                       Fisher)      return max(z, 𝚺(log.(eigvals(P)).^2))
+    elseif  metric==logdet0         return max(z, real(logdet(0.5*(P+I)) - 0.5*logdet(P)))
+    elseif  metric==ChoEuclidean    return max(z, ss(choL(P)-I))
     elseif  metric==logCholesky
-            LP=choL(P);             return sst(LP, -1) + ssd(𝑓𝔻(log, LP))
-    elseif  metric==Jeffrey         return 0.5(tr(P) + tr(inv(P))) - size(P, 1)
+            LP=choL(P);             return max(z, real(sst(LP, -1)) + ssd(𝑓𝔻(log, LP)))
+    elseif  metric==Jeffrey         return max(z, 0.5*(tr(P) + tr(inv(P))) - size(P, 1))
     elseif  metric==VonNeumann
-            𝓵P=ℍ(log(P));           return 0.5(tr(P, 𝓵P) - tr(𝓵P))
-    elseif  metric==Wasserstein     return tr(P) + size(P, 1) - 2tr(sqrt(P))
+            𝓵P=ℍ(log(P));           return max(z, 0.5*(tr(P, 𝓵P) - tr(𝓵P)))
+    elseif  metric==Wasserstein     return max(z, tr(P) + size(P, 1) - 2*tr(sqrt(P)))
     else    @error("in RiemannianGeometryP.distanceSqr function
              (PosDefManifold Package): the chosen 'metric' does not exist")
     end # if
@@ -288,57 +289,60 @@ end #function
 
 
 function distanceSqr(metric::Metric, D::𝔻{T}) where T<:Real
-    if      metric==Euclidean        return  ssd(D-I)
-    elseif  metric==invEuclidean     return  ssd(inv(D)-I)
-    elseif  metric in (logEuclidean,
-                             Fisher) return  ssd(log(D))
-    elseif  metric==logdet0          return  logdet(0.5(D+I)) - 0.5logdet(D)
-    elseif  metric==ChoEuclidean     return  ssd(√(D)-I)
-    elseif  metric==logCholesky      return  ssd(𝑓𝔻(log, √(D)))
-    elseif  metric==Jeffrey          return  0.5(tr(D) + tr(inv(D))) - size(D, 1)
-    elseif  metric==VonNeumann
-            𝓵D=log(D);               return  0.5(tr(D*𝓵D) - tr(𝓵D))
-    elseif  metric==Wasserstein      return  tr(D) + size(D, 1) - 2tr(sqrt(D))
-    else    @error("in RiemannianGeometryP.distanceSqr function
+    z=eltype(D)(0)
+    if     metric==Euclidean    return  max(z, ssd(D-I))
+    elseif metric==invEuclidean return  max(z, ssd(inv(D)-I))
+    elseif metric in (Fisher,
+                logEuclidean)   return  max(z, ssd(log(D)))
+    elseif metric==logdet0      return  max(z, logdet(0.5*(D+I)) - 0.5*logdet(D))
+    elseif metric==ChoEuclidean return  max(z, ssd(√(D)-I))
+    elseif metric==logCholesky  return  max(z, ssd(𝑓𝔻(log, √(D))))
+    elseif metric==Jeffrey      return  max(z, 0.5*(tr(D) + tr(inv(D))) - size(D, 1))
+    elseif metric==VonNeumann
+           𝓵D=log(D);           return  max(z, 0.5*(tr(D*𝓵D) - tr(𝓵D)))
+    elseif metric==Wasserstein  return  max(z, tr(D) + size(D, 1) - 2*tr(sqrt(D)))
+    else   @error("in RiemannianGeometryP.distanceSqr function
              (PosDefManifold Package): the chosen 'metric' does not exist")
     end # if
 end #function
 
 
 function distanceSqr(metric::Metric, P::ℍ, Q::ℍ)
-    if      metric==Euclidean    return  ss(ℍ(P - Q))
-    elseif  metric==invEuclidean return  ss(ℍ(inv(P) - inv(Q)))
-    elseif  metric==logEuclidean return  ss(ℍ(log(P) - log(Q)))
-    elseif  metric==Fisher       return  𝚺(log.(eigvals(P, Q)).^2)
-    elseif  metric==logdet0      return  real(logdet(0.5(P + Q)) - 0.5logdet(P * Q))
-    elseif  metric==ChoEuclidean return  ss(choL(P)-choL(Q))
-    elseif  metric==logCholesky
-            LP=choL(P); LQ=choL(Q);
-                                 return  sst(tril(LP, -1) - tril(LQ, -1), -1) + ssd(𝑓𝔻(log, LP) - 𝑓𝔻(log, LQ))
-    elseif  metric==Jeffrey      return  0.5(tr(inv(Q), P) + tr(inv(P), Q)) - size(P, 1) #using formula tr(Q⁻¹P)/2 + tr(P⁻¹Q)/2 -n
-    elseif  metric==VonNeumann              # using formula: tr(PlogP - PlogQ + QlogQ - QlogP)/2=(tr(P(logP - LoqQ)) + tr(Q(logQ - logP)))/2=
-            R=log(P)-log(Q);     return  0.5real( tr(P, R) - tr(Q, R) )  # (tr(P(logP - LoqQ)) - tr(Q(logP - LoqQ)))/2
-    elseif  metric==Wasserstein
-            P½=sqrt(P);          return  tr(P) + tr(Q) - 2real(tr(sqrt(ℍ(P½ * Q * P½))))
-    else    @error("in RiemannianGeometryP.distanceSqr function
+    z=real(eltype(P))(0)
+    if     metric==Euclidean    return  max(z, ss(ℍ(P - Q)))
+    elseif metric==invEuclidean return  max(z, ss(ℍ(inv(P) - inv(Q))))
+    elseif metric==logEuclidean return  max(z, ss(ℍ(log(P) - log(Q))))
+    elseif metric==Fisher       return  max(z, 𝚺(log.(eigvals(P, Q)).^2))
+    elseif metric==logdet0      return  max(z, real(logdet(0.5*(P + Q)) - 0.5*logdet(P * Q)))
+    elseif metric==ChoEuclidean return  max(z, ss(choL(P)-choL(Q)))
+    elseif metric==logCholesky
+           LP=choL(P); LQ=choL(Q);
+                                return  max(z, real(sst(tril(LP, -1) - tril(LQ, -1), -1)) + ssd(𝑓𝔻(log, LP) - 𝑓𝔻(log, LQ)))
+    elseif metric==Jeffrey      return  max(z, 0.5*(tr(inv(Q), P) + tr(inv(P), Q)) - size(P, 1)) #using formula tr(Q⁻¹P)/2 + tr(P⁻¹Q)/2 -n
+    elseif metric==VonNeumann              # using formula: tr(PlogP - PlogQ + QlogQ - QlogP)/2=(tr(P(logP - LoqQ)) + tr(Q(logQ - logP)))/2=
+           R=log(P)-log(Q);     return  max(z, 0.5*real(tr(P, R) - tr(Q, R)))  # (tr(P(logP - LoqQ)) - tr(Q(logP - LoqQ)))/2
+    elseif metric==Wasserstein
+           P½=sqrt(P);          return  max(z, tr(P) + tr(Q) - 2*real(tr(sqrt(ℍ(P½ * Q * P½)))))
+    else   @error("in RiemannianGeometryP.distanceSqr function
                     (PosDefManifold Package): the chosen 'metric' does not exist")
     end #if
 end # function
 
 
 function distanceSqr(metric::Metric, D::𝔻{T}, E::𝔻{T}) where T<:Real
-    if      metric==Euclidean    return  ssd(D - E)
-    elseif  metric==invEuclidean return  ssd(inv(D) - inv(E))
-    elseif  metric in (Fisher,
-                 logEuclidean)   return  ssd(log(D) - log(E))
-    elseif  metric==logdet0      return  logdet(0.5(D + E)) - 0.5logdet(D * E)
-    elseif  metric==ChoEuclidean return  ssd(√(D) - √(E))
-    elseif  metric==logCholesky  return  ssd(𝑓𝔻(log, √(D)) - 𝑓𝔻(log, √(E)))
-    elseif  metric==Jeffrey      return  0.5(tr(inv(E) * D) + tr(inv(D) * E)) - size(D, 1)
-    elseif  metric==VonNeumann
-            R=log(D)-log(E);     return  0.5(tr(D * R) - tr(E * R))
-    elseif  metric==Wasserstein  return  tr(D) + tr(E) - 2tr(sqrt(D*E))
-    else    @error("in RiemannianGeometryP.distanceSqr function
+    z=eltype(D)(0)
+    if     metric==Euclidean    return  max(z, ssd(D - E))
+    elseif metric==invEuclidean return  max(z, ssd(inv(D) - inv(E)))
+    elseif metric in (Fisher,
+                 logEuclidean)  return  max(z, ssd(log(D) - log(E)))
+    elseif metric==logdet0      return  max(z, logdet(0.5*(D + E)) - 0.5*logdet(D * E))
+    elseif metric==ChoEuclidean return  max(z, ssd(√(D) - √(E)))
+    elseif metric==logCholesky  return  max(z, ssd(𝑓𝔻(log, √(D)) - 𝑓𝔻(log, √(E))))
+    elseif metric==Jeffrey      return  max(z, 0.5*(tr(inv(E) * D) + tr(inv(D) * E)) - size(D, 1))
+    elseif metric==VonNeumann
+           R=log(D)-log(E);     return  max(z, 0.5*(tr(D * R) - tr(E * R)))
+    elseif metric==Wasserstein  return  max(z, tr(D) + tr(E) - 2*tr(sqrt(D*E)))
+    else   @error("in RiemannianGeometryP.distanceSqr function
                     (PosDefManifold Package): the chosen 'metric' does not exist")
     end #if
 end # function
