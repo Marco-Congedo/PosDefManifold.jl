@@ -149,7 +149,6 @@ export
     distanceSqr, distance²,
     distance,
     distanceSqrMat, distance²Mat,
-    distanceSqrMat⏩, distance²Mat⏩,
     distanceMat,
     laplacian,
     laplacianEigenMaps, laplacianEM,
