@@ -36,16 +36,16 @@
 
  ℍVector, ℍVector₂, 𝔻Vector, 𝔻Vector₂, 𝕃Vector, 𝕃Vector₂, 𝕄Vector, 𝕄Vector₂.
 
- See [aliases](@ref) for the symbols `ℍ`, `𝔻`, `𝕃` and `𝕄` and the
- [Array of Matrices types](@ref).
+ Those are [Array of Matrices types](@ref).
+ See also [aliases](@ref) for the symbols `ℍ`, `𝔻`, `𝕃` and `𝕄`.
 
  Note that this function is different from Julia function
  [typeof](https://docs.julialang.org/en/v1/base/base/#Core.typeof),
- which returns the concrete type (see example below).
-
- This function is useful for [typecasting matrices](@ref).
+ which returns the concrete type (see example below), thus
+ cannot be used for [typecasting matrices](@ref).
 
  ## Examples
+    using LinearAlgebra, PosDefManifold
     P=randP(3) # generate a 3x3 Hermitian matrix
     typeofMatrix(P) # returns `Hermitian`
     typeof(P) # returns `Hermitian{Float64,Array{Float64,2}}`
@@ -65,20 +65,23 @@ typeofMat=typeofMatrix
 #  ------------------------
 
 """
-    (1) function det1(X::Union{𝔻{T}, 𝕃, 𝕄}) where T<:Real
+    (1) function det1(X::Union{𝔻{T}, 𝕃, 𝕄}; <tol::Real=0>) where T<:Real
     (2) function det1(X::ℍ)
 
  Return the argument matrix ``X`` normalized so as to have unit determinant.
  For square positive definite matrices this is the best approximant
- from the set of matrices in the [special linear group](https://bit.ly/2W5jDZ6)
- - see Bhatia and Jain (2014)[🎓].
+ from the set of matrices in the [special linear group](https://bit.ly/2W5jDZ6) -
+ see Bhatia and Jain (2014)[🎓].
 
- The matrix argument can be (1) real `Diagonal`, `LowerTriangular` or
+ The matrix argument can be (1) real `Diagonal`, `LowerTriangular`,
  a generic `Matrix`, or (2) an `Hermitian` matrix.
- In (1) a check is performed first
- and if the determinant is not positive a warning is printed.
- In (2) the matrix argument is assumed positive definite.
- If this is not the case an error is returned.
+ In (1), if the determinant is not greater to `tol` (which defalts to zero)
+ a warning is printed and ``X`` is returned.
+ In (2) the matrix argument is assumed positive definite and there is
+ no check whatsoever.
+ If the determinant is not positive an error occurs. This is done
+ because for Hermitian matrices Julia throws an error anyway if
+ the matrix is defective.
 
  **See** [det](https://bit.ly/2Y4MnTF).
 
@@ -89,25 +92,30 @@ typeofMat=typeofMatrix
     P=randP(5) # generate a random real positive definite matrix 5x5
     Q=det1(P)
     det(Q) # must be 1
-
+    # using a tolerance
+    Q=det1(P; tol=1e-12)
 """
-function det1(X::Union{𝔻{T}, 𝕃, 𝕄}) where T<:Real
-    d = det(X)
-    if d>0 X/d^(1/size(X, 1)) else @warn det1Msg; X end
+function det1(X::Union{𝔻{T}, 𝕃, 𝕄}; tol::Real=0) where T<:Real
+    tol>=0 ? tolerance=tol : tolerance = 0
+    Det = det(X)
+    if Det>tolerance X/Det^(1/size(X, 1)) else @warn det1Msg Det tolerance; X end
 end
 det1(X::ℍ) = X/det(X)^(1/size(X, 1))
-det1Msg="function det1 in LinearAlgebra.jl of PosDefMaifold package: the determinant of the input matrix is not positive."
+det1Msg="function det1 in LinearAlgebra.jl of PosDefMaifold package: the determinant of the input matrix is not greater than the tolerance."
 
 
 """
-    tr1(X::ℍ)
-    tr1(X::𝕄)
+    tr1(X::Union{ℍ, 𝔻{T}, 𝕃, 𝕄}) where T<:Real
 
- Given a real or complex square `Matrix` or `Hermitian` matrix ``X``,
- return the trace-normalized ``X``
- (trace=1).
+ Return the argument matrix ``X`` normalized so as to have unit trace.
 
-  **See**: [Julia trace function](https://bit.ly/2HoOLiM).
+ The matrix argument can be real `Diagonal`, `LowerTriangular`,
+ a generic `Matrix`, an `Hermitian` matrix.
+
+ If the trace is not greater to `tol`
+ (which defalts to zero) a warning is printed and ``X`` is returned.
+
+ **See**: [Julia trace function](https://bit.ly/2HoOLiM).
 
  **See also**: [`tr`](@ref), [`det1`](@ref).
 
@@ -116,11 +124,16 @@ det1Msg="function det1 in LinearAlgebra.jl of PosDefMaifold package: the determi
     P=randP(5) # generate a random real positive definite matrix 5x5
     Q=tr1(P)
     tr(Q)  # must be 1
+    # using a tolerance
+    Q=tr1(P; tol=1e-12)
 
 """
-tr1(X::ℍ) = ℍ(triu(X)/tr(X))
-
-tr1(X::𝕄) = X/tr(X)
+function tr1(X::Union{ℍ, 𝔻{T}, 𝕃, 𝕄}; tol::Real=0) where T<:Real
+    tol>=0 ? tolerance=tol : tolerance = 0
+    trace = tr(X)
+    if trace>tolerance X/trace else @warn tr1Msg trace tolerance; X end
+end
+tr1Msg="function tr1 in LinearAlgebra.jl of PosDefMaifold package: the trace of the input matrix is not greater than the tolerance."
 
 
 """
