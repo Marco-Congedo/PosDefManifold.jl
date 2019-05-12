@@ -7,7 +7,7 @@ matrices. In Julia those are `Hermitian` matrices, see [typecasting matrices](@r
 
 
 | Function   | Description |
-|:----------:|:----------- |
+|:---------- |:----------- |
 | [`randChi²`](@ref), randχ²| Generate a random variable distributed as a chi-squared |
 | [`randEigvals`](@ref), `randλ` | Generate a random vectors of real positive eigenvalues |
 | [`randEigvalsMat`](@ref), `randΛ` | Generate a random diagonal matrix of real positive eigenvalues |

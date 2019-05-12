@@ -4,7 +4,7 @@ Unit for classification and related functions.
 
 
 | Category  | Output |
-|:----------:|:----------- |
+|:---------- |:----------- |
 | 1. [Probability](@ref) | functions taking probabilities as input or output |
 
 
@@ -12,7 +12,7 @@ Unit for classification and related functions.
 ## Probability
 
 | Function   | Description |
-|:----------:|:----------- |
+|:---------- |:----------- |
 | [`softmax`](@ref) | compute softmax probabilities |
 
 

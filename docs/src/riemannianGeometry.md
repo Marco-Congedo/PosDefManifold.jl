@@ -7,7 +7,7 @@ for manipulating points in the Riemannian manifold of
 The functions are divided in six categories:
 
 | Category  | Output |
-|:----------:|:----------- |
+|:---------- |:----------- |
 | 1. [Geodesic equations](@ref) | interpolation, extrapolation,... |
 | 2. [Distances](@ref) | length of geodesics |
 | 3. [Graphs and Laplacians](@ref) | for spectral embedding, eigenmaps, system dynamics,...|
@@ -20,7 +20,7 @@ The functions are divided in six categories:
 ## Geodesic equations
 
 | Function   | Description |
-|:----------:|:----------- |
+|:---------- |:----------- |
 | [`geodesic`](@ref) | Geodesic equations (weighted mean of two positive definite matrices) for any metric |
 
 ⋅
@@ -32,7 +32,7 @@ geodesic
 ## Distances
 
 | Function   | Description |
-|:----------:|:----------- |
+|:---------- |:----------- |
 | [`distanceSqr`](@ref), `distance²` | Squared distance between positive definite matrices|
 | [`distance`](@ref) | Distance between positive definite matrices|
 
@@ -46,7 +46,7 @@ distance
 ## Graphs and Laplacians
 
 | Function   | Description |
-|:----------:|:----------- |
+|:---------- |:----------- |
 | [`distanceSqrMat`](@ref), `distance²Mat` | Lower triangular matrix of all squared inter-distances|
 | [`distanceMat`](@ref) | Lower triangular matrix of all inter-distances|
 | [`laplacian`](@ref) | Laplacian of a squared inter-distances matrix|
@@ -66,7 +66,7 @@ spectralEmbedding
 ## Means
 
 | Function   | Description |
-|:----------:|:----------- |
+|:---------- |:----------- |
 | [`mean`](@ref) | Weighted Fréchet mean (wFm) of a matrix set using any metric |
 | [`means`](@ref) | As above for several sets at once |
 | [`generalizedMean`](@ref) | Generalized wFm of a matrix set |
@@ -90,7 +90,7 @@ powerMean
 ## Tangent Space operations
 
 | Function   | Description |
-|:----------:|:----------- |
+|:---------- |:----------- |
 | [`logMap`](@ref) | Logarithmic map (from manifold to tangent space) |
 | [`expMap`](@ref) | Exponential map (from tangent space to manifold) |
 | [`vecP`](@ref) | vectorization of matrices in the tangent space |
@@ -108,7 +108,7 @@ matP
 ## Procrustes problems
 
 | Function   | Description |
-|:----------:|:----------- |
+|:---------- |:----------- |
 | [`procrustes`](@ref) | Solution to the Procrustes problem in the manifold of positive definite matrices |
 
 ⋅
