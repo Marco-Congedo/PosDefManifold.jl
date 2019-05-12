@@ -32,7 +32,7 @@
 
  Return the type of a matrix, either `Hermitian`,
  `Diagonal`, `LowerTriangular`, or `Matrix`.
- ``X`` may be a matrix of one of these type, but also one of the following:
+ ``X`` may be a matrix of one of these types, but also one of the following:
 
  ℍVector, ℍVector₂, 𝔻Vector, 𝔻Vector₂, 𝕃Vector, 𝕃Vector₂, 𝕄Vector, 𝕄Vector₂.
 
@@ -68,7 +68,7 @@ typeofMat=typeofMatrix
     (1) function det1(X::Union{𝔻{T}, 𝕃, 𝕄}; <tol::Real=0>) where T<:Real
     (2) function det1(X::ℍ)
 
- Return the argument matrix ``X`` normalized so as to have unit determinant.
+ Return the argument matrix ``X`` normalized so as to have *unit determinant*.
  For square positive definite matrices this is the best approximant
  from the set of matrices in the [special linear group](https://bit.ly/2W5jDZ6) -
  see Bhatia and Jain (2014)[🎓].
@@ -83,7 +83,7 @@ typeofMat=typeofMatrix
  because for Hermitian matrices Julia throws an error anyway if
  the matrix is defective.
 
- **See** [det](https://bit.ly/2Y4MnTF).
+ **See** [Julia det function](https://bit.ly/2Y4MnTF).
 
  **See also**: [`tr1`](@ref).
 
@@ -107,10 +107,10 @@ det1Msg="function det1 in LinearAlgebra.jl of PosDefMaifold package: the determi
 """
     tr1(X::Union{ℍ, 𝔻{T}, 𝕃, 𝕄}) where T<:Real
 
- Return the argument matrix ``X`` normalized so as to have unit trace.
+ Return the argument matrix ``X`` normalized so as to have *unit trace*.
 
  The matrix argument can be real `Diagonal`, `LowerTriangular`,
- a generic `Matrix`, an `Hermitian` matrix.
+ a generic `Matrix` or an `Hermitian` matrix.
 
  If the trace is not greater to `tol`
  (which defalts to zero) a warning is printed and ``X`` is returned.
@@ -143,7 +143,7 @@ tr1Msg="function tr1 in LinearAlgebra.jl of PosDefMaifold package: the trace of 
     (4) normalizeCol!(X::𝕄, range::UnitRange, by::Number)
 
 
- Given a `Matrix` ``X``or real or complex elements,
+ Given a `Matrix` ``X`` comprised of real or complex elements,
  - (1) normalize the ``j^{th}`` column to unit norm
  - (2) divide the elements of the ``j^{th}`` column by number ``by``
  - (3) normalize the columns in ``range`` to unit norm
@@ -164,7 +164,8 @@ tr1Msg="function tr1 in LinearAlgebra.jl of PosDefMaifold package: the trace of 
     Julia does not allow normalizing the columns of `Hermitian` matrices.
     If you want to call this function for an `Hermitian` matrix see [typecasting matrices](@ref).
 
- **See** [norm](https://bit.ly/2TaAkR0) and [randn](https://bit.ly/2I1Vgrg) for the example
+ **See** [norm](https://bit.ly/2TaAkR0) and also [randn](https://bit.ly/2I1Vgrg)
+ for the example below.
 
  **See also**: [`colNorm`](@ref), [`colProd`](@ref).
 
@@ -206,11 +207,11 @@ normalizeCol!(X::𝕄{T}, range::UnitRange, by::Number) where T<:RealOrComplex =
     (1) ispos(   λ::Vector{T};
                 <tol::Real=0, rev=true, 🔔=true, msg="">) where T<:Real
 
-    (2) ispos(   Λ::Diagonal{T};
+    (2) ispos(   Λ::𝔻{T};
                 <tol::Real=0, rev=true, 🔔=true, msg="">) where T<:Real
 ```
 
- Return ``true`` if all numbers in (1) real vector ``λ`` or in (2) real diagonal
+ Return ``true`` if all numbers in (1) real vector ``λ`` or in (2) real `Diagonal`
  matrix ``Λ`` are not inferior to ``tol``, otherwise return ``false``. This is used,
  for example, in spectral functions to check that all eigenvalues are positive.
 
@@ -222,8 +223,8 @@ normalizeCol!(X::𝕄{T}, range::UnitRange, by::Number) where T<:RealOrComplex =
  The following are *<optional keyword arguments>*:
 
  - If ``rev=true`` the (1) elements in ``λ`` or (2) the diagonal elements in ``Λ`` will be chacked in reverse order.
- This is done for allowing a very fast
- check when the elements are sorted and it is known where to start checking.
+ This is done for allowing a very fast check when the elements
+ are sorted and it is known from where is best to start checking.
 
  If the result is ``false``:
  - if ``🔔=true`` a bell character will be printed. In most systems this will ring a bell on the computer.
@@ -273,7 +274,8 @@ end
 
  ``\\sum_{i=1}^{r} \\big(x_{ij}^*x_{il}\\big), ``
 
- where ``r`` is the number of rows of ``X`` and ``^*`` denotes complex conjugate.
+ where ``r`` is the number of rows of ``X`` and ``^*`` denotes complex
+ conjugate (nothing if the matrix is real).
 
  (2) Given real or complex `Matrix` or `Hermitian` matrices ``X`` and ``Y``,
  return the dot product of the ``j^{th}`` column of ``X`` and the ``l^{th}`` column
@@ -281,8 +283,7 @@ end
 
  ``\\sum_{i=1}^{r} \\big(x_{ij}^*y_{il}\\big), ``
 
- where ``r`` is the number of rows of ``X`` and of ``Y`` and ``^*`` denotes
- the complex conjugate.
+ where ``r`` is the number of rows of ``X`` and of ``Y`` and ``^*`` is as above.
 
 !!! note "Nota Bene"
     ``X`` and of ``Y`` may have a different number of columns, but must have
@@ -341,7 +342,7 @@ colNorm(X::Union{𝕄, ℍ}, j::Int) = BLAS.nrm2(size(X, 1), X[:, j], 1)
 **alias**: `ss`
 
  Return
- - (1) the sum of square of the elements in an array ``A`` of any dimensions.
+ - (1) the sum of squares of the elements in an array ``A`` of any dimensions.
  - (2) as in (1), but for an `Hermitian` matrix ``H``, using only the lower triangular part.
  - (3) as in (1), but for a `LowerTriangular` matrix ``L``.
  - (4) as in (1), but for a `Diagonal` matrix ``D`` (sum of squares of diagonal elements).
@@ -441,7 +442,7 @@ ssd=sumOfSqrDiag
  - `1-size(X, 1):0` for ``X`` `LowerTriangular`.
 
  For ``X`` `Diagonal` the result is
- - 0 if ``k<0``,
+ - ``0`` if ``k<0``,
  - the sum of the squares of the diagonal elements otherwise.
 
  See julia [tril(M, k::Integer)](https://bit.ly/2Tbx8o7) function
@@ -557,7 +558,7 @@ tr(H::Union{ℍ, 𝕄}, D::𝔻{T}) where T<:Real = tr(D, H)
 
  **alias**: `qf`
 
- (1) Given a real vector ``v`` and a real `Hermitian` ``P``,
+ (1) Given a real vector ``v`` and a real `Hermitian` matrix ``P``,
  compute the quadratic form
 
  ``v^HPv``,
@@ -569,7 +570,8 @@ tr(H::Union{ℍ, 𝕄}, D::𝔻{T}) where T<:Real = tr(D, H)
  and the `LowerTriangular` view ``L`` of a real symmetric matrix.
 
  (3) As in (1), given a real vector ``v``
- and a real generic `Matrix`, if `forceLower=true`.
+ and a real generic `Matrix` ``M``, if `forceLower=true`. If `forceLower=false`,
+ the product ``v^HMv`` is evaluated using the whole matrix ``M``.
 
  (4) Generic method for computing the quadratic form for a real or complex
  `Matrix` or a complex `Hermitian` matrix. The whole matrix is used.
@@ -580,7 +582,7 @@ tr(H::Union{ℍ, 𝕄}, D::𝔻{T}) where T<:Real = tr(D, H)
 
  ``\\sum_i(v_i^2x_{ii})+\\sum_{i>j}(2v_iv_jx_{ij})``.
 
- This is used in (1) &nd (2).
+ This is used in (1), (2) and (3).
 
 
  ## Examples
@@ -594,9 +596,9 @@ tr(H::Union{ℍ, 𝕄}, D::𝔻{T}) where T<:Real = tr(D, H)
     q1 ≈ q2 ? println(" ⭐ ") : println(" ⛔ ")
 
 """
-quadraticForm(v::Vector{T}, P::ℍ{T}) where T<:Real = quadraticForm(v, 𝕃(P))
+quadraticForm(v::Vector{T}, P::ℍ{T}) where T<:Real = qf(v, 𝕃(P))
 
-quadraticForm(v::Vector{T}, X::𝕄{T}, forceLower::Bool) where T<: Real = forceLower==true ? quadraticForm(v, 𝕃(X)) : v'*X*v
+quadraticForm(v::Vector{T}, X::𝕄{T}, forceLower::Bool) where T<: Real = forceLower==true ? qf(v, 𝕃(X)) : v'*X*v
 
 quadraticForm(v::Vector{T}, X::Union{𝕄{T}, ℍ{S}}) where T<:RealOrComplex where S<:Complex = v'*X*v
 
@@ -649,9 +651,9 @@ end
  **alias**: `𝑓𝔻`
 
  Applies function `func` element-wise to the elements of the ``k^{th}``
- diagonal of matrix ``X`` (square in all cases but for the 𝕄=`Matrix` argument,
- in which case it may be of dimension *r⋅c*)
- and return a diagonal matrix with these elements.
+ diagonal of matrix ``X`` and return a diagonal matrix with these elements.
+ ``X`` must be square in all cases, but for the 𝕄=`Matrix` type argument,
+ in which case it may be of dimension *r⋅c*, with *r ≠ c*.
 
  See julia [tril(M, k::Integer)](https://bit.ly/2Tbx8o7) function
  for numbering of diagonals.
@@ -770,7 +772,9 @@ end # mgs function
  Given a positive semi-definite `Hermitian` matrix ``S``,
  returns a 2-tuple ``(Λ, U)``, where ``U`` is the matrix holding in columns
  the eigenvectors and ``Λ`` is the matrix holding the eigenvalues on the diagonal.
- This is the output of Julia `eigen` function in ``UΛU'=S`` form.
+ This is the output of Julia
+ [eigen](https://docs.julialang.org/en/v1/stdlib/LinearAlgebra/#LinearAlgebra.eigen)
+ function in ``UΛU'=S`` form.
 
  As for the `eigen` function, the eigenvalues and associated
  eigenvectors are sorted by increasing values of eigenvalues.
@@ -814,7 +818,7 @@ end
 
  ``P`` must be flagged as Hermitian. See [typecasting matrices](@ref).
  It must be a positive definite or positive semi-definite matrix,
- depending on 'func'.
+ depending on `func`.
 
  A special method is provided for real `Diagonal` matrices (2).
 
@@ -833,7 +837,6 @@ end
  where ``U`` is the matrix holding in columns the eigenvectors of ``P``,
  ``Λ`` is the matrix holding on diagonal its eigenvalues and ``f`` is
  a function applying element-wise to the eigenvalues.
-
 
  **See also**: [`evd`](@ref).
 
@@ -857,7 +860,6 @@ spectralFunctions(D::𝔻{T}, func::Function) where T<:Real = func.(D)
 
 
 
-
 """
     (1) pow(P::ℍ, args...)
     (2) pow(D::𝔻{T}, args...) where T<:Real
@@ -865,9 +867,9 @@ spectralFunctions(D::𝔻{T}, func::Function) where T<:Real = func.(D)
  (1) Given a positive semi-definite `Hermitian` matrix ``P``, return the power
  ``P^{r_1}, P^{r_2},...``
  for any number of exponents ``r_1, r_2,...``.
- It returns a tuple of as many elements as arguments passed after ``P``.
+ It returns a tuple comprising as many elements as arguments passed after ``P``.
 
- ``P`` must be flagged as Hermitian. See [typecasting matrices](@ref).
+ ``P`` must be flagged as `Hermitian`. See [typecasting matrices](@ref).
 
  ``arg1, arg2,...`` are real numbers.
 
@@ -913,6 +915,13 @@ end
  ``P`` must be flagged as Hermitian. See [typecasting matrices](@ref).
 
  A special method is provided for real `Diagonal` matrices (2).
+
+ ### Maths
+
+ The principal square root of a positive definite matrix ``P`` is the only
+ symmetric (if ``P`` is real) or Hermitian (if ``P`` is complex) square root.
+ Its inverse ``P^{-1/2}`` is also named the **whitening** or **sphering**
+ matrix since``P^{-1/2}PP^{-1/2}=I``.
 
  **See**: [typecasting matrices](@ref).
 
@@ -1079,7 +1088,7 @@ powIter=powerIterations
  (1) Given a real or complex positive definite `Hermitian` matrix ``P``,
  return the *Cholesky lower triangular factor* ``L``
  such that ``LL^H=P``. To obtain ``L^H`` or both ``L`` and ``L^H``, use instead
- julia function [cholesky(P)](https://bit.ly/2u9Hw5P).
+ julia function [cholesky](https://bit.ly/2u9Hw5P).
 
  On output, ``L`` is of type [`LowerTriangular`](https://bit.ly/2U511f3).
 
