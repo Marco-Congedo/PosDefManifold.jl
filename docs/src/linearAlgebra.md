@@ -8,7 +8,7 @@
 
 | Category  | Output |
 |:---------- |:----------- |
-| 0. [Utilities](@ref)  | --- |
+| 0. [Utilities](@ref)  | - - - |
 | 1. [Matrix normalizations](@ref) | matrix |
 | 2. [Boolean functions of matrices](@ref) | matrix |
 | 3. [Scalar functions of matrices](@ref) | scalar |
@@ -24,7 +24,7 @@
 
 | Function   | Description |
 |:---------- |:----------- |
-| [`typeofMatrix`](@ref), `typeofMat` | Return the type of matrix argument |
+| [`typeofMatrix`](@ref), `typeofMat` | Return the type of the matrix argument |
 
 ⋅
 
