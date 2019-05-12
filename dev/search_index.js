@@ -621,7 +621,7 @@ var documenterSearchIndex = {"docs": [
     "page": "linearAlgebra.jl",
     "title": "linearAlgebra.jl",
     "category": "section",
-    "text": "This unit contains linear algebra functions useful in relation to the Riemannian  geometry of the manifold of Symmetric Positive Definite (SPD) or  Hermitian Positive Definite (HPD) matrices. In Julia those are Hermitian matrices, see typecasting matrices.In general they take a matrix as input (some may take other arrays as input) and are divided in eight categories depending on what kind of functions thay are and what they give as output:Category Output\n0. Utilities –-\n1. Matrix normalizations matrix\n2. Boolean functions of matrices matrix\n3. Scalar functions of matrices scalar\n4. Diagonal functions of matrices diagonal matrix\n5. Unitary functions of matrices orthogonal/unitary matrix\n6. Matrix function of matrices matrix\n7. Spectral decompositions of positive matrices spectral function of input\n8. Decompositions involving triangular matrices triangular matrix⋅"
+    "text": "This unit contains linear algebra functions useful in relation to the Riemannian  geometry of the manifold of Symmetric Positive Definite (SPD) or  Hermitian Positive Definite (HPD) matrices. In Julia those are Hermitian matrices, see typecasting matrices.In general they take a matrix as input (some may take other arrays as input) and are divided in eight categories depending on what kind of functions thay are and what they give as output:Category Output\n0. Utilities - - -\n1. Matrix normalizations matrix\n2. Boolean functions of matrices matrix\n3. Scalar functions of matrices scalar\n4. Diagonal functions of matrices diagonal matrix\n5. Unitary functions of matrices orthogonal/unitary matrix\n6. Matrix function of matrices matrix\n7. Spectral decompositions of positive matrices spectral function of input\n8. Decompositions involving triangular matrices triangular matrix⋅"
 },
 
 {
@@ -629,7 +629,7 @@ var documenterSearchIndex = {"docs": [
     "page": "linearAlgebra.jl",
     "title": "PosDefManifold.typeofMatrix",
     "category": "function",
-    "text": "function typeofMatrix(X)\n\nalias: typeofMat\n\nReturn the type of a matrix, either Hermitian,  Diagonal, LowerTriangular, or Matrix.  X may be a matrix of one of these type, but also one of the following:\n\nℍVector, ℍVector₂, 𝔻Vector, 𝔻Vector₂, 𝕃Vector, 𝕃Vector₂, 𝕄Vector, 𝕄Vector₂.\n\nSee aliases for the symbols ℍ, 𝔻, 𝕃 and 𝕄 and the  Array of Matrices types.\n\nNote that this function is different from Julia function  typeof,  which returns the concrete type (see example below).\n\nThis function is useful for typecasting matrices.\n\nExamples\n\nP=randP(3) # generate a 3x3 Hermitian matrix\ntypeofMatrix(P) # returns `Hermitian`\ntypeof(P) # returns `Hermitian{Float64,Array{Float64,2}}`\n# typecast P as a `Matrix` M\nM=Matrix(P)\n# typecast M as a matrix of the same type as P and write the result in A\nA=typeofMatrix(P)(M)\n\n\n\n\n\n"
+    "text": "function typeofMatrix(X)\n\nalias: typeofMat\n\nReturn the type of a matrix, either Hermitian,  Diagonal, LowerTriangular, or Matrix.  X may be a matrix of one of these type, but also one of the following:\n\nℍVector, ℍVector₂, 𝔻Vector, 𝔻Vector₂, 𝕃Vector, 𝕃Vector₂, 𝕄Vector, 𝕄Vector₂.\n\nThose are Array of Matrices types.  See also aliases for the symbols ℍ, 𝔻, 𝕃 and 𝕄.\n\nNote that this function is different from Julia function  typeof,  which returns the concrete type (see example below), thus  cannot be used for typecasting matrices.\n\nExamples\n\nusing LinearAlgebra, PosDefManifold\nP=randP(3) # generate a 3x3 Hermitian matrix\ntypeofMatrix(P) # returns `Hermitian`\ntypeof(P) # returns `Hermitian{Float64,Array{Float64,2}}`\n# typecast P as a `Matrix` M\nM=Matrix(P)\n# typecast M as a matrix of the same type as P and write the result in A\nA=typeofMatrix(P)(M)\n\n\n\n\n\n"
 },
 
 {
@@ -637,7 +637,7 @@ var documenterSearchIndex = {"docs": [
     "page": "linearAlgebra.jl",
     "title": "Utilities",
     "category": "section",
-    "text": "Function Description\ntypeofMatrix, typeofMat Return the type of matrix argument⋅typeofMatrix"
+    "text": "Function Description\ntypeofMatrix, typeofMat Return the type of the matrix argument⋅typeofMatrix"
 },
 
 {
@@ -645,7 +645,7 @@ var documenterSearchIndex = {"docs": [
     "page": "linearAlgebra.jl",
     "title": "PosDefManifold.det1",
     "category": "function",
-    "text": "(1) function det1(X::Union{𝔻{T}, 𝕃, 𝕄}) where T<:Real\n(2) function det1(X::ℍ)\n\nReturn the argument matrix X normalized so as to have unit determinant.  For square positive definite matrices this is the best approximant  from the set of matrices in the special linear group\n\nsee Bhatia and Jain (2014)[🎓].\n\nThe matrix argument can be (1) real Diagonal, LowerTriangular or  a generic Matrix, or (2) an Hermitian matrix.  In (1) a check is performed first  and if the determinant is not positive a warning is printed.  In (2) the matrix argument is assumed positive definite.  If this is not the case an error is returned.\n\nSee det.\n\nSee also: tr1.\n\nExamples\n\nusing LinearAlgebra, PosDefManifold\nP=randP(5) # generate a random real positive definite matrix 5x5\nQ=det1(P)\ndet(Q) # must be 1\n\n\n\n\n\n"
+    "text": "(1) function det1(X::Union{𝔻{T}, 𝕃, 𝕄}; <tol::Real=0>) where T<:Real\n(2) function det1(X::ℍ)\n\nReturn the argument matrix X normalized so as to have unit determinant.  For square positive definite matrices this is the best approximant  from the set of matrices in the special linear group -  see Bhatia and Jain (2014)[🎓].\n\nThe matrix argument can be (1) real Diagonal, LowerTriangular,  a generic Matrix, or (2) an Hermitian matrix.  In (1), if the determinant is not greater to tol (which defalts to zero)  a warning is printed and X is returned.  In (2) the matrix argument is assumed positive definite and there is  no check whatsoever.  If the determinant is not positive an error occurs. This is done  because for Hermitian matrices Julia throws an error anyway if  the matrix is defective.\n\nSee det.\n\nSee also: tr1.\n\nExamples\n\nusing LinearAlgebra, PosDefManifold\nP=randP(5) # generate a random real positive definite matrix 5x5\nQ=det1(P)\ndet(Q) # must be 1\n# using a tolerance\nQ=det1(P; tol=1e-12)\n\n\n\n\n\n"
 },
 
 {
@@ -653,7 +653,7 @@ var documenterSearchIndex = {"docs": [
     "page": "linearAlgebra.jl",
     "title": "PosDefManifold.tr1",
     "category": "function",
-    "text": "tr1(X::ℍ)\ntr1(X::𝕄)\n\nGiven a real or complex square Matrix or Hermitian matrix X,  return the trace-normalized X  (trace=1).\n\nSee: Julia trace function.\n\nSee also: tr, det1.\n\nExamples\n\nusing LinearAlgebra, PosDefManifold\nP=randP(5) # generate a random real positive definite matrix 5x5\nQ=tr1(P)\ntr(Q)  # must be 1\n\n\n\n\n\n"
+    "text": "tr1(X::Union{ℍ, 𝔻{T}, 𝕃, 𝕄}) where T<:Real\n\nReturn the argument matrix X normalized so as to have unit trace.\n\nThe matrix argument can be real Diagonal, LowerTriangular,  a generic Matrix, an Hermitian matrix.\n\nIf the trace is not greater to tol  (which defalts to zero) a warning is printed and X is returned.\n\nSee: Julia trace function.\n\nSee also: tr, det1.\n\nExamples\n\nusing LinearAlgebra, PosDefManifold\nP=randP(5) # generate a random real positive definite matrix 5x5\nQ=tr1(P)\ntr(Q)  # must be 1\n# using a tolerance\nQ=tr1(P; tol=1e-12)\n\n\n\n\n\n"
 },
 
 {
