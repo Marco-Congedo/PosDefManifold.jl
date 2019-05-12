@@ -40,8 +40,6 @@ The main module does not contains functions, but it declares all **constant**,
 |`𝔻`|[`Diagonal`](https://bit.ly/2Jovxf8)|LinearAlgebra| \bbD | ⛔ |
 |`ℍ`|[`Hermitian`](https://bit.ly/2JOiROX)|LinearAlgebra| \bbH | ✓ |
 |`𝕃`|[`LowerTriangular`](https://docs.julialang.org/en/v1/stdlib/LinearAlgebra/#LinearAlgebra.LowerTriangular)|LinearAlgebra| \bbH | ⛔ |
-|`❗`|[`Threads.@threads`](https://docs.julialang.org/en/v1/base/multi-threading/#Base.Threads.@threads)|Base.Threads| | ✓ |
-
 
 
 All packages above are built-in julia packages.
@@ -91,14 +89,17 @@ To know what is the current metric, you can get it as a string using:
 
     s=string(metric)
 
-To see the list of metrics in type Metric use:
+To see the list of metrics in type `Metric` use:
 
     instances(Metric)
 
 #### RealOrComplex type
  `RealOrComplex=Union{Real, Complex}`
 
- This is the Union of Real and Complex Types.
+ This is the [Union](https://docs.julialang.org/en/v1/base/base/#Core.Union)
+ of `Real` and `Complex` Types.
+
+#### Array of Matrices types
 
 #### 𝕄Vector type
    `𝕄Vector=Vector{𝕄}`
@@ -168,7 +169,7 @@ To see the list of metrics in type Metric use:
  *symmetric positive definite (SPD, real)* or *Hermitian positive definite (HPD, complex)*.
  Such matrices are uniformly identified in **PosDefManifold** as being of the `Hermitian` type, using the standard [LinearAlgebra](https://bit.ly/2JOiROX) package.
  The alias `ℍ` is used consistently in the code (see [aliases](@ref)).
- If the input is not flagged as `Hermitian`, the functions restricting the input to *positive definite matrices* will give an error.
+ If the input is not flagged as `Hermitian`, the functions restricting the input to *positive definite matrices* will not be accessible.
 
  **Example**
 
@@ -205,7 +206,13 @@ To see the list of metrics in type Metric use:
      3.74948  6.4728   6.21635
      4.54381  6.21635  8.91504
 
- Similarly, if you want to construct an [ℍVector type](@ref) from, say, two Hermitian matrices `P` and `Q`, don't write `A=[P, Q]`, but rather `A=ℍVector([P, Q])`. In fact,
+ Be careful: `Hermitian(P)` will construct and Hermitian matrix from the argument.
+ If the matrix argument is not symmetric (if real) or Hermitian (if complex)
+ it will be made so by copying the transpose (if real) or complex conjugate
+ and transpose (if complex) of a triangular part into the other.
+ See [Hermitian](https://docs.julialang.org/en/v1/stdlib/LinearAlgebra/#LinearAlgebra.Hermitian).
+
+ If you want to construct an [ℍVector type](@ref) from, say, two Hermitian matrices `P` and `Q`, don't write `A=[P, Q]`, but rather `A=ℍVector([P, Q])`. In fact,
  the first is seen by Julia as
 
     2-element Array{Hermitian{Float64,Array{Float64,2}},1},
@@ -216,9 +223,8 @@ To see the list of metrics in type Metric use:
 
  which is the type expected in all functions taking an `ℍVector type` as argument.
 
- Other functions act on generic matrices (of type [Matrix](https://docs.julialang.org/en/v1/base/arrays/#Base.Matrix)).
- To those functions you can pass any matrix.
- However, keep in mind that the functions writing on the argument matrix such as
+ Other functions act on generic matrices (of type [Matrix](https://docs.julialang.org/en/v1/base/arrays/#Base.Matrix)). This is seen by Julia as `Array{T,2} where T`.
+ Keep in mind that the functions writing on the argument matrix such as
  [`normalizeCol!`](@ref) will give an error if you pass an `Hermitian` matrix,
  since Julia does not allow writing on non-diagonal elements of those matrices.
  In this case typecast it in another object using the `Matrix` type;
@@ -231,7 +237,6 @@ To see the list of metrics in type Metric use:
 
   Some more examples:
 
-
  - Typecasting `Adjoint` matrices:
 
     Matrix(X')
@@ -239,15 +244,19 @@ To see the list of metrics in type Metric use:
  - here is how to get an `Hermitian` matrix out of the
  diagonal part of an `Hermitian` matrix H:
 
-    Hermitian(Matrix(Diagonal(H))).
+    Hermitian(Matrix(Diagonal(H)))
 
  - here is how to get a `LowerTriangular` matrix out of an
  `Hermitian` matrix H:
 
-    LowerTriangular(Matrix(H)).
+    LowerTriangular(Matrix(H))
 
  For example, you can use this to pass a full inter-distance matrix to the [`laplacian`](@ref) function to obtain the Laplacian matrix.
 
+ A useful function is [`typeofMatrix`](@ref). For example, the following line
+ typecasts matrix `M` to the type of matrix `P` and put the result in `A`:
+
+    A=typeofMatrix(P)(M)
 
 #### Threads
 Some functions in **PosDefManifold** call BLAS routines for optimal performnce.
