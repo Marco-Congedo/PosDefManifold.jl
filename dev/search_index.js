@@ -293,7 +293,7 @@ var documenterSearchIndex = {"docs": [
     "page": "MainModule (PosDefManifold.jl)",
     "title": "aliases",
     "category": "section",
-    "text": "alias Julia function in Package tab-completition REPL support\n𝚺 sum Base \\bfSigma ⛔\n𝛍 mean Statistics \\bfmu ⛔\n𝕄 Matrix Base \\bbM ⛔\n𝔻 Diagonal LinearAlgebra \\bbD ⛔\nℍ Hermitian LinearAlgebra \\bbH ✓\n𝕃 LowerTriangular LinearAlgebra \\bbH ⛔\n❗ Threads.@threads Base.Threads  ✓All packages above are built-in julia packages."
+    "text": "alias Julia function in Package tab-completition REPL support\n𝚺 sum Base \\bfSigma ⛔\n𝛍 mean Statistics \\bfmu ⛔\n𝕄 Matrix Base \\bbM ⛔\n𝔻 Diagonal LinearAlgebra \\bbD ⛔\nℍ Hermitian LinearAlgebra \\bbH ✓\n𝕃 LowerTriangular LinearAlgebra \\bbH ⛔All packages above are built-in julia packages."
 },
 
 {
@@ -317,7 +317,15 @@ var documenterSearchIndex = {"docs": [
     "page": "MainModule (PosDefManifold.jl)",
     "title": "RealOrComplex type",
     "category": "section",
-    "text": "RealOrComplex=Union{Real, Complex}This is the Union of Real and Complex Types."
+    "text": "RealOrComplex=Union{Real, Complex}This is the Union  of Real and Complex Types."
+},
+
+{
+    "location": "MainModule/#Array-of-Matrices-types-1",
+    "page": "MainModule (PosDefManifold.jl)",
+    "title": "Array of Matrices types",
+    "category": "section",
+    "text": ""
 },
 
 {
@@ -365,7 +373,7 @@ var documenterSearchIndex = {"docs": [
     "page": "MainModule (PosDefManifold.jl)",
     "title": "typecasting matrices",
     "category": "section",
-    "text": "Several functions in PosDefManifold implement multiple dispatch and can handle several kinds of matrices as input, however the core functions for manipulating objects on the Riemannian manifold of positive definite matrices act by definition on positive definite matrices only.  Those matrices must therefore be either  symmetric positive definite (SPD, real) or Hermitian positive definite (HPD, complex).  Such matrices are uniformly identified in PosDefManifold as being of the Hermitian type, using the standard LinearAlgebra package.  The alias ℍ is used consistently in the code (see aliases).  If the input is not flagged as Hermitian, the functions restricting the input to positive definite matrices will give an error.Examplejulia> using LinearAlgebra\n\njulia> f(S::Hermitian)=S*S\'\nf (generic function with 1 method)\n\njulia> A=randn(3, 3)\n3×3 Array{Float64,2}:\n -0.67407  -0.344258    0.203714\n -1.06551  -0.0233796   0.975465\n -1.04727  -1.19807    -0.0219121\n\njulia> H=A*A\' # although SPD, H is not automatically flagged as Hermitian\n3×3 Array{Float64,2}:\n 0.614384  0.924991  1.11391\n 0.924991  2.08738   1.12251\n 1.11391   1.12251   2.53263\n\njulia> f(H)\nERROR: MethodError: no method matching f(::Array{Float64,2})\nClosest candidates are:\n  f(::Hermitian) at none:1If you construct a positive definite matrix and it is not flagged,  you can do so simply by typecasting it, that is, passing as argument to the  functions Hermitian(P) instead of just P. The ℍ alias can be  used for short, i.e., ℍ(P). Continuing the example above:julia> f(ℍ(H))  # this way it works, equivalent to f(Hermitian(H))\n3×3 Array{Float64,2}:\n 2.47388  3.74948  4.54381\n 3.74948  6.4728   6.21635\n 4.54381  6.21635  8.91504Similarly, if you want to construct an ℍVector type from, say, two Hermitian matrices P and Q, don\'t write A=[P, Q], but rather A=ℍVector([P, Q]). In fact,  the first is seen by Julia as2-element Array{Hermitian{Float64,Array{Float64,2}},1},while the latter as2-element Array{Hermitian,1},which is the type expected in all functions taking an ℍVector type as argument.Other functions act on generic matrices (of type Matrix).  To those functions you can pass any matrix.  However, keep in mind that the functions writing on the argument matrix such as  normalizeCol! will give an error if you pass an Hermitian matrix,  since Julia does not allow writing on non-diagonal elements of those matrices.  In this case typecast it in another object using the Matrix type;  suppose H is Hermitian, you would use for example:julia> X=Matrix(H)\njulia> normalizeCol!(X, 1)\njulia> norm(X[:, 1])\n1.0Some more examples:Typecasting Adjoint matrices:\nMatrix(X\')\nhere is how to get an Hermitian matrix out of thediagonal part of an Hermitian matrix H:Hermitian(Matrix(Diagonal(H))).here is how to get a LowerTriangular matrix out of anHermitian matrix H:LowerTriangular(Matrix(H)).For example, you can use this to pass a full inter-distance matrix to the laplacian function to obtain the Laplacian matrix."
+    "text": "Several functions in PosDefManifold implement multiple dispatch and can handle several kinds of matrices as input, however the core functions for manipulating objects on the Riemannian manifold of positive definite matrices act by definition on positive definite matrices only.  Those matrices must therefore be either  symmetric positive definite (SPD, real) or Hermitian positive definite (HPD, complex).  Such matrices are uniformly identified in PosDefManifold as being of the Hermitian type, using the standard LinearAlgebra package.  The alias ℍ is used consistently in the code (see aliases).  If the input is not flagged as Hermitian, the functions restricting the input to positive definite matrices will not be accessible.Examplejulia> using LinearAlgebra\n\njulia> f(S::Hermitian)=S*S\'\nf (generic function with 1 method)\n\njulia> A=randn(3, 3)\n3×3 Array{Float64,2}:\n -0.67407  -0.344258    0.203714\n -1.06551  -0.0233796   0.975465\n -1.04727  -1.19807    -0.0219121\n\njulia> H=A*A\' # although SPD, H is not automatically flagged as Hermitian\n3×3 Array{Float64,2}:\n 0.614384  0.924991  1.11391\n 0.924991  2.08738   1.12251\n 1.11391   1.12251   2.53263\n\njulia> f(H)\nERROR: MethodError: no method matching f(::Array{Float64,2})\nClosest candidates are:\n  f(::Hermitian) at none:1If you construct a positive definite matrix and it is not flagged,  you can do so simply by typecasting it, that is, passing as argument to the  functions Hermitian(P) instead of just P. The ℍ alias can be  used for short, i.e., ℍ(P). Continuing the example above:julia> f(ℍ(H))  # this way it works, equivalent to f(Hermitian(H))\n3×3 Array{Float64,2}:\n 2.47388  3.74948  4.54381\n 3.74948  6.4728   6.21635\n 4.54381  6.21635  8.91504Be careful: Hermitian(P) will construct and Hermitian matrix from the argument.  If the matrix argument is not symmetric (if real) or Hermitian (if complex)  it will be made so by copying the transpose (if real) or complex conjugate  and transpose (if complex) of a triangular part into the other.  See Hermitian.If you want to construct an ℍVector type from, say, two Hermitian matrices P and Q, don\'t write A=[P, Q], but rather A=ℍVector([P, Q]). In fact,  the first is seen by Julia as2-element Array{Hermitian{Float64,Array{Float64,2}},1},while the latter as2-element Array{Hermitian,1},which is the type expected in all functions taking an ℍVector type as argument.Other functions act on generic matrices (of type Matrix). This is seen by Julia as Array{T,2} where T.  Keep in mind that the functions writing on the argument matrix such as  normalizeCol! will give an error if you pass an Hermitian matrix,  since Julia does not allow writing on non-diagonal elements of those matrices.  In this case typecast it in another object using the Matrix type;  suppose H is Hermitian, you would use for example:julia> X=Matrix(H)\njulia> normalizeCol!(X, 1)\njulia> norm(X[:, 1])\n1.0Some more examples:Typecasting Adjoint matrices:\nMatrix(X\')\nhere is how to get an Hermitian matrix out of thediagonal part of an Hermitian matrix H:Hermitian(Matrix(Diagonal(H)))here is how to get a LowerTriangular matrix out of anHermitian matrix H:LowerTriangular(Matrix(H))For example, you can use this to pass a full inter-distance matrix to the laplacian function to obtain the Laplacian matrix.A useful function is typeofMatrix. For example, the following line  typecasts matrix M to the type of matrix P and put the result in A:A=typeofMatrix(P)(M)"
 },
 
 {
@@ -613,7 +621,23 @@ var documenterSearchIndex = {"docs": [
     "page": "linearAlgebra.jl",
     "title": "linearAlgebra.jl",
     "category": "section",
-    "text": "This unit contains linear algebra functions useful in relation to the Riemannian  geometry of the manifold of Symmetric Positive Definite (SPD) or  Hermitian Positive Definite (HPD) matrices. In Julia those are Hermitian matrices, see typecasting matrices.In general they take a matrix as input (some may take other arrays as input) and are divided in seven categories depending on what kind of functions thay are and what they give as output:Category Output\n1. Matrix normalizations matrix\n2. Boolean functions of matrices matrix\n3. Scalar functions of matrices scalar\n4. Diagonal functions of matrices diagonal matrix\n5. Unitary functions of matrices orthogonal/unitary matrix\n6. Matrix function of matrices matrix\n7. Spectral decompositions of positive matrices spectral function of input\n8. Decompositions involving triangular matrices triangular matrix⋅"
+    "text": "This unit contains linear algebra functions useful in relation to the Riemannian  geometry of the manifold of Symmetric Positive Definite (SPD) or  Hermitian Positive Definite (HPD) matrices. In Julia those are Hermitian matrices, see typecasting matrices.In general they take a matrix as input (some may take other arrays as input) and are divided in eight categories depending on what kind of functions thay are and what they give as output:Category Output\n0. Utilities –-\n1. Matrix normalizations matrix\n2. Boolean functions of matrices matrix\n3. Scalar functions of matrices scalar\n4. Diagonal functions of matrices diagonal matrix\n5. Unitary functions of matrices orthogonal/unitary matrix\n6. Matrix function of matrices matrix\n7. Spectral decompositions of positive matrices spectral function of input\n8. Decompositions involving triangular matrices triangular matrix⋅"
+},
+
+{
+    "location": "linearAlgebra/#PosDefManifold.typeofMatrix",
+    "page": "linearAlgebra.jl",
+    "title": "PosDefManifold.typeofMatrix",
+    "category": "function",
+    "text": "function typeofMatrix(X)\n\nalias: typeofMat\n\nReturn the type of a matrix, either Hermitian,  Diagonal, LowerTriangular, or Matrix.  X may be a matrix of one of these type, but also one of the following:\n\nℍVector, ℍVector₂, 𝔻Vector, 𝔻Vector₂, 𝕃Vector, 𝕃Vector₂, 𝕄Vector, 𝕄Vector₂.\n\nSee aliases for the symbols ℍ, 𝔻, 𝕃 and 𝕄 and the  Array of Matrices types.\n\nNote that this function is different from Julia function  typeof,  which returns the concrete type (see example below).\n\nThis function is useful for typecasting matrices.\n\nExamples\n\nP=randP(3) # generate a 3x3 Hermitian matrix\ntypeofMatrix(P) # returns `Hermitian`\ntypeof(P) # returns `Hermitian{Float64,Array{Float64,2}}`\n# typecast P as a `Matrix` M\nM=Matrix(P)\n# typecast M as a matrix of the same type as P and write the result in A\nA=typeofMatrix(P)(M)\n\n\n\n\n\n"
+},
+
+{
+    "location": "linearAlgebra/#Utilities-1",
+    "page": "linearAlgebra.jl",
+    "title": "Utilities",
+    "category": "section",
+    "text": "Function Description\ntypeofMatrix, typeofMat Return the type of matrix argument⋅typeofMatrix"
 },
 
 {
@@ -621,7 +645,7 @@ var documenterSearchIndex = {"docs": [
     "page": "linearAlgebra.jl",
     "title": "PosDefManifold.det1",
     "category": "function",
-    "text": "det1(X::𝕄)\ndet1(X::ℍ)\n\nGiven a real or complex square Matrix or Hermitian matrix X,  return the best approximant to  X from the set of matrices in the special linear group,  i.e., the closer matrix having determinant equal to 1.  See Bhatia and Jain (2014)[🎓].\n\nSee det.\n\nSee also: tr1.\n\nExamples\n\nusing LinearAlgebra, PosDefManifold\nP=randP(5) # generate a random real positive definite matrix 5x5\nQ=det1(P)\ndet(Q) # must be 1\n\n\n\n\n\n"
+    "text": "(1) function det1(X::Union{𝔻{T}, 𝕃, 𝕄}) where T<:Real\n(2) function det1(X::ℍ)\n\nReturn the argument matrix X normalized so as to have unit determinant.  For square positive definite matrices this is the best approximant  from the set of matrices in the special linear group\n\nsee Bhatia and Jain (2014)[🎓].\n\nThe matrix argument can be (1) real Diagonal, LowerTriangular or  a generic Matrix, or (2) an Hermitian matrix.  In (1) a check is performed first  and if the determinant is not positive a warning is printed.  In (2) the matrix argument is assumed positive definite.  If this is not the case an error is returned.\n\nSee det.\n\nSee also: tr1.\n\nExamples\n\nusing LinearAlgebra, PosDefManifold\nP=randP(5) # generate a random real positive definite matrix 5x5\nQ=det1(P)\ndet(Q) # must be 1\n\n\n\n\n\n"
 },
 
 {
@@ -701,7 +725,7 @@ var documenterSearchIndex = {"docs": [
     "page": "linearAlgebra.jl",
     "title": "PosDefManifold.sumOfSqrTril",
     "category": "function",
-    "text": "sumOfSqrTril(X::Union{𝕄, 𝔻, ℍ, 𝕃}, k::Int=0)\n\nalias: sst\n\nGiven a real or complex Matrix, Diagonal, Hermitian or  LowerTriangular matrix X,  return the sum of squares of the elements  in its lower triangle up to the k^th underdiagonal.\n\nMatrix X may be rectangular.\n\nk must be in range\n\n1-size(X, 1):c-1 for X Matrix, Diagonal or Hermitian,\n1-size(X, 1):0 for X LowerTriangular.\n\nSee julia tril(M, k::Integer) function  for numbering of diagonals.\n\nSee also: sumOfSqr, sumOfSqrDiag.\n\nExamples\n\nusing PosDefManifold\nA=[4. 3.; 2. 5.; 1. 2.]\n#3×2 Array{Float64,2}:\n# 4.0  3.0\n# 2.0  5.0\n# 1.0  2.0\n\ns=sumOfSqrTril(A, -1)\n# 9.0 = 1²+2²+2²\n\ns=sumOfSqrTril(A, 0)\n# 50.0 = 1²+2²+2²+4²+5²\n\n\n\n\n\n"
+    "text": "sumOfSqrTril(X::Union{𝕄, 𝔻, ℍ, 𝕃}, k::Int=0)\n\nalias: sst\n\nGiven a real or complex Matrix, Diagonal, Hermitian or  LowerTriangular matrix X,  return the sum of squares of the elements  in its lower triangle up to the k^th underdiagonal.\n\nMatrix X may be rectangular.\n\nk must be in range\n\n1-size(X, 1):c-1 for X Matrix, Diagonal or Hermitian,\n1-size(X, 1):0 for X LowerTriangular.\n\nFor X Diagonal the result is\n\n0 if k0,\nthe sum of the squares of the diagonal elements otherwise.\n\nSee julia tril(M, k::Integer) function  for numbering of diagonals.\n\nSee also: sumOfSqr, sumOfSqrDiag.\n\nExamples\n\nusing PosDefManifold\nA=[4. 3.; 2. 5.; 1. 2.]\n#3×2 Array{Float64,2}:\n# 4.0  3.0\n# 2.0  5.0\n# 1.0  2.0\n\ns=sumOfSqrTril(A, -1)\n# 9.0 = 1²+2²+2²\n\ns=sumOfSqrTril(A, 0)\n# 50.0 = 1²+2²+2²+4²+5²\n\n\n\n\n\n"
 },
 
 {
