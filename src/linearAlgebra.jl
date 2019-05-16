@@ -26,7 +26,7 @@
 ## 0. Utilities
 #  ------------------------
 """
-    function typeofMatrix(array::Union{ AnyMAtrix,
+    function typeofMatrix(array::Union{ AnyMatrix,
                                         AnyMatrixVector,
                                         AnyMatrixVector₂ })
 
@@ -34,7 +34,7 @@
 
  Return the type of a matrix, either `Hermitian`,
  `Diagonal`, `LowerTriangular`, or `Matrix`.
- `array` may be a matrix of one of these types, but also one of the following:
+ Argument `array` may be a matrix of one of these types, but also one of the following:
 
  ℍVector, ℍVector₂, 𝔻Vector, 𝔻Vector₂, 𝕃Vector, 𝕃Vector₂, 𝕄Vector, 𝕄Vector₂.
 
@@ -76,9 +76,9 @@ typeofMat=typeofMatrix
  (1) ``X`` is a real or complex `Matrix`, `Diagonal`,
  `LowerTriangular` or `Hermitian` matrix.
  Return a 2-tuple containing the dimensions of ``X``,
- which is twice the same dimension for all possible types of ``X``
+ which is two times the same dimension for all possible types of ``X``
  with the exception of the `Matrix` type, which can be rectangular.
- Optionally you can specify a dimension (1, 2)
+ Optionally you can specify a dimension (1 or 2)
  to get just the length of that dimension.
 
  (2) `vector` is an 𝕄Vector, 𝔻Vector, 𝕃Vector or ℍVector type
