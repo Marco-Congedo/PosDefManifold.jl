@@ -1,5 +1,5 @@
 #    Unit test.jl, part of PosDefManifold Package for julia language
-#    v 0.1.3 - last update 28th of April 2019
+#    v 0.0.3 - last update 16th of May 2019
 #
 #    MIT License
 #    Copyright (c) 2019, Marco Congedo, CNRS, Grenobe, France:
@@ -88,6 +88,9 @@ function tests();
     ## 0. Utilities
     name="typeofMatrix"; newTest(name)
     typeofMatrix(𝐏); RUN()
+
+    name="dim"; newTest(name)
+    dim(𝐏); RUN()
 
     ## 1. Matrix Normalizations
 
@@ -182,9 +185,9 @@ function tests();
     tr(P, X) ≈ tr(P*X) ? OK() : OH(name*" Method 2 real case")
     tr(PC, XC) ≈ tr(PC*XC) ? OK() : OH(name*" Method 2 complex case")
     tr(D_, P_) ≈ tr(D_*P_) ? OK() : OH(name*" Method 3 real case")
-    tr(D_, PC_) ≈ tr(D_*PC_) ? OK() : OH(name*" Method 3 complex case")
+    tr(DC_, PC_) ≈ tr(DC_*PC_) ? OK() : OH(name*" Method 3 complex case")
     tr(P_, D_) ≈ tr(D_*P_) ? OK() : OH(name*" Method 4 real case")
-    tr(PC_, D_) ≈ tr(D_*PC_) ? OK() : OH(name*" Method 4 complex case")
+    tr(PC_, DC_) ≈ tr(DC_*PC_) ? OK() : OH(name*" Method 4 complex case")
 
 
 

@@ -93,73 +93,148 @@ To see the list of metrics in type `Metric` use:
 
     instances(Metric)
 
-#### RealOrComplex type
- `RealOrComplex=Union{Real, Complex}`
-
- This is the [Union](https://docs.julialang.org/en/v1/base/base/#Core.Union)
- of `Real` and `Complex` Types.
-
 #### Array of Matrices types
 
 #### 𝕄Vector type
    `𝕄Vector=Vector{𝕄}`
 
-   This is a vector of general `Matrix` matrices, alias of `MatrixVector`.
-   Julia sees is at: `Array{Array{T,2} where T,1}`.See [aliases](@ref) for the 𝕄 symbol and [typecasting matrices](@ref) for the use of matrices in **PosDefManifold**.
+ This is a vector of general `Matrix` matrices, alias of `MatrixVector`.
+ Julia sees is at: `Array{Array{T,2} where T,1}`.See [aliases](@ref) for the 𝕄 symbol and [typecasting matrices](@ref) for the use of matrices in **PosDefManifold**.
 
-  **𝕄Vector₂ type**
+!!! warning "Nota bene"
+    This object is meant to hold matrices living in the same manifold,
+    therefore it is assumed by all methods that all matrices it holds are of the same dimension.
 
-  `𝕄Vector₂=Vector{𝕄Vector}` is a vector of [𝕄Vector type](@ref) objects,
-  i.e., a vector of vectors of Matrices.
-  It is the alias of `MAtrixVector₂`.
-  Julia sees it as: `Array{Array{Array{T,2} where T,1},1}`.
-  Note that `𝕄Vector₂` is not a
-  matrix of matrices since the several `𝕄Vector` objects it holds
-  do not need to have the same length.
+ **See** [`dim`](@ref), [`typeofMatrix`](@ref)
 
+ **𝕄Vector₂ type**
+
+   `𝕄Vector₂=Vector{𝕄Vector}`
+
+ This is a vector of [𝕄Vector type](@ref) objects,
+ i.e., a vector of vectors of Matrices.
+ It is the alias of `MAtrixVector₂`.
+ Julia sees it as: `Array{Array{Array{T,2} where T,1},1}`.
+
+!!! warning "Nota bene"
+    This object is meant to hold matrices living in the same manifold,
+    therefore it is assumed by all methods that all matrices it holds are of the same dimension.
+    However the several `𝕄Vector` objects it holds do not need to have the same length.    
+
+ **See** [`dim`](@ref), [`typeofMatrix`](@ref)
 
 #### 𝔻Vector type
-  `𝔻Vector=Vector{𝔻}`
+   `𝔻Vector=Vector{𝔻}`
 
-  This is a vector of `Diagonal` matrices, alias of `DiagonalVector`.
-  Julia sees is at: `Array{Diagonal,1}`.See [aliases](@ref) for the 𝔻 symbol and [typecasting matrices](@ref) for the use of Diagonal matrices in **PosDefManifold**.
+ This is a vector of `Diagonal` matrices, alias of `DiagonalVector`.
+ Julia sees is at: `Array{Diagonal,1}`.See [aliases](@ref) for the 𝔻 symbol and [typecasting matrices](@ref) for the use of Diagonal matrices in **PosDefManifold**.
+
+!!! warning "Nota bene"
+    This object is meant to hold matrices living in the same manifold,
+    therefore it is assumed by all methods that all matrices it holds  are of the same dimension.
+
+ **See** [`dim`](@ref), [`typeofMatrix`](@ref)
 
  **𝔻Vector₂ type**
 
- `𝔻Vector₂=Vector{𝔻Vector}` is a vector of [𝔻Vector type](@ref) objects,
+   `𝔻Vector₂=Vector{𝔻Vector}`
+
+ This is a vector of [𝔻Vector type](@ref) objects,
  i.e., a vector of vectors of `Diagonal` matrices.
  It is the alias of `DiagonalVector₂`.
- Julia sees it as: `Array{Array{Diagonal,1},1}`. Note that `𝔻Vector₂` is not a
- matrix of Diagonal matrices since the several `𝔻Vector` objects it holds
- do not need to have the same length.
+ Julia sees it as: `Array{Array{Diagonal,1},1}`.
+
+!!! warning "Nota bene"
+    This object is meant to hold matrices living in the same manifold,
+    therefore it is assumed by all methods that all matrices it holds are of the same dimension.
+    However the several `𝔻Vector` objects it holds do not need to have the same length.    
+
+ **See** [`dim`](@ref), [`typeofMatrix`](@ref)
 
 #### 𝕃Vector type
    `𝕃Vector=Vector{𝕃}`
 
  This is a vector of `LowerTriangular` matrices, alias of `LowerTriangularVector`.
- Julia sees is at: `Array{LowerTriangular,1}`.See [aliases](@ref) for the 𝕃
- symbol and [typecasting matrices](@ref) for the use of LowerTriangular matrices in **PosDefManifold**.
+ Julia sees is at: `Array{LowerTriangular,1}`.See [aliases](@ref) for the 𝕃 symbol and [typecasting matrices](@ref) for the use of LowerTriangular matrices in **PosDefManifold**.
+
+!!! warning "Nota bene"
+    This object is meant to hold matrices living in the same manifold,
+    therefore it is assumed by all methods that all matrices it holds are of the same dimension.
+
+ **See** [`dim`](@ref), [`typeofMatrix`](@ref)
 
  **𝕃Vector₂ type**
 
- `𝕃Vector₂=Vector{𝕃Vector}` is a vector of [𝕃Vector type](@ref) objects, i.e.,
+   `𝕃Vector₂=Vector{𝕃Vector}`
+
+ This is a vector of [𝕃Vector type](@ref) objects, i.e.,
  a vector of vectors of `LowerTriangular` matrices.
  It is the alias of `LowerTriangularVector₂`.
- Julia sees it as: `Array{Array{LowerTriangular,1},1}`. Note that `𝔻Vector₂`
- is not a matrix of LowerTriangular matrices since the several `𝕃Vector`
- objects it holds do not need to have the same length.
+ Julia sees it as: `Array{Array{LowerTriangular,1},1}`.
+
+!!! warning "Nota bene"
+    This object is meant to hold matrices living in the same manifold,
+    therefore it is assumed by all methods that all matrices it holds are of the same dimension.
+    However the several `𝕃Vector` objects it holds do not need to have the same length.    
+
+ **See** [`dim`](@ref), [`typeofMatrix`](@ref)
 
 #### ℍVector type
- `ℍVector=Vector{ℍ}`
+   `ℍVector=Vector{ℍ}`
 
  This is a vector of `Hermitian` matrices, alias of `HermitianVector`.
  Julia sees is at: `Array{Hermitian,1}`.See [aliases](@ref) for the ℍ symbol and [typecasting matrices](@ref) for the use of Hermitian matrices in **PosDefManifold**.
 
-**ℍVector₂ type**
+!!! warning "Nota bene"
+    This object is meant to hold matrices living in the same manifold,
+    therefore it is assumed by all methods that all matrices it holds are of the same dimension.
 
- `ℍVector₂=Vector{ℍVector}` is a vector of [ℍVector type](@ref) objects, i.e., a vector of vectors of `Hermitian` matrices.
+ **See** [`dim`](@ref), [`typeofMatrix`](@ref)
+
+ **ℍVector₂ type**
+
+    `ℍVector₂=Vector{ℍVector}`
+
+ is a vector of [ℍVector type](@ref)
+ objects, i.e., a vector of vectors of `Hermitian` matrices.
  It is the alias of `HermitianVector₂`.
- Julia sees it as: `Array{Array{Hermitian,1},1}`. Note that `ℍVector₂` is not a matrix of Hermitian matrices since the several `ℍVector` objects it holds do not need to have the same length.
+ Julia sees it as: `Array{Array{Hermitian,1},1}`.
+
+!!! warning "Nota bene"
+    This object is meant to hold matrices living in the same manifold,
+    therefore it is assumed by all methods that all matrices it holds are of the same dimension.
+    However the several `𝕃Vector` objects it holds do not need to have the same length.
+
+ **See** [`dim`](@ref), [`typeofMatrix`](@ref)
+
+#### RealOrComplex type
+   `RealOrComplex=Union{Real, Complex}`
+
+ This is the [Union](https://docs.julialang.org/en/v1/base/base/#Core.Union) of `Real` and `Complex` types.
+
+#### AnyMatrix type
+   `AnyMatrix=Union{𝔻{T}, 𝕃{T}, ℍ{T}, 𝕄{T}} where T<:RealOrComplex`
+
+ This is the [Union](https://docs.julialang.org/en/v1/base/base/#Core.Union)
+ of real or complex `Diagonal`, `LowerTriangular`, `Hermitian` and `Matrix` types. It is often used in the definition of functions.
+
+ **See** [aliases](ref)
+
+#### AnyMatrixVector type
+   `AnyMatrixVector=Union{𝕄Vector, 𝔻Vector, 𝕃Vector, ℍVector}`
+
+ This is the [Union](https://docs.julialang.org/en/v1/base/base/#Core.Union) of 𝕄Vector, 𝔻Vector, 𝕃Vector, ℍVector. It is often used in the definition of functions.
+ See [Array of Matrices types](@ref).
+
+ **See** [Array of Matrices types](@ref).
+
+ **AnyMatrixVector₂ type**
+
+   `AnyMatrixVector₂=Union{𝕄Vector₂, 𝔻Vector₂, 𝕃Vector₂, ℍVector₂}`
+
+ This is the [Union](https://docs.julialang.org/en/v1/base/base/#Core.Union) of 𝕄Vector₂, 𝔻Vector₂, 𝕃Vector₂, ℍVector₂. It is often used in the definition of functions. See [Array of Matrices types](@ref).
+
+ **See** [AnyMatrixVector type](@ref).
 
 ### tips & tricks
 

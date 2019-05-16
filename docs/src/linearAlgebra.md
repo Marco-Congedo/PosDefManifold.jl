@@ -25,11 +25,14 @@
 | Function   | Description |
 |:---------- |:----------- |
 | [`typeofMatrix`](@ref), `typeofMat` | Return the type of the matrix argument |
+| [`dim`](@ref)| length of the dimansions of matrices and vectors of matrices |
+
 
 ⋅
 
 ```@docs
 typeofMatrix
+dim
 ```
 
 ## Matrix normalizations

@@ -1,5 +1,5 @@
 #    Unit riemannianGeometry.jl, part of PosDefManifold Package for julia language
-#    v 0.1.3 - last update 28th of April 2019
+#    v 0.0.3 - last update 16th of May 2019
 #
 #    MIT License
 #    Copyright (c) 2019, Marco Congedo, CNRS, Grenobe, France:
@@ -24,9 +24,6 @@
 # 0. Internal Functions
 #    By convention their name begin with underscore char
 # -----------------------------------------------------------
-_attributes(𝐏::ℍVector)=(size(𝐏[1], 1), length(𝐏))
-_attributes(𝐃::𝔻Vector)=(size(𝐃[1], 1), length(𝐃))
-
 
 # Given a non-negative weight vector normalize the weights so as to sum up to 1
 # if ✓w == true and if they are not already normalized
@@ -39,14 +36,50 @@ function _getWeights(w::Vector, ✓w::Bool, k::Int)
 end
 
 
+# create t=nthreads() ranges partitioning the columns of a lower triangular
+# matrix {strictly lower is strictlyLower=true} in such a way that the t ranges
+# comprise a number of elements of the matrix as similar as possible to each other.
+# The long line in the function is the zero of the derivative of the cost
+# function [n(x+1)+x(x+1)/2-n(n+1)/2t]²
+# { [n(x+1)+x(x+1)/2-n(n+1)/2t]² if the matrix is strictly lower triangular },
+# where n(x+1)+x(x+1)/2 {nx+x(x+1)/2} is the number of elements in the
+# first x columns and n(n+1)/2t {n(n-1)/2t} is the average number of
+# elements in t partitions.
+# Such derivative is used iteratively to find all the t ranges
+# This function returns an array of t ranges indexing the columns of the partitions.
+# Example: _partitionTril4threads(20) # using t=4 threads
+# outputs ranges 1:2, 3:5, 6:10, 11:20, comprising, respectively
+# 39, 51, 54, 55 elements of a 20x20 lower triangular matrix,
+# which has 190 elements (expected number of elements per partition=190/4=47.5)
+# Usage: looping over columns of a trianguar matrix L of dimension nxn:
+# ranges=_partitionTril4threads(n)
+# Threads.@threads for r=1:length(ranges) for k in ranges[r] ... end end
+function _partitionTril4threads(n::Int, strictlyLower::Bool=false)
+    thr=nthreads()
+    n<thr ? thr=n : nothing
+    ranges=Vector(undef, thr)
+    (a, b, i, k) = 4n^2, 4n, 1, 0
+    strictlyLower ? b=-b : nothing
+    for r=1:thr-1
+        t = thr-r+1
+        j=Int(round(max(-((sqrt((a+b+1)t^2+(-a-b)t)+(-2n+1)t)/(2t)), 1)))
+        k+=j
+        ranges[r]=i:k
+        i=k+1
+    end
+    ranges[thr]=i:n
+    return ranges
+end
+
+
 
 # -----------------------------------------------------------
 # 1. Geodesic Equations
 # -----------------------------------------------------------
 
 """
-    (1) geodesic(metric::Metric, P::ℍ, Q::ℍ, a::Real)
-    (2) geodesic(metric::Metric, D::𝔻{T}, E::𝔻{T}, a::Real) where T<:Real
+    (1) geodesic(metric::Metric, P::ℍ{T}, Q::ℍ{T}, a::Real) where T<:RealOrComplex
+    (2) geodesic(metric::Metric, D::𝔻{S}, E::𝔻{S}, a::Real) where S<:Real
 
  (1) Move along the [geodesic](@ref) from point ``P`` to point ``Q``
  (two positive definite matrices) with *arclegth* ``0<=a<=1``,
@@ -112,7 +145,7 @@ end
     E=geodesic(Fisher, P, Q, 2)
 
 """
-function geodesic(metric::Metric, P::ℍ, Q::ℍ, a::Real)
+function geodesic(metric::Metric, P::ℍ{T}, Q::ℍ{T}, a::Real) where T<:RealOrComplex
     if a ≈ 0 return P end
     if a ≈ 1 return Q end
     b = 1-a
@@ -160,15 +193,21 @@ function geodesic(metric::Metric, D::𝔻{T}, E::𝔻{T}, a::Real) where T<:Real
     if      a ≈ 1 return E end
     b = 1-a
     if      metric==Euclidean    return D*b + E*a
+
     elseif  metric==invEuclidean return inv( inv(D)b + inv(E)a )
+
     elseif  metric in (Fisher,
                  logEuclidean)   return exp( log(D)b + log(E)a )
+
     elseif  metric in (logdet0,
                        Jeffrey)  return mean(metric, 𝔻Vector([D, E]), w=[b, a], ✓w=false)
+
     elseif  metric==VonNeumann
             @warn("An expression for the geodesic is not available for the Von Neumann metric")
+
     elseif  metric==ChoEuclidean
             Z=(√D)b + (√E)a;     return Z*Z
+
     elseif  metric==logCholesky # ???
             LD=sqrt(D)
             LE=sqrt(E)
@@ -176,6 +215,7 @@ function geodesic(metric::Metric, D::𝔻{T}, E::𝔻{T}, a::Real) where T<:Real
                                  return Z*Z
     elseif  metric==Wasserstein
                                  return (b^2)D + (a^2)E + (a*b)(D*E)
+
     else    @error("in RiemannianGeometryP.geodesic function
                  (PosDefManifold Package): the chosen 'metric' does not exist")
     end # if
@@ -188,10 +228,10 @@ end # function
 # -----------------------------------------------------------
 
 """
-    (1) distanceSqr(metric::Metric, P::ℍ)
-    (2) distanceSqr(metric::Metric, P::ℍ, Q::ℍ)
-    (3) distanceSqr(metric::Metric, D::𝔻{T}) where T<:Real
-    (4) distanceSqr(metric::Metric, D::𝔻{T}, E::𝔻{T}) where T<:Real
+    (1) distanceSqr(metric::Metric, P::ℍ{T}) where T<:RealOrComplex
+    (2) distanceSqr(metric::Metric, P::ℍ{T}, Q::ℍ{T}) where T<:RealOrComplex
+    (3) distanceSqr(metric::Metric, D::𝔻{S}) where S<:Real
+    (4) distanceSqr(metric::Metric, D::𝔻{S}, E::𝔻{S}) where S<:Real
 
 
  **alias**: `distance²`
@@ -268,20 +308,30 @@ end # function
     e=distance²(Jeffrey, P, Q)
 
 """
-function distanceSqr(metric::Metric, P::ℍ)
-    z=real(eltype(P))(0)
+function distanceSqr(metric::Metric, P::ℍ{T}) where T<:RealOrComplex
+    z=real(T)(0)
+
     if      metric==Euclidean       return max(z, ss(P-I))
+
     elseif  metric==invEuclidean    return max(z, ss(inv(P)-I))
+
     elseif  metric in (logEuclidean,
                        Fisher)      return max(z, 𝚺(log.(eigvals(P)).^2))
+
     elseif  metric==logdet0         return max(z, real(logdet(0.5*(P+I)) - 0.5*logdet(P)))
+
     elseif  metric==ChoEuclidean    return max(z, ss(choL(P)-I))
+
     elseif  metric==logCholesky
             LP=choL(P);             return max(z, real(sst(LP, -1)) + ssd(𝑓𝔻(log, LP)))
+
     elseif  metric==Jeffrey         return max(z, 0.5*(tr(P) + tr(inv(P))) - size(P, 1))
+
     elseif  metric==VonNeumann
             𝓵P=ℍ(log(P));           return max(z, 0.5*(tr(P, 𝓵P) - tr(𝓵P)))
+
     elseif  metric==Wasserstein     return max(z, tr(P) + size(P, 1) - 2*tr(sqrt(P)))
+
     else    @error("in RiemannianGeometryP.distanceSqr function
              (PosDefManifold Package): the chosen 'metric' does not exist")
     end # if
@@ -289,40 +339,60 @@ end #function
 
 
 function distanceSqr(metric::Metric, D::𝔻{T}) where T<:Real
-    z=eltype(D)(0)
+    z=T(0)
+
     if     metric==Euclidean    return  max(z, ssd(D-I))
+
     elseif metric==invEuclidean return  max(z, ssd(inv(D)-I))
+
     elseif metric in (Fisher,
                 logEuclidean)   return  max(z, ssd(log(D)))
+
     elseif metric==logdet0      return  max(z, logdet(0.5*(D+I)) - 0.5*logdet(D))
+
     elseif metric==ChoEuclidean return  max(z, ssd(√(D)-I))
+
     elseif metric==logCholesky  return  max(z, ssd(𝑓𝔻(log, √(D))))
+
     elseif metric==Jeffrey      return  max(z, 0.5*(tr(D) + tr(inv(D))) - size(D, 1))
+
     elseif metric==VonNeumann
            𝓵D=log(D);           return  max(z, 0.5*(tr(D*𝓵D) - tr(𝓵D)))
+
     elseif metric==Wasserstein  return  max(z, tr(D) + size(D, 1) - 2*tr(sqrt(D)))
+
     else   @error("in RiemannianGeometryP.distanceSqr function
              (PosDefManifold Package): the chosen 'metric' does not exist")
     end # if
 end #function
 
 
-function distanceSqr(metric::Metric, P::ℍ, Q::ℍ)
-    z=real(eltype(P))(0)
+function distanceSqr(metric::Metric, P::ℍ{T}, Q::ℍ{T}) where T<:RealOrComplex
+    z=real(T)(0)
     if     metric==Euclidean    return  max(z, ss(ℍ(P - Q)))
+
     elseif metric==invEuclidean return  max(z, ss(ℍ(inv(P) - inv(Q))))
+
     elseif metric==logEuclidean return  max(z, ss(ℍ(log(P) - log(Q))))
+
     elseif metric==Fisher       return  max(z, 𝚺(log.(eigvals(P, Q)).^2))
+
     elseif metric==logdet0      return  max(z, real(logdet(0.5*(P + Q)) - 0.5*logdet(P * Q)))
+
     elseif metric==ChoEuclidean return  max(z, ss(choL(P)-choL(Q)))
+
     elseif metric==logCholesky
            LP=choL(P); LQ=choL(Q);
                                 return  max(z, real(sst(tril(LP, -1) - tril(LQ, -1), -1)) + ssd(𝑓𝔻(log, LP) - 𝑓𝔻(log, LQ)))
+
     elseif metric==Jeffrey      return  max(z, 0.5*(tr(inv(Q), P) + tr(inv(P), Q)) - size(P, 1)) #using formula tr(Q⁻¹P)/2 + tr(P⁻¹Q)/2 -n
+
     elseif metric==VonNeumann              # using formula: tr(PlogP - PlogQ + QlogQ - QlogP)/2=(tr(P(logP - LoqQ)) + tr(Q(logQ - logP)))/2=
            R=log(P)-log(Q);     return  max(z, 0.5*real(tr(P, R) - tr(Q, R)))  # (tr(P(logP - LoqQ)) - tr(Q(logP - LoqQ)))/2
+
     elseif metric==Wasserstein
            P½=sqrt(P);          return  max(z, tr(P) + tr(Q) - 2*real(tr(sqrt(ℍ(P½ * Q * P½)))))
+
     else   @error("in RiemannianGeometryP.distanceSqr function
                     (PosDefManifold Package): the chosen 'metric' does not exist")
     end #if
@@ -330,18 +400,27 @@ end # function
 
 
 function distanceSqr(metric::Metric, D::𝔻{T}, E::𝔻{T}) where T<:Real
-    z=eltype(D)(0)
+    z=T(0)
     if     metric==Euclidean    return  max(z, ssd(D - E))
+
     elseif metric==invEuclidean return  max(z, ssd(inv(D) - inv(E)))
+
     elseif metric in (Fisher,
                  logEuclidean)  return  max(z, ssd(log(D) - log(E)))
+
     elseif metric==logdet0      return  max(z, logdet(0.5*(D + E)) - 0.5*logdet(D * E))
+
     elseif metric==ChoEuclidean return  max(z, ssd(√(D) - √(E)))
+
     elseif metric==logCholesky  return  max(z, ssd(𝑓𝔻(log, √(D)) - 𝑓𝔻(log, √(E))))
+
     elseif metric==Jeffrey      return  max(z, 0.5*(tr(inv(E) * D) + tr(inv(D) * E)) - size(D, 1))
+
     elseif metric==VonNeumann
            R=log(D)-log(E);     return  max(z, 0.5*(tr(D * R) - tr(E * R)))
+
     elseif metric==Wasserstein  return  max(z, tr(D) + tr(E) - 2*tr(sqrt(D*E)))
+
     else   @error("in RiemannianGeometryP.distanceSqr function
                     (PosDefManifold Package): the chosen 'metric' does not exist")
     end #if
@@ -350,10 +429,10 @@ distance²=distanceSqr # alias
 
 
 """
-    (1) distance(metric::Metric, P::ℍ)
-    (2) distance(metric::Metric, P::ℍ, Q::ℍ)
-    (3) distance(metric::Metric, D::𝔻{T}) where T<:Real
-    (4) distance(metric::Metric, D::𝔻{T}, E::𝔻{T}) where T<:Real
+    (1) distance(metric::Metric, P::ℍ{T}) where T<:RealOrComplex
+    (2) distance(metric::Metric, P::ℍ{T}, Q::ℍ{T}) where T<:RealOrComplex
+    (3) distance(metric::Metric, D::𝔻{S}) where S<:Real
+    (4) distance(metric::Metric, D::𝔻{S}, E::𝔻{S}) where S<:Real
 
 
  (1) Return ``δ(P, I)``, the *distance* between positive definite matrix ``P`` and
@@ -370,53 +449,17 @@ distance²=distanceSqr # alias
 
  **See also**: [`distanceMat`](@ref).
 """
-distance(metric::Metric, P::ℍ) = √(distanceSqr(metric, P))
-distance(metric::Metric, D::𝔻{T}) where T<:Real = √(distanceSqr(metric, D))
+distance(metric::Metric, P::ℍ{T}) where T<:RealOrComplex = √(distance²(metric, P))
+distance(metric::Metric, D::𝔻{T}) where T<:Real = √(distance²(metric, D))
 
-distance(metric::Metric, P::ℍ, Q::ℍ) = √(distanceSqr(metric, P, Q))
-distance(metric::Metric, D::𝔻{T}, E::𝔻{T}) where T<:Real = √(distanceSqr(metric, D, E))
+distance(metric::Metric, P::ℍ{T}, Q::ℍ{T}) where T<:RealOrComplex = √(distance²(metric, P, Q))
+distance(metric::Metric, D::𝔻{T}, E::𝔻{T}) where T<:Real = √(distance²(metric, D, E))
 
 
 
 # -----------------------------------------------------------
 # 3. Inter-distance matrix, Laplacian and Spectral Embedding
 # -----------------------------------------------------------
-
-# create t=nthreads() ranges partitioning the columns of a lower triangular
-# matrix {strictly lower is strictlyLower=true} in such a way that the t ranges
-# comprise a number of elements of the matrix as similar as possible to each other.
-# The long line in the function is the zero of the derivative of the cost
-# function [n(x+1)+x(x+1)/2-n(n+1)/2t]²
-# { [n(x+1)+x(x+1)/2-n(n+1)/2t]² if the matrix is strictly lower triangular },
-# where n(x+1)+x(x+1)/2 {nx+x(x+1)/2} is the number of elements in the
-# first x columns and n(n+1)/2t {n(n-1)/2t} is the average number of
-# elements in t partitions.
-# Such derivative is used iteratively to find all the t ranges
-# This function returns an array of t ranges indexing the columns of the partitions.
-# Example: _partitionTril4threads(20) # using t=4 threads
-# outputs ranges 1:2, 3:5, 6:10, 11:20, comprising, respectively
-# 39, 51, 54, 55 elements of a 20x20 lower triangular matrix,
-# which has 190 elements (expected number of elements per partition=190/4=47.5)
-# Usage: looping over columns of a trianguar matrix L of dimension nxn:
-# ranges=_partitionTril4threads(n)
-# Threads.@threads for r=1:length(ranges) for k in ranges[r] ... end end
-function _partitionTril4threads(n::Int, strictlyLower::Bool=false)
-    thr=nthreads()
-    n<thr ? thr=n : nothing
-    ranges=Vector(undef, thr)
-    (a, b, i, k) = 4n^2, 4n, 1, 0
-    strictlyLower ? b=-b : nothing
-    for r=1:thr-1
-        t = thr-r+1
-        j=Int(round(max(-((sqrt((a+b+1)t^2+(-a-b)t)+(-2n+1)t)/(2t)), 1)))
-        k+=j
-        ranges[r]=i:k
-        i=k+1
-    end
-    ranges[thr]=i:n
-    return ranges
-end
-
 
 """
     (1) distanceSqrMat(metric::Metric, 𝐏::ℍVector;
@@ -473,7 +516,7 @@ end
 """
 function distanceSqrMat(type::Type{T}, metric::Metric, 𝐏::ℍVector;
                                  ⏩=false) where T<:AbstractFloat
-   n, k=_attributes(𝐏)
+   k, n = dim(𝐏, 1), dim(𝐏, 2)
    △=𝕃{type}(diagm(0 => zeros(k)))
    ⏩ && k>3 && nthreads() > 1 ? threaded=true : threaded=false
    if threaded R=_partitionTril4threads(k, true); m=length(R) end # ranges
@@ -535,9 +578,9 @@ function distanceSqrMat(type::Type{T}, metric::Metric, 𝐏::ℍVector;
            @threads for j=1:k 𝐏𝓵[j]=ℍ(log(𝐏[j])); v[j]=tr(𝐏[j], 𝐏𝓵[j]) end
            @threads for r=1:m for j in R[r], i=j+1:k △[i, j]=0.5*real(v[i]+v[j]-tr(𝐏[i], 𝐏𝓵[j])-tr(𝐏[j], 𝐏𝓵[i])) end end
        else
-           𝐏𝓵=[ℍ(log(P)) for P in 𝐏]
+           𝐏𝓵=[ℍ(log(P)) for P in 𝐏] # map(ℍ, map(log, 𝐏))
            v=[tr(𝐏[i], 𝐏𝓵[i]) for i=1:length(𝐏)]
-           for j=1:k-1, i=j+1:k △[i, j]=0.5real(v[i]+v[j]-tr(𝐏[i], 𝐏𝓵[j])-tr(𝐏[j], 𝐏𝓵[i])) end
+           for j=1:k-1, i=j+1:k △[i, j]=0.5*real(v[i]+v[j]-tr(𝐏[i], 𝐏𝓵[j])-tr(𝐏[j], 𝐏𝓵[i])) end
        end
 
    elseif metric==Wasserstein
@@ -625,7 +668,7 @@ distanceMat(metric::Metric, 𝐏::ℍVector; ⏩=false)=sqrt.(distanceSqrMat(met
 
 
 """
-    laplacian(Δ²:𝕃)
+    laplacian(Δ²:𝕃{S}) where S<:Real
 
  Given a `LowerTriangular` matrix of squared inter-distances ``Δ^2``,
  return the lower triangular part of the *normalized Laplacian*.
@@ -664,13 +707,13 @@ distanceMat(metric::Metric, 𝐏::ℍVector; ⏩=false)=sqrt.(distanceSqrMat(met
     lap=laplacian(Dsqr) # or: Ω=laplacian(Δ²)
 
  """
-function laplacian(Δ²::𝕃)
+function laplacian(Δ²::𝕃{T}) where T<:Real
     r=size(Δ², 1)
     epsilon=median([Δ²[i, j] for j=1:r-1 for i=j+1:r]) # use geometric mean instead
-    Ω=𝕃{eltype(Δ²)}(diagm(0 => ones(r)))
+    Ω=𝕃{T}(diagm(0 => ones(r)))
     for j=1:r-1, i=j+1:r Ω[i, j]=exp(-Δ²[i, j]/epsilon)  end
     # 1/sqrt of the row (or col) sum of L+L'-diag(L) using only L
-    D=Vector{eltype(Δ²)}(undef, r)
+    D=Vector{T}(undef, r)
     for i=1:r
         D[i]=0.
         for j=1:i D[i]+=Ω[i, j] end
@@ -684,8 +727,8 @@ end
 
 
 """
-    laplacianEigenMaps(Ω::𝕃, q::Int;
-                      <tol::Real=0, maxiter=300, ⍰=false>)
+    laplacianEigenMaps(Ω::𝕃{S}, q::Int;
+                      <tol::Real=0, maxiter=300, ⍰=false>) where S<:Real
 
  **alias**: `laplacianEM`
 
@@ -714,7 +757,7 @@ end
  and references therein.
 
  **Arguments**: `(Ω::𝕃, q; <tol::Real=0, maxiter=300, ⍰=false>)`:
- - ``Ω`` is a `LowerTriangular` normalized Laplacian obtained by the [`laplacian`](@ref) function,
+ - ``Ω`` is a real `LowerTriangular` normalized Laplacian obtained by the [`laplacian`](@ref) function,
  - ``q`` is the dimension of the Laplacian eigen maps;
  - The following are *<optional keyword arguments>* for the power iterations:
    * `tol` is the tolerance for convergence (see below),
@@ -743,10 +786,10 @@ end
     evalues, maps, iterations, convergence=laplacianEM(lap, 2; ⍰=true)
 
 """
-function laplacianEigenMaps(Ω::𝕃, q::Int;
-                            tol::Real=0, maxiter=300, ⍰=false)
+function laplacianEigenMaps(Ω::𝕃{T}, q::Int;
+                            tol::Real=0, maxiter=300, ⍰=false) where T<:Real
     # make a check for q<size(Ω, 1)
-    tol==0 ? tolerance = √eps(real(eltype(Ω))) : tolerance = tol
+    tol==0 ? tolerance = √eps(T) : tolerance = tol
     (Λ, U, iter, conv) =
         powIter(Ω, q+1; evalues=true, tol=tolerance, maxiter=maxiter, ⍰=⍰)
     return 𝔻(Λ[2:q+1, 2:q+1]), U[1:size(U, 1), 2:q+1], iter, conv
@@ -830,7 +873,7 @@ end
 # -----------------------------------------------------------
 
 """
-    (1) mean(metric::Metric, P::ℍ, Q::ℍ)
+    (1) mean(metric::Metric, P::ℍ{T}, Q::ℍ{T}) where T<:RealOrComplex
     (2) mean(metric::Metric, D::𝔻{T}, E::𝔻{T}) where T<:Real
 
     (3) mean(metric::Metric, 𝐏::ℍVector;
@@ -921,21 +964,24 @@ end
     M=mean(Wasserstein, Pset)  # (2) unweighted Wassertein mean
     # using unicode: M=mean(Wasserstein, 𝐏)
 """
-mean(metric::Metric, P::ℍ, Q::ℍ) = geodesic(metric, P, Q, 0.5)
+mean(metric::Metric, P::ℍ{T}, Q::ℍ{T}) where T<:RealOrComplex = geodesic(metric, P, Q, 0.5)
 mean(metric::Metric, D::𝔻{T}, E::𝔻{T}) where T<:Real = geodesic(metric, D, E, 0.5)
 
 function mean(metric::Metric, 𝐏::ℍVector;
               w::Vector=[], ✓w=true)
+
     # iterative solutions
     if  metric == Fisher
             (G, iter, conv)=gMean(𝐏; w=w, ✓w=✓w);       return G end
+
     if  metric == logdet0
             (G, iter, conv)=logdet0Mean(𝐏; w=w, ✓w=✓w); return G end
+
     if  metric == Wasserstein
             (G, iter, conv)=wasMean(𝐏; w=w, ✓w=✓w);     return G end
 
     # closed-form expressions and exit
-    n, k = _attributes(𝐏)
+    k, n = dim(𝐏, 1), dim(𝐏, 2)
     isempty(w) ? nothing : v = _getWeights(w, ✓w, k)
 
     if  metric == Euclidean
@@ -977,12 +1023,14 @@ end # function
 
 function mean(metric::Metric, 𝐃::𝔻Vector;
               w::Vector=[], ✓w=true)
+
     # iterative solutions
     if metric == logdet0
             (G, iter, conv)=logdet0Mean(𝐃; w=w, ✓w=✓w); return G end
 
-    n, k = _attributes(𝐃)
+    k, n = dim(𝐃, 1), dim(𝐃, 2)
     isempty(w) ? nothing : v = _getWeights(w, ✓w, k)
+
     # closed-form expressions and exit
     if     metric == Euclidean
         if isempty(w) return 𝛍(𝐃) else return 𝚺(map(*, v, 𝐃)) end
@@ -1038,7 +1086,7 @@ end # function
      # Generate a set of 4 random 3x3 SPD matrices
      Pset=randP(3, 4) # or, using unicode: 𝐏=randP(3, 4)
      # Generate a set of 40 random 4x4 SPD matrices
-     Qset=randP(3, 4) # or, using unicode: 𝐐=randP(3, 4)
+     Qset=randP(3, 40) # or, using unicode: 𝐐=randP(3, 40)
      # listing directly ℍVector objects
      means(logEuclidean, ℍVector₂([Pset, Qset])) # or: means(logEuclidean, ℍVector₂([𝐏, 𝐐]))
      # note that [𝐏, 𝐐] is actually a ℍVector₂ type object
@@ -1128,7 +1176,7 @@ function generalizedMean(𝐏::Union{ℍVector, 𝔻Vector}, p::Real;
     elseif p ==  0 return mean(logEuclidean, 𝐏; w=w, ✓w=✓w)
     elseif p ==  1 return mean(Euclidean, 𝐏;    w=w, ✓w=✓w)
     else
-        n, k=_attributes(𝐏)
+        k, n = dim(𝐏, 1), dim(𝐏, 2)
         if isempty(w)
             return 𝕋(𝛍(P^p for P in 𝐏))^(1/p)
         else
@@ -1233,13 +1281,14 @@ end # function
 function geometricMean(𝐏::ℍVector;
          w::Vector=[], ✓w=true, init=nothing, tol::Real=0, ⍰=false, ⏩=false)
 
-    (maxiter, iter, conv, oldconv, (n, k)) = 500, 1, 0., maxpos, _attributes(𝐏)
+    k, n, type = dim(𝐏, 1), dim(𝐏, 2), eltype(𝐏[1])
+    maxiter, iter, conv, oldconv = 500, 1, 0., maxpos
     ⏩ && k>2 && nthreads() > 1 ? threaded=true : threaded=false
-    tol==0 ? tolerance = √eps(real(eltype(𝐏[1])))*1e2 : tolerance = tol
+    tol==0 ? tolerance = √eps(real(type))*1e2 : tolerance = tol
     isempty(w) ? v=[] : v = _getWeights(w, ✓w, k)
     init == nothing ? M = mean(Jeffrey, 𝐏; w=v, ✓w=false) : M = ℍ(init)
-    💡 = similar(M, eltype(M))
-    if threaded S, 𝐐 = similar(M, eltype(M)), similar(𝐏) end
+    💡 = similar(M, type)
+    if threaded S, 𝐐 = similar(M, type), similar(𝐏) end
     ⍰ && threaded && @info("Iterating multi-threaded geometricMean Fixed-Point...")
     ⍰ && !threaded && @info("Iterating geometricMean Fixed-Point...")
 
@@ -1362,13 +1411,12 @@ suggested by (Moakher, 2012, p315)[🎓](@ref), yielding iterations
 function logdet0Mean(𝐏::Union{ℍVector, 𝔻Vector};
                      w::Vector=[], ✓w=true, init=nothing, tol::Real=0, ⍰=false)
     𝕋=typeofMatrix(𝐏)
-    (maxiter, iter, conv, oldconv) = 500, 1, 0., maxpos
-    n, k = _attributes(𝐏)
-    l = k/2
+    k, n, type = dim(𝐏, 1), dim(𝐏, 2), eltype(𝐏[1])
+    maxiter, iter, conv, oldconv, l = 500, 1, 0., maxpos, k/2
     isempty(w) ? v=[] : v = _getWeights(w, ✓w, k)
     init == nothing ? M = mean(logEuclidean, 𝐏; w=v, ✓w=false) : M = 𝕋(init)
-    💡 = similar(M, eltype(M))
-    tol==0 ? tolerance = √eps(real(eltype(𝐏[1])))*1e2 : tolerance = tol
+    💡 = similar(M, type)
+    tol==0 ? tolerance = √eps(real(type))*1e2 : tolerance = tol
     ⍰ && @info("Iterating logDet0Mean Fixed-Point...")
 
     while true
@@ -1468,11 +1516,12 @@ ld0Mean=logdet0Mean
 """
 function wasMean(𝐏::ℍVector;
                  w::Vector=[], ✓w=true, init=nothing, tol::Real=0, ⍰=false)
-    (iter, conv, oldconv, maxiter, (n, k)) = 1, 0., maxpos, 500, _attributes(𝐏)
+    k, n, type = dim(𝐏, 1), dim(𝐏, 2), eltype(𝐏[1])
+    iter, conv, oldconv, maxiter = 1, 0., maxpos, 500
     isempty(w) ? v=[] : v = _getWeights(w, ✓w, k)
     init == nothing ? M = generalizedMean(𝐏, 0.5; w=v, ✓w=false) : M = ℍ(init)
-    💡 = similar(M, eltype(M))
-    tol==0 ? tolerance = √eps(real(eltype(𝐏[1])))*1e2 : tolerance = tol
+    💡 = similar(M, type)
+    tol==0 ? tolerance = √eps(real(type))*1e2 : tolerance = tol
     ⍰ && @info("Iterating wasMean Fixed-Point...")
 
     while true
@@ -1594,9 +1643,11 @@ wasMean(𝐃::𝔻Vector;
 """
 function powerMean(𝐏::ℍVector, p::Real;
                    w::Vector=[], ✓w=true, init=nothing, tol::Real=0, ⍰=false)
+
   if ! (-1<=p<=1)
        @error("The parameter p for power means must be in range [-1...1]")
   else
+
     if p ≈-1
        return (mean(invEuclidean, 𝐏; w=w, ✓w=✓w), 1, 0)
     elseif p ≈ 0
@@ -1604,19 +1655,19 @@ function powerMean(𝐏::ℍVector, p::Real;
        P, iter1, conv1=powerMean(𝐏,  0.01; w=w, ✓w=✓w, init=LE, tol=tol, ⍰=⍰)
        Q, iter2, conv2=powerMean(𝐏, -0.01; w=w, ✓w=✓w, init=P, tol=tol, ⍰=⍰)
        return (geodesic(Fisher, P, Q,  0.5), iter1+iter2, (conv1+conv2)/2)
+
     elseif p ≈ 1
        return (mean(Euclidean, 𝐏; w=w, ✓w=✓w), 1, 0)
     else
        # Set Parameters
-       (n, k) = _attributes(𝐏)
-       (sqrtn, absp, maxiter, iter, conv, oldconv) = √n, abs(p), 500, 1, 0., maxpos
-       r=-0.375/absp
+       k, n, absp, type = dim(𝐏, 1), dim(𝐏, 2), abs(p), eltype(𝐏[1])
+       sqrtn, maxiter, iter, conv, oldconv, r = √n, 500, 1, 0., maxpos, -0.375/absp
        w≠[] ? v = _getWeights(w, ✓w, k) : v=[]
        init == nothing ? M = generalizedMean(𝐏, p; w=v, ✓w=false) : M = ℍ(init)
        p<0 ? X=ℍ(M^(0.5)) : X=ℍ(M^(-0.5))
-       💡, H, 𝒫 = similar(X), similar(X), similar(𝐏)
+       💡, H, 𝒫 = similar(X, type), similar(X, type), similar(𝐏)
        p<0 ? 𝒫=[inv(P) for P in 𝐏] : 𝒫=𝐏
-       tol==0 ? tolerance = √eps(real(eltype(𝐏[1])))*1e2 : tolerance = tol
+       tol==0 ? tolerance = √eps(real(type))*1e2 : tolerance = tol
        ⍰ && @info("Iterating powerMean Fixed-Point...")
 
        while true
@@ -1651,7 +1702,7 @@ powerMean(𝐃::𝔻Vector, p::Real;
 # -----------------------------------------------------------
 
 """
-    logMap(metric::Metric, P::ℍ, G::ℍ)
+    logMap(metric::Metric, P::ℍ{T}, G::ℍ{T}) where T<:RealOrComplex
 
  *Logaritmic Map:* map a positive definite matrix ``P`` from the SPD or
  Hermitian manifold into the tangent space at base-point ``G`` using the [Fisher](@ref) metric.
@@ -1683,7 +1734,7 @@ powerMean(𝐃::𝔻Vector, p::Real;
     # projecting P at the base point given by the geometric mean of P and Q
     S=logMap(metric, P, G)
 """
-function logMap(metric::Metric, P::ℍ, G::ℍ)
+function logMap(metric::Metric, P::ℍ{T}, G::ℍ{T}) where T<:RealOrComplex
     if   metric==Fisher
          G½, G⁻½=pow(G, 0.5, -0.5)
          return ℍ(G½ * log(ℍ(G⁻½ * P * G⁻½)) * G½)
@@ -1694,7 +1745,7 @@ end
 
 """
 
-    expMap(metric::Metric, S::ℍ, G::ℍ)
+    expMap(metric::Metric, S::ℍ{T}, G::ℍ{T}) where T<:RealOrComplex
 
  *Exponential Map:* map an `Hermitian` matrix ``S`` from the tangent space at base
  point ``G`` into the SPD or Hermitian manifold (using the [Fisher](@ref) metric).
@@ -1725,7 +1776,7 @@ end
     # adding the identity in the tangent space and reprojecting back onto the manifold
     H=expMap(Fisher, ℍ(S+I), G)
 """
-function expMap(metric::Metric, S::ℍ, G::ℍ)
+function expMap(metric::Metric, S::ℍ{T}, G::ℍ{T}) where T<:RealOrComplex
     if   metric==Fisher
          G½, G⁻½=pow(G, 0.5, -0.5)
          return ℍ(G½ * exp(ℍ(G⁻½ * S * G⁻½)) * G½)
@@ -1736,7 +1787,7 @@ end
 
 
 """
-    vecP(S::ℍ)
+    vecP(S::ℍ{T}) where T<:RealOrComplex
 
  *Vectorize* a tangent vector (which is an `Hermitian` matrix) ``S``:  mat -> vec.
 
@@ -1760,11 +1811,12 @@ end
     # vectorize S
     v=vecP(S)
 """
-vecP(S::ℍ)=[(if i==j return S[i, j] else return (S[i, j])*sqrt2 end) for j=1:size(S, 2) for i=j:size(S, 1)]
+vecP(S::ℍ{T}) where T<:RealOrComplex =
+    [(if i==j return S[i, j] else return (S[i, j])*sqrt2 end) for j=1:size(S, 2) for i=j:size(S, 1)]
 
 
 """
-    matP(ς::Vector)
+    matP(ς::Vector{T}) where T<:RealOrComplex
 
  *Matrizize* a tangent vector (vector) ς :  vec -> mat.
 
@@ -1793,9 +1845,9 @@ vecP(S::ℍ)=[(if i==j return S[i, j] else return (S[i, j])*sqrt2 end) for j=1:s
     # Get the point in the tangent space
     S=matP(z)
 """
-function matP(ς::Vector)
+function matP(ς::Vector{T}) where T<:RealOrComplex
   n=Int((-1+√(1+8*length(ς)))/2) # Size of the matrix whose vectorization vector v has size length(v)
-  S=Matrix{eltype(ς)}(undef, n, n)
+  S=Matrix{T}(undef, n, n)
   l=0
   for j in 1:n-1
     l=l+1
@@ -1816,7 +1868,7 @@ end
 # -----------------------------------------------------------
 
 """
-    procrustes(P::ℍ, Q::ℍ, extremum="min")
+    procrustes(P::ℍ{T}, Q::ℍ{T}, extremum="min") where T<:RealOrComplex
 
  Given two positive definite matrices ``P`` and ``Q``,
  return by default the solution of problem
@@ -1859,7 +1911,7 @@ end
     # argmax problem
     V=procrustes(P, Q, "max")
 """
-function procrustes(P::ℍ, Q::ℍ, extremum="min")
+function procrustes(P::ℍ{T}, Q::ℍ{T}, extremum="min") where T<:RealOrComplex
     Pup=eigvecs(P)
     Qup=eigvecs(Q)
     Pdown=reverse(Pup, dims=(2))
