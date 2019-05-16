@@ -112,8 +112,8 @@ To see the list of metrics in type `Metric` use:
    `𝕄Vector₂=Vector{𝕄Vector}`
 
  This is a vector of [𝕄Vector type](@ref) objects,
- i.e., a vector of vectors of Matrices.
- It is the alias of `MAtrixVector₂`.
+ i.e., a vector of vectors of matrices.
+ It is the alias of `MatrixVector₂`.
  Julia sees it as: `Array{Array{Array{T,2} where T,1},1}`.
 
 !!! warning "Nota bene"
@@ -195,7 +195,7 @@ To see the list of metrics in type `Metric` use:
 
     `ℍVector₂=Vector{ℍVector}`
 
- is a vector of [ℍVector type](@ref)
+ This is a vector of [ℍVector type](@ref)
  objects, i.e., a vector of vectors of `Hermitian` matrices.
  It is the alias of `HermitianVector₂`.
  Julia sees it as: `Array{Array{Hermitian,1},1}`.
@@ -203,7 +203,7 @@ To see the list of metrics in type `Metric` use:
 !!! warning "Nota bene"
     This object is meant to hold matrices living in the same manifold,
     therefore it is assumed by all methods that all matrices it holds are of the same dimension.
-    However the several `𝕃Vector` objects it holds do not need to have the same length.
+    However the several `ℍVector` objects it holds do not need to have the same length.
 
  **See** [`dim`](@ref), [`typeofMatrix`](@ref)
 
@@ -218,23 +218,19 @@ To see the list of metrics in type `Metric` use:
  This is the [Union](https://docs.julialang.org/en/v1/base/base/#Core.Union)
  of real or complex `Diagonal`, `LowerTriangular`, `Hermitian` and `Matrix` types. It is often used in the definition of functions.
 
- **See** [aliases](ref)
+ **See** [aliases](@ref)
 
 #### AnyMatrixVector type
    `AnyMatrixVector=Union{𝕄Vector, 𝔻Vector, 𝕃Vector, ℍVector}`
 
- This is the [Union](https://docs.julialang.org/en/v1/base/base/#Core.Union) of 𝕄Vector, 𝔻Vector, 𝕃Vector, ℍVector. It is often used in the definition of functions.
+ This is the [Union](https://docs.julialang.org/en/v1/base/base/#Core.Union) of 𝕄Vector, 𝔻Vector, 𝕃Vector and ℍVector. It is often used in the definition of functions.
  See [Array of Matrices types](@ref).
-
- **See** [Array of Matrices types](@ref).
 
  **AnyMatrixVector₂ type**
 
    `AnyMatrixVector₂=Union{𝕄Vector₂, 𝔻Vector₂, 𝕃Vector₂, ℍVector₂}`
 
  This is the [Union](https://docs.julialang.org/en/v1/base/base/#Core.Union) of 𝕄Vector₂, 𝔻Vector₂, 𝕃Vector₂, ℍVector₂. It is often used in the definition of functions. See [Array of Matrices types](@ref).
-
- **See** [AnyMatrixVector type](@ref).
 
 ### tips & tricks
 
