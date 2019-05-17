@@ -209,8 +209,8 @@ function geodesic(metric::Metric, D::𝔻{T}, E::𝔻{T}, a::Real) where T<:Real
             Z=(√D)b + (√E)a;     return Z*Z
 
     elseif  metric==logCholesky # ???
-            LD=sqrt(D)
-            LE=sqrt(E)
+            LD=√D
+            LE=√E
             Z=𝑓𝔻(x->x, LD)*exp((𝑓𝔻(log, LE)a-𝑓𝔻(log, LD)))
                                  return Z*Z
     elseif  metric==Wasserstein
@@ -350,9 +350,9 @@ function distanceSqr(metric::Metric, D::𝔻{T}) where T<:Real
 
     elseif metric==logdet0      return  max(z, logdet(0.5*(D+I)) - 0.5*logdet(D))
 
-    elseif metric==ChoEuclidean return  max(z, ssd(√(D)-I))
+    elseif metric==ChoEuclidean return  max(z, ssd(√D-I))
 
-    elseif metric==logCholesky  return  max(z, ssd(𝑓𝔻(log, √(D))))
+    elseif metric==logCholesky  return  max(z, ssd(𝑓𝔻(log, √D)))
 
     elseif metric==Jeffrey      return  max(z, 0.5*(tr(D) + tr(inv(D))) - size(D, 1))
 
@@ -578,7 +578,7 @@ function distanceSqrMat(type::Type{T}, metric::Metric, 𝐏::ℍVector;
            @threads for j=1:k 𝐏𝓵[j]=ℍ(log(𝐏[j])); v[j]=tr(𝐏[j], 𝐏𝓵[j]) end
            @threads for r=1:m for j in R[r], i=j+1:k △[i, j]=0.5*real(v[i]+v[j]-tr(𝐏[i], 𝐏𝓵[j])-tr(𝐏[j], 𝐏𝓵[i])) end end
        else
-           𝐏𝓵=[ℍ(log(P)) for P in 𝐏] # map(ℍ, map(log, 𝐏))
+           𝐏𝓵=[ℍ(log(P)) for P in 𝐏]
            v=[tr(𝐏[i], 𝐏𝓵[i]) for i=1:length(𝐏)]
            for j=1:k-1, i=j+1:k △[i, j]=0.5*real(v[i]+v[j]-tr(𝐏[i], 𝐏𝓵[j])-tr(𝐏[j], 𝐏𝓵[i])) end
        end
@@ -715,14 +715,14 @@ function laplacian(Δ²::𝕃{T}) where T<:Real
     # 1/sqrt of the row (or col) sum of L+L'-diag(L) using only L
     D=Vector{T}(undef, r)
     for i=1:r
-        D[i]=0.
-        for j=1:i D[i]+=Ω[i, j] end
-        for l=i+1:r D[i]+=Ω[l, i] end # conj(L[l, i]) for complex matrices
-        D[i]=1/√(D[i])
+        D[i]=T(0)
+        for j=1:i   D[i] += Ω[i, j] end
+        for l=i+1:r D[i] += Ω[l, i] end # conj(L[l, i]) for complex matrices
+        D[i]=1/√D[i]
     end
     # D * (L+L'-diag(L))* D using only L
     for j=1:r, i=j:r Ω[i, j]*=D[i]*D[j] end
-    return Ω #ℍ(D * W * D) # Ω, see laplacianEigenMaps
+    return Ω # see laplacianEigenMaps
 end
 
 
@@ -972,13 +972,13 @@ function mean(metric::Metric, 𝐏::ℍVector;
 
     # iterative solutions
     if  metric == Fisher
-            (G, iter, conv)=gMean(𝐏; w=w, ✓w=✓w);       return G end
+            (G, iter, conv) = gMean(𝐏; w=w, ✓w=✓w);   return G end
 
     if  metric == logdet0
-            (G, iter, conv)=logdet0Mean(𝐏; w=w, ✓w=✓w); return G end
+            (G, iter, conv) = ld0Mean(𝐏; w=w, ✓w=✓w); return G end
 
     if  metric == Wasserstein
-            (G, iter, conv)=wasMean(𝐏; w=w, ✓w=✓w);     return G end
+            (G, iter, conv) = wasMean(𝐏; w=w, ✓w=✓w); return G end
 
     # closed-form expressions and exit
     k, n = dim(𝐏, 1), dim(𝐏, 2)
@@ -1026,7 +1026,7 @@ function mean(metric::Metric, 𝐃::𝔻Vector;
 
     # iterative solutions
     if metric == logdet0
-            (G, iter, conv)=logdet0Mean(𝐃; w=w, ✓w=✓w); return G end
+            (G, iter, conv)=ld0Mean(𝐃; w=w, ✓w=✓w); return G end
 
     k, n = dim(𝐃, 1), dim(𝐃, 2)
     isempty(w) ? nothing : v = _getWeights(w, ✓w, k)
@@ -1189,10 +1189,10 @@ end # function
 
 """
     (1) geometricMean(𝐏::ℍVector;
-                     <w::Vector=[], ✓w=true, init=nothing, tol::Real=0, ⍰=false, ⏩=false>)
+            <w::Vector=[], ✓w=true, init=nothing, tol::Real=0, ⍰=false, ⏩=false>)
 
     (2) geometricMean(𝐃::𝔻Vector;
-                     <w::Vector=[], ✓w=true, init=nothing, tol::Real=0, ⍰=false>)
+            <w::Vector=[], ✓w=true, init=nothing, tol::Real=0, ⍰=false>)
 
  **alias**: `gmean`
 
@@ -1241,8 +1241,12 @@ end # function
     convergence criterion over two successive iterations to vanish for about
     half the significant digits minus 2.
 
- (2) Like method (1), but for a 1d array ``𝐃={D_1,...,D_k}`` of ``k``
+ (2) Like in (1), but for a 1d array ``𝐃={D_1,...,D_k}`` of ``k``
  real positive definite diagonal matrices of [𝔻Vector type](@ref).
+ In this case the solution is available in closed-form as the log Euclidean
+ mean, hence the *<optional keyword arguments*> `init`, `tol` and `⍰`
+ have no effect and return the 3-tuple ``(G, 1, 0)``.
+ See the [log Euclidean](@ref) metric.
 
  **See**: [Fisher](@ref) metric.
 
@@ -1284,26 +1288,25 @@ function geometricMean(𝐏::ℍVector;
     k, n, type = dim(𝐏, 1), dim(𝐏, 2), eltype(𝐏[1])
     maxiter, iter, conv, oldconv = 500, 1, 0., maxpos
     ⏩ && k>2 && nthreads() > 1 ? threaded=true : threaded=false
-    tol==0 ? tolerance = √eps(real(type))*1e2 : tolerance = tol
     isempty(w) ? v=[] : v = _getWeights(w, ✓w, k)
-    init == nothing ? M = mean(Jeffrey, 𝐏; w=v, ✓w=false) : M = ℍ(init)
+    init == nothing ? M = mean(logEuclidean, 𝐏; w=v, ✓w=false) : M = ℍ(init)
+    tol==0 ? tolerance = √eps(real(type))*1e2 : tolerance = tol
     💡 = similar(M, type)
-    if threaded S, 𝐐 = similar(M, type), similar(𝐏) end
+    if threaded 𝐐 = similar(𝐏) end
     ⍰ && threaded && @info("Iterating multi-threaded geometricMean Fixed-Point...")
     ⍰ && !threaded && @info("Iterating geometricMean Fixed-Point...")
 
     while true
-        M½, M⁻½=pow(M, 0.5, -0.5)
+        M½, M⁻½ = pow(M, 0.5, -0.5)
         #M -< M^1/2 {  exp[epsilon( 1/n{sum(i=1 to n) ln(M^-1/2 Mi M^-1/2)} )] } M^1/2
         if threaded
             if isempty(w)
                 @threads for i=1:k 𝐐[i] = log(ℍ(M⁻½*𝐏[i]*M⁻½)) end
-                S=ℍ(𝛍(𝐐))
+                💡 = ℍ(M½*exp(ℍ(𝛍(𝐐)))*M½)
             else
                 @threads for i=1:k 𝐐[i] = v[i]*log(ℍ(M⁻½*𝐏[i]*M⁻½)) end
-                S=ℍ(𝚺(𝐐))
+                💡 = ℍ(M½*exp(ℍ(𝚺(𝐐)))*M½)
             end
-            💡 = ℍ(M½*exp(S)*M½)
         else
             if isempty(w)
                 💡 = ℍ(M½*exp(ℍ(𝛍(log(ℍ(M⁻½*P*M⁻½)) for P in 𝐏)))*M½)
@@ -1331,17 +1334,17 @@ geometricMean(𝐃::𝔻Vector;
 
 gMean=geometricMean
 
-"""
-    (1) logdet0Mean(𝐏::ℍVector;
-                   <w::Vector=[], ✓w=true, init=nothing, tol::Real=0, ⍰=false>)
 
-    (2) logdet0Mean(𝐃::𝔻Vector;
-                   <w::Vector=[], ✓w=true, init=nothing, tol::Real=0, ⍰=false>)
+"""
+    logdet0Mean(𝐏::Union{ℍVector, 𝔻Vector};
+        <w::Vector=[], ✓w=true, init=nothing, tol::Real=0, ⍰=false, ⏩=false>)
 
  **alias**: `ld0Mean`
 
- (1) Given a 1d array ``𝐏={P_1,...,P_k}`` of ``k`` positive definite matrices of
- [ℍVector type](@ref) and optional non-negative real weights vector ``w={w_1,...,w_k}``,
+ Given a 1d array ``𝐏={P_1,...,P_k}`` of ``k`` positive definite matrices of
+ [ℍVector type](@ref) or real positive definite diagonal matrices of
+ [𝔻Vector type](@ref) and optional
+ non-negative real weights vector ``w={w_1,...,w_k}``,
  return the 3-tuple ``(G, iter, conv)``, where ``G`` is the mean according
  to the [logdet zero](@ref) metric and ``iter``, ``conv`` are the number of iterations
  and convergence attained by the algorithm.
@@ -1350,7 +1353,7 @@ gMean=geometricMean
  ``\\sum_{i=1}^{k}w_i\\big(\\frac{1}{2}P_i+\\frac{1}{2}G\\big)^{-1}=G^{-1}``.
 
  For estimating it, this function implements the fixed-point iteration algorithm
-suggested by (Moakher, 2012, p315)[🎓](@ref), yielding iterations
+ suggested by (Moakher, 2012, p315)[🎓](@ref), yielding iterations
 
  ``G ← \\frac{1}{2}\\big(\\sum_{i=1}^{k}w_i(P_i+G)^{-1}\\big)^{-1}``.
 
@@ -1367,6 +1370,13 @@ suggested by (Moakher, 2012, p315)[🎓](@ref), yielding iterations
  - `init` is a matrix to be used as initialization for the mean. If no matrix is provided, the [log Euclidean](@ref) mean will be used,
  - `tol` is the tolerance for the convergence (see below).
  - if `⍰` is true, the convergence attained at each iteration is printed.
+ - if ⏩=true the iterations are multi-threaded.
+
+!!! warning "Multi-Threading"
+    [Multi-threading](https://docs.julialang.org/en/v1/manual/parallel-computing/#Multi-Threading-(Experimental)-1)
+    is still experimental in julia. You should check the result on each computer.
+    Multi-threading is automatically disabled if `k<3` or if Julia
+    uses only one thread. See [Threads](@ref).
 
 !!! note "Nota Bene"
     In normal circumstances this algorithm converges monothonically.
@@ -1377,9 +1387,6 @@ suggested by (Moakher, 2012, p315)[🎓](@ref), yielding iterations
     real type of data input ``𝐏``. This corresponds to requiring the relative
     convergence criterion over two successive iterations to vanish for about
     half the significant digits minus 2.
-
- (2) Like method (1), but for a 1d array ``𝐃={D_1,...,D_k}`` of ``k``
- real positive definite diagonal matrices of [𝔻Vector type](@ref).
 
  **See**: [logdet zero](@ref) metric, [modified Bhattacharyya mean](@ref).
 
@@ -1407,20 +1414,43 @@ suggested by (Moakher, 2012, p315)[🎓](@ref), yielding iterations
     Pset[1]=ℍ(Pset[1]+(randP(3)/100))
     G, iter, conv = logdet0Mean(Pset; w=weights, ✓w=false, ⍰=true, init=G)
 
+    # run multi-threaded when the number of matrices is high
+    using BenchmarkTools
+    Pset=randP(20, 160)
+    @benchmark(logdet0Mean(Pset)) # single-threaded
+    @benchmark(logDet0Mean(Pset; ⏩=true)) # multi-threaded
 """
 function logdet0Mean(𝐏::Union{ℍVector, 𝔻Vector};
-                     w::Vector=[], ✓w=true, init=nothing, tol::Real=0, ⍰=false)
+         w::Vector=[], ✓w=true, init=nothing, tol::Real=0, ⍰=false, ⏩=false)
     𝕋=typeofMatrix(𝐏)
     k, n, type = dim(𝐏, 1), dim(𝐏, 2), eltype(𝐏[1])
     maxiter, iter, conv, oldconv, l = 500, 1, 0., maxpos, k/2
+    ⏩ && k>2 && nthreads() > 1 ? threaded=true : threaded=false
     isempty(w) ? v=[] : v = _getWeights(w, ✓w, k)
     init == nothing ? M = mean(logEuclidean, 𝐏; w=v, ✓w=false) : M = 𝕋(init)
-    💡 = similar(M, type)
     tol==0 ? tolerance = √eps(real(type))*1e2 : tolerance = tol
-    ⍰ && @info("Iterating logDet0Mean Fixed-Point...")
+    💡 = similar(M, type)
+    if threaded 𝐐 = similar(𝐏) end
+    ⍰ && threaded && @info("Iterating multi-threaded logDet0Mean Fixed-Point...")
+    ⍰ && !threaded && @info("Iterating logDet0Mean Fixed-Point...")
 
     while true
-        isempty(w) ? 💡 = l * inv(𝕋(𝚺(inv(𝕋(P+M)) for P in 𝐏))) : 💡 = 0.5 * inv(𝕋(𝚺(ω * inv(𝕋(P+M)) for (ω, P) in zip(v, 𝐏))))
+        if threaded
+            if isempty(w)
+                @threads for i=1:k 𝐐[i] = inv(𝕋(𝐏[i]+M)) end
+                💡 = l * inv(𝕋(𝚺(𝐐)))
+            else
+                @threads for i=1:k 𝐐[i] = v[i]*inv(𝕋(𝐏[i]+M)) end
+                💡 = 0.5 * inv(𝕋(𝚺(𝐐)))
+            end
+        else
+            if isempty(w)
+                💡 = l * inv(𝕋(𝚺(inv(𝕋(P+M)) for P in 𝐏)))
+            else
+                💡 = 0.5 * inv(𝕋(𝚺(ω * inv(𝕋(P+M)) for (ω, P) in zip(v, 𝐏))))
+            end
+        end
+
         conv = √norm(💡-M)/norm(M)
         ⍰ && println("iteration: ", iter, "; convergence: ", conv)
         (diverging = conv > oldconv) && ⍰ && @warn("logdet0Mean diverged at:", iter)
@@ -1438,7 +1468,7 @@ ld0Mean=logdet0Mean
 
 """
     (1) wasMean(𝐏::ℍVector;
-            <w::Vector=[], ✓w=true, init=nothing, tol::Real=0, ⍰=false>)
+            <w::Vector=[], ✓w=true, init=nothing, tol::Real=0, ⍰=false, ⏩=false>)
 
     (2) wasMean(𝐃::𝔻Vector;
             <w::Vector=[], ✓w=true, init=nothing, tol::Real=0, ⍰=false>)
@@ -1470,6 +1500,13 @@ ld0Mean=logdet0Mean
  - `init` is a matrix to be used as initialization for the mean. If no matrix is provided, the instance of [generalized means](@ref) with ``p=0.5`` will be used,
  - `tol` is the tolerance for the convergence (see below).
  - if `⍰` is true, the convergence attained at each iteration is printed.
+ - if ⏩=true the iterations are multi-threaded.
+
+!!! warning "Multi-Threading"
+    [Multi-threading](https://docs.julialang.org/en/v1/manual/parallel-computing/#Multi-Threading-(Experimental)-1)
+    is still experimental in julia. You should check the result on each computer.
+    Multi-threading is automatically disabled if `k<3` or if Julia
+    uses only one thread. See [Threads](@ref).
 
 !!! note "Nota Bene"
     In normal circumstances this algorithm converges monothonically.
@@ -1513,26 +1550,46 @@ ld0Mean=logdet0Mean
     Pset[1]=ℍ(Pset[1]+(randP(3)/100))
     G, iter, conv = wasMean(Pset; w=weights, ⍰=true, init=G)
 
+    # run multi-threaded when the number of matrices is high
+    using BenchmarkTools
+    Pset=randP(20, 160)
+    @benchmark(wasMean(Pset)) # single-threaded
+    @benchmark(wasMean(Pset; ⏩=true)) # multi-threaded
+
 """
 function wasMean(𝐏::ℍVector;
-                 w::Vector=[], ✓w=true, init=nothing, tol::Real=0, ⍰=false)
+         w::Vector=[], ✓w=true, init=nothing, tol::Real=0, ⍰=false, ⏩=false)
+
     k, n, type = dim(𝐏, 1), dim(𝐏, 2), eltype(𝐏[1])
-    iter, conv, oldconv, maxiter = 1, 0., maxpos, 500
+    maxiter, iter, conv, oldconv = 500, 1, 0., maxpos
+    ⏩ && k>2 && nthreads() > 1 ? threaded=true : threaded=false
     isempty(w) ? v=[] : v = _getWeights(w, ✓w, k)
     init == nothing ? M = generalizedMean(𝐏, 0.5; w=v, ✓w=false) : M = ℍ(init)
-    💡 = similar(M, type)
     tol==0 ? tolerance = √eps(real(type))*1e2 : tolerance = tol
-    ⍰ && @info("Iterating wasMean Fixed-Point...")
+    💡 = similar(M, type)
+    if threaded 𝐐 = similar(𝐏) end
+    ⍰ && threaded && @info("Iterating multi-threaded wasMean Fixed-Point...")
+    ⍰ && !threaded && @info("Iterating wasMean Fixed-Point...")
 
     while true
-        S, W=pow(M, 0.5, -0.5)
-        if isempty(w)
-            💡 = ℍ(W * sqr(ℍ(𝛍(sqrt(ℍ(S*P*S)) for P in 𝐏))) * W)
+        M½, M⁻½ = pow(M, 0.5, -0.5)
+        if threaded
+            if isempty(w)
+                @threads for i=1:k 𝐐[i] = √(ℍ(M½*𝐏[i]*M½)) end
+                💡 = ℍ(M⁻½ * sqr(𝛍(𝐐)) * M⁻½)
+            else
+                @threads for i=1:k 𝐐[i] = v[i]*√(ℍ(M½*𝐏[i]*M½)) end
+                💡 = ℍ(M⁻½ * sqr(𝚺(𝐐)) * M⁻½)
+            end
         else
-            💡 = ℍ(W * sqr(ℍ(𝚺((sqrt(ℍ(S*P*S)) * ω) for (ω, P) in zip(v, 𝐏)))) * W)
+            if isempty(w)
+                💡 = ℍ(M⁻½ * sqr(𝛍(√(ℍ(M½*P*M½)) for P in 𝐏)) * M⁻½)
+            else
+                💡 = ℍ(M⁻½ * sqr(𝚺((√(ℍ(M½*P*M½)) * ω) for (ω, P) in zip(v, 𝐏))) * M⁻½)
+            end
         end
-        conv = √norm(💡-M)/norm(M)
 
+        conv = √norm(💡-M)/norm(M)
         ⍰ && println("iteration: ", iter, "; convergence: ", conv)
         (diverging = conv > oldconv) && ⍰ && @warn("wasMean diverged at:", iter)
         (overRun = iter == maxiter) && @warn("wasMean reached the max number of iterations before convergence:", iter)
@@ -1551,7 +1608,7 @@ wasMean(𝐃::𝔻Vector;
 
 """
     (1) powerMean(𝐏::ℍVector, p::Real;
-             <w::Vector=[], ✓w=true, init=nothing, tol::Real=0, ⍰=false>)
+             <w::Vector=[], ✓w=true, init=nothing, tol::Real=0, ⍰=false, ⏩=false>)
 
     (2) powerMean(𝐃::𝔻Vector, p::Real;
              <w::Vector=[], ✓w=true, init=nothing, tol::Real=0, ⍰=false>)
@@ -1597,6 +1654,13 @@ wasMean(𝐃::𝔻Vector;
  - `init` is a matrix to be used as initialization for the mean. If no matrix is provided, the instance of [generalized means](@ref) with parameter ``p`` will be used.
  - `tol` is the tolerance for the convergence (see below).
  - if `⍰` is true, the convergence attained at each iteration is printed.
+ - if ⏩=true the iterations are multi-threaded.
+
+!!! warning "Multi-Threading"
+    [Multi-threading](https://docs.julialang.org/en/v1/manual/parallel-computing/#Multi-Threading-(Experimental)-1)
+    is still experimental in julia. You should check the result on each computer.
+    Multi-threading is automatically disabled if `k<3` or if Julia
+    uses only one thread. See [Threads](@ref).
 
 !!! note "Nota Bene"
     In normal circumstances this algorithm converges monothonically.
@@ -1640,9 +1704,15 @@ wasMean(𝐃::𝔻Vector;
     Pset[1]=ℍ(Pset[1]+(randP(3)/100))
     G, iter, conv = powerMean(Pset, 0.5; w=weights, ⍰=true, init=G)
 
+    # run multi-threaded when the number of matrices is high
+    using BenchmarkTools
+    Pset=randP(20, 160)
+    @benchmark(powerMean(Pset, 0.5)) # single-threaded
+    @benchmark(powerMean(Pset, 0.5; ⏩=true)) # multi-threaded
+
 """
 function powerMean(𝐏::ℍVector, p::Real;
-                   w::Vector=[], ✓w=true, init=nothing, tol::Real=0, ⍰=false)
+         w::Vector=[], ✓w=true, init=nothing, tol::Real=0, ⍰=false, ⏩=false)
 
   if ! (-1<=p<=1)
        @error("The parameter p for power means must be in range [-1...1]")
@@ -1652,8 +1722,8 @@ function powerMean(𝐏::ℍVector, p::Real;
        return (mean(invEuclidean, 𝐏; w=w, ✓w=✓w), 1, 0)
     elseif p ≈ 0
        LE=mean(logEuclidean, 𝐏, w=w, ✓w=✓w)
-       P, iter1, conv1=powerMean(𝐏,  0.01; w=w, ✓w=✓w, init=LE, tol=tol, ⍰=⍰)
-       Q, iter2, conv2=powerMean(𝐏, -0.01; w=w, ✓w=✓w, init=P, tol=tol, ⍰=⍰)
+       P, iter1, conv1=powerMean(𝐏,  0.01; w=w, ✓w=✓w, init=LE, tol=tol, ⍰=⍰, ⏩=⏩)
+       Q, iter2, conv2=powerMean(𝐏, -0.01; w=w, ✓w=✓w, init=P, tol=tol, ⍰=⍰, ⏩=⏩)
        return (geodesic(Fisher, P, Q,  0.5), iter1+iter2, (conv1+conv2)/2)
 
     elseif p ≈ 1
@@ -1662,31 +1732,47 @@ function powerMean(𝐏::ℍVector, p::Real;
        # Set Parameters
        k, n, absp, type = dim(𝐏, 1), dim(𝐏, 2), abs(p), eltype(𝐏[1])
        sqrtn, maxiter, iter, conv, oldconv, r = √n, 500, 1, 0., maxpos, -0.375/absp
-       w≠[] ? v = _getWeights(w, ✓w, k) : v=[]
+       ⏩ && k>2 && nthreads() > 1 ? threaded=true : threaded=false
+       isempty(w) ? v=[] : v = _getWeights(w, ✓w, k)
        init == nothing ? M = generalizedMean(𝐏, p; w=v, ✓w=false) : M = ℍ(init)
        p<0 ? X=ℍ(M^(0.5)) : X=ℍ(M^(-0.5))
        💡, H, 𝒫 = similar(X, type), similar(X, type), similar(𝐏)
        p<0 ? 𝒫=[inv(P) for P in 𝐏] : 𝒫=𝐏
        tol==0 ? tolerance = √eps(real(type))*1e2 : tolerance = tol
-       ⍰ && @info("Iterating powerMean Fixed-Point...")
+       if threaded 𝐐 = similar(𝐏) end
+       ⍰ && threaded && @info("Iterating multi-threaded powerMean Fixed-Point...")
+       ⍰ && !threaded && @info("Iterating powerMean Fixed-Point...")
 
        while true
-          if isempty(w)
-              H=𝛍(pow(ℍ(X*P*X), absp) for P in 𝒫)
-          else
-              H=𝚺(ω*pow(ℍ(X*P*X), absp) for (ω, P) in zip(v, 𝒫))
-          end
-          💡 = (pow(ℍ(H), r))*X
-          conv = √norm(H-I)/sqrtn # relative difference to identity
-          ⍰ && println("iteration: ", iter, "; convergence: ", conv)
-          (diverging = conv > oldconv) && ⍰ && @warn("powerMean diverged at:", iter)
-          (overRun = iter == maxiter) && @warn("powerMean: reached the max number of iterations before convergence:", iter)
-          conv <= tolerance || overRun==true ? break : X = 💡
-          oldconv=conv
-          iter += 1
-        end # while
-    end # if
+           if threaded
+               if isempty(w)
+                   @threads for i=1:k 𝐐[i] = ℍ(X*𝒫[i]*X')^absp end
+                   H=𝛍(𝐐)
+                   💡 = ℍ(H)^r * X
+               else
+                   @threads for i=1:k 𝐐[i] = v[i] * ℍ(X*𝒫[i]*X')^absp end
+                   H=𝚺(𝐐)
+                   💡 = ℍ(H)^r * X
+               end
+           else
+               if isempty(w)
+                   H=𝛍(ℍ(X*P*X')^absp for P in 𝒫)
+               else
+                   H=𝚺(ω * ℍ(X*P*X')^absp for (ω, P) in zip(v, 𝒫))
+               end
+               💡 = ℍ(H)^r * X
+           end
 
+       conv = √norm(H-I)/sqrtn # relative difference to identity
+       ⍰ && println("iteration: ", iter, "; convergence: ", conv)
+       (diverging = conv > oldconv) && ⍰ && @warn("powerMean diverged at:", iter)
+       (overRun = iter == maxiter) && @warn("powerMean: reached the max number of iterations before convergence:", iter)
+       conv <= tolerance || overRun==true ? break : X = 💡
+       oldconv=conv
+       iter += 1
+       end # while
+
+    end # if
     p<0 ? (return ℍ((💡)'*💡), iter, conv) : (return inv(ℍ((💡)'*💡)), iter, conv)
   end # if !(-1<=p<=1)
 end
