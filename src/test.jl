@@ -480,23 +480,35 @@ function tests();
     spectralEmbedding(logEuclidean, 𝐏, 2); RUN()
 
 
-    name="mean I"; newTest(name);
-    (mean(m, P, Q) for m in metrics); RUN()
-    (mean(m, 𝐏) for m in metrics); RUN()
-    (mean(m, PC, QC) for m in metrics); RUN()
-    (mean(m, 𝐏C) for m in metrics); RUN()
-    (mean(m, 𝐃) for m in metrics); RUN()
-    name="mean II"; newTest(name);
+    name="mean (I)"; newTest(name);
+    for m=1:length(metrics)
+            if m ∉ (7, 9) mean(metrics[m], P, Q) end end; RUN()
+    for m=1:length(metrics)
+            if m ∉ (6, 7, 9, 10) mean(metrics[m], 𝐏) end end; RUN()
+    for m=1:length(metrics)
+            if m ∉ (7, 9) mean(metrics[m], PC, QC) end end; RUN()
+    for m=1:length(metrics)
+            if m ∉ (6, 7, 9, 10) mean(metrics[m], 𝐏C) end end; RUN()
+    for m=1:length(metrics)
+            if m ∉ (6, 7, 9, 10) mean(metrics[m], 𝐃) end end; RUN()
+
+    name="mean (II)"; newTest(name);
     k=length(𝐃)
-    for m in metrics
-        if string(m)≠"VonNeumann"
-            D1=mean(m, 𝐃)
+    for m=1:length(metrics)
+        if m ∉ (6, 7, 9, 10)
+            D1=mean(metrics[m], 𝐃)
             𝐃H=Vector{Hermitian}(undef, k)
             for i=1:k 𝐃H[i]=Hermitian(Matrix(𝐃[i])) end
-            D2=mean(m, 𝐃H)
+            D2=mean(metrics[m], 𝐃H)
             norm(𝕄(D1)-𝕄(D2))/k<0.0001 ? OK() : OH(name*" Real Diagonal Input, metric "*string(m))
         end
     end
+
+    name="mean (⏩ )"; newTest(name);
+    for m=1:length(metrics)
+            if m ∉ (6, 7, 9, 10) mean(metrics[m], 𝐏; ⏩=true) end end; RUN()
+    for m=1:length(metrics)
+            if m ∉ (7, 9) mean(metrics[m], 𝐃; ⏩=true) end end; RUN()
 
 
     name="means"; newTest(name);
@@ -525,6 +537,13 @@ function tests();
     ℍ( (ℍ(0.4*PC_^p)+ℍ(1.6*QC_^p))  )^(1/p) ≈ generalizedMean(𝐏2, p; w=w, ✓w=false) ? OK() : OH(name*" Complex Input 5")
     ((𝐃[1]^p+𝐃[2]^p)/2)^(1/p) ≈ generalizedMean(𝔻Vector([𝐃[1], 𝐃[2]]), p) ? OK() : OH(name*" Real Diagonal Input")
 
+    name="generalizedMean(⏩ )"; newTest(name);
+    generalizedMean(𝐏, 0.5; ⏩=true); RUN()
+    generalizedMean(𝐏, 0.5; w=weights, ✓w=false, ⏩=true); RUN()
+    generalizedMean(𝐏C, 0.5; ⏩=true); RUN()
+    generalizedMean(𝐏C, 0.5; w=weights, ✓w=false, ⏩=true); RUN()
+    generalizedMean(𝐃, 0.5; ⏩=true); RUN()
+    generalizedMean(𝐃, 0.5; w=weights, ✓w=false, ⏩=true); RUN()
 
 
     name="geometricMean"; newTest(name);
@@ -540,6 +559,8 @@ function tests();
     geometricMean(𝐏; w=weights, ✓w=false, ⏩=true); RUN()
     geometricMean(𝐏C; ⏩=true); RUN()
     geometricMean(𝐏C; w=weights, ✓w=false, ⏩=true); RUN()
+    geometricMean(𝐃; ⏩=true); RUN()
+    geometricMean(𝐃, w=weights, ✓w=false, ⏩=true); RUN()
 
     name="logdet0Mean"; newTest(name);
     w=[0.5, 0.5]
@@ -559,6 +580,14 @@ function tests();
     ldG, iter, conv = logdet0Mean(𝔻Vector([𝐃[1], 𝐃[2]])) # logdet0 mean for k=2
     GM ≈ ldG ? OK() : OH(name*" Real Diagonal Input")
 
+    name="logdet0Mean(⏩ )"; newTest(name);
+    logdet0Mean(𝐏; ⏩=true); RUN()
+    logdet0Mean(𝐏; w=weights, ✓w=false, ⏩=true); RUN()
+    logdet0Mean(𝐏C; ⏩=true); RUN()
+    logdet0Mean(𝐏C; w=weights, ✓w=false, ⏩=true); RUN()
+    logdet0Mean(𝐃; ⏩=true); RUN()
+    logdet0Mean(𝐃, w=weights, ✓w=false, ⏩=true); RUN()
+
 
     name="wasMean"; newTest(name);
     wasMean(𝐏); RUN()
@@ -568,6 +597,15 @@ function tests();
     wasMean(𝐃); RUN()
     wasMean(𝐃; w=weights); RUN()
 
+    name="wasMean(⏩ )"; newTest(name);
+    wasMean(𝐏; ⏩=true); RUN()
+    wasMean(𝐏; w=weights, ✓w=false, ⏩=true); RUN()
+    wasMean(𝐏C; ⏩=true); RUN()
+    wasMean(𝐏C; w=weights, ✓w=false, ⏩=true); RUN()
+    wasMean(𝐃; ⏩=true); RUN()
+    wasMean(𝐃, w=weights, ✓w=false, ⏩=true); RUN()
+
+
 
     name="powerMean"; newTest(name);
     powerMean(𝐏, 0.5); RUN()
@@ -576,6 +614,14 @@ function tests();
     powerMean(𝐏C, 0.5; w=weights); RUN()
     powerMean(𝐃, 0.5); RUN()
     powerMean(𝐃, 0.5; w=weights); RUN()
+
+    name="powerMean(⏩ )"; newTest(name);
+    powerMean(𝐏, 0.5; ⏩=true); RUN()
+    powerMean(𝐏, 0.5; w=weights, ✓w=false, ⏩=true); RUN()
+    powerMean(𝐏C, 0.5; ⏩=true); RUN()
+    powerMean(𝐏C, 0.5; w=weights, ✓w=false, ⏩=true); RUN()
+    powerMean(𝐃, 0.5; ⏩=true); RUN()
+    powerMean(𝐃, 0.5, w=weights, ✓w=false, ⏩=true); RUN()
 
 
     name="logMap"; newTest(name);
