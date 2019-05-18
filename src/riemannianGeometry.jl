@@ -1422,7 +1422,7 @@ function geometricMean(𝐏::ℍVector;
     maxiter, iter, conv, oldconv = 500, 1, 0., maxpos
     ⏩ && k>2 && nthreads() > 1 ? threaded=true : threaded=false
     isempty(w) ? v=[] : v = _getWeights(w, ✓w, k)
-    init == nothing ? M = mean(logEuclidean, 𝐏; w=v, ✓w=false) : M = ℍ(init)
+    init == nothing ? M = mean(logEuclidean, 𝐏; w=v, ✓w=false, ⏩=⏩) : M = ℍ(init)
     tol==0 ? tolerance = √eps(real(type))*1e2 : tolerance = tol
     💡 = similar(M, type)
     if threaded 𝐐 = similar(𝐏) end
@@ -1556,12 +1556,13 @@ gMean=geometricMean
 """
 function logdet0Mean(𝐏::Union{ℍVector, 𝔻Vector};
          w::Vector=[], ✓w=true, init=nothing, tol::Real=0, ⍰=false, ⏩=false)
+
     𝕋=typeofMatrix(𝐏)
     k, n, type = dim(𝐏, 1), dim(𝐏, 2), eltype(𝐏[1])
     maxiter, iter, conv, oldconv, l = 500, 1, 0., maxpos, k/2
     ⏩ && k>2 && nthreads() > 1 ? threaded=true : threaded=false
     isempty(w) ? v=[] : v = _getWeights(w, ✓w, k)
-    init == nothing ? M = mean(logEuclidean, 𝐏; w=v, ✓w=false) : M = 𝕋(init)
+    init == nothing ? M = mean(logEuclidean, 𝐏; w=v, ✓w=false, ⏩=⏩) : M = 𝕋(init)
     tol==0 ? tolerance = √eps(real(type))*1e2 : tolerance = tol
     💡 = similar(M, type)
     if threaded 𝐐 = similar(𝐏) end
@@ -1698,7 +1699,7 @@ function wasMean(𝐏::ℍVector;
     maxiter, iter, conv, oldconv = 500, 1, 0., maxpos
     ⏩ && k>2 && nthreads() > 1 ? threaded=true : threaded=false
     isempty(w) ? v=[] : v = _getWeights(w, ✓w, k)
-    init == nothing ? M = generalizedMean(𝐏, 0.5; w=v, ✓w=false) : M = ℍ(init)
+    init == nothing ? M = generalizedMean(𝐏, 0.5; w=v, ✓w=false, ⏩=⏩) : M = ℍ(init)
     tol==0 ? tolerance = √eps(real(type))*1e2 : tolerance = tol
     💡 = similar(M, type)
     if threaded 𝐐 = similar(𝐏) end
@@ -1858,22 +1859,22 @@ function powerMean(𝐏::ℍVector, p::Real;
   else
 
     if p ≈-1
-       return (mean(invEuclidean, 𝐏; w=w, ✓w=✓w), 1, 0)
+       return (mean(invEuclidean, 𝐏; w=w, ✓w=✓w, ⏩=⏩), 1, 0)
     elseif p ≈ 0
-       LE=mean(logEuclidean, 𝐏, w=w, ✓w=✓w)
+       LE=mean(logEuclidean, 𝐏, w=w, ✓w=✓w, ⏩=⏩)
        P, iter1, conv1=powerMean(𝐏,  0.01; w=w, ✓w=✓w, init=LE, tol=tol, ⍰=⍰, ⏩=⏩)
        Q, iter2, conv2=powerMean(𝐏, -0.01; w=w, ✓w=✓w, init=P, tol=tol, ⍰=⍰, ⏩=⏩)
        return (geodesic(Fisher, P, Q,  0.5), iter1+iter2, (conv1+conv2)/2)
 
     elseif p ≈ 1
-       return (mean(Euclidean, 𝐏; w=w, ✓w=✓w), 1, 0)
+       return (mean(Euclidean, 𝐏; w=w, ✓w=✓w, ⏩=⏩), 1, 0)
     else
        # Set Parameters
        k, n, absp, type = dim(𝐏, 1), dim(𝐏, 2), abs(p), eltype(𝐏[1])
        sqrtn, maxiter, iter, conv, oldconv, r = √n, 500, 1, 0., maxpos, -0.375/absp
        ⏩ && k>2 && nthreads() > 1 ? threaded=true : threaded=false
        isempty(w) ? v=[] : v = _getWeights(w, ✓w, k)
-       init == nothing ? M = generalizedMean(𝐏, p; w=v, ✓w=false) : M = ℍ(init)
+       init == nothing ? M = generalizedMean(𝐏, p; w=v, ✓w=false, ⏩=⏩) : M = ℍ(init)
        p<0 ? X=ℍ(M^(0.5)) : X=ℍ(M^(-0.5))
        💡, H, 𝒫 = similar(X, type), similar(X, type), similar(𝐏)
        p<0 ? 𝒫=[inv(P) for P in 𝐏] : 𝒫=𝐏
