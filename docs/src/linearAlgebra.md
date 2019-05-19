@@ -119,7 +119,7 @@ mgs
 
 | Function   | Description |
 |:---------- |:----------- |
-| [`fVec`](@ref) | general function for multi-threaded computation of means and sums of matrix vectors|
+| [`fVec`](@ref) | General function for multi-threaded computation of means and sums of matrix vectors|
 
 ⋅
 
