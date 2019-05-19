@@ -999,8 +999,8 @@ end # mgs function
  normalizing the same weights vector each time. By default `✓w` is false.
 
 !!! note "Nota Bene"
-    Contrarily to Julia *mean* and *sum* function (v 1.1.0) the `fVec` function
-    returns a matrix of the same type of the matrices in 𝐏.
+    Contrarily to Julia `mean` and `sum` function (v 1.1.0) the `fVec` function
+    returns a matrix of the same type of the matrices in ``𝐏``.
 
  ## Examples
 
