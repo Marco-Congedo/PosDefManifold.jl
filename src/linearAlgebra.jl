@@ -109,6 +109,7 @@ typeofMat=typeofMatrix
 
  Return the type of a Vector, either `HermitianVector`,
  `DiagonalVector`, `LowerTriangularVector`, or `MatrixVector`.
+ The aliases of those are, respectvely, ℍVector, 𝔻Vector, 𝕃Vector and 𝕄Vector.
  Argument `array` may be a vector of one of these types, but also one of the following:
 
  ℍVector₂, 𝔻Vector₂, 𝕃Vector₂, 𝕄Vector₂.
@@ -119,7 +120,7 @@ typeofMat=typeofMatrix
  Note that this function is different from Julia function
  [typeof](https://docs.julialang.org/en/v1/base/base/#Core.typeof)
  only in that it returns the vector type also for
- ℍVector₂, 𝔻Vector₂, 𝕃Vector₂ and 𝕄Vector₂ types.
+ the ℍVector₂, 𝔻Vector₂, 𝕃Vector₂ and 𝕄Vector₂ types.
 
  ## Examples
     using LinearAlgebra, PosDefManifold
@@ -954,10 +955,10 @@ end # mgs function
 
 """
 	(1) fVec(f::Function, 𝐏::AnyMatrixVector;
-		 	<w::Vector=[], ✓w=false, threads=0, allocs=[]>)
+		 	<w::Vector=[], ✓w=false, allocs=[]>)
 
 	(2) fVec(f::Function, g::Function, 𝐏::AnyMatrixVector;
-			<w::Vector=[], ✓w=false, threads=0, allocs=[]>)
+			<w::Vector=[], ✓w=false, allocs=[]>)
 
 
  Given a 1d array ``𝐏={P_1,...,P_k}`` of ``k`` matrices
@@ -965,17 +966,17 @@ end # mgs function
  [ℍVector type](@ref) and an optional non-negative real weights vector
  ``w={w_1,...,w_k}``, return expression
 
- ``(1) f_{i=1}^{k}(w_iP_i)``,
+ ``(1)\\hspace{6pt}f_{i=1}^{k}(w_iP_i)``,
 
  or
 
- ``(2) f_{i=1}^{k}(w_ig(P_i))``,
+ ``(2)\\hspace{6pt}f_{i=1}^{k}(w_ig(P_i))``,
 
  where ``f`` is a linear matrix function iterating over all elements of ``𝐏``,
- typically the `mean` or `sum` function and `g` is whatever matrix function
- applying to each matrix ``P_k``, such as ``exp``, ``log``, ``sqrt``, etc.
+ typically the `mean` or `sum` function and ``g`` is whatever matrix function
+ applying to each matrix ``P_k``, such as `exp`, `log, `sqrt, etc.
 
- This function is multi-threaded. It works by partitioning the ``k``
+ This function is always **multi-threaded**. It works by partitioning the ``k``
  operations required by the ``f`` function in several groups,
  passing each group to a separate thread and applying the ``f`` function
  again on the intermediate results (that's why ``f`` must be linear).
@@ -984,19 +985,22 @@ end # mgs function
  For the number of threads Julia is instructed to use see [Threads](@ref).
 
  *<optional keword argument>* `allocs` allows to pass pre-allocated memory
- for holding the intermediate result of each thread (see example). This is
- worthwhile only if the size of the matrices is very high and/or when `fVec`
- is to be called repeatedly on many vector of matrices whenever the matrices
- have the same size (so that one allocation works for all calls).
+ for holding the intermediate result of each thread.
+ Argument `allocs` must be a vector of as many matrices as threads and where
+ the matrices have the same dimension as the the matrices in ``𝐏``
+ (see the example here below). Using this option is worthwhile only
+ if the size of the matrices is very high and/or when `fVec` is to be
+ called repeatedly on many vector of matrices where the matrices
+ have the same size, so that one allocation works for all calls.
 
  If *<optional keyword argument>* `✓w=true` is passed, the weights are
  normalized so as to sum up to 1, otherwise they are used as they are passed.
  This option is provided to allow calling this function repeatedly without
- normalizing the same weights vector each time.
+ normalizing the same weights vector each time. By default `✓w` is false.
 
 !!! note "Nota Bene"
-	Contrarily to Julia `mean` or `sum` function (v 1.1.0) the `fVec` function
-	returns a matric of the same type of the matrices in ``𝐏``.
+	Contrarily to Julia *mean* and *sum* function (v 1.1.0) the `fVec` function
+	returns a matrix of the same type of the matrices in 𝐏.
 
  ## Examples
 
