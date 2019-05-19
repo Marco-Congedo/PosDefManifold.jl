@@ -47,10 +47,10 @@ end
 function _fVec_common(𝐏::AnyMatrixVector;
 					  w::Vector=[], ✓w=false, allocs=[])
 	threads=nthreads()
-    k, n = dim(𝐏, 1), dim(𝐏, 2)
+	k, n = dim(𝐏, 1), dim(𝐏, 2)
 	isempty(w) ? v=[] : v = _getWeights(w, ✓w, k)
-    threads==1 || k<threads*4 && @warn fVecMsg threads k
-	#allocs==[] ? 𝐐=𝕄Vector([𝕄{type}(undef, n, n) for i=1:thr]) : 𝐐=allocs
+	threads==1 || k<threads*4 && @warn fVecMsg threads k
+	#allocs==[] ? 𝐐=𝕄Vector([𝕄{type}(undef, n, n) for i=1:threads]) : 𝐐=allocs
 	allocs==[] ? 𝐐=𝕄Vector(repeat([𝐏[1]], threads)) : 𝐐=allocs
 	return (_partitionLinRange4threads(k, threads), 𝐐, v)
 end
