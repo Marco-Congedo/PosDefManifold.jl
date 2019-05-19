@@ -330,10 +330,10 @@ To see the list of metrics in type `Metric` use:
     A=typeofMatrix(P)(M)
 
 #### Threads
-Some functions in **PosDefManifold** call BLAS routines for optimal performnce.
-This is reported in the help section of the concerned functions.
-In most functions julia calls BLAS routines automatically.
-You can set the number of threads
+Some functions in **PosDefManifold** explicitly call BLAS routines
+for optimal performnce. This is reported in the help section of the
+concerned functions. Most functions calls BLAS routine implicitly
+via Julia. You can set the number of threads
 the BLAS library should use by:
 
     using LinearAlgebra
@@ -341,11 +341,17 @@ the BLAS library should use by:
 
 where `n` is the number of threads.
 By default, **PosDefManifold** reserves to BLAS
-all CPU threads available on your computer (given by the output of `Sys.CPU_THREADS`) minus the number threads used by Julia
+all CPU threads available on your computer (given by the output of `Sys.CPU_THREADS`)
+minus the number threads used by Julia
 for multi-threaded computations (given by the output of `Threads.nthreads()`).
-In Linux and OSX this latter number of threads defaults to one and is controlled by an environment variable, i.e.,
+In Windows this latter number of threads is set to hals the avaiable threads.
+In Linux and OSX defaults to one and is controlled by an environment variable, i.e.,
 
    `export JULIA_NUM_THREADS=4`
 
 See this [post](https://discourse.julialang.org/t/issue-number-of-threads/14593), this [post](https://discourse.julialang.org/t/customize-number-of-threads-interactively/11574/2) and julia
 [doc on threads](https://docs.julialang.org/en/v1/manual/parallel-computing/#Multi-Threading-(Experimental)-1).
+
+Notice that **PosDefManifold** features many multi-threaded functions and these
+may allow a gain in computation time only if Julia is instructed to use
+at least two threads.
