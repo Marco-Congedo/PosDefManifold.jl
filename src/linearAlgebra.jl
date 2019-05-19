@@ -168,7 +168,7 @@ typeofVec=typeofVector
  `vector` and `vector₂` are [Array of Matrices types](@ref).
  See also [aliases](@ref) for the symbols `ℍ`, `𝔻`, `𝕃` and `𝕄`.
 
-!!! note "nota bene"
+!!! note "Nota Bene"
     If you specify a dimension and this is out of the valid range,
     the function returns zero.
 
@@ -999,8 +999,8 @@ end # mgs function
  normalizing the same weights vector each time. By default `✓w` is false.
 
 !!! note "Nota Bene"
-	Contrarily to Julia *mean* and *sum* function (v 1.1.0) the `fVec` function
-	returns a matrix of the same type of the matrices in 𝐏.
+    Contrarily to Julia *mean* and *sum* function (v 1.1.0) the `fVec` function
+    returns a matrix of the same type of the matrices in 𝐏.
 
  ## Examples
 
@@ -1052,7 +1052,7 @@ function fVec(f::Function, 𝐏::AnyMatrixVector;
 	ranges, 𝐐, v = _fVec_common(𝐏; w=w, ✓w=✓w, allocs=allocs)
 	l=length(ranges) # number of threads
 	if isempty(w)
-    	@threads for r=1:l 𝐐[r]=f(𝐏[i] for i in ranges[r]) end
+		@threads for r=1:l 𝐐[r]=f(𝐏[i] for i in ranges[r]) end
 	else
 		@threads for r=1:l 𝐐[r]=f(v[i]*𝐏[i] for i in ranges[r]) end
 	end
@@ -1065,7 +1065,7 @@ function fVec(f::Function, g::Function, 𝐏::AnyMatrixVector;
 	ranges, 𝐐, v = _fVec_common(𝐏; w=w, ✓w=✓w, allocs=allocs)
 	l=length(ranges) # number of threads
 	if isempty(w)
-    	@threads for r=1:l 𝐐[r]=f(g(𝐏[i]) for i in ranges[r]) end
+		@threads for r=1:l 𝐐[r]=f(g(𝐏[i]) for i in ranges[r]) end
 	else
 		@threads for r=1:l 𝐐[r]=f(v[i]*g(𝐏[i]) for i in ranges[r]) end
 	end
