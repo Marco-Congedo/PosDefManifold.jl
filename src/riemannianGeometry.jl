@@ -1013,67 +1013,46 @@ function mean(metric::Metric, 𝐏::ℍVector;
     # closed-form expressions and exit
     k, n, thr = dim(𝐏, 1), dim(𝐏, 2), nthreads()
     ⏩ && k>=thr*4 && thr > 1 ? threaded=true : threaded=false
-    metric ∈ (ChoEuclidean, logCholesky) && typeofMatrix(𝐏)<:ℍ ? tri=true : tri=false
-    threaded && (tri ? 𝐐 = 𝕃Vector(undef, k) : 𝐐 = similar(𝐏))
+    threaded && metric == logCholesky ? 𝐐 = 𝕃Vector(undef, k) : nothing
     isempty(w) ? v=[] : v = _getWeights(w, ✓w, k)
 
-    if  metric == Euclidean # threaded here does not apply
-        isempty(w) ? (return ℍ(𝛍(𝐏))) : (return ℍ(𝚺(map(*, v, 𝐏))))
+    if  metric == Euclidean
+        if threaded
+            isempty(w) ? (return fVec(𝛍, 𝐏)) : (return fVec(𝛍, 𝐏; w=v))
+        else
+            isempty(w) ? (return ℍ(𝛍(𝐏))) : (return ℍ(𝚺(map(*, v, 𝐏))))
+        end
 
     elseif metric == invEuclidean
         if threaded
-            if isempty(w)
-                @threads for i=1:k 𝐐[i] = inv(𝐏[i]) end
-                return inv(ℍ(𝛍(𝐐)))
-            else
-                @threads for i=1:k 𝐐[i] = v[i] * inv(𝐏[i]) end
-                return inv(ℍ(𝚺(𝐐)))
-            end
+            if isempty(w) return inv(fVec(𝛍, inv, 𝐏))
+            else          return inv(fVec(𝚺, inv, 𝐏; w=v)) end
         else
-            if isempty(w)
-                return inv(ℍ(𝛍(inv, 𝐏)))
-            else
-                return inv(ℍ(𝚺(map(*, v, map(inv, 𝐏)))))
-            end
+            if isempty(w) return inv(ℍ(𝛍(inv, 𝐏)))
+            else          return inv(ℍ(𝚺(map(*, v, map(inv, 𝐏))))) end
         end
 
     elseif metric == logEuclidean
         if threaded
-            if isempty(w)
-                @threads for i=1:k 𝐐[i] = log(𝐏[i]) end
-                return ℍ(exp(ℍ(𝛍(𝐐))))
-            else
-                @threads for i=1:k 𝐐[i] = v[i] * log(𝐏[i]) end
-                return ℍ(exp(ℍ(𝚺(𝐐))))
-            end
+            if isempty(w) return ℍ(exp(fVec(𝛍, log, 𝐏)))
+            else          return ℍ(exp(fVec(𝚺, log, 𝐏; w=v))) end
         else
-            if isempty(w)
-                return ℍ(exp(ℍ(𝛍(log, 𝐏))))
-            else
-                return ℍ(exp(ℍ(𝚺(map(*, v, map(log, 𝐏))))))
-            end
+            if isempty(w) return ℍ(exp(ℍ(𝛍(log, 𝐏))))
+            else          return ℍ(exp(ℍ(𝚺(map(*, v, map(log, 𝐏)))))) end
         end
 
     elseif metric == ChoEuclidean
         if threaded
-            if isempty(w)
-                @threads for i=1:k 𝐐[i] = choL(𝐏[i]) end
-                L=𝛍(𝐐)
-            else
-                @threads for i=1:k 𝐐[i] = v[i] * choL(𝐏[i]) end
-                L=𝚺(𝐐)
-            end
+            if isempty(w) L=fVec(𝛍, choL, 𝐏)
+            else          L=fVec(𝚺, choL, 𝐏; w=v) end
         else
             isempty(w) ? L = 𝛍(choL, 𝐏) : L = 𝚺(map(*, v, map(choL, 𝐏)))
         end
         return ℍ(L*L')
 
     elseif metric == logCholesky
-        if threaded
-            @threads for i=1:k 𝐐[i] = choL(𝐏[i]) end
-        else
-            𝐐=map(choL, 𝐏)
-        end
+        if threaded       @threads for i=1:k 𝐐[i] = choL(𝐏[i]) end
+        else             𝐐=map(choL, 𝐏) end
 
         if isempty(w)
             Z=𝛍(tril(L,-1) for L in 𝐐) + exp(𝛍(𝑓𝔻(log, L) for L in 𝐐))
@@ -1104,56 +1083,37 @@ function mean(metric::Metric, 𝐃::𝔻Vector;
     # closed-form expressions and exit
     k, n, thr = dim(𝐃, 1), dim(𝐃, 2), nthreads()
     ⏩ && k>=thr*4 && thr > 1 ? threaded=true : threaded=false
-    if threaded 𝐄 = similar(𝐃) end
     isempty(w) ? v=[] : v = _getWeights(w, ✓w, k)
 
-    if     metric == Euclidean # threaded here does not apply
-        if isempty(w) return 𝛍(𝐃) else return 𝚺(map(*, v, 𝐃)) end
+    if     metric == Euclidean
+        if threaded
+            if isempty(w) return fVec(𝛍, 𝐃) else return fVec(𝚺, 𝐃; w=v) end
+        else
+            if isempty(w) return 𝛍(𝐃) else return 𝚺(map(*, v, 𝐃)) end
+        end
 
     elseif metric == invEuclidean
         if threaded
-            if isempty(w)
-                @threads for i=1:k 𝐄[i] = inv(𝐃[i]) end
-                return inv(𝛍(𝐄))
-            else
-                @threads for i=1:k 𝐄[i] = v[i] * inv(𝐃[i]) end
-                return inv(𝚺(𝐄))
-            end
+            if isempty(w) return inv(fVec(𝛍, inv, 𝐃))
+            else          return inv(fVec(𝚺, inv, 𝐃; w=v)) end
         else
-            if isempty(w)
-                return inv(𝛍(inv, 𝐃))
-            else
-                return inv(𝚺(map(*, v, map(inv, 𝐃))))
-            end
+            if isempty(w) return inv(𝛍(inv, 𝐃))
+            else          return inv(𝚺(map(*, v, map(inv, 𝐃)))) end
         end
-
 
     elseif metric in (logEuclidean, Fisher, logCholesky)
         if threaded
-            if isempty(w)
-                @threads for i=1:k 𝐄[i] = log(𝐃[i]) end
-                return exp(𝛍(𝐄))
-            else
-                @threads for i=1:k 𝐄[i] = v[i] * log(𝐃[i]) end
-                return exp(𝚺(𝐄))
-            end
+            if isempty(w) return exp(fVec(𝛍, log, 𝐃))
+            else          return exp(fVec(𝚺, log, 𝐃; w=v)) end
         else
-            if isempty(w)
-                return exp(𝛍(log, 𝐃))
-            else
-                return exp(𝚺(map(*, v, map(log, 𝐃))))
-            end
+            if isempty(w) return exp(𝛍(log, 𝐃))
+            else          return exp(𝚺(map(*, v, map(log, 𝐃)))) end
         end
 
     elseif metric == ChoEuclidean
         if threaded
-            if isempty(w)
-                @threads for i=1:k 𝐄[i] = √(𝐃[i]) end
-                L=𝛍(𝐄)
-            else
-                @threads for i=1:k 𝐄[i] = v[i] * √(𝐃[i]) end
-                L=𝚺(𝐄)
-            end
+            if isempty(w) L=fVec(𝛍, sqrt, 𝐃)
+            else          L=fVec(𝚺, sqrt, 𝐃; w=v) end
         else
             isempty(w) ? L = 𝛍(sqrt, 𝐃) : L = 𝚺(map(*, v, map(sqrt, 𝐃)))
         end
@@ -1303,24 +1263,14 @@ function generalizedMean(𝐏::Union{ℍVector, 𝔻Vector}, p::Real;
     else
         k, n, thr = dim(𝐏, 1), dim(𝐏, 2), nthreads()
         ⏩ && k>=thr*4 && thr > 1 ? threaded=true : threaded=false
-        if threaded 𝐐 = similar(𝐏) end
+        isempty(w) ? v=[] : v = _getWeights(w, ✓w, k)
 
         if threaded
-            if isempty(w)
-                @threads for i=1:k 𝐐[i] = 𝐏[i]^p end
-                return 𝕋(𝛍(𝐐))^(1/p)
-            else
-                v=_getWeights(w, ✓w, k)
-                @threads for i=1:k 𝐐[i] = v[i] * 𝐏[i]^p end
-                return 𝕋(𝚺(𝐐))^(1/p)
-            end
+            if isempty(w) return (fVec(𝛍, x->x^p, 𝐏))^(1/p)
+            else          return (fVec(𝚺, x->x^p, 𝐏; w=v))^(1/p) end
         else
-            if isempty(w)
-                return 𝕋(𝛍(P^p for P in 𝐏))^(1/p)
-            else
-                v=_getWeights(w, ✓w, k)
-                return 𝕋(𝚺(ω*P^p for (ω, P) in zip(v, 𝐏)))^(1/p)
-            end
+            if isempty(w) return 𝕋(𝛍(P^p for P in 𝐏))^(1/p)
+            else          return 𝕋(𝚺(ω*P^p for (ω, P) in zip(v, 𝐏)))^(1/p) end
         end
     end # if p
 end # function
