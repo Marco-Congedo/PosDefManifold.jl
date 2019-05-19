@@ -858,7 +858,8 @@ end
 !!! note "Nota Bene"
     The function `func` must support the `func.` syntax and therefore
     must be able to apply element-wise to the elements of the chosen diagonal
-    (this includes anonymous functions). If the input matrix is complex, the function `func`
+    (this includes [anonymous functions](https://docs.julialang.org/en/v1/manual/functions/#man-anonymous-functions-1)).
+	If the input matrix is complex, the function `func`
     must be able to support complex arguments.
 
  **See also**: [`DiagOfProd`](@ref), [`tr`](@ref).
@@ -974,7 +975,8 @@ end # mgs function
 
  where ``f`` is a linear matrix function iterating over all elements of ``𝐏``,
  typically the `mean` or `sum` function and ``g`` is whatever matrix function
- applying to each matrix ``P_k``, such as `exp`, `log, `sqrt`, etc.
+ applying to each matrix ``P_k``, such as `exp`, `log, `sqrt`, etc,
+ and [anonymous functions](https://docs.julialang.org/en/v1/manual/functions/#man-anonymous-functions-1).
 
  This function is always **multi-threaded**. It works by partitioning the ``k``
  operations required by the ``f`` function in several groups,
@@ -1138,7 +1140,7 @@ end
 !!! note "Nota Bene"
     The function `func` must support the `func.` syntax and therefore
     must be able to apply element-wise to the eigenvalues
-    (those include anonymous functions).
+    (those include [anonymous functions](https://docs.julialang.org/en/v1/manual/functions/#man-anonymous-functions-1)).
 
  ### Maths
 

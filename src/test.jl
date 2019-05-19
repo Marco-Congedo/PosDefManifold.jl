@@ -230,6 +230,16 @@ function tests();
 
     ## 7. Matrix function of matrices
 
+    name="fVec"; newTest(name)
+    Pset=randP(4, 64)
+    mean(Pset)≈fVec(mean, Pset) ? OK() : OH(name*" simple mean, real")
+    mean(sqrt, Pset)≈fVec(mean, sqrt, Pset) ? OK() : OH(name*" mean, sqrt, real")
+    fVecw=(randn(64)).^2
+    fVecw=fVecw./sum(fVecw) # generate normalized random weights
+    mean(Pset[i]*fVecw[i] for i=1:64)≈fVec(mean, Pset; w=fVecw) ? OK() : OH(name*" simple weighted mean, real")
+    mean(sqrt(Pset[i])*fVecw[i] for i=1:64)≈fVec(mean, sqrt, Pset; w=fVecw) ? OK() : OH(name*" weighted mean, sqrt, real")
+
+
     ## 8. Spectral decompositions of positive matrices
 
     name="evd"; newTest(name)
