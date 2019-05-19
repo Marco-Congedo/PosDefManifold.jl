@@ -974,7 +974,7 @@ end # mgs function
 
  where ``f`` is a linear matrix function iterating over all elements of ``𝐏``,
  typically the `mean` or `sum` function and ``g`` is whatever matrix function
- applying to each matrix ``P_k``, such as `exp`, `log, `sqrt, etc.
+ applying to each matrix ``P_k``, such as `exp`, `log, `sqrt`, etc.
 
  This function is always **multi-threaded**. It works by partitioning the ``k``
  operations required by the ``f`` function in several groups,
@@ -990,8 +990,8 @@ end # mgs function
  the matrices have the same dimension as the the matrices in ``𝐏``
  (see the example here below). Using this option is worthwhile only
  if the size of the matrices is very high and/or when `fVec` is to be
- called repeatedly on many vector of matrices where the matrices
- have the same size, so that one allocation works for all calls.
+ called repeatedly on many vector of matrices, where the matrices
+ have always the same size, so that one allocation works for all calls.
 
  If *<optional keyword argument>* `✓w=true` is passed, the weights are
  normalized so as to sum up to 1, otherwise they are used as they are passed.
