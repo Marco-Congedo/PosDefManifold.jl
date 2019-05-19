@@ -11,19 +11,52 @@
 #   of Symmetric Positive Definite (SPD) or Hermitian matrices.
 #
 #   CONTENT
-#   0. Utilities
-#   1. Matrix normalizations
-#   2. Boolean functions of matrices
-#   3. Scalar functions of matrices
-#   4. Diagonal functions of matrices
-#   5. Unitary functions of matrices
-#   6. Matrix function of matrices
-#   7. Spectral decompositions of positive matrices
-#   8. Decompositions involving triangular matrices
+#   0. Internal functions
+#   1. Utilities
+#   2. Matrix normalizations
+#   3. Boolean functions of matrices
+#   4. Scalar functions of matrices
+#   5. Diagonal functions of matrices
+#   6. Unitary functions of matrices
+#   7. Matrix function of matrices
+#   8. Spectral decompositions of positive matrices
+#   9. Decompositions involving triangular matrices
 # __________________________________________________________________
 
+# -----------------------------------------------------------
+# 0. Internal Functions
+#    By convention their name begin with underscore char
+# -----------------------------------------------------------
+
+# return a vector of ranges partitioning lineraly and
+# as much as possible evenly `n` elements in `threads` ranges.
+# `threads` is the number of threads to which the ranges are to be
+# dispatched. If `threads` is not provided, it is set to the number
+# of threads Julia is currently instructed to use.
+# For example, for `k`=99
+# and `threads`=4, return Array{UnitRange{Int64},1}:[1:25, 26:50, 51:75, 76:99].
+# This function is called by threaded function `fVec`
+function _partitionLinRange4threads(n::Int, threads::Int=0)
+    threads==0 ? thr=nthreads() : thr=threads
+    n<thr ? thr = n : nothing
+    d = max(round(Int64, n / thr), 1)
+    return [(r<thr ? (d*r-d+1:d*r) : (d*thr-d+1:n)) for r=1:thr]
+end
+
+# used by function fvec
+function _fVec_common(𝐏::AnyMatrixVector;
+					  w::Vector=[], ✓w=false, allocs=[])
+	threads=nthreads()
+    k, n = dim(𝐏, 1), dim(𝐏, 2)
+	isempty(w) ? v=[] : v = _getWeights(w, ✓w, k)
+    threads==1 || k<threads*4 && @warn fVecMsg threads k
+	#allocs==[] ? 𝐐=𝕄Vector([𝕄{type}(undef, n, n) for i=1:thr]) : 𝐐=allocs
+	allocs==[] ? 𝐐=𝕄Vector(repeat([𝐏[1]], threads)) : 𝐐=allocs
+	return (_partitionLinRange4threads(k, threads), 𝐐, v)
+end
+
 #  ------------------------
-## 0. Utilities
+## 1. Utilities
 #  ------------------------
 """
     function typeofMatrix(array::Union{ AnyMatrix,
@@ -66,6 +99,40 @@ typeofMatrix(D::Union{𝔻, 𝔻Vector, 𝔻Vector₂}) = 𝔻
 typeofMatrix(L::Union{𝕃, 𝕃Vector, 𝕃Vector₂}) = 𝕃
 typeofMatrix(M::Union{𝕄, 𝕄Vector, 𝕄Vector₂}) = 𝕄
 typeofMat=typeofMatrix
+
+
+"""
+    function typeofVector(array::Union{ AnyMatrixVector,
+                                        AnyMatrixVector₂ })
+
+ **alias**: `typeofVec`
+
+ Return the type of a Vector, either `HermitianVector`,
+ `DiagonalVector`, `LowerTriangularVector`, or `MatrixVector`.
+ Argument `array` may be a vector of one of these types, but also one of the following:
+
+ ℍVector₂, 𝔻Vector₂, 𝕃Vector₂, 𝕄Vector₂.
+
+ Those are [Array of Matrices types](@ref).
+ See also [aliases](@ref) for the symbols `ℍ`, `𝔻`, `𝕃` and `𝕄`.
+
+ Note that this function is different from Julia function
+ [typeof](https://docs.julialang.org/en/v1/base/base/#Core.typeof)
+ only in that it returns the vector type also for
+ ℍVector₂, 𝔻Vector₂, 𝕃Vector₂ and 𝕄Vector₂ types.
+
+ ## Examples
+    using LinearAlgebra, PosDefManifold
+    P=randP(3, 4) # generate 4 3x3 Hermitian matrix
+    typeofMatrix(P) # returns `Array{Hermitian,1}`
+    typeof(P) # also returns `Array{Hermitian,1}`
+
+"""
+typeofVector(H::Union{ℍVector, ℍVector₂}) = ℍVector
+typeofVector(D::Union{𝔻Vector, 𝔻Vector₂}) = 𝔻Vector
+typeofVector(L::Union{𝕃Vector, 𝕃Vector₂}) = 𝕃Vector
+typeofVector(M::Union{𝕄Vector, 𝕄Vector₂}) = 𝕄Vector
+typeofVec=typeofVector
 
 
 """
@@ -171,7 +238,7 @@ dim(vector₂::AnyMatrixVector₂) =
     (length(vector₂), collect(length(vec) for vec in vector₂), size(vector₂[1][1], 1), size(vector₂[1][1], 2))
 
 #  ------------------------
-## 1. Matrix Normalizations
+## 2. Matrix Normalizations
 #  ------------------------
 
 """
@@ -308,7 +375,7 @@ normalizeCol!(X::𝕄{T}, range::UnitRange, by::Number) where T<:RealOrComplex =
 
 
 #  -------------------------------
-## 2. Boolean Functions of Matrices
+## 3. Boolean Functions of Matrices
 #  -------------------------------
 
 """
@@ -370,7 +437,7 @@ ispos(Λ::Diagonal{T}; tol::Real=0, rev=true, 🔔=true, msg="") where T<:Real =
 
 
 #  -------------------------------
-## 3. Scalar functions of matrices
+## 4. Scalar functions of matrices
 #  -------------------------------
 
 """
@@ -760,7 +827,7 @@ end
 
 
 #  ---------------------------------
-## 4. Diagonal functions of matrices
+## 5. Diagonal functions of matrices
 #  ---------------------------------
 """
     fDiag(func::Function, X::AnyMatrix, k::Int=0)
@@ -840,7 +907,7 @@ dop=DiagOfProd
 
 
 #  -------------------------------
-## 5. Unitary functions of matrices
+## 6. Unitary functions of matrices
 #  -------------------------------
 """
     mgs(X::𝕄{T}, numCol::Int=0) where T<:RealOrComplex
@@ -880,9 +947,129 @@ function mgs(X::𝕄{T}, numCol::Int=0) where T<:RealOrComplex
     return U
 end # mgs function
 
+
 #  ------------------------------
-## 6. Matrix function of matrices
+## 7. Matrix function of matrices
 #  ------------------------------
+
+"""
+	(1) fVec(f::Function, 𝐏::AnyMatrixVector;
+		 	<w::Vector=[], ✓w=false, threads=0, allocs=[]>)
+
+	(2) fVec(f::Function, g::Function, 𝐏::AnyMatrixVector;
+			<w::Vector=[], ✓w=false, threads=0, allocs=[]>)
+
+
+ Given a 1d array ``𝐏={P_1,...,P_k}`` of ``k`` matrices
+ of the [𝕄Vector type](@ref), [𝔻Vector type](@ref), [𝕃Vector type](@ref) or
+ [ℍVector type](@ref) and an optional non-negative real weights vector
+ ``w={w_1,...,w_k}``, return expression
+
+ ``(1) f_{i=1}^{k}(w_iP_i)``,
+
+ or
+
+ ``(2) f_{i=1}^{k}(w_ig(P_i))``,
+
+ where ``f`` is a linear matrix function iterating over all elements of ``𝐏``,
+ typically the `mean` or `sum` function and `g` is whatever matrix function
+ applying to each matrix ``P_k``, such as ``exp``, ``log``, ``sqrt``, etc.
+
+ This function is multi-threaded. It works by partitioning the ``k``
+ operations required by the ``f`` function in several groups,
+ passing each group to a separate thread and applying the ``f`` function
+ again on the intermediate results (that's why ``f`` must be linear).
+ This function allows a gain in computational time only when the number of
+ matrices (1) and/or their size (2) is high. Use `mean` and `sum` otherwise.
+ For the number of threads Julia is instructed to use see [Threads](@ref).
+
+ *<optional keword argument>* `allocs` allows to pass pre-allocated memory
+ for holding the intermediate result of each thread (see example). This is
+ worthwhile only if the size of the matrices is very high and/or when `fVec`
+ is to be called repeatedly on many vector of matrices whenever the matrices
+ have the same size (so that one allocation works for all calls).
+
+ If *<optional keyword argument>* `✓w=true` is passed, the weights are
+ normalized so as to sum up to 1, otherwise they are used as they are passed.
+ This option is provided to allow calling this function repeatedly without
+ normalizing the same weights vector each time.
+
+!!! note "Nota Bene"
+	Contrarily to Julia `mean` or `sum` function (v 1.1.0) the `fVec` function
+	returns a matric of the same type of the matrices in ``𝐏``.
+
+ ## Examples
+
+    using LinearAlgebra, PosDefManifold
+    Pset=randP(4, 1000); # generate 1000 positive definite 4x4 matrices
+	mean(Pset) # arithmetic mean calling Julia function
+	Threads.nthreads() # check that at least two threads are available
+	fVec(mean, Pset) multi-threaded arithmetic mean
+
+	inv(mean(inv, Pset)) # Harmonic mean calling Julia function
+	inv(fVec(mean, inv, Pset)) # multi-threaded Harmonic mean
+
+	exp(mean(log, Pset)) # log Euclidean mean calling Julia function
+	exp(fVec(mean, log, Pset)) # multi-threaded log Euclidean mean
+
+	# notice that Julia `exp` function has changed the type of the result
+	# to `Symmetric`. To obtain an `Hermitian` output use
+	ℍ(exp(fVec(mean, log, Pset)))
+
+	w=(randn(1000)).^2
+	w=w./sum(w)  		# generate normalized random weights
+
+	# weighted arithmetic mean calling Julia function
+	sum(Pset[i]*w[i] for i=1:length(w))
+	# multi-threaded weighted arithmetic mean
+	fVec(sum, Pset, w=w)
+
+	# weighted harmonic mean calling Julia function
+	inv(sum(inv(Pset[i])*w[i] for i=1:length(w)))
+	# multi-threaded weighted harmonic mean
+	inv(fVec(sum, inv, Pset, w=w))
+
+	# pre-allocating memory
+	Pset=randP(100, 1000); # generate 1000 positive definite 100x100 matrices
+	Qset=MatrixVector(repeat([Pset[1]], nthreads()))
+	fVec(mean, log, Pset, allocs=Qset)
+
+	# How much computing time we save ?
+	# (example min time obtained with 4 threads & 4 BLAS threads)
+	using BenchmarkTools
+	# standard Julia function
+	@benchmark(mean(log, Pset)) 					# (5.271 s)
+	# fVec
+	@benchmark(fVec(mean, log, Pset))				# (1.540 s)
+"""
+function fVec(f::Function, 𝐏::AnyMatrixVector;
+			  w::Vector=[], ✓w=false, allocs=[])
+
+	ranges, 𝐐, v = _fVec_common(𝐏; w=w, ✓w=✓w, allocs=allocs)
+	l=length(ranges) # number of threads
+	if isempty(w)
+    	@threads for r=1:l 𝐐[r]=f(𝐏[i] for i in ranges[r]) end
+	else
+		@threads for r=1:l 𝐐[r]=f(v[i]*𝐏[i] for i in ranges[r]) end
+	end
+    l==1 ? (return 𝐐[1]) : (return typeofMatrix(𝐏)(f(𝐐)))
+end
+
+function fVec(f::Function, g::Function, 𝐏::AnyMatrixVector;
+			  w::Vector=[], ✓w=false, allocs=[])
+
+	ranges, 𝐐, v = _fVec_common(𝐏; w=w, ✓w=✓w, allocs=allocs)
+	l=length(ranges) # number of threads
+	if isempty(w)
+    	@threads for r=1:l 𝐐[r]=f(g(𝐏[i]) for i in ranges[r]) end
+	else
+		@threads for r=1:l 𝐐[r]=f(v[i]*g(𝐏[i]) for i in ranges[r]) end
+	end
+    l==1 ? (return 𝐐[1]) : (return typeofMatrix(𝐏)(f(𝐐)))
+end
+fVecMsg="function fVec of linearAlgebra.jl (PosDefManifold): only one thread is used or the number of matrices (k) is too low for taking advantage of multi-threading"
+
+
 
 #  -----------------------------------------------
 ## 7. Spectral decompositions of positive matrices
@@ -1201,7 +1388,7 @@ powIter=powerIterations
 
 
 #  -----------------------------------------------
-## 8. Decompositions involving triangular matrices
+## 9. Decompositions involving triangular matrices
 #  -----------------------------------------------
 """
     (1) choL(P::ℍ{T}) where T<:RealOrComplex

@@ -85,14 +85,14 @@ function tests();
     # functions in LinearAlgebrainP.jl
     print("- Unit 'linearAlgebra.jl'")
 
-    ## 0. Utilities
+    ## 1. Utilities
     name="typeofMatrix"; newTest(name)
     typeofMatrix(𝐏); RUN()
 
     name="dim"; newTest(name)
     dim(𝐏); RUN()
 
-    ## 1. Matrix Normalizations
+    ## 2. Matrix Normalizations
 
     name="det1"; newTest(name)
     det(det1(P))  ≈ 1 ?  OK() : OH(name*" real case")
@@ -123,13 +123,13 @@ function tests();
     normalizeCol!(TC, 2:3, 2)
     norm(TC[:, 2])+norm(TC[:, 3]) ≈ 1 ? OK() : OH(name*" Method 4 complex case")
 
-    ## 2. Boolean functions of matrices
+    ## 3. Boolean functions of matrices
 
     name="ispos"; newTest(name)
     ispos(λ, 🔔=false) == false ? OK() : OH(name*" Method 1 real case")
     ispos(Λ, 🔔=false) == false ? OK() : OH(name*" Method 2 real case")
 
-    ## 3. Scalar Functions of Matrices
+    ## 4. Scalar Functions of Matrices
 
     name="colProd"; newTest(name)
     j1=1; j2=rand(2:n);
@@ -209,7 +209,7 @@ function tests();
     f=fidelity(PC, QC); RUN()
 
 
-    ## 4. Diagonal functions of matrices
+    ## 5. Diagonal functions of matrices
 
     name="fDiag"; newTest(name)
     D=fDiag(x->x^2, P_)
@@ -220,7 +220,7 @@ function tests();
     DiagOfProd(PC, QC)≈Diagonal(PC*QC) ? OK() : OH(name*" Complex Input")
 
 
-    ## 5. Unitary functions of matrices
+    ## 6. Unitary functions of matrices
 
     name="mgs"; newTest(name)
     U=mgs(X)
@@ -228,9 +228,9 @@ function tests();
     U=mgs(XC)
     U'*U≈I ? OK() : OH(name*" Complex Input")
 
-    ## 6. Matrix function of matrices
+    ## 7. Matrix function of matrices
 
-    ## 7. Spectral decompositions of positive matrices
+    ## 8. Spectral decompositions of positive matrices
 
     name="evd"; newTest(name)
     (Λ, U) = evd(P)
@@ -294,7 +294,7 @@ function tests();
     L*L'≈D_ ? OK() : OH(name*" Real Input method 2")
 
 
-    # 8. Decompositions involving triangular matrices
+    # 9. Decompositions involving triangular matrices
 
     # functions in SignalProcessinginP.jl
     println(" ")

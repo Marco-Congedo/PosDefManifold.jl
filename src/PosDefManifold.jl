@@ -112,6 +112,7 @@ export
 
     # from LinearAlgebra.jl
     typeofMatrix, typeofMat,
+    typeofVector, typeofVec,
     dim,
     det1,
     tr1,
@@ -127,6 +128,7 @@ export
     fDiag, 𝑓𝔻,
     DiagOfProd, dop,
     mgs,
+    fVec,
     evd,
     spectralFunctions,
     ispos,
