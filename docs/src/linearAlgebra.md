@@ -8,15 +8,15 @@
 
 | Category  | Output |
 |:---------- |:----------- |
-| 0. [Utilities](@ref)  | - - - |
-| 1. [Matrix normalizations](@ref) | matrix |
-| 2. [Boolean functions of matrices](@ref) | matrix |
-| 3. [Scalar functions of matrices](@ref) | scalar |
-| 4. [Diagonal functions of matrices](@ref) | diagonal matrix |
-| 5. [Unitary functions of matrices](@ref) | orthogonal/unitary matrix |
-| 6. [Matrix function of matrices](@ref) | matrix |
-| 7. [Spectral decompositions of positive matrices](@ref) | spectral function of input|
-| 8. [Decompositions involving triangular matrices](@ref) | triangular matrix |
+| 1. [Utilities](@ref)  | - - - |
+| 2. [Matrix normalizations](@ref) | matrix |
+| 3. [Boolean functions of matrices](@ref) | matrix |
+| 4. [Scalar functions of matrices](@ref) | scalar |
+| 5. [Diagonal functions of matrices](@ref) | diagonal matrix |
+| 6. [Unitary functions of matrices](@ref) | orthogonal/unitary matrix |
+| 7. [Matrix function of matrices](@ref) | matrix |
+| 8. [Spectral decompositions of positive matrices](@ref) | spectral function of input|
+| 9. [Decompositions involving triangular matrices](@ref) | triangular matrix |
 
 ⋅
 
@@ -25,6 +25,7 @@
 | Function   | Description |
 |:---------- |:----------- |
 | [`typeofMatrix`](@ref), `typeofMat` | Return the type of the matrix argument |
+| [`typeofVector`](@ref), `typeofVec` | Return the type of the matrix vector argument |
 | [`dim`](@ref)| length of the dimansions of matrices and vectors of matrices |
 
 
@@ -32,6 +33,7 @@
 
 ```@docs
 typeofMatrix
+typeofVector
 dim
 ```
 
@@ -117,11 +119,12 @@ mgs
 
 | Function   | Description |
 |:---------- |:----------- |
-| none for now | ipse lorem...|
+| [`fVec`](@ref) | general function for multi-threaded computation of means and sums of matrix vectors|
 
 ⋅
 
 ```@docs
+fVec
 ```
 
 ## Spectral decompositions of positive matrices

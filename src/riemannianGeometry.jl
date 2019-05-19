@@ -37,8 +37,9 @@ end
 
 
 # create t=nthreads() ranges partitioning the columns of a lower triangular
-# matrix {strictly lower is strictlyLower=true} in such a way that the t ranges
-# comprise a number of elements of the matrix as similar as possible to each other.
+# matrix of dimensions nxn {strictly lower if strictlyLower=true}
+# in such a way that the t ranges comprise a number of elements of the matrix
+# as similar as possible to each other.
 # The long line in the function is the zero of the derivative of the cost
 # function [n(x+1)+x(x+1)/2-n(n+1)/2t]²
 # { [n(x+1)+x(x+1)/2-n(n+1)/2t]² if the matrix is strictly lower triangular },
@@ -56,18 +57,18 @@ end
 # Threads.@threads for r=1:length(ranges) for k in ranges[r] ... end end
 function _partitionTril4threads(n::Int, strictlyLower::Bool=false)
     thr=nthreads()
-    n<thr ? thr=n : nothing
+    n<thr ? thr = n : nothing
     ranges=Vector(undef, thr)
     (a, b, i, k) = 4n^2, 4n, 1, 0
-    strictlyLower ? b=-b : nothing
+    strictlyLower ? b = -b : nothing
     for r=1:thr-1
         t = thr-r+1
-        j=Int(round(max(-((sqrt((a+b+1)t^2+(-a-b)t)+(-2n+1)t)/(2t)), 1)))
-        k+=j
-        ranges[r]=i:k
-        i=k+1
+        j = Int(round(max(-((sqrt((a+b+1)t^2+(-a-b)t)+(-2n+1)t)/(2t)), 1)))
+        k += j
+        ranges[r] = i:k
+        i = k+1
     end
-    ranges[thr]=i:n
+    ranges[thr] = i:n
     return ranges
 end
 
@@ -311,26 +312,26 @@ end # function
 function distanceSqr(metric::Metric, P::ℍ{T}) where T<:RealOrComplex
     z=real(T)(0)
 
-    if      metric==Euclidean       return max(z, ss(P-I))
+    if      metric==Euclidean    return max(z, ss(P-I))
 
-    elseif  metric==invEuclidean    return max(z, ss(inv(P)-I))
+    elseif  metric==invEuclidean return max(z, ss(inv(P)-I))
 
-    elseif  metric in (logEuclidean,
-                       Fisher)      return max(z, 𝚺(log.(eigvals(P)).^2))
+    elseif  metric ∈ (Fisher,
+                logEuclidean)    return max(z, 𝚺(log.(eigvals(P)).^2))
 
-    elseif  metric==logdet0         return max(z, real(logdet(0.5*(P+I)) - 0.5*logdet(P)))
+    elseif  metric==logdet0      return max(z, real(logdet(0.5*(P+I)) - 0.5*logdet(P)))
 
-    elseif  metric==ChoEuclidean    return max(z, ss(choL(P)-I))
+    elseif  metric==ChoEuclidean return max(z, ss(choL(P)-I))
 
     elseif  metric==logCholesky
-            LP=choL(P);             return max(z, real(sst(LP, -1)) + ssd(𝑓𝔻(log, LP)))
+            LP=choL(P);          return max(z, real(sst(LP, -1)) + ssd(𝑓𝔻(log, LP)))
 
-    elseif  metric==Jeffrey         return max(z, 0.5*(tr(P) + tr(inv(P))) - size(P, 1))
+    elseif  metric==Jeffrey      return max(z, 0.5*(tr(P) + tr(inv(P))) - size(P, 1))
 
     elseif  metric==VonNeumann
-            𝓵P=ℍ(log(P));           return max(z, 0.5*(tr(P, 𝓵P) - tr(𝓵P)))
+            𝓵P=ℍ(log(P));        return max(z, 0.5*(tr(P, 𝓵P) - tr(𝓵P)))
 
-    elseif  metric==Wasserstein     return max(z, tr(P) + size(P, 1) - 2*tr(sqrt(P)))
+    elseif  metric==Wasserstein  return max(z, tr(P) + size(P, 1) - 2*tr(sqrt(P)))
 
     else    @error("in RiemannianGeometryP.distanceSqr function
              (PosDefManifold Package): the chosen 'metric' does not exist")
@@ -345,7 +346,7 @@ function distanceSqr(metric::Metric, D::𝔻{T}) where T<:Real
 
     elseif metric==invEuclidean return  max(z, ssd(inv(D)-I))
 
-    elseif metric in (Fisher,
+    elseif metric ∈ (Fisher,
                 logEuclidean)   return  max(z, ssd(log(D)))
 
     elseif metric==logdet0      return  max(z, logdet(0.5*(D+I)) - 0.5*logdet(D))
@@ -489,8 +490,8 @@ distance(metric::Metric, D::𝔻{T}, E::𝔻{T}) where T<:Real = √(distance²(
 !!! warning "Multi-Threading"
     [Multi-threading](https://docs.julialang.org/en/v1/manual/parallel-computing/#Multi-Threading-(Experimental)-1)
     is still experimental in julia. You should check the result on each computer.
-    Multi-threading is automatically disabled if `k<4` or if Julia
-    uses only one thread. See [Threads](@ref).
+    Multi-threading is automatically disabled if the number of threads
+    Julia is instructed to use is ``<2`` or ``<2k``. See [Threads](@ref).
 
  **See**: [distance](@ref).
 
@@ -516,9 +517,9 @@ distance(metric::Metric, D::𝔻{T}, E::𝔻{T}) where T<:Real = √(distance²(
 """
 function distanceSqrMat(type::Type{T}, metric::Metric, 𝐏::ℍVector;
                                  ⏩=false) where T<:AbstractFloat
-   k, n = dim(𝐏, 1), dim(𝐏, 2)
+   k, n, thr = dim(𝐏, 1), dim(𝐏, 2), nthreads()
    △=𝕃{type}(diagm(0 => zeros(k)))
-   ⏩ && k>3 && nthreads() > 1 ? threaded=true : threaded=false
+   ⏩ && k>=thr*2 && thr > 1 ? threaded=true : threaded=false
    if threaded R=_partitionTril4threads(k, true); m=length(R) end # ranges
 
    if     metric == invEuclidean
@@ -642,8 +643,8 @@ distance²Mat=distanceSqrMat
 !!! warning "Multi-Threading"
     [Multi-threading](https://docs.julialang.org/en/v1/manual/parallel-computing/#Multi-Threading-(Experimental)-1)
     is still experimental in julia. You should check the result on each computer.
-    Multi-threading is automatically disabled if `k<4` or if Julia
-    uses only one thread. See [Threads](@ref).
+    Multi-threading is automatically disabled if the number of threads
+    Julia is instructed to use is ``<2`` or ``<4k``. See [Threads](@ref).
 
  **See**: [distance](@ref).
 
@@ -906,7 +907,7 @@ end
  If you don't pass a weight vector with *<optional keyword argument>* ``w``,
  return the *unweighted mean*.
 
- If *<optional keword argument>* `✓w=true` (default), the weights are
+ If *<optional keyword argument>* `✓w=true` (default), the weights are
  normalized so as to sum up to 1, otherwise they are used as they are passed
  and should be already normalized.  This option is provided to allow
  calling this function repeatedly without normalizing the same weights
@@ -924,8 +925,8 @@ end
 !!! warning "Multi-Threading"
     [Multi-threading](https://docs.julialang.org/en/v1/manual/parallel-computing/#Multi-Threading-(Experimental)-1)
     is still experimental in julia. You should check the result on each computer.
-    Multi-threading is automatically disabled if `k<3` or if Julia
-    uses only one thread. See [Threads](@ref).
+    Multi-threading is automatically disabled if the number of threads
+    Julia is instructed to use is ``<2`` or ``<4k``. See [Threads](@ref).
 
  ## Math
 
@@ -1010,8 +1011,8 @@ function mean(metric::Metric, 𝐏::ℍVector;
     end
 
     # closed-form expressions and exit
-    k, n = dim(𝐏, 1), dim(𝐏, 2)
-    ⏩ && k>2 && nthreads() > 1 ? threaded=true : threaded=false
+    k, n, thr = dim(𝐏, 1), dim(𝐏, 2), nthreads()
+    ⏩ && k>=thr*4 && thr > 1 ? threaded=true : threaded=false
     metric ∈ (ChoEuclidean, logCholesky) && typeofMatrix(𝐏)<:ℍ ? tri=true : tri=false
     threaded && (tri ? 𝐐 = 𝕃Vector(undef, k) : 𝐐 = similar(𝐏))
     isempty(w) ? v=[] : v = _getWeights(w, ✓w, k)
@@ -1101,8 +1102,8 @@ function mean(metric::Metric, 𝐃::𝔻Vector;
     end
 
     # closed-form expressions and exit
-    k, n = dim(𝐃, 1), dim(𝐃, 2)
-    ⏩ && k>2 && nthreads() > 1 ? threaded=true : threaded=false
+    k, n, thr = dim(𝐃, 1), dim(𝐃, 2), nthreads()
+    ⏩ && k>=thr*4 && thr > 1 ? threaded=true : threaded=false
     if threaded 𝐄 = similar(𝐃) end
     isempty(w) ? v=[] : v = _getWeights(w, ✓w, k)
 
@@ -1235,7 +1236,7 @@ means(metric::Metric, 𝒟::𝔻Vector₂)=𝔻Vector([mean(metric, 𝐃) for �
 
  ``G=\\big(\\sum_{i=1}^{k}P_i^p\\big)^{1/p}``.
 
- If *<optional keword argument>* `✓w=true` (default), the weights are
+ If *<optional keyword argument>* `✓w=true` (default), the weights are
  normalized so as to sum up to 1, otherwise they are used as they are passed
  and should be already normalized.
  This option is provided to allow
@@ -1246,8 +1247,9 @@ means(metric::Metric, 𝒟::𝔻Vector₂)=𝔻Vector([mean(metric, 𝐃) for �
 !!! warning "Multi-Threading"
     [Multi-threading](https://docs.julialang.org/en/v1/manual/parallel-computing/#Multi-Threading-(Experimental)-1)
     is still experimental in julia. You should check the result on each computer.
-    Multi-threading is automatically disabled if `k<3` or if Julia
-    uses only one thread. See [Threads](@ref).
+    Multi-threading is automatically disabled if the number of threads
+    Julia is instructed to use is ``<2`` or ``<4k``. See [Threads](@ref).
+
 
  The following special cases for parameter ``p`` are noteworthy:
  - For ``p=\\frac{1}{2}`` the generalized mean is the [modified Bhattacharyya mean](@ref).
@@ -1299,8 +1301,8 @@ function generalizedMean(𝐏::Union{ℍVector, 𝔻Vector}, p::Real;
     elseif p ==  0 return mean(logEuclidean, 𝐏; w=w, ✓w=✓w, ⏩=⏩)
     elseif p ==  1 return mean(Euclidean, 𝐏;    w=w, ✓w=✓w, ⏩=⏩)
     else
-        k, n = dim(𝐏, 1), dim(𝐏, 2)
-        ⏩ && k>2 && nthreads() > 1 ? threaded=true : threaded=false
+        k, n, thr = dim(𝐏, 1), dim(𝐏, 2), nthreads()
+        ⏩ && k>=thr*4 && thr > 1 ? threaded=true : threaded=false
         if threaded 𝐐 = similar(𝐏) end
 
         if threaded
@@ -1348,7 +1350,7 @@ end # function
  If you don't pass a weight vector with *<optional keyword argument>* ``w``,
  return the *unweighted geometric mean*.
 
- If *<optional keword argument>* `✓w=true` (default), the weights are
+ If *<optional keyword argument>* `✓w=true` (default), the weights are
  normalized so as to sum up to 1, otherwise they are used as they are passed
  and should be already normalized.  This option is provided to allow
  calling this function repeatedly without normalizing the same weights
@@ -1369,8 +1371,8 @@ end # function
 !!! warning "Multi-Threading"
     [Multi-threading](https://docs.julialang.org/en/v1/manual/parallel-computing/#Multi-Threading-(Experimental)-1)
     is still experimental in julia. You should check the result on each computer.
-    Multi-threading is automatically disabled if `k<3` or if Julia
-    uses only one thread. See [Threads](@ref).
+    Multi-threading is automatically disabled if the number of threads
+    Julia is instructed to use is ``<2`` or ``<4k``. See [Threads](@ref).
 
 !!! note "Nota Bene"
     In normal circumstances this algorithm converges monothonically.
@@ -1418,11 +1420,11 @@ end # function
 function geometricMean(𝐏::ℍVector;
          w::Vector=[], ✓w=true, init=nothing, tol::Real=0, ⍰=false, ⏩=false)
 
-    k, n, type = dim(𝐏, 1), dim(𝐏, 2), eltype(𝐏[1])
+    k, n, type, thr = dim(𝐏, 1), dim(𝐏, 2), eltype(𝐏[1]), nthreads()
     maxiter, iter, conv, oldconv = 500, 1, 0., maxpos
-    ⏩ && k>2 && nthreads() > 1 ? threaded=true : threaded=false
+    ⏩ && k>=thr*4 && thr > 1 ? threaded=true : threaded=false
     isempty(w) ? v=[] : v = _getWeights(w, ✓w, k)
-    init == nothing ? M = mean(logEuclidean, 𝐏; w=v, ✓w=false) : M = ℍ(init)
+    init == nothing ? M = mean(logEuclidean, 𝐏; w=v, ✓w=false, ⏩=⏩) : M = ℍ(init)
     tol==0 ? tolerance = √eps(real(type))*1e2 : tolerance = tol
     💡 = similar(M, type)
     if threaded 𝐐 = similar(𝐏) end
@@ -1494,7 +1496,7 @@ gMean=geometricMean
  If you don't pass a weight vector with *<optional keyword argument>* ``w``,
  return the *unweighted logdet zero mean*.
 
- If *<optional keword argument>* `✓w=true` (default), the weights are
+ If *<optional keyword argument>* `✓w=true` (default), the weights are
  normalized so as to sum up to 1, otherwise they are used as they are passed
  and should be already normalized.  This option is provided to allow
  calling this function repeatedly without normalizing the same weights
@@ -1509,8 +1511,8 @@ gMean=geometricMean
 !!! warning "Multi-Threading"
     [Multi-threading](https://docs.julialang.org/en/v1/manual/parallel-computing/#Multi-Threading-(Experimental)-1)
     is still experimental in julia. You should check the result on each computer.
-    Multi-threading is automatically disabled if `k<3` or if Julia
-    uses only one thread. See [Threads](@ref).
+    Multi-threading is automatically disabled if the number of threads
+    Julia is instructed to use is ``<2`` or ``<4k``. See [Threads](@ref).
 
 !!! note "Nota Bene"
     In normal circumstances this algorithm converges monothonically.
@@ -1556,12 +1558,13 @@ gMean=geometricMean
 """
 function logdet0Mean(𝐏::Union{ℍVector, 𝔻Vector};
          w::Vector=[], ✓w=true, init=nothing, tol::Real=0, ⍰=false, ⏩=false)
+
     𝕋=typeofMatrix(𝐏)
-    k, n, type = dim(𝐏, 1), dim(𝐏, 2), eltype(𝐏[1])
+    k, n, type, thr = dim(𝐏, 1), dim(𝐏, 2), eltype(𝐏[1]), nthreads()
     maxiter, iter, conv, oldconv, l = 500, 1, 0., maxpos, k/2
-    ⏩ && k>2 && nthreads() > 1 ? threaded=true : threaded=false
+    ⏩ && k>=thr*4 && thr > 1 ? threaded=true : threaded=false
     isempty(w) ? v=[] : v = _getWeights(w, ✓w, k)
-    init == nothing ? M = mean(logEuclidean, 𝐏; w=v, ✓w=false) : M = 𝕋(init)
+    init == nothing ? M = mean(logEuclidean, 𝐏; w=v, ✓w=false, ⏩=⏩) : M = 𝕋(init)
     tol==0 ? tolerance = √eps(real(type))*1e2 : tolerance = tol
     💡 = similar(M, type)
     if threaded 𝐐 = similar(𝐏) end
@@ -1624,7 +1627,7 @@ ld0Mean=logdet0Mean
  If you don't pass a weight vector with *<optional keyword argument>* ``w``,
  return the *unweighted Wassertein mean*.
 
- If *<optional keword argument>* `✓w=true` (default), the weights are
+ If *<optional keyword argument>* `✓w=true` (default), the weights are
  normalized so as to sum up to 1, otherwise they are used as they are passed
  and they should be already normalized.  This option is provided to allow
  calling this function repeatedly without normalizing the same weights
@@ -1645,8 +1648,8 @@ ld0Mean=logdet0Mean
 !!! warning "Multi-Threading"
     [Multi-threading](https://docs.julialang.org/en/v1/manual/parallel-computing/#Multi-Threading-(Experimental)-1)
     is still experimental in julia. You should check the result on each computer.
-    Multi-threading is automatically disabled if `k<3` or if Julia
-    uses only one thread. See [Threads](@ref).
+    Multi-threading is automatically disabled if the number of threads
+    Julia is instructed to use is ``<2`` or ``<4k``. See [Threads](@ref).
 
 !!! note "Nota Bene"
     In normal circumstances this algorithm converges monothonically.
@@ -1694,11 +1697,11 @@ ld0Mean=logdet0Mean
 function wasMean(𝐏::ℍVector;
          w::Vector=[], ✓w=true, init=nothing, tol::Real=0, ⍰=false, ⏩=false)
 
-    k, n, type = dim(𝐏, 1), dim(𝐏, 2), eltype(𝐏[1])
+    k, n, type, thr = dim(𝐏, 1), dim(𝐏, 2), eltype(𝐏[1]), nthreads()
     maxiter, iter, conv, oldconv = 500, 1, 0., maxpos
-    ⏩ && k>2 && nthreads() > 1 ? threaded=true : threaded=false
+    ⏩ && k>=thr*4 && thr > 1 ? threaded=true : threaded=false
     isempty(w) ? v=[] : v = _getWeights(w, ✓w, k)
-    init == nothing ? M = generalizedMean(𝐏, 0.5; w=v, ✓w=false) : M = ℍ(init)
+    init == nothing ? M = generalizedMean(𝐏, 0.5; w=v, ✓w=false, ⏩=⏩) : M = ℍ(init)
     tol==0 ? tolerance = √eps(real(type))*1e2 : tolerance = tol
     💡 = similar(M, type)
     if threaded 𝐐 = similar(𝐏) end
@@ -1776,9 +1779,9 @@ wasMean(𝐃::𝔻Vector;
  If you don't pass a weight vector with *<optional keyword argument>* ``w``,
  return the *unweighted power mean*.
 
- If *<optional keword argument>* `✓w=true` (default), the weights are
+ If *<optional keyword argument>* `✓w=true` (default), the weights are
  normalized so as to sum up to 1, otherwise they are used as they are passed
- and should type be already normalized.  This option is provided to allow
+ and should be already normalized.  This option is provided to allow
  calling this function repeatedly without normalizing the same weights
  vector each time.
 
@@ -1798,8 +1801,8 @@ wasMean(𝐃::𝔻Vector;
 !!! warning "Multi-Threading"
     [Multi-threading](https://docs.julialang.org/en/v1/manual/parallel-computing/#Multi-Threading-(Experimental)-1)
     is still experimental in julia. You should check the result on each computer.
-    Multi-threading is automatically disabled if `k<3` or if Julia
-    uses only one thread. See [Threads](@ref).
+    Multi-threading is automatically disabled if the number of threads
+    Julia is instructed to use is ``<2`` or ``<4k``. See [Threads](@ref).
 
 !!! note "Nota Bene"
     In normal circumstances this algorithm converges monothonically.
@@ -1858,22 +1861,22 @@ function powerMean(𝐏::ℍVector, p::Real;
   else
 
     if p ≈-1
-       return (mean(invEuclidean, 𝐏; w=w, ✓w=✓w), 1, 0)
+       return (mean(invEuclidean, 𝐏; w=w, ✓w=✓w, ⏩=⏩), 1, 0)
     elseif p ≈ 0
-       LE=mean(logEuclidean, 𝐏, w=w, ✓w=✓w)
+       LE=mean(logEuclidean, 𝐏, w=w, ✓w=✓w, ⏩=⏩)
        P, iter1, conv1=powerMean(𝐏,  0.01; w=w, ✓w=✓w, init=LE, tol=tol, ⍰=⍰, ⏩=⏩)
        Q, iter2, conv2=powerMean(𝐏, -0.01; w=w, ✓w=✓w, init=P, tol=tol, ⍰=⍰, ⏩=⏩)
        return (geodesic(Fisher, P, Q,  0.5), iter1+iter2, (conv1+conv2)/2)
 
     elseif p ≈ 1
-       return (mean(Euclidean, 𝐏; w=w, ✓w=✓w), 1, 0)
+       return (mean(Euclidean, 𝐏; w=w, ✓w=✓w, ⏩=⏩), 1, 0)
     else
        # Set Parameters
-       k, n, absp, type = dim(𝐏, 1), dim(𝐏, 2), abs(p), eltype(𝐏[1])
+       k, n, absp, type, thr = dim(𝐏, 1), dim(𝐏, 2), abs(p), eltype(𝐏[1]), nthreads()
        sqrtn, maxiter, iter, conv, oldconv, r = √n, 500, 1, 0., maxpos, -0.375/absp
-       ⏩ && k>2 && nthreads() > 1 ? threaded=true : threaded=false
+       ⏩ && k>=thr*4 && thr > 1 ? threaded=true : threaded=false
        isempty(w) ? v=[] : v = _getWeights(w, ✓w, k)
-       init == nothing ? M = generalizedMean(𝐏, p; w=v, ✓w=false) : M = ℍ(init)
+       init == nothing ? M = generalizedMean(𝐏, p; w=v, ✓w=false, ⏩=⏩) : M = ℍ(init)
        p<0 ? X=ℍ(M^(0.5)) : X=ℍ(M^(-0.5))
        💡, H, 𝒫 = similar(X, type), similar(X, type), similar(𝐏)
        p<0 ? 𝒫=[inv(P) for P in 𝐏] : 𝒫=𝐏

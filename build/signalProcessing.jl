@@ -1,5 +1,5 @@
 #    Unit signalProcessing.jl, part of PosDefManifold Package for julia language
-#    v 0.1.3 - last update 28th of April 2019
+#    v 0.0.3 - last update 16th of May 2019
 #
 #    MIT License
 #    Copyright (c) 2019, Marco Congedo, CNRS, Grenobe, France:
@@ -341,7 +341,7 @@ end
 
 
 """
-    gram(X::Matrix{T}) omissis
+    gram(X::Matrix{T}) where T<:RealOrComplex
 
  Given a generic data matrix ``X``, comprised of real or complex elements,
  return the normalized [Gram matrix](https://bit.ly/2I0FQn2), that is,
@@ -362,14 +362,14 @@ end
     X=randn(100, 2);
     F=gram(X); # => G=X'*X/100
 """
-function gram(X::Matrix)
+function gram(X::𝕄{T}) where T<:RealOrComplex
     (r, c)=size(X)
     r<c ? ℍ((X*X')/c) : ℍ((X'*X)/r)
 end # function gram
 
 
 """
-trade(P::ℍ)
+trade(P::ℍ{T}) where T<:RealOrComplex
 
  Given a positive definite matrix `P`, return as a 2-tuple the
  *trace* and the *determinant* of `P`.
@@ -398,4 +398,4 @@ trade(P::ℍ)
     y=log.(y)
     plot(x, y, seriestype=:scatter)
 """
-trade(P::ℍ)=(tr(P), det(P))
+trade(P::ℍ{T}) where T<:RealOrComplex = (tr(P), det(P))

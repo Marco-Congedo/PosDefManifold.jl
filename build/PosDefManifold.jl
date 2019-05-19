@@ -1,5 +1,5 @@
 #    Main Module of the  PosDefManifold Package for julia language
-#    v 0.1.3 - last update 28th of April 2019
+#    v 0.0.3 - last update 16th of May 2019
 #
 #    MIT License
 #    Copyright (c) 2019, Marco Congedo, CNRS, Grenobe, France:
@@ -30,28 +30,24 @@ const maxpos=1e15
 𝕃 = LowerTriangular    # tab completition \bbL
 
 # types
+MatrixVector = 𝕄Vector = Vector{𝕄}            # vector of Matrices
+MatrixVector₂= 𝕄Vector₂= Vector{𝕄Vector}      # vector of vectors of Matrices
+
+DiagonalVector = 𝔻Vector = Vector{𝔻}          # vector of Diagonal Matrices
+DiagonalVector₂= 𝔻Vector₂= Vector{𝔻Vector}    # vector of vectors of Diagonal matrices
+
+LowerTriangularVector = 𝕃Vector = Vector{𝕃}       # vector of LowerTriangular Matrices
+LowerTriangularVector₂= 𝕃Vector₂= Vector{𝕃Vector} # vector of vectors of Diagonal matrices
+
+HermitianVector = ℍVector = Vector{ℍ}           # vector of Hermitian matrices
+HermitianVector₂= ℍVector₂= Vector{ℍVector}     # vector of vectors of Hermitian matrices
 
 RealOrComplex=Union{Real, Complex}
 
-MatrixVector=Vector{𝕄}                 # vector of Matrices
-𝕄Vector=MatrixVector                   # alias
-MatrixVector₂=Vector{𝕄Vector}          # vector of vectors of Matrices
-𝕄Vector₂=MatrixVector₂                 # alias
+AnyMatrix=Union{𝔻{T}, 𝕃{T}, ℍ{T}, 𝕄{T}} where T<:RealOrComplex
+AnyMatrixVector=Union{𝕄Vector, 𝔻Vector, 𝕃Vector, ℍVector}
+AnyMatrixVector₂=Union{𝕄Vector₂, 𝔻Vector₂, 𝕃Vector₂, ℍVector₂}
 
-DiagonalVector=Vector{𝔻}               # vector of Diagonal Matrices
-𝔻Vector=DiagonalVector                 # alias
-DiagonalVector₂=Vector{𝔻Vector}        # vector of vectors of Diagonal matrices
-𝔻Vector₂=DiagonalVector₂               # alias
-
-LowerTriangularVector=Vector{𝕃}        # vector of LowerTriangular Matrices
-𝕃Vector=LowerTriangularVector          # alias
-LowerTriangularVector₂=Vector{𝕃Vector} # vector of vectors of Diagonal matrices
-𝕃Vector₂=LowerTriangularVector₂        # alias
-
-HermitianVector=Vector{ℍ}               # vector of Hermitian matrices
-ℍVector=HermitianVector                 # alias
-HermitianVector₂=Vector{ℍVector}        # vector of vectors of Hermitian matrices
-ℍVector₂=HermitianVector₂               # alias
 
 @enum Metric begin
     Euclidean    =  1  # distance: δ_e; mean: Arithmetic
@@ -68,8 +64,9 @@ HermitianVector₂=Vector{ℍVector}        # vector of vectors of Hermitian mat
 end
 
 
-import  Statistics.mean,
-        LinearAlgebra.tr
+import
+    Statistics.mean,
+    LinearAlgebra.tr
 
 export
     # From this module
@@ -89,7 +86,6 @@ export
     𝕃,
 
     #types
-    RealOrComplex,
     MatrixVector, 𝕄Vector,
     MatrixVector₂, 𝕄Vector₂,
     DiagonalVector, 𝔻Vector,
@@ -98,6 +94,10 @@ export
     LowerTriangularVector₂, 𝕃Vector₂,
     HermitianVector, ℍVector,
     HermitianVector₂, ℍVector₂,
+    RealOrComplex,
+    AnyMatrix,
+    AnyMatrixVector,
+    AnyMatrixVector₂,
     Metric,
         Euclidean,
         invEuclidean,
@@ -112,6 +112,7 @@ export
 
     # from LinearAlgebra.jl
     typeofMatrix, typeofMat,
+    dim,
     det1,
     tr1,
     normalizeCol!,
@@ -188,7 +189,5 @@ println(" CPU  Threads: ",Sys.CPU_THREADS)
 # Sys.BINDIR # julia bin directory
 println(" Base.Threads: ", "$(Threads.nthreads())")
 println(" BLAS Threads: ", "$(Sys.CPU_THREADS-Threads.nthreads())", "\n")
-
-
 
 end # module
