@@ -526,6 +526,11 @@ function tests();
     means(logEuclidean, ℍVector₂([𝐏C, 𝐐C])); RUN()
     means(logEuclidean, 𝔻Vector₂([𝐃, 𝐄])); RUN()
 
+    name="means (⏩ )"; newTest(name);
+    means(logEuclidean, ℍVector₂([𝐏, 𝐐]); ⏩=true); RUN()
+    means(logEuclidean, ℍVector₂([𝐏C, 𝐐C]); ⏩=true); RUN()
+    means(logEuclidean, 𝔻Vector₂([𝐃, 𝐄]); ⏩=true); RUN()
+
 
     name="generalizedMean"; newTest(name);
     𝐏2=ℍVector([P_, Q_])
