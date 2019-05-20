@@ -1136,9 +1136,9 @@ end # function
 
 
 """
-    (1) means(metric::Metric, 𝒫::ℍVector₂)
+    (1) means(metric::Metric, 𝒫::ℍVector₂; <⏩=false>)
 
-    (2) means(metric::Metric, 𝒟::𝔻Vector₂)
+    (2) means(metric::Metric, 𝒟::𝔻Vector₂; <⏩=false>)
 
  (1) Given a 2d array ``𝒫`` of positive definite matrices as an [ℍVector₂ type](@ref)
  compute the [Fréchet mean](@ref) for as many [ℍVector type](@ref) objects
@@ -1153,6 +1153,17 @@ end # function
  Return the means in a vector of `Diagonal` matrices, that is, as a `𝔻Vector` type.
 
  The weigted Fréchet mean is not supported in this function.
+
+ If *<optional key argmuent>* ⏩=true the computation of the means
+ is multi-threaded.
+
+!!! warning "Multi-Threading"
+    [Multi-threading](https://docs.julialang.org/en/v1/manual/parallel-computing/#Multi-Threading-(Experimental)-1)
+    is still experimental in julia. You should check the result on each computer.
+    For each mean to be computed, multi-threading is automatically disabled
+    if the number of threads Julia is instructed to use is ``<2`` or ``<4k``,
+    where ``k`` is the number of matrices for which the mean is to be computed.
+    See [Threads](@ref).
 
   **See also**: [`mean`](@ref).
 
@@ -1172,10 +1183,35 @@ end # function
      sets[2]=Qset # or: 𝒫[2]=𝐐
      means(logEuclidean, sets) # or: means(logEuclidean, 𝒫)
 
-"""
-means(metric::Metric, 𝒫::ℍVector₂)=ℍVector([mean(metric, 𝐏) for 𝐏 in 𝒫])
+     # going multi-threated
 
-means(metric::Metric, 𝒟::𝔻Vector₂)=𝔻Vector([mean(metric, 𝐃) for 𝐃 in 𝒟])
+     # first, create 20 sets of 200 50x50 SPD matrices
+     sets=ℍVector₂([randP(50, 200) for i=1:20])
+
+     # How much computing time we save ?
+     # (example min time obtained with 4 threads & 4 BLAS threads)
+     using BenchmarkTools
+
+     # non multi-threaded, mean with closed-form solution
+     @benchmark(means(logEuclidean, sets))  		 # (6.196 s)
+
+     # multi-threaded, mean with closed-form solution
+     @benchmark(means(logEuclidean, sets; ⏩=true)) # (1.897 s)
+
+     sets=ℍVector₂([randP(10, 200) for i=1:10])
+
+     # non multi-threaded, mean with iterative solution
+     # wait a bit
+     @benchmark(means(Fisher, sets))  		         # (4.672 s )
+
+     # multi-threaded, mean with iterative solution
+     @benchmark(means(Fisher, sets; ⏩=true))        # (1.510 s)
+"""
+means(metric::Metric, 𝒫::ℍVector₂; ⏩=false) =
+        ℍVector([mean(metric, 𝐏; ⏩=⏩) for 𝐏 in 𝒫])
+
+means(metric::Metric, 𝒟::𝔻Vector₂; ⏩=false) =
+        𝔻Vector([mean(metric, 𝐃; ⏩=⏩) for 𝐃 in 𝒟])
 
 
 
@@ -1202,7 +1238,8 @@ means(metric::Metric, 𝒟::𝔻Vector₂)=𝔻Vector([mean(metric, 𝐃) for �
  This option is provided to allow
  calling this function repeatedly without normalizing the weights each time.
 
- If ⏩=true the computation of the generalized mean is multi-threaded.
+ If *<optional key argmuent>* ⏩=true the computation of the generalized mean
+ is multi-threaded.
 
 !!! warning "Multi-Threading"
     [Multi-threading](https://docs.julialang.org/en/v1/manual/parallel-computing/#Multi-Threading-(Experimental)-1)
