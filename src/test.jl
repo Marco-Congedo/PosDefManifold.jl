@@ -239,6 +239,12 @@ function tests();
     mean(Pset[i]*fVecw[i] for i=1:64)≈fVec(mean, Pset; w=fVecw) ? OK() : OH(name*" simple weighted mean, real")
     mean(sqrt(Pset[i])*fVecw[i] for i=1:64)≈fVec(mean, sqrt, Pset; w=fVecw) ? OK() : OH(name*" weighted mean, sqrt, real")
 
+    name="congruence"; newTest(name)
+    M=randn(n, n)
+    congruence(M, P)≈M*P*M' ? OK() : OH(name*"Matrix method")
+    Pset=randP(n, n*4)
+    Qset=cong(M, Pset)
+    Qset≈[M*Pset[i]*M' for i=1:n*4] ? OK() : OH(name*"Matrix Vector method")
 
     ## 8. Spectral decompositions of positive matrices
 
@@ -722,7 +728,7 @@ SKIP()=print(" skypped")
 failing_tests=[]
 
 function testall()
-    println("\n⭐ "," PosDefManifold testing utility", "⭐\n")
+    println("\n⭐"," PosDefManifold testing utility", "⭐\n")
     println("Starting tests...\n")
     tests()
     # print out the tests that have failed (if any)

@@ -129,6 +129,7 @@ export
     DiagOfProd, dop,
     mgs,
     fVec,
+    congruence, cong,
     evd,
     spectralFunctions,
     ispos,
