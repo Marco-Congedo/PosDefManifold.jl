@@ -43,16 +43,31 @@ function _partitionLinRange4threads(n::Int, threads::Int=0)
     return [(r<thr ? (d*r-d+1:d*r) : (d*thr-d+1:n)) for r=1:thr]
 end
 
+
+function _GetThreads(n::Int, callingFunction::String)
+	threads=Threads.nthreads()
+	threads==1 && @warn "Function "*callingFunction*": Julia is instructed to use only one thread."
+	if n<threads*4
+		@warn "Function "*callingFunction*": the number of operations (n) is too low for taking advantage of multi-threading" threads n
+		threads=1
+	end
+	return threads
+end
+
+function _GetThreadsAndLinRanges(n::Int, callingFunction::String)
+	threads = _GetThreads(n, callingFunction)
+	ranges=_partitionLinRange4threads(n, threads)
+	return threads, ranges
+end
+
 # used by function fvec
 function _fVec_common(𝐏::AnyMatrixVector;
 					  w::Vector=[], ✓w=false, allocs=[])
-	threads=nthreads()
-	k, n = dim(𝐏, 1), dim(𝐏, 2)
-	isempty(w) ? v=[] : v = _getWeights(w, ✓w, k)
-	threads==1 || k<threads*4 && @warn fVecMsg threads k
+    threads, ranges = _GetThreadsAndLinRanges(dim(𝐏, 1), "fVec")
+	isempty(w) ? v=[] : v = _getWeights(w, ✓w)
 	#allocs==[] ? 𝐐=𝕄Vector([𝕄{type}(undef, n, n) for i=1:threads]) : 𝐐=allocs
 	allocs==[] ? 𝐐=𝕄Vector(repeat([𝐏[1]], threads)) : 𝐐=allocs
-	return (_partitionLinRange4threads(k, threads), 𝐐, v)
+	return (threads, ranges, 𝐐, v)
 end
 
 #  ------------------------
@@ -1010,7 +1025,7 @@ end # mgs function
     Pset=randP(4, 1000); # generate 1000 positive definite 4x4 matrices
 	mean(Pset) # arithmetic mean calling Julia function
 	Threads.nthreads() # check that at least two threads are available
-	fVec(mean, Pset) multi-threaded arithmetic mean
+	fVec(mean, Pset) # multi-threaded arithmetic mean
 
 	inv(mean(inv, Pset)) # Harmonic mean calling Julia function
 	inv(fVec(mean, inv, Pset)) # multi-threaded Harmonic mean
@@ -1051,29 +1066,83 @@ end # mgs function
 function fVec(f::Function, 𝐏::AnyMatrixVector;
 			  w::Vector=[], ✓w=false, allocs=[])
 
-	ranges, 𝐐, v = _fVec_common(𝐏; w=w, ✓w=✓w, allocs=allocs)
-	l=length(ranges) # number of threads
+	threads, ranges, 𝐐, v = _fVec_common(𝐏; w=w, ✓w=✓w, allocs=allocs)
 	if isempty(w)
-		@threads for r=1:l 𝐐[r]=f(𝐏[i] for i in ranges[r]) end
+		@threads for r=1:threads 𝐐[r]=f(𝐏[i] for i in ranges[r]) end
 	else
-		@threads for r=1:l 𝐐[r]=f(v[i]*𝐏[i] for i in ranges[r]) end
+		@threads for r=1:threads 𝐐[r]=f(v[i]*𝐏[i] for i in ranges[r]) end
 	end
-    l==1 ? (return 𝐐[1]) : (return typeofMatrix(𝐏)(f(𝐐)))
+    threads==1 ? (return 𝐐[1]) : (return typeofMatrix(𝐏)(f(𝐐)))
 end
 
 function fVec(f::Function, g::Function, 𝐏::AnyMatrixVector;
 			  w::Vector=[], ✓w=false, allocs=[])
 
-	ranges, 𝐐, v = _fVec_common(𝐏; w=w, ✓w=✓w, allocs=allocs)
-	l=length(ranges) # number of threads
+	threads, ranges, 𝐐, v = _fVec_common(𝐏; w=w, ✓w=✓w, allocs=allocs)
 	if isempty(w)
-		@threads for r=1:l 𝐐[r]=f(g(𝐏[i]) for i in ranges[r]) end
+		@threads for r=1:threads 𝐐[r]=f(g(𝐏[i]) for i in ranges[r]) end
 	else
-		@threads for r=1:l 𝐐[r]=f(v[i]*g(𝐏[i]) for i in ranges[r]) end
+		@threads for r=1:threads 𝐐[r]=f(v[i]*g(𝐏[i]) for i in ranges[r]) end
 	end
-    l==1 ? (return 𝐐[1]) : (return typeofMatrix(𝐏)(f(𝐐)))
+    threads==1 ? (return 𝐐[1]) : (return typeofMatrix(𝐏)(f(𝐐)))
 end
-fVecMsg="function fVec of linearAlgebra.jl (PosDefManifold): only one thread is used or the number of matrices (k) is too low for taking advantage of multi-threading"
+
+"""
+	(1) congruence(B::AnyMatrix, P::ℍ)
+	(2) congruence(B::AnyMatrix, 𝐏::ℍVector)
+
+ **alias**: `cong`
+
+ (1) Return as an `Hermitian` matrix the congruent transformation
+ of `Hermitian` matrix ``P``
+
+ ``BPB^H``,
+
+ for ``B`` `Hermitian`, `LowerTriangular`, `Diagonal` or a general `Matrix`.
+
+ (2) Return an [ℍVector type](@ref) holding the congruent transformations
+
+ ``BP_kB^H``,
+
+ for all ``k`` matrices in [ℍVector type](@ref) ``𝐏={P_1,...,P_k}``.
+
+ Method (2) is **multi-threaded**. See [Threads](@ref).
+
+ ## Examples
+
+    using LinearAlgebra, PosDefManifold
+
+	# (1)
+	P=randP(3) # generate a 3x3 positive matrix
+	M=randn(3, 3)
+	C=congruence(M, P) # = M*P*M'
+
+	# (2)
+    Pset=randP(4, 100); # generate 100 positive definite 4x4 matrices
+	M=randn(4, 4)
+	Qset=cong(M, Pset) # = [M*Pset_1*M',...,M*Pset_k*M'] as an ℍVector type
+
+	# recenter the matrices in Pset to their Fisher mean:
+	Qset=cong(invsqrt(mean(Fisher, Pset; ⏩=true)), Pset)
+
+	# as a check, the Fisher mean of Qset is now the identity
+	mean(Fisher, Qset; ⏩=true)≈I ? println("⭐") : println("⛔")
+
+"""
+congruence(B::AnyMatrix, P::ℍ) = ℍ(B*P*B')
+
+function congruence(B::AnyMatrix, 𝐏::ℍVector)
+	threads = _GetThreads(dim(𝐏, 1), "congruence")
+	if threads==1
+		return ℍVector([congruence(B, P) for P in 𝐏])
+	else
+		𝐐=similar(𝐏)
+		@threads for i=1:dim(𝐏, 1) 𝐐[i] = congruence(B, 𝐏[i]) end
+		return 𝐐
+	end
+end
+
+cong=congruence
 
 
 

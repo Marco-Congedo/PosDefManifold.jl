@@ -17,7 +17,7 @@ Note that the first time you execute the test it will take some time as the code
 This here below is the output of the `testall()` function
 (v0.1.3) run on the 20th of May 2019:
 
-⭐  PosDefManifold testing utility⭐
+⭐ PosDefManifold testing utility⭐
 
 Starting tests...
 

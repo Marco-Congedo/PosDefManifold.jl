@@ -27,7 +27,7 @@
 
 # Given a non-negative weight vector normalize the weights so as to sum up to 1
 # if ✓w == true and if they are not already normalized
-function _getWeights(w::Vector, ✓w::Bool, k::Int)
+function _getWeights(w::Vector, ✓w::Bool)
     if ✓w==true
         s=𝚺(w)
         if s ≉  1.0 return w./s else return w end
@@ -1014,7 +1014,7 @@ function mean(metric::Metric, 𝐏::ℍVector;
     k, n, thr = dim(𝐏, 1), dim(𝐏, 2), nthreads()
     ⏩ && k>=thr*4 && thr > 1 ? threaded=true : threaded=false
     threaded && metric == logCholesky ? 𝐐 = 𝕃Vector(undef, k) : nothing
-    isempty(w) ? v=[] : v = _getWeights(w, ✓w, k)
+    isempty(w) ? v=[] : v = _getWeights(w, ✓w)
 
     if  metric == Euclidean
         if threaded
@@ -1083,7 +1083,7 @@ function mean(metric::Metric, 𝐃::𝔻Vector;
     # closed-form expressions and exit
     k, n, thr = dim(𝐃, 1), dim(𝐃, 2), nthreads()
     ⏩ && k>=thr*4 && thr > 1 ? threaded=true : threaded=false
-    isempty(w) ? v=[] : v = _getWeights(w, ✓w, k)
+    isempty(w) ? v=[] : v = _getWeights(w, ✓w)
 
     if     metric == Euclidean
         if threaded
@@ -1300,7 +1300,7 @@ function generalizedMean(𝐏::Union{ℍVector, 𝔻Vector}, p::Real;
     else
         k, n, thr = dim(𝐏, 1), dim(𝐏, 2), nthreads()
         ⏩ && k>=thr*4 && thr > 1 ? threaded=true : threaded=false
-        isempty(w) ? v=[] : v = _getWeights(w, ✓w, k)
+        isempty(w) ? v=[] : v = _getWeights(w, ✓w)
 
         if threaded
             if isempty(w) return (fVec(𝛍, x->x^p, 𝐏))^(1/p)
@@ -1410,7 +1410,7 @@ function geometricMean(𝐏::ℍVector;
     k, n, type, thr = dim(𝐏, 1), dim(𝐏, 2), eltype(𝐏[1]), nthreads()
     maxiter, iter, conv, oldconv = 500, 1, 0., maxpos
     ⏩ && k>=thr*4 && thr > 1 ? threaded=true : threaded=false
-    isempty(w) ? v=[] : v = _getWeights(w, ✓w, k)
+    isempty(w) ? v=[] : v = _getWeights(w, ✓w)
     init == nothing ? M = mean(logEuclidean, 𝐏; w=v, ✓w=false, ⏩=⏩) : M = ℍ(init)
     tol==0 ? tolerance = √eps(real(type))*1e2 : tolerance = tol
     💡 = similar(M, type)
@@ -1550,7 +1550,7 @@ function logdet0Mean(𝐏::Union{ℍVector, 𝔻Vector};
     k, n, type, thr = dim(𝐏, 1), dim(𝐏, 2), eltype(𝐏[1]), nthreads()
     maxiter, iter, conv, oldconv, l = 500, 1, 0., maxpos, k/2
     ⏩ && k>=thr*4 && thr > 1 ? threaded=true : threaded=false
-    isempty(w) ? v=[] : v = _getWeights(w, ✓w, k)
+    isempty(w) ? v=[] : v = _getWeights(w, ✓w)
     init == nothing ? M = mean(logEuclidean, 𝐏; w=v, ✓w=false, ⏩=⏩) : M = 𝕋(init)
     tol==0 ? tolerance = √eps(real(type))*1e2 : tolerance = tol
     💡 = similar(M, type)
@@ -1687,7 +1687,7 @@ function wasMean(𝐏::ℍVector;
     k, n, type, thr = dim(𝐏, 1), dim(𝐏, 2), eltype(𝐏[1]), nthreads()
     maxiter, iter, conv, oldconv = 500, 1, 0., maxpos
     ⏩ && k>=thr*4 && thr > 1 ? threaded=true : threaded=false
-    isempty(w) ? v=[] : v = _getWeights(w, ✓w, k)
+    isempty(w) ? v=[] : v = _getWeights(w, ✓w)
     init == nothing ? M = generalizedMean(𝐏, 0.5; w=v, ✓w=false, ⏩=⏩) : M = ℍ(init)
     tol==0 ? tolerance = √eps(real(type))*1e2 : tolerance = tol
     💡 = similar(M, type)
@@ -1862,7 +1862,7 @@ function powerMean(𝐏::ℍVector, p::Real;
        k, n, absp, type, thr = dim(𝐏, 1), dim(𝐏, 2), abs(p), eltype(𝐏[1]), nthreads()
        sqrtn, maxiter, iter, conv, oldconv, r = √n, 500, 1, 0., maxpos, -0.375/absp
        ⏩ && k>=thr*4 && thr > 1 ? threaded=true : threaded=false
-       isempty(w) ? v=[] : v = _getWeights(w, ✓w, k)
+       isempty(w) ? v=[] : v = _getWeights(w, ✓w)
        init == nothing ? M = generalizedMean(𝐏, p; w=v, ✓w=false, ⏩=⏩) : M = ℍ(init)
        p<0 ? X=ℍ(M^(0.5)) : X=ℍ(M^(-0.5))
        💡, H, 𝒫 = similar(X, type), similar(X, type), similar(𝐏)

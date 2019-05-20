@@ -120,11 +120,16 @@ mgs
 | Function   | Description |
 |:---------- |:----------- |
 | [`fVec`](@ref) | General function for multi-threaded computation of means and sums of matrix vectors|
+| [`congruence`](@ref), `cong` | Compute congruent transformations |
+
+
+
 
 ⋅
 
 ```@docs
 fVec
+congruence
 ```
 
 ## Spectral decompositions of positive matrices
