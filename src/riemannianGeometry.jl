@@ -800,10 +800,10 @@ laplacianEM=laplacianEigenMaps
 
 """
     (1) spectralEmbedding(metric::Metric, 𝐏::ℍVector, q::Int;
-                         <tol::Real=0, maxiter=300, ⍰=false>)
+                <tol::Real=0, maxiter=300, ⍰=false, ⏩=false>)
 
     (2) spectralEmbedding(metric::Metric, 𝐏::ℍVector, q::Int, type::Type{T};
-                         <tol::Real=0, maxiter=300, ⍰=false>) where T<:Real
+                <tol::Real=0, maxiter=300, ⍰=false, ⏩=false>) where T<:Real
 
  Given a 1d array ``𝐏`` of ``k`` positive definite matrices ``{P_1,...,P_k}``
  (real or complex), compute its *eigen maps* in ``q`` dimensions.
@@ -831,6 +831,13 @@ laplacianEM=laplacianEigenMaps
    * `tol` is the tolerance for convergence of the power method (see below),
    * `maxiter` is the maximum number of iterations allowed for the power method,
    * if `⍰` is true the convergence at all iterations will be printed.
+ - if ⏩=true the computation of inter-distances is multi-threaded.
+
+ !!! warning "Multi-Threading"
+     [Multi-threading](https://docs.julialang.org/en/v1/manual/parallel-computing/#Multi-Threading-(Experimental)-1)
+     is still experimental in julia. You should check the result on each computer.
+     Multi-threading is automatically disabled if the number of threads
+     Julia is instructed to use is ``<2`` or ``<2k``. See [Threads](@ref).
 
 !!! note "Nota Bene"
     ``tol`` defaults to the square root of `Base.eps` of the `Float32` type (1)
@@ -844,26 +851,31 @@ laplacianEM=laplacianEigenMaps
     using PosDefManifold
     # Generate a set of 4 random 10x10 SPD matrices
     Pset=randP(10, 4) # or, using unicode: 𝐏=randP(10, 4)
-    evalues, maps, iterations, convergence=spectralEmbedding(logEuclidean, Pset, 2)
+    evalues, maps, iter, conv=spectralEmbedding(logEuclidean, Pset, 2)
+
     # show convergence information
-    evalues, maps, iterations, convergence=spectralEmbedding(logEuclidean, Pset, 2; ⍰=true)
+    evalues, maps, iter, conv=spectralEmbedding(logEuclidean, Pset, 2; ⍰=true)
+
     # use Float64 precision.
-    evalues, maps, iterations, convergence=spectralEmbedding(logEuclidean, Pset, 2, Float64)
+    evalues, maps, iter, conv=spectralEmbedding(logEuclidean, Pset, 2, Float64)
+
+    # Multi-threaded
+    evalues, maps, iter, conv=spectralEmbedding(logEuclidean, Pset, 2, ⏩=true)
 
 """
 function spectralEmbedding(metric::Metric, 𝐏::ℍVector, q::Int, type::Type{T};
-                           tol::Real=0, maxiter=300, ⍰=false) where T<:Real
+                tol::Real=0, maxiter=300, ⍰=false, ⏩=false) where T<:Real
     tol==0 ? tolerance = √eps(type) : tolerance = tol
     return (Λ, U, iter, conv) =
-      laplacianEM(laplacian(distance²Mat(metric, 𝐏, type)), q;
-                                tol=tolerance, maxiter=maxiter, ⍰=⍰)
+      laplacianEM(laplacian(distance²Mat(metric, 𝐏, type, ⏩=⏩)), q;
+                            tol=tolerance, maxiter=maxiter, ⍰=⍰)
 end
 
 function spectralEmbedding(metric::Metric, 𝐏::ℍVector, q::Int;
-                           tol::Real=0, maxiter=300, ⍰=false)
+                tol::Real=0, maxiter=300, ⍰=false, ⏩=false)
     tol==0 ? tolerance = √eps(Float32) : tolerance = tol
     return (Λ, U, iter, conv) =
-      laplacianEM(laplacian(distance²Mat(metric, 𝐏)), q;
+      laplacianEM(laplacian(distance²Mat(metric, 𝐏, ⏩=⏩)), q;
                                 tol=tolerance, maxiter=maxiter, ⍰=⍰)
 end
 
@@ -1018,7 +1030,7 @@ function mean(metric::Metric, 𝐏::ℍVector;
 
     if  metric == Euclidean
         if threaded
-            isempty(w) ? (return fVec(𝛍, 𝐏)) : (return fVec(𝛍, 𝐏; w=v))
+            isempty(w) ? (return fVec(𝛍, 𝐏)) : (return fVec(𝚺, 𝐏; w=v))
         else
             isempty(w) ? (return ℍ(𝛍(𝐏))) : (return ℍ(𝚺(map(*, v, 𝐏))))
         end
@@ -1051,7 +1063,7 @@ function mean(metric::Metric, 𝐏::ℍVector;
         return ℍ(L*L')
 
     elseif metric == logCholesky
-        if threaded       @threads for i=1:k 𝐐[i] = choL(𝐏[i]) end
+        if threaded      @threads for i=1:k 𝐐[i] = choL(𝐏[i]) end
         else             𝐐=map(choL, 𝐏) end
 
         if isempty(w)
@@ -1424,10 +1436,10 @@ function geometricMean(𝐏::ℍVector;
         if threaded
             if isempty(w)
                 @threads for i=1:k 𝐐[i] = log(ℍ(M⁻½*𝐏[i]*M⁻½)) end
-                💡 = ℍ(M½*exp(ℍ(𝛍(𝐐)))*M½)
+                💡 = ℍ(M½*exp(fVec(𝛍, 𝐐))*M½)
             else
                 @threads for i=1:k 𝐐[i] = v[i] * log(ℍ(M⁻½*𝐏[i]*M⁻½)) end
-                💡 = ℍ(M½*exp(ℍ(𝚺(𝐐)))*M½)
+                💡 = ℍ(M½*exp(fVec(𝚺, 𝐐))*M½)
             end
         else
             if isempty(w)
@@ -1562,10 +1574,10 @@ function logdet0Mean(𝐏::Union{ℍVector, 𝔻Vector};
         if threaded
             if isempty(w)
                 @threads for i=1:k 𝐐[i] = inv(𝕋(𝐏[i]+M)) end
-                💡 = l * inv(𝕋(𝚺(𝐐)))
+                💡 = l * inv(fVec(𝚺, 𝐐))
             else
                 @threads for i=1:k 𝐐[i] = v[i] * inv(𝕋(𝐏[i]+M)) end
-                💡 = 0.5 * inv(𝕋(𝚺(𝐐)))
+                💡 = 0.5 * inv(fVec(𝚺, 𝐐))
             end
         else
             if isempty(w)
@@ -1700,10 +1712,10 @@ function wasMean(𝐏::ℍVector;
         if threaded
             if isempty(w)
                 @threads for i=1:k 𝐐[i] = √(ℍ(M½*𝐏[i]*M½)) end
-                💡 = ℍ(M⁻½ * sqr(𝛍(𝐐)) * M⁻½)
+                💡 = ℍ(M⁻½ * sqr(fVec(𝛍, 𝐐)) * M⁻½)
             else
                 @threads for i=1:k 𝐐[i] = v[i] * √(ℍ(M½*𝐏[i]*M½)) end
-                💡 = ℍ(M⁻½ * sqr(𝚺(𝐐)) * M⁻½)
+                💡 = ℍ(M⁻½ * sqr(fVec(𝚺, 𝐐)) * M⁻½)
             end
         else
             if isempty(w)
@@ -1876,11 +1888,11 @@ function powerMean(𝐏::ℍVector, p::Real;
            if threaded
                if isempty(w)
                    @threads for i=1:k 𝐐[i] = ℍ(X*𝒫[i]*X')^absp end
-                   H=𝛍(𝐐)
+                   H=fVec(𝛍, 𝐐)
                    💡 = ℍ(H)^r * X
                else
                    @threads for i=1:k 𝐐[i] = v[i] * ℍ(X*𝒫[i]*X')^absp end
-                   H=𝚺(𝐐)
+                   H=fVec(𝚺, 𝐐)
                    💡 = ℍ(H)^r * X
                end
            else
