@@ -44,7 +44,8 @@ HermitianVector₂= ℍVector₂= Vector{ℍVector}     # vector of vectors of H
 
 RealOrComplex=Union{Real, Complex}
 
-AnyMatrix=Union{𝔻{T}, 𝕃{T}, ℍ{T}, 𝕄{T}} where T<:RealOrComplex
+#AnyMatrix=Union{𝔻{T}, 𝕃{T}, ℍ{T}, 𝕄{T}} where T<:RealOrComplex
+AnyMatrix=Union{𝔻, 𝕃, ℍ, 𝕄}
 AnyMatrixVector=Union{𝕄Vector, 𝔻Vector, 𝕃Vector, ℍVector}
 AnyMatrixVector₂=Union{𝕄Vector₂, 𝔻Vector₂, 𝕃Vector₂, ℍVector₂}
 
