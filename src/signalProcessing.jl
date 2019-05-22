@@ -173,6 +173,8 @@ randU=randUnitaryMat
  - (3) an array 1d (of [ℍVector type](@ref)) of ``k`` matrices of the kind in (1)
  - (4) an array 1d (of [ℍVector type](@ref)) of ``k`` matrices of the kind in (2).
 
+ Methods (3) and (4) are **multi-threaded**. See [Threads](@ref).
+
  For (1) and (2) the matrix is generated according to model
 
  ``UΛU^H+ηI``,
