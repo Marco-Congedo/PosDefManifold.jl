@@ -185,25 +185,24 @@ randU=randUnitaryMat
  `df` and `eigvalsSNR` randomly generated calling function
  `randΛ`([`randEigvalsMat`](@ref)).
 
- For (3) and (4), if the <optional keyword argument> 'commuting=true' is passed,
+ For (3) and (4), if the *<optional keyword argument>* `commuting=true` is passed,
  the ``k`` matrices are generated according to model
 
-  ``UΛΛ_iU^H+ηI``,
+  ``UΛ_iU^H+ηI,\\hspace{8pt}``, for ``i``=1:``k``
 
  otherwise they are generated accrding to model
 
- ``(UΛ_iU^H+ηI)+φ(V_iΔ_iV_i^H+ηI),\\hspace{8pt}``  Eq.[1]
+ ``(UΛ_iU^H+ηI)+φ(V_iΔ_iV_i^H+ηI),\\hspace{8pt}``, for ``i``=1:``k``  Eq.[1]
 
  where
  - ``U`` and the ``V_i`` are random (3) orthogonal/(4) unitary matrices,
  - ``Λ_i`` and ``Δ_i`` are positive definite diagonal matrices
  - ``η`` is a non-negative scalar.
   All variables here above are randomly generated as in (1) and (2)
- - ``φ`` is adjusted so as to obtain a desired output `SNR`
- ([signal-to-noise ratio](https://bit.ly/1VvpvnQ)), which is also an
+ - ``φ`` is adjusted so as to obtain a desired output `SNR` ([signal-to-noise ratio](https://bit.ly/1VvpvnQ)), which is also an
  *<optional keywords arguments>*, such as
 
- ``SNR=\\frac{\\displaystyle\\sum_{i=1}^{k}\\textrm{tr}(UΛ_kU^H+ηI)}{\\displaystyle\\sum_{i=1}^{k}\\textrm{tr}φ(UΔ_kU^H+ηI)}``.
+ ``SNR=\\frac{\\displaystyle\\sum_{i=1}^{k}\\textrm{tr}(UΛ_iU^H+ηI)}{\\displaystyle\\sum_{i=1}^{k}\\textrm{tr}φ(V_iΔ_iV_i^H+ηI)}``.
 
 !!! note "Nota Bene"
     The keyword arguments `SNR` is not expressed in decibels,

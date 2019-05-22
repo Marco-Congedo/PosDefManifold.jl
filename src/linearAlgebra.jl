@@ -1097,7 +1097,7 @@ end
 
 """
 	(1) congruence(B::AnyMatrix, P::AnyMatrix, matrixType)
-	(2) congruence(B::AnyMatrix, 𝐏::AnyMatrixVector, VectorType)
+	(2) congruence(B::AnyMatrix, 𝐏::AnyMatrixVector, vectorType)
 
  **alias**: `cong`
 
@@ -1108,7 +1108,7 @@ end
  for ``B`` and ``P`` any combination of `Hermitian`, `LowerTriangular`,
  `Diagonal` or general `Matrix` type.
 
- The result is of the `type` argument,
+ The result is of the `matrixType` argument,
  which must be one of these four abstract type (not an instance of them).
  See [aliases](@ref) for shortening these type using symbols `ℍ`, `𝔻`, `𝕃` and `𝕄`.
 
@@ -1119,9 +1119,9 @@ end
  for all ``k`` matrices in ``𝐏={P_1,...,P_k}``, for ``B`` and ``𝐏``
  any combination of matrix type `Hermitian`, `LowerTriangular`,
  `Diagonal` or `Matrix` (``B``) and vector of matrices type `ℍVector`, `𝔻Vector`,
- `𝕃Vector` and `𝕄Vector (``𝐏``). See [Array of Matrices types](@ref).
+ `𝕃Vector` and `𝕄Vector` (``𝐏``). See [Array of Matrices types](@ref).
 
- The result is a vector of matrices of the `type` argument, which must be
+ The result is a vector of matrices of the `vectorType` argument, which must be
  one of the following abstract types: `ℍVector`, `𝔻Vector`, `𝕃Vector` or `𝕄Vector`
  (and not an instance of these types).
 
@@ -1130,13 +1130,13 @@ end
 !!! warning "Nota Bene"
  	Types `ℍ`, `𝔻`, `𝕃` or `𝕄` are actually constructors, thus they may
 	modify the result of the congruence(s). It is your responsibility to
-	pick the right argument `type`. For example, in (1) if ``B``
-	and ``P`` are `Hermitian`, calling `cong(B, P, 𝔻)` will actually
+	pick the right argument `matrixType` in (1) and `vectorType` in (2).
+	For example, in (1) if ``B`` and ``P`` are `Hermitian`,
+	calling `cong(B, P, 𝔻)` will actually
 	return the diagonal part of B*P*B' and calling `cong(B, P, 𝕃)` will
 	actually return its lower triangular part. The full congruence can
 	be obtained as an `Hermitian` matrix by `cong(B, P, ℍ)` and as a generic
-	matrix object by `cong(B, P, 𝕄)`. This warning applies as well to
-	method (2).
+	matrix object by `cong(B, P, 𝕄)`. 
 
  ## Examples
 
