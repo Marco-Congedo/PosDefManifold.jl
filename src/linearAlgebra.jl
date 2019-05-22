@@ -84,7 +84,8 @@ end
  `Diagonal`, `LowerTriangular`, or `Matrix`.
  Argument `array` may be a matrix of one of these types, but also one of the following:
 
- ℍVector, ℍVector₂, 𝔻Vector, 𝔻Vector₂, 𝕃Vector, 𝕃Vector₂, 𝕄Vector, 𝕄Vector₂.
+ `ℍVector`, `ℍVector₂`, `𝔻Vector`, `𝔻Vector₂`, `𝕃Vector`, `𝕃Vector₂`,
+ `𝕄Vector`, `𝕄Vector₂`.
 
  Those are [Array of Matrices types](@ref).
  See also [aliases](@ref) for the symbols `ℍ`, `𝔻`, `𝕃` and `𝕄`.
@@ -117,25 +118,29 @@ typeofMat=typeofMatrix
 
 
 """
-    function typeofVector(array::Union{ AnyMatrixVector,
+    function typeofVector(array::Union{ AnyMatrix,
+										AnyMatrixVector,
                                         AnyMatrixVector₂ })
 
  **alias**: `typeofVec`
 
  Return the type of a Vector, either `HermitianVector`,
  `DiagonalVector`, `LowerTriangularVector`, or `MatrixVector`.
- The aliases of those are, respectvely, ℍVector, 𝔻Vector, 𝕃Vector and 𝕄Vector.
- Argument `array` may be a vector of one of these types, but also one of the following:
+ The aliases of those are, respectvely, `ℍVector`, `𝔻Vector`, `𝕃Vector` and
+ `𝕄Vector`.
+ Argument `array` may be a vector of one of these types, but also one of the
+ following:
 
- ℍVector₂, 𝔻Vector₂, 𝕃Vector₂, 𝕄Vector₂.
+ `ℍ`, `𝔻`, `𝕃` and `𝕄`, `ℍVector₂`, `𝔻Vector₂`, `𝕃Vector₂`, `𝕄Vector₂`.
 
- Those are [Array of Matrices types](@ref).
- See also [aliases](@ref) for the symbols `ℍ`, `𝔻`, `𝕃` and `𝕄`.
+ See [aliases](@ref) for the symbols `ℍ`, `𝔻`, `𝕃` and `𝕄`.
+ The last four are [Array of Matrices types](@ref).
 
  Note that this function is different from Julia function
  [typeof](https://docs.julialang.org/en/v1/base/base/#Core.typeof)
- only in that it returns the vector type also for
- the ℍVector₂, 𝔻Vector₂, 𝕃Vector₂ and 𝕄Vector₂ types.
+ only in that it returns the vector type also if `array`
+ is not of the `ℍVector`, `𝔻Vector`, `𝕃Vector` or
+ `𝕄Vector` type.
 
  ## Examples
     using LinearAlgebra, PosDefManifold
@@ -143,11 +148,14 @@ typeofMat=typeofMatrix
     typeofMatrix(P) # returns `Array{Hermitian,1}`
     typeof(P) # also returns `Array{Hermitian,1}`
 
+	typeofMatrix(P[1]) # returns `Array{Hermitian,1}`
+    typeof(P[1]) # returns `Hermitian{Float64,Array{Float64,2}}`
+
 """
-typeofVector(H::Union{ℍVector, ℍVector₂}) = ℍVector
-typeofVector(D::Union{𝔻Vector, 𝔻Vector₂}) = 𝔻Vector
-typeofVector(L::Union{𝕃Vector, 𝕃Vector₂}) = 𝕃Vector
-typeofVector(M::Union{𝕄Vector, 𝕄Vector₂}) = 𝕄Vector
+typeofVector(H::Union{ℍ, ℍVector, ℍVector₂}) = ℍVector
+typeofVector(D::Union{𝔻, 𝔻Vector, 𝔻Vector₂}) = 𝔻Vector
+typeofVector(L::Union{𝕃, 𝕃Vector, 𝕃Vector₂}) = 𝕃Vector
+typeofVector(M::Union{𝕄, 𝕄Vector, 𝕄Vector₂}) = 𝕄Vector
 typeofVec=typeofVector
 
 
@@ -1088,25 +1096,47 @@ function fVec(f::Function, g::Function, 𝐏::AnyMatrixVector;
 end
 
 """
-	(1) congruence(B::AnyMatrix, P::ℍ)
-	(2) congruence(B::AnyMatrix, 𝐏::ℍVector)
+	(1) congruence(B::AnyMatrix, P::AnyMatrix, matrixType)
+	(2) congruence(B::AnyMatrix, 𝐏::AnyMatrixVector, VectorType)
 
  **alias**: `cong`
 
- (1) Return as an `Hermitian` matrix the congruent transformation
- of `Hermitian` matrix ``P``
+ (1) Return the congruent transformation
 
  ``BPB^H``,
 
- for ``B`` `Hermitian`, `LowerTriangular`, `Diagonal` or a general `Matrix`.
+ for ``B`` and ``P`` any combination of `Hermitian`, `LowerTriangular`,
+ `Diagonal` or general `Matrix` type.
 
- (2) Return an [ℍVector type](@ref) holding the congruent transformations
+ The result is of the `type` argument,
+ which must be one of these four abstract type (not an instance of them).
+ See [aliases](@ref) for shortening these type using symbols `ℍ`, `𝔻`, `𝕃` and `𝕄`.
+
+ (2) Return a vector of matrices holding the congruent transformations
 
  ``BP_kB^H``,
 
- for all ``k`` matrices in [ℍVector type](@ref) ``𝐏={P_1,...,P_k}``.
+ for all ``k`` matrices in ``𝐏={P_1,...,P_k}``, for ``B`` and ``𝐏``
+ any combination of matrix type `Hermitian`, `LowerTriangular`,
+ `Diagonal` or `Matrix` (``B``) and vector of matrices type `ℍVector`, `𝔻Vector`,
+ `𝕃Vector` and `𝕄Vector (``𝐏``). See [Array of Matrices types](@ref).
+
+ The result is a vector of matrices of the `type` argument, which must be
+ one of the following abstract types: `ℍVector`, `𝔻Vector`, `𝕃Vector` or `𝕄Vector`
+ (and not an instance of these types).
 
  Method (2) is **multi-threaded**. See [Threads](@ref).
+
+!!! warning "Nota Bene"
+ 	Types `ℍ`, `𝔻`, `𝕃` or `𝕄` are actually constructors, thus they may
+	modify the result of the congruence(s). It is your responsibility to
+	pick the right argument `type`. For example, in (1) if ``B``
+	and ``P`` are `Hermitian`, calling `cong(B, P, 𝔻)` will actually
+	return the diagonal part of B*P*B' and calling `cong(B, P, 𝕃)` will
+	actually return its lower triangular part. The full congruence can
+	be obtained as an `Hermitian` matrix by `cong(B, P, ℍ)` and as a generic
+	matrix object by `cong(B, P, 𝕄)`. This warning applies as well to
+	method (2).
 
  ## Examples
 
@@ -1115,29 +1145,30 @@ end
 	# (1)
 	P=randP(3) # generate a 3x3 positive matrix
 	M=randn(3, 3)
-	C=congruence(M, P) # = M*P*M'
+	C=cong(M, P, ℍ) # equivalent to C=ℍ(M*P*M')
 
 	# (2)
     Pset=randP(4, 100); # generate 100 positive definite 4x4 matrices
 	M=randn(4, 4)
-	Qset=cong(M, Pset) # = [M*Pset_1*M',...,M*Pset_k*M'] as an ℍVector type
+	Qset=cong(M, Pset, ℍVector) # = [M*Pset_1*M',...,M*Pset_k*M'] as an ℍVector type
 
 	# recenter the matrices in Pset to their Fisher mean:
-	Qset=cong(invsqrt(mean(Fisher, Pset; ⏩=true)), Pset)
+	Qset=cong(invsqrt(mean(Fisher, Pset; ⏩=true)), Pset, ℍVector)
 
 	# as a check, the Fisher mean of Qset is now the identity
 	mean(Fisher, Qset; ⏩=true)≈I ? println("⭐") : println("⛔")
 
 """
-congruence(B::AnyMatrix, P::ℍ) = ℍ(B*P*B')
+congruence(B::AnyMatrix, P::AnyMatrix, matrixType) = matrixType(B*P*B')
 
-function congruence(B::AnyMatrix, 𝐏::ℍVector)
-	threads = _GetThreads(dim(𝐏, 1), "congruence")
+function congruence(B::AnyMatrix, 𝐏::AnyMatrixVector, vectorType)
+	k, 𝕋 = dim(𝐏, 1), typeofMat(vectorType(undef, 0))
+	threads = _GetThreads(k, "congruence")
 	if threads==1
-		return ℍVector([congruence(B, P) for P in 𝐏])
+		return vectorType([congruence(B, P, 𝕋) for P in 𝐏])
 	else
-		𝐐=similar(𝐏)
-		@threads for i=1:dim(𝐏, 1) 𝐐[i] = congruence(B, 𝐏[i]) end
+		𝐐=vectorType(undef, k)
+		@threads for i=1:k 𝐐[i] = congruence(B, 𝐏[i], 𝕋) end
 		return 𝐐
 	end
 end

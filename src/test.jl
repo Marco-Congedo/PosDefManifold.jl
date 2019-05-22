@@ -241,9 +241,9 @@ function tests();
 
     name="congruence"; newTest(name)
     M=randn(n, n)
-    congruence(M, P)≈M*P*M' ? OK() : OH(name*"Matrix method")
+    congruence(M, P, ℍ)≈M*P*M' ? OK() : OH(name*"Matrix method")
     Pset=randP(n, n*4)
-    Qset=cong(M, Pset)
+    Qset=cong(M, Pset, ℍVector)
     Qset≈[M*Pset[i]*M' for i=1:n*4] ? OK() : OH(name*"Matrix Vector method")
 
     ## 8. Spectral decompositions of positive matrices
