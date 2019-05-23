@@ -6,10 +6,14 @@ Julia version ≥ 1.0.3
 
 ## Installation
 
-The package is not registered yet. Execute the following command
-in Julia's REPL:
+Execute the following command in Julia's REPL:
 
-]add https://github.com/Marco-Congedo/PosDefManifold.jl
+    ]add PosDefManifold
+
+To obtain the latest development version execute instead
+
+    ]add PosDefManifold#master
+
 
 ## Overview
 
