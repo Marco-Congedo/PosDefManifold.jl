@@ -1,5 +1,5 @@
 #   Unit linearAlgebra.jl, part of PosDefManifold Package for julia language
-#   v 0.0.3 - last update 16th of May 2019
+#   v 0.3.1 - last update 23th of Mai 2019
 #
 #   MIT License
 #   Copyright (c) 2019, Marco Congedo, CNRS, Grenobe, France:
@@ -1136,7 +1136,7 @@ end
 	return the diagonal part of B*P*B' and calling `cong(B, P, 𝕃)` will
 	actually return its lower triangular part. The full congruence can
 	be obtained as an `Hermitian` matrix by `cong(B, P, ℍ)` and as a generic
-	matrix object by `cong(B, P, 𝕄)`. 
+	matrix object by `cong(B, P, 𝕄)`.
 
  ## Examples
 
