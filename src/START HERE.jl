@@ -1,7 +1,7 @@
 #   This unit is not necessary for the PosDefManifold package.
 #   It allows to install the PosDefManifold package
 #   and to build the documentation locally.
-#   v 0.3.1 - last update 23th of Mai 2019
+#   v 0.3.2 - last update 25th of Mai 2019
 #
 #   MIT License
 #   Copyright (c) 2019, Marco Congedo, CNRS, Grenobe, France:
