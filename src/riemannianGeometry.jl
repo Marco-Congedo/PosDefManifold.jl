@@ -1,5 +1,5 @@
 #    Unit riemannianGeometry.jl, part of PosDefManifold Package for julia language
-#    v 0.3.2 - last update 25th of Mai 2019
+#    v 0.3.0 - last update 25th of Mai 2019
 #
 #    MIT License
 #    Copyright (c) 2019, Marco Congedo, CNRS, Grenobe, France:
