@@ -376,7 +376,6 @@ tr1Msg="function tr1 in LinearAlgebra.jl of PosDefMaifold package: the trace of 
     X=randn(ComplexF64, 10, 20)
     normalizeCol!(X, 3)                  # (1) normalize columns 3
     normalizeCol!(X, 3:6, (2.0 + 0.5im)) # (4) divide columns 3 to 5 by (2.0 + 0.5im)
-
 """
 function normalizeCol!(X::𝕄{T}, j::Int) where T<:RealOrComplex
     w=colNorm(X, j)
