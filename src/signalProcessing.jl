@@ -1,5 +1,5 @@
 #    Unit signalProcessing.jl, part of PosDefManifold Package for julia language
-#    v 0.3.0 - last update 25th of Mai 2019
+#    v 0.3.1 - last update 30th of Mai 2019
 #
 #    MIT License
 #    Copyright (c) 2019, Marco Congedo, CNRS, Grenobe, France:
@@ -12,7 +12,7 @@
 
 
 """
- `randChi²(df::Int)`
+    randChi²(df::Int)
 
  **alias**: `randχ²`
 
@@ -33,7 +33,11 @@ randChi²(df::Int) =
 randχ²=randChi²
 
 """
- `randEigvals(n::Int; <df::Int=2, eigvalsSNR::Real=10e3>)`
+    randEigvals(n::Int;
+                <
+                df::Int=2,
+                eigvalsSNR::Real=10e3)
+                >
 
  **alias**: `randλ`
 
@@ -51,14 +55,26 @@ randχ²=randChi²
     plot!(σ) # needs Plots package. Check your plots back-end.
 
 """
-randEigvals(n::Int; df::Int=2, eigvalsSNR::Real=10e3) =
+randEigvals(n::Int;
+            df::Int=2,
+            eigvalsSNR::Real=10e3) =
     eigvalsSNR==Inf ? [randχ²(df) for i in 1:n] : [randχ²(df)+(df/eigvalsSNR) for i in 1:n]
 
 randλ=randEigvals
 
 """
-    (1) randEigvalsMat(n::Int; <df::Int=2, eigvalsSNR::Real=10e3>)
-    (2) randEigvalsMat(n::Int, k::Int; <df::Int=2, eigvalsSNR::Real=10e3>)
+    (1) randEigvalsMat(n::Int;
+                        <
+                        df::Int=2,
+                        eigvalsSNR::Real=10e3)
+                        >
+
+    (2) randEigvalsMat(n::Int, k::Int;
+                        <
+                        df::Int=2,
+                        eigvalsSNR::Real=10e3
+                        )
+                        >
 
  **alias**: `randΛ`
 
@@ -114,10 +130,14 @@ randλ=randEigvals
     Dvec=randΛ(n, 10)
 
 """
-randEigvalsMat(n::Int; df::Int=2, eigvalsSNR::Real=10e3)=
-    𝔻(randλ(n, df=df, eigvalsSNR=eigvalsSNR))
+randEigvalsMat(n::Int;
+                df::Int=2,
+                eigvalsSNR::Real=10e3) =
+        𝔻(randλ(n, df=df, eigvalsSNR=eigvalsSNR))
 
-randEigvalsMat(n::Int, k::Int; df::Int=2, eigvalsSNR::Real=10e3)=
+randEigvalsMat(n::Int, k::Int;
+                df::Int=2,
+                eigvalsSNR::Real=10e3) =
         𝔻Vector([randΛ(n, df=df, eigvalsSNR=eigvalsSNR) for j=1:k])
 
 randΛ=randEigvalsMat
@@ -159,10 +179,22 @@ randU=randUnitaryMat
 
 
 """
-    (1) randPosDefMat(n::Int; <df::Int=2, eigvalsSNR::Real=10e3>)
+    (1) randPosDefMat(n::Int;
+                        <
+                        df::Int=2,
+                        eigvalsSNR::Real=10e3)
+                        >
+
     (2) randPosDefMat(::Type{Complex{T}}, arguments in (1))
+
     (3) randPosDefMat(n::Int, k::Int;
-            df::Int=2, eigvalsSNR::Real=10e3, SNR::Real=100, commuting=false)
+                        <
+                        df::Int=2,
+                        eigvalsSNR::Real=10e3,
+                        SNR::Real=100,
+                        commuting=false)
+                        >
+
     (4) randPosDefMat(::Type{Complex{T}}, arguments in (3))
 
  **alias**: `randP`
@@ -228,17 +260,22 @@ randU=randUnitaryMat
 
 """
 randPosDefMat(n::Int;
-              df::Int=2, eigvalsSNR::Real=10e3) =
+              df::Int=2,
+              eigvalsSNR::Real=10e3) =
     congruence(randU(n), randΛ(n, df=df, eigvalsSNR=eigvalsSNR), ℍ)
 
 
 randPosDefMat(::Type{Complex{T}}, n::Int;
-             df::Int=2, eigvalsSNR::Real=10e3) where {T<:AbstractFloat} =
+             df::Int=2,
+             eigvalsSNR::Real=10e3)     where {T<:AbstractFloat} =
     congruence(randU(ComplexF64, n), randΛ(n, df=df, eigvalsSNR=eigvalsSNR), ℍ)
 
 
 function randPosDefMat(n::Int, k::Int;
-             df::Int=2, eigvalsSNR::Real=10e3, SNR::Real=100, commuting=false)
+             df::Int=2,
+             eigvalsSNR::Real=10e3,
+             SNR::Real=100,
+             commuting=false)
     U=randU(n)
     𝐏=ℍVector(undef, k)
     φ=1/SNR
@@ -255,7 +292,10 @@ end
 
 
 function randPosDefMat(::Type{Complex{T}}, n::Int, k::Int;
-            df::Int=2, eigvalsSNR::Real=10e3, SNR::Real=100, commuting=false) where {T<:AbstractFloat}
+            df::Int=2,
+            eigvalsSNR::Real=10e3,
+            SNR::Real=100,
+            commuting=false)            where {T<:AbstractFloat}
     U=randU(ComplexF64, n)
     𝐏=ℍVector(undef, k)
     φ=1/SNR
@@ -341,13 +381,15 @@ randP=randPosDefMat
     # output_snr should be approx. equal to 1000
 
 """
-function regularize!(P::ℍ; SNR=10e3)
+function regularize!(P::ℍ;
+                    SNR=10e3)
     n=size(P, 1)
     η=tr(P)/(SNR*n)
     for i in 1:n P[i, i]+=η  end
 end
 
-function regularize!(𝐏::ℍVector; SNR=10e3)
+function regularize!(𝐏::ℍVector;
+                    SNR=10e3)
     k=length(𝐏)
     n=size(𝐏[1], 1)
     η=sum(tr(P) for P in 𝐏)/(SNR*n*k)

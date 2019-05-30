@@ -1,7 +1,7 @@
 #   This unit is not necessary for the PosDefManifold package.
 #   It allows to install the PosDefManifold package
 #   and to build the documentation locally.
-#   v 0.3.0 - last update 25th of Mai 2019
+#   v 0.3.1 - last update 25th of Mai 2019
 #
 #   MIT License
 #   Copyright (c) 2019, Marco Congedo, CNRS, Grenobe, France:
@@ -19,9 +19,11 @@
 #   you have identified the 'srcDir'.
 
 begin
-    projectName="PosDefManifold"
-    juliaCodeDir=homedir()*"\\Documents\\Code\\julia\\"
-    srcDir           =   juliaCodeDir*projectName*"\\"*projectDir*"src\\"
+    projectName = "PosDefManifold"
+    # change the following path to the folder where your projects are
+    juliaCodeDir= homedir()*"\\Documents\\Code\\julia\\"
+    srcDir      = juliaCodeDir*projectName*"\\src\\"
+    docsDir     = juliaCodeDir*projectName*"\\docs\\"
 
     push!(LOAD_PATH, srcDir)
 
@@ -30,6 +32,6 @@ begin
     PosDefManifold
 
     cd(docsDir)
-    clipboard("""makedocs(sitename="PosDefManifold", modules=[PosDefManifold])""")
+    clipboard("""makedocs(sitename="$projectName", modules=[$projectName])""")
     @info("\nhit CTRL+V+ENTER on the REPL for building the documentation.");
 end

@@ -26,7 +26,9 @@ The main module does not contains functions, but it declares all **constant**,
 | constant   | value | numeric value
 |:----------:| ----------- | ----------- |
 |`sqrt2` |√2 | 1.4142135623730951 |
-|`invsqrt2`|1/√2 | 0.7071067811865475 |
+|`sqrt2inv`|1/√2 | 0.7071067811865475 |
+|`golden`| (√5+1)/2 | 1.6180339887499 |
+|`goldeninv`| (√5-1)/2 | 0.6180339887499 |
 |`maxpos`| 1e15 | 100000000000000|
 
 

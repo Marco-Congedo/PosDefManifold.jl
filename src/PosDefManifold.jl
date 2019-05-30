@@ -1,5 +1,5 @@
 #    Main Module of the  PosDefManifold Package for julia language
-#    v 0.3.0 - last update 25th of Mai 2019
+#    v 0.3.1 - last update 30th of Mai 2019
 #
 #    MIT License
 #    Copyright (c) 2019, Marco Congedo, CNRS, Grenobe, France:
@@ -16,9 +16,11 @@ using LinearAlgebra, Statistics, Base.Threads
 BLAS.set_num_threads(Sys.CPU_THREADS-Threads.nthreads())
 
 # constants
-const sqrt2=√2
-const invsqrt2=1/sqrt2
-const maxpos=1e15
+const sqrt2     =   √2
+const invsqrt2  =   1/sqrt2
+const golden    =   (√5+1)/2 # 1.618033988749894848204586834365638117720309...
+const goldeninv =   golden-1.0 # = 1/gold = (√5-1)/2 = ...
+const maxpos    =   1e15
 
 
 # aliases
@@ -28,6 +30,7 @@ const maxpos=1e15
 𝔻 = Diagonal	        # tab-completition: \bbD
 ℍ = Hermitian          # tab completion \bbH
 𝕃 = LowerTriangular    # tab completition \bbL
+
 
 # types
 MatrixVector = 𝕄Vector = Vector{𝕄}            # vector of Matrices
@@ -75,7 +78,8 @@ export
     #constants
     sqrt2,
     invsqrt2,
-    minpos,
+    golden,
+    goldeninv,
     maxpos,
 
     #aliases
@@ -163,6 +167,7 @@ export
     means,
     generalizedMean,
     geometricMean, gMean,
+    geometricpMean, gpMean,
     logdet0Mean, ld0Mean,
     wasMean,
     powerMean,
