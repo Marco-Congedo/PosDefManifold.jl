@@ -633,7 +633,6 @@ ss=sumOfSqr
     X=randn(10, 20)
     sumDiag2=sumOfSqrDiag(X) # (1)
     sumDiag2=sumOfSqrDiag(𝔻(X)) # (2) 𝔻=LinearAlgebra.Diagonal
-
 """
 sumOfSqrDiag(X::𝕄{T}) where T<:RealOrComplex =
     𝚺(abs2(X[i, i]) for i=1:minimum(size(X)))
@@ -815,7 +814,6 @@ tr(H::Union{ℍ{T}, 𝕄{T}}, D::𝔻{T}) where T<:RealOrComplex = tr(D, H)
     L=LowerTriangular(Matrix(P)) # or L=𝕃(Matrix(P))
     q2=quadraticForm(v, L)
     q1 ≈ q2 ? println(" ⭐ ") : println(" ⛔ ")
-
 """
 quadraticForm(v::Vector{T}, P::ℍ{T}) where T<:Real = qf(v, 𝕃(P))
 
@@ -899,12 +897,20 @@ end
  **See also**: [`DiagOfProd`](@ref), [`tr`](@ref).
 
  ## Examples
+
     using PosDefManifold
     P=randP(5) # use P=randP(ComplexF64, 5) for generating an Hermitian matrix
-    D=fDiag(inv, P, -1)   # diagonal matrix with the inverse of the first sub-diagonal of P
-    (Λ, U) = evd(P)       # Λ holds the eigenvalues of P, see evd
-    Δ=fDiag(log, Λ)       # diagonal matrix with the log of the eigenvalues
-    Δ=fDiag(x->x^2, Λ)    # using an anonymous function for the square of the eigenvalues
+
+	# diagonal matrix with the inverse of the first sub-diagonal of P
+    D=fDiag(inv, P, -1)
+
+	(Λ, U) = evd(P) # Λ holds the eigenvalues of P, see evd
+
+	# diagonal matrix with the log of the eigenvalues
+    Δ=fDiag(log, Λ)
+
+	# using an anonymous function for the square of the eigenvalues
+    Δ=fDiag(x->x^2, Λ)
 """
 fDiag(func::Function, X::𝔻{T}, k::Int=0) where T<:RealOrComplex = func.(X)
 
@@ -989,6 +995,7 @@ end # mgs function
 #  ------------------------------
 
 """
+```
 	(1) fVec(f::Function, 𝐏::AnyMatrixVector;
 	<
 	w::Vector=[],
@@ -998,7 +1005,7 @@ end # mgs function
 
 	(2) fVec(f::Function, g::Function, 𝐏::AnyMatrixVector;
 	< same optional keyword arguments in (1) >)
-
+```
 
  Given a 1d array ``𝐏={P_1,...,P_k}`` of ``k`` matrices
  of the [𝕄Vector type](@ref), [𝔻Vector type](@ref), [𝕃Vector type](@ref) or
@@ -1148,7 +1155,7 @@ end
  Method (2) is **multi-threaded**. See [Threads](@ref).
 
 !!! warning "Nota Bene"
- 	Types `ℍ`, `𝔻`, `𝕃` or `𝕄` are actually constructors, thus they may
+	Types `ℍ`, `𝔻`, `𝕃` or `𝕄` are actually constructors, thus they may
 	modify the result of the congruence(s). It is your responsibility to
 	pick the right argument `matrixType` in (1) and `vectorType` in (2).
 	For example, in (1) if ``B`` and ``P`` are `Hermitian`,
