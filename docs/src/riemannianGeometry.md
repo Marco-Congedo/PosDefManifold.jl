@@ -8,12 +8,12 @@ The functions are divided in six categories:
 
 | Category  | Output |
 |:---------- |:----------- |
-| 1. [Geodesic equations](@ref) | interpolation, extrapolation,... |
+| 1. [Geodesic equations](@ref) | interpolation, extrapolation, weighted mean of two matrices, ... |
 | 2. [Distances](@ref) | length of geodesics |
-| 3. [Graphs and Laplacians](@ref) | for spectral embedding, eigenmaps, system dynamics,...|
+| 3. [Graphs and Laplacians](@ref) | spectral embedding, eigenmaps, track system dynamics, ...|
 | 4. [Means](@ref) | mid-points of geodesics, centers of mass of several points |
 | 5. [Tangent Space operations](@ref) | maps from the manifold to the tangent space and viceversa |
-| 6. [Procrustes problems](@ref) | for data matching, transfer learning,...|
+| 6. [Procrustes problems](@ref) | data matching, transfer learning, ...|
 
 ⋅
 
@@ -71,7 +71,7 @@ spectralEmbedding
 | [`means`](@ref) | As above for several sets at once |
 | [`generalizedMean`](@ref) | Generalized wFm of a matrix set |
 | [`geometricMean`](@ref), `gMean` | wFm of a matrix set minimizing the dispersion according to the Fisher metric (iterative)|
-| [`geometricpMean`](@ref), `gMean` | robust wFm of a matrix set minimizing the p-dispersion according to the Fisher metric (iterative)|
+| [`geometricpMean`](@ref), `gpMean` | robust wFm of a matrix set minimizing the p-dispersion according to the Fisher metric (iterative)|
 | [`logdet0Mean`](@ref), `ld0Mean` | wFm of a matrix set according to the logdet0 metric (iterative)|
 | [`wasMean`](@ref) | wFm of a matrix set according to the Wasserstein metric (iterative)|
 | [`powerMean`](@ref) | Power wFm of a matrix set (iterative)|

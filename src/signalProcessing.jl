@@ -33,11 +33,12 @@ randChi²(df::Int) =
 randχ²=randChi²
 
 """
+```
     randEigvals(n::Int;
     <
     df::Int=2,
-    eigvalsSNR::Real=10e3)
-    >
+    eigvalsSNR::Real=10e3 >)
+```
 
  **alias**: `randλ`
 
@@ -63,14 +64,15 @@ randEigvals(n::Int;
 randλ=randEigvals
 
 """
+```
     (1) randEigvalsMat(n::Int;
     <
     df::Int=2,
-    eigvalsSNR::Real=10e3
-    >)
+    eigvalsSNR::Real=10e3 >)
 
     (2) randEigvalsMat(n::Int, k::Int;
     < same keyword arguments as in (1) >)
+```
 
  **alias**: `randΛ`
 
@@ -175,11 +177,11 @@ randU=randUnitaryMat
 
 
 """
+```
     (1) randPosDefMat(n::Int;
     <
     df::Int=2,
-    eigvalsSNR::Real=10e3
-    >)
+    eigvalsSNR::Real=10e3 >)
 
     (2) randPosDefMat(::Type{Complex{T}}, n:: Int;
     < same keyword arguments as in (1) >)
@@ -189,11 +191,11 @@ randU=randUnitaryMat
     df::Int=2,
     eigvalsSNR::Real=10e3,
     SNR::Real=100,
-    commuting=false
-    >)
+    commuting=false >)
 
     (4) randPosDefMat(::Type{Complex{T}}, n::Int, k::Int;
     < same keyword arguments as in (3) >)
+```
 
  **alias**: `randP`
 
@@ -357,7 +359,8 @@ randP=randPosDefMat
     using LinearAlgebra, Plots, PosDefManifold
     n=3
     U=randU(n)
-    # in Q we will write two matrices, the unregularized and regularized matrix side by side
+    # in Q we will write two matrices,
+    # the unregularized and regularized matrix side by side
     Q=Matrix{Float64}(undef, n, n*2)
     P=ℍ(U*Diagonal(randn(n).^2)*U') # generate a real 3x3 positive matrix
     for i=1:n, j=1:n Q[i, j]=P[i, j] end
