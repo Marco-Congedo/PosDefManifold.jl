@@ -1,5 +1,5 @@
 #   Unit linearAlgebra.jl, part of PosDefManifold Package for julia language
-#   v 0.3.0 - last update 25th of Mai 2019
+#   v 0.3.1 - last update 30th of Mai 2019
 #
 #   MIT License
 #   Copyright (c) 2019, Marco Congedo, CNRS, Grenobe, France:
@@ -405,10 +405,17 @@ normalizeCol!(X::𝕄{T}, range::UnitRange, by::Number) where T<:RealOrComplex =
 """
 ```
     (1) ispos(   λ::Vector{T};
-                <tol::Real=0, rev=true, 🔔=true, msg="">) where T<:Real
+                <
+				tol::Real=0,
+				rev=true,
+				🔔=true,
+				msg="") 				where T<:Real
+				>
 
     (2) ispos(   Λ::𝔻{T};
-                <tol::Real=0, rev=true, 🔔=true, msg="">) where T<:Real
+				< optional keyword arguments in (1) ) >
+										where T<:Real
+
 ```
 
  Return ``true`` if all numbers in (1) real vector ``λ`` or in (2) real `Diagonal`
@@ -443,7 +450,12 @@ normalizeCol!(X::𝕄{T}, range::UnitRange, by::Number) where T<:RealOrComplex =
  # └ @ [here julie will point to the line of code issuing the warning]
 ```
  """
-function ispos(λ::Vector{T}; tol::Real=0, rev=true, 🔔=true, msg="") where T<:Real
+function ispos(λ::Vector{T};
+				tol::Real=0,
+				rev=true,
+				🔔=true,
+				msg="") 			where T<:Real
+
     tol==0 ? tolerance = √eps(T) : tolerance = tol
     rev ? iterations = (length(λ):-1:1) : iterations=(1:length(λ))
     for i in iterations
@@ -456,7 +468,11 @@ function ispos(λ::Vector{T}; tol::Real=0, rev=true, 🔔=true, msg="") where T<
     return true
 end
 
-ispos(Λ::Diagonal{T}; tol::Real=0, rev=true, 🔔=true, msg="") where T<:Real =
+ispos(Λ::Diagonal{T};
+		tol::Real=0,
+		rev=true,
+		🔔=true,
+		msg="") 					where T<:Real =
       ispos( diag(Λ); tol=tol, rev=rev, 🔔=🔔, msg=msg)
 
 
@@ -979,10 +995,14 @@ end # mgs function
 
 """
 	(1) fVec(f::Function, 𝐏::AnyMatrixVector;
-		 	<w::Vector=[], ✓w=false, allocs=[]>)
+		 	<
+			w::Vector=[],
+			✓w=false,
+			allocs=[])
+			>
 
 	(2) fVec(f::Function, g::Function, 𝐏::AnyMatrixVector;
-			<w::Vector=[], ✓w=false, allocs=[]>)
+			< optional keyword arguments in (1) ) >
 
 
  Given a 1d array ``𝐏={P_1,...,P_k}`` of ``k`` matrices
@@ -1072,7 +1092,9 @@ end # mgs function
 	@benchmark(fVec(mean, log, Pset))				# (1.540 s)
 """
 function fVec(f::Function, 𝐏::AnyMatrixVector;
-			  w::Vector=[], ✓w=false, allocs=[])
+			  w::Vector=[],
+			  ✓w=false,
+			  allocs=[])
 
 	threads, ranges, 𝐐, v = _fVec_common(𝐏; w=w, ✓w=✓w, allocs=allocs)
 	if isempty(w)
@@ -1084,7 +1106,9 @@ function fVec(f::Function, 𝐏::AnyMatrixVector;
 end
 
 function fVec(f::Function, g::Function, 𝐏::AnyMatrixVector;
-			  w::Vector=[], ✓w=false, allocs=[])
+			  w::Vector=[],
+			  ✓w=false,
+			  allocs=[])
 
 	threads, ranges, 𝐐, v = _fVec_common(𝐏; w=w, ✓w=✓w, allocs=allocs)
 	if isempty(w)
@@ -1108,8 +1132,8 @@ end
  for ``B`` and ``P`` any combination of `Hermitian`, `LowerTriangular`,
  `Diagonal` or general `Matrix` type.
 
- The result is of the `matrixType` argument,
- which must be one of these four abstract type (not an instance of them).
+ The result is of the `matrixType` argument, which must be provided and
+ must be one of these four abstract type (not an instance of them).
  See [aliases](@ref) for shortening these type using symbols `ℍ`, `𝔻`, `𝕃` and `𝕄`.
 
  (2) Return a vector of matrices holding the congruent transformations
@@ -1122,7 +1146,8 @@ end
  `𝕃Vector` and `𝕄Vector` (``𝐏``). See [Array of Matrices types](@ref).
 
  The result is a vector of matrices of the `vectorType` argument, which must be
- one of the following abstract types: `ℍVector`, `𝔻Vector`, `𝕃Vector` or `𝕄Vector`
+ provided and must be one of the following abstract types:
+ `ℍVector`, `𝔻Vector`, `𝕃Vector` or `𝕄Vector`
  (and not an instance of these types).
 
  Method (2) is **multi-threaded**. See [Threads](@ref).
@@ -1305,7 +1330,7 @@ spectralFunctions(D::𝔻{T}, func::Function) where T<:Real = func.(D)
 """
 pow(P::ℍ{T}, p) where T<:RealOrComplex = spectralFunctions(P, x->x^p) # one argument
 
-pow(D::𝔻{T}, p)  where T<:Real = spectralFunctions(D, x->x^p) # one argument
+pow(D::𝔻{T}, p)  where T<:Real = D^p # one argument
 
 function pow(P::ℍ{T}, args...) where T<:RealOrComplex # several arguments
     (Λ, U) = evd(P)
@@ -1384,10 +1409,16 @@ sqr(X::Union{𝕄{T}, 𝕃{T}, 𝔻{S}}) where T<:RealOrComplex where S<:Real = 
 
 """
     powerIterations(H::Union{ℍ{T}, 𝕄{T}}, q::Int;
-    <evalues=false, tol::Real=0, maxiter=300, ⍰=false>)  where T<:RealOrComplex
+    				<
+					evalues=false,
+					tol::Real=0,
+					maxiter::Int=300,
+					⍰=false)
+					> 						where T<:RealOrComplex
 
     powerIterations(L::𝕃{S}, q::Int;
-    <evalues=false, tol::Real=0, maxiter=300, ⍰=false)> where S<:Real
+    				< optional keyword arguments in (1) ) >
+											where S<:Real
 
  **alias**: `powIter`
 
@@ -1404,11 +1435,11 @@ sqr(X::Union{𝕄{T}, 𝕃{T}, 𝔻{S}}) where T<:RealOrComplex where S<:Real = 
  This option is available only for real matrices (see below).
 
  The following are *<optional keyword arguments>*:
- - ``tol`` is the tolerance for the convergence of the power method (see below),
- - ``maxiter`` is the maximum number of iterations allowed for the power method,
- - if ``⍰=true``, the convergence of all iterations will be printed,
- - if ``evalues=true``, return the 4-tuple ``(Λ, U, iterations, covergence)``,
- - if ``evalues=false`` return the 3-tuple ``(U, iterations, covergence)``.
+ - `tol is the tolerance for the convergence of the power method (see below),
+ - `maxiter is the maximum number of iterations allowed for the power method,
+ - if `⍰=true, the convergence of all iterations will be printed,
+ - if `evalues=true, return the 4-tuple ``(Λ, U, iterations, covergence)``,
+ - if `evalues=false return the 3-tuple ``(U, iterations, covergence)``.
 
 
 !!! note "Nota Bene"
@@ -1448,7 +1479,10 @@ sqr(X::Union{𝕄{T}, 𝕃{T}, 𝔻{S}}) where T<:RealOrComplex where S<:Real = 
 
 """
 function powerIterations(H::𝕄{T}, q::Int;
-  evalues=false, tol::Real=0, maxiter=300, ⍰=false) where T<:RealOrComplex
+  						evalues=false,
+						tol::Real=0,
+						maxiter::Int=300,
+						⍰=false) 			where T<:RealOrComplex
 
     (n, sqrtn, type) = size(H, 1), √(size(H, 1)), eltype(H)
     tol==0 ? tolerance = √eps(real(type))*1e2 : tolerance = tol
@@ -1483,12 +1517,18 @@ end
 
 
 powerIterations(H::ℍ{T}, q::Int;
-    evalues=false, tol::Real=0, maxiter=300, ⍰=false) where T<:RealOrComplex =
-    powerIterations(Matrix(H), q; evalues=evalues, tol=tol, maxiter=maxiter, ⍰=⍰)
+    			evalues=false,
+				tol::Real=0,
+				maxiter::Int=300,
+				⍰=false) 			where T<:RealOrComplex =
+    powIter(Matrix(H), q; evalues=evalues, tol=tol, maxiter=maxiter, ⍰=⍰)
 
 powerIterations(L::𝕃{T}, q::Int;
-        evalues=false, tol::Real=0, maxiter=300, ⍰=false) where T<:Real =
-    powerIterations(𝕄(L), q; evalues=evalues, tol=tol, maxiter=maxiter, ⍰=⍰)
+        		evalues=false,
+				tol::Real=0,
+				maxiter::Int=300,
+				⍰=false) 			where T<:Real =
+    powIter(𝕄(L), q; evalues=evalues, tol=tol, maxiter=maxiter, ⍰=⍰)
 
 powIter=powerIterations
 

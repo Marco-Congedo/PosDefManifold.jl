@@ -1,5 +1,5 @@
 #   Unit classification.jl, part of PosDefManifold Package for julia language
-#   v 0.3.0 - last update 25th of Mai 2019
+#   v 0.3.1 - last update 30th of Mai 2019
 #
 #   MIT License
 #   Copyright (c) 2019, Marco Congedo, CNRS, Grenobe, France:
@@ -11,11 +11,18 @@
 #   of Symmetric Positive Definite (SPD) or Hermitian matrices.
 #
 #   CONTENT
-#   1. Probability
+#   1.  Utilities
+#   2.  Probability
 # __________________________________________________________________
 
+
 #  ------------------------
-## 1. Probability
+## 1. Utilities
+#  ------------------------
+
+
+#  ------------------------
+## 2. Probability
 #  ------------------------
 
 """
