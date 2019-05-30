@@ -34,10 +34,10 @@ randχ²=randChi²
 
 """
     randEigvals(n::Int;
-                <
-                df::Int=2,
-                eigvalsSNR::Real=10e3)
-                >
+    <
+    df::Int=2,
+    eigvalsSNR::Real=10e3)
+    >
 
  **alias**: `randλ`
 
@@ -64,17 +64,13 @@ randλ=randEigvals
 
 """
     (1) randEigvalsMat(n::Int;
-                        <
-                        df::Int=2,
-                        eigvalsSNR::Real=10e3)
-                        >
+    <
+    df::Int=2,
+    eigvalsSNR::Real=10e3
+    >)
 
     (2) randEigvalsMat(n::Int, k::Int;
-                        <
-                        df::Int=2,
-                        eigvalsSNR::Real=10e3
-                        )
-                        >
+    < same keyword arguments as in (1) >)
 
  **alias**: `randΛ`
 
@@ -180,22 +176,24 @@ randU=randUnitaryMat
 
 """
     (1) randPosDefMat(n::Int;
-                        <
-                        df::Int=2,
-                        eigvalsSNR::Real=10e3)
-                        >
+    <
+    df::Int=2,
+    eigvalsSNR::Real=10e3
+    >)
 
-    (2) randPosDefMat(::Type{Complex{T}}, arguments in (1))
+    (2) randPosDefMat(::Type{Complex{T}}, n:: Int;
+    < same keyword arguments as in (1) >)
 
     (3) randPosDefMat(n::Int, k::Int;
-                        <
-                        df::Int=2,
-                        eigvalsSNR::Real=10e3,
-                        SNR::Real=100,
-                        commuting=false)
-                        >
+    <
+    df::Int=2,
+    eigvalsSNR::Real=10e3,
+    SNR::Real=100,
+    commuting=false
+    >)
 
-    (4) randPosDefMat(::Type{Complex{T}}, arguments in (3))
+    (4) randPosDefMat(::Type{Complex{T}}, n::Int, k::Int;
+    < same keyword arguments as in (3) >)
 
  **alias**: `randP`
 

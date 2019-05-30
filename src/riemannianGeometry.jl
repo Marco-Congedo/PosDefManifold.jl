@@ -464,9 +464,10 @@ distance(metric::Metric, D::𝔻{T}, E::𝔻{T}) where T<:Real = √(distance²(
 
 """
     (1) distanceSqrMat(metric::Metric, 𝐏::ℍVector;
-                        <⏩=false>)
+    <⏩=false>)
+
     (2) distanceSqrMat(type::Type{T}, metric::Metric, 𝐏::ℍVector;
-                        <⏩=false>) where T<:AbstractFloat
+    <⏩=false>) where T<:AbstractFloat
 
  **alias**: `distance²Mat`
 
@@ -616,9 +617,10 @@ distance²Mat=distanceSqrMat
 
 """
     (1) distanceMat(metric::Metric, 𝐏::ℍVector;
-                                    <⏩=true>)
+    <⏩=true>)
+
     (2) distanceMat(type::Type{T}, metric::Metric, 𝐏::ℍVector;
-                                    <⏩=true>) where T<:AbstractFloat
+    <⏩=true>) where T<:AbstractFloat
 
  Given a 1d array ``𝐏`` of ``k`` positive definite matrices
  ``{P_1,...,P_k}`` of [ℍVector type](@ref), create the ``k⋅k`` real
@@ -733,11 +735,10 @@ end
 
 """
     laplacianEigenMaps(Ω::𝕃{S}, q::Int;
-                      <
-                      tol::Real=0,
-                      maxiter::Int=300,
-                      ⍰=false)              where S<:Real
-                      >
+    <
+    tol::Real=0,
+    maxiter::Int=300,
+    ⍰=false>) where S<:Real
 
  **alias**: `laplacianEM`
 
@@ -813,19 +814,14 @@ laplacianEM=laplacianEigenMaps
 
 """
     (1) spectralEmbedding(metric::Metric, 𝐏::ℍVector, q::Int;
-                            <
-                            tol::Real=0,
-                            maxiter::Int=300,
-                            ⍰=false,
-                            ⏩=false)
-                            >
+    <
+    tol::Real=0,
+    maxiter::Int=300,
+    ⍰=false,
+    ⏩=false>)
 
     (2) spectralEmbedding(type::Type{T}, metric::Metric, 𝐏::ℍVector, q::Int;
-                            <
-                            tol::Real=0,
-                            maxiter::Int=300,
-                            ⍰=false,
-                            ⏩=false)            where T<:Real
+    < same optional keyword arguments as in (1) >) where T<:Real
                             >
 
  Given a 1d array ``𝐏`` of ``k`` positive definite matrices ``{P_1,...,P_k}``
@@ -924,14 +920,13 @@ end
     (2) mean(metric::Metric, D::𝔻{T}, E::𝔻{T}) where T<:Real
 
     (3) mean(metric::Metric, 𝐏::ℍVector;
-            <
-            w::Vector=[],
-            ✓w=true,
-            ⏩=false)
-            >
+    <
+    w::Vector=[],
+    ✓w=true,
+    ⏩=false >)
 
     (4) mean(metric::Metric, 𝐃::𝔻Vector;
-            < optional keyword arguments in (3) ) >
+    < same optional keyword arguments as in (3) >)
 
  (1) Mean of two positive definite matrices, passed in arbitrary order as
  arguments ``P`` and ``Q``, using the specified `metric` of type
@@ -1193,10 +1188,10 @@ end # function
 
 """
     (1) means(metric::Metric, 𝒫::ℍVector₂;
-                <⏩=false>)
+    <⏩=false>)
 
     (2) means(metric::Metric, 𝒟::𝔻Vector₂;
-                <⏩=false>)
+    <⏩=false>)
 
  (1) Given a 2d array ``𝒫`` of positive definite matrices as an [ℍVector₂ type](@ref)
  compute the [Fréchet mean](@ref) for as many [ℍVector type](@ref) objects
@@ -1275,11 +1270,10 @@ means(metric::Metric, 𝒟::𝔻Vector₂; ⏩=false) =
 
 """
     generalizedMean(𝐏::Union{ℍVector, 𝔻Vector}, p::Real;
-                   <
-                   w::Vector=[],
-                   ✓w=true,
-                   ⏩=false)
-                   >
+    <
+    w::Vector=[],
+    ✓w=true,
+    ⏩=false >)
 
  Given a 1d array ``𝐏={P_1,...,P_k}`` of ``k`` positive definite matrices of
  [ℍVector type](@ref) or real positive definite diagonal matrices of
@@ -1378,16 +1372,15 @@ end # function
 
 
 """
-    geometricMean(  𝐏::Union{ℍVector, 𝔻Vector};
-                    <
-                    w::Vector=[],
-                    ✓w=true,
-                    init=nothing,
-                    tol::Real=0,
-                    maxiter::Int=500,
-                    ⍰=false,
-                    ⏩=false)
-                    >
+    geometricMean(𝐏::Union{ℍVector, 𝔻Vector};
+    <
+    w::Vector=[],
+    ✓w=true,
+    init=nothing,
+    tol::Real=0,
+    maxiter::Int=500,
+    ⍰=false,
+    ⏩=false >)
 
  **alias**: `gmean`
 
@@ -1544,15 +1537,14 @@ gMean=geometricMean
 
 """
     geometricpMean(  𝐏::ℍVector, p::Real=goldeninv;
-                    <
-                    w::Vector=[],
-                    ✓w=true,
-                    init=nothing,
-                    tol::Real=0,
-                    maxiter::Int=500,
-                    ⍰=false,
-                    ⏩=false)
-                    >
+    <
+    w::Vector=[],
+    ✓w=true,
+    init=nothing,
+    tol::Real=0,
+    maxiter::Int=500,
+    ⍰=false,
+    ⏩=false >)
 
  **alias**: `gpmean`
 
@@ -1567,11 +1559,11 @@ gMean=geometricMean
  This function implements the p-dispersion gradient descent
  algorithm (to be published), yielding iterations
 
-``G ←G^{1/2}\\textrm{exp}\\big(\\sum_{i=1}^{k}w_ipδ^2(G, P_i)^(p-1)\\textrm{log}(G^{-1/2} P_i G^{-1/2})\\big)G^{1/2}.``
+``G ←G^{1/2}\\textrm{exp}\\big(\\sum_{i=1}^{k}pw_iδ^2(G, P_i)^{p-1}\\textrm{log}(G^{-1/2} P_i G^{-1/2})\\big)G^{1/2}.``
 
 - if ``p=1`` this yields the usual gradient descent algorithm implemented in [`geometricMean`](@ref)
 - if ``p=0.5`` this yields the Riemannian median
-- the default value of ``p`` is the iverse of the golden ratio (0.61803...)
+- the default value of ``p`` is the inverse of the golden ratio (0.61803...)
 
  If you don't pass a weight vector with *<optional keyword argument>* ``w``,
  return the *unweighted geometric-p mean*.
@@ -1585,7 +1577,7 @@ gMean=geometricMean
  The following are more *<optional keyword arguments*>:
  - `init` is a matrix to be used as initialization for the mean. If no matrix is provided, the [log Euclidean](@ref) mean will be used,
  - `tol` is the tolerance for the convergence (see below).
- - `maxiter` is the maximum number of iterations allowed
+ - `maxiter` is the maximum number of iterations allowed.
  - if `⍰` is true, the convergence attained at each iteration is printed.
  - if ⏩=true the iterations are multi-threaded (see below).
 
@@ -1600,8 +1592,8 @@ gMean=geometricMean
     If the algorithm diverges and `⍰` is true a **warning** is printed
     indicating the iteration when this happened.
 
-    The smaller the parameter `p` is the slower and less likely the
-    convergence is. If the algorithm does not converge, increase `p` and/or
+    The smaller the parameter ``p`` is, the slower and less likely the
+    convergence is. If the algorithm does not converge, increase ``p`` and/or
     eliminate the otliers from the input set ``𝐏``.
 
     ``tol`` defaults to 100 times the square root of `Base.eps` of the nearest
@@ -1617,7 +1609,7 @@ gMean=geometricMean
  ## Examples
     using LinearAlgebra, PosDefManifold, Plots
 
-    # This examples show that this algorithm is more robust to otlier
+    # This examples show that this algorithm is more robust to outliers
     # as compared to the standard geometric mean algorithm
 
     # Generate a set of 100 random 10x10 SPD matrices
@@ -1641,7 +1633,7 @@ gMean=geometricMean
     S=HermitianVector([G, G1, H, H1])
 
     # check the interdistance matrix Δ² to verify that the geometric mean
-    # after the introduction of the outlier (`G1``)is far away from the other means
+    # after the introduction of the outlier (`G1``) is far away from the other means
     # that is, that element (4,3) is much smaller than element (2,1).
     Δ²=distance²Mat(Float64, Fisher, S)
 
@@ -1714,15 +1706,15 @@ end
 
 """
     logdet0Mean(𝐏::Union{ℍVector, 𝔻Vector};
-                <
-                w::Vector=[],
-                ✓w=true,
-                init=nothing,
-                tol::Real=0,
-                maxiter::Int = 500,
-                ⍰=false,
-                ⏩=false)
-                >
+    <
+    w::Vector=[],
+    ✓w=true,
+    init=nothing,
+    tol::Real=0,
+    maxiter::Int=500,
+    ⍰=false,
+    ⏩=false >)
+
 
  **alias**: `ld0Mean`
 
@@ -1754,7 +1746,7 @@ end
  The following are more *<optional keyword arguments*>:
  - `init` is a matrix to be used as initialization for the mean. If no matrix is provided, the [log Euclidean](@ref) mean will be used,
  - `tol` is the tolerance for the convergence (see below).
- - `maxiter` is the maximum number of iterations allowed
+ - `maxiter` is the maximum number of iterations allowed.
  - if `⍰` is true, the convergence attained at each iteration is printed.
  - if ⏩=true the iterations are multi-threaded (see below).
 
@@ -1862,15 +1854,14 @@ ld0Mean=logdet0Mean
 
 """
     wasMean(𝐏::Union{ℍVector, 𝔻Vector};
-            <
-            w::Vector=[],
-            ✓w=true,
-            init=nothing,
-            tol::Real=0,
-            maxiter::Int=500,
-            ⍰=false,
-            ⏩=false)
-            >
+    <
+    w::Vector=[],
+    ✓w=true,
+    init=nothing,
+    tol::Real=0,
+    maxiter::Int=500,
+    ⍰=false,
+    ⏩=false >)
 
  Given a 1d array ``𝐏={P_1,...,P_k}`` of ``k`` positive definite matrices
  of [ℍVector type](@ref) or real positive definite diagonal matrices of
@@ -1900,7 +1891,7 @@ ld0Mean=logdet0Mean
  The following are more *<optional keyword arguments*>:
  - `init` is a matrix to be used as initialization for the mean. If no matrix is provided, the instance of [generalized means](@ref) with ``p=0.5`` will be used,
  - `tol` is the tolerance for the convergence (see below).
- - `maxiter` is the maximum number of iterations allowed
+ - `maxiter` is the maximum number of iterations allowed.
  - if `⍰` is true, the convergence attained at each iteration is printed.
  - if ⏩=true the iterations are multi-threaded (see below).
 
@@ -2017,15 +2008,15 @@ wasMean(𝐃::𝔻Vector;
 
 """
     powerMean(𝐏::Union{ℍVector, 𝔻Vector}, p::Real;
-             <
-             w::Vector=[],
-             ✓w=true,
-             init=nothing,
-             tol::Real=0,
-             maxiter::Int=500
-             ⍰=false,
-             ⏩=false)
-             >
+    <
+    w::Vector=[],
+    ✓w=true,
+    init=nothing,
+    tol::Real=0,
+    maxiter::Int=500,
+    ⍰=false,
+    ⏩=false >)
+
 
  Given a 1d array ``𝐏={P_1,...,P_k}`` of ``k`` positive definite matrices
  of [ℍVector type](@ref) or real positive definite diagonal matrices of
@@ -2067,7 +2058,7 @@ wasMean(𝐃::𝔻Vector;
  The following are more *<optional keyword arguments*>:
  - `init` is a matrix to be used as initialization for the mean. If no matrix is provided, the instance of [generalized means](@ref) with parameter ``p`` will be used.
  - `tol` is the tolerance for the convergence (see below).
- - `maxiter` is the maximum number of iterations allowed
+ - `maxiter` is the maximum number of iterations allowed.
  - if `⍰` is true, the convergence attained at each iteration is printed.
  - if ⏩=true the iterations are multi-threaded.
 
