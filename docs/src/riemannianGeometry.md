@@ -70,8 +70,8 @@ spectralEmbedding
 | [`mean`](@ref) | Weighted Fréchet mean (wFm) of a matrix set using any metric |
 | [`means`](@ref) | As above for several sets at once |
 | [`generalizedMean`](@ref) | Generalized wFm of a matrix set |
-| [`geometricMean`](@ref), `gMean` | wFm of a matrix set according to the Fisher metric (iterative)|
-| [`geometricpMean`](@ref), `gMean` | wFm of a matrix set according to the Fisher metric and the robust p-cost function (iterative)|
+| [`geometricMean`](@ref), `gMean` | wFm of a matrix set minimizing the dispersion according to the Fisher metric (iterative)|
+| [`geometricpMean`](@ref), `gMean` | robust wFm of a matrix set minimizing the p-dispersion according to the Fisher metric (iterative)|
 | [`logdet0Mean`](@ref), `ld0Mean` | wFm of a matrix set according to the logdet0 metric (iterative)|
 | [`wasMean`](@ref) | wFm of a matrix set according to the Wasserstein metric (iterative)|
 | [`powerMean`](@ref) | Power wFm of a matrix set (iterative)|
