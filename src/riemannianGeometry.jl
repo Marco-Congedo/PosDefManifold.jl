@@ -1433,7 +1433,7 @@ end # function
  - `init` is a matrix to be used as initialization for the mean. If no matrix is provided, the [log Euclidean](@ref) mean will be used,
  - `tol` is the tolerance for the convergence (see below).
  - `maxiter` is the maximum number of iterations allowed
- - if `⍰` is true, the convergence attained at each iteration is printed and a *warning* is printed if convergence is not attained.
+ - if `⍰`=true, the convergence attained at each iteration is printed and a *warning* is printed if convergence is not attained.
  - if ⏩=true the iterations are multi-threaded (see below).
 
  If the input is a 1d array of ``k`` real positive definite diagonal matrices
@@ -1583,7 +1583,7 @@ gMean=geometricMean
  [ℍVector type](@ref), a real parameter ``0<p<1`` and optional non-negative real
  weights vector ``w={w_1,...,w_k}``, return the 3-tuple ``(G, iter, conv)``,
  where ``G`` is the *geometric-p mean*, i.e., the mean according to the
- [Fisher](@ref) metric minimizing the p-dispersion (see below) and
+ [Fisher](@ref) metric minimizing the *p-dispersion* (see below) and
  ``iter``, ``conv`` are the number of
  iterations and convergence attained by the algorithm.
 
@@ -1592,9 +1592,9 @@ gMean=geometricMean
 
 ``G ←G^{1/2}\\textrm{exp}\\big(ς\\sum_{i=1}^{k}pw_iδ^2(G, P_i)^{p-1}\\textrm{log}(G^{-1/2} P_i G^{-1/2})\\big)G^{1/2}.``
 
-- if ``p=1`` this yields the geometric mean (implemented wit fixed step-size) in [`geometricMean`](@ref)).
+- if ``p=1`` this yields the geometric mean (implemented with fixed step-size in [`geometricMean`](@ref)).
 - if ``p=0.5`` this yields the geometric median.
-- the default value of ``p`` is the inverse of the golden ratio (0.61803...).
+- the default value of ``p`` is the inverse of the golden ratio (0.61803...),yielding the *geometric-golden mean*.
 
  If you don't pass a weight vector with *<optional keyword argument>* ``w``,
  return the *unweighted geometric-p mean*.
@@ -1609,9 +1609,9 @@ gMean=geometricMean
  - `init` is a matrix to be used as initialization for the mean. If no matrix is provided, the [log Euclidean](@ref) mean will be used,
  - `tol` is the tolerance for the convergence (see below).
  - `maxiter` is the maximum number of iterations allowed.
- - if `⍰` is true, the convergence attained at each iteration is printed and a *warning* is printed if convergence is not attained.
+ - if `⍰`=true, the convergence attained at each iteration is printed and a *warning* is printed if convergence is not attained.
  - if ⏩=true the iterations are multi-threaded (see below).
- - if adaptStepSize=true the step size ``ς`` for the gradient descent is adapted at each iteration (see below).
+ - if `adaptStepSize`=true the step size ``ς`` for the gradient descent is adapted at each iteration (see below).
 
 !!! warning "Multi-Threading"
     [Multi-threading](https://docs.julialang.org/en/v1/manual/parallel-computing/#Multi-Threading-(Experimental)-1)
@@ -1620,18 +1620,18 @@ gMean=geometricMean
     Julia is instructed to use is ``<2`` or ``<4k``. See [Threads](@ref).
 
 !!! note "Nota Bene"
-    In normal circumstances this algorithm converges monothonically.
     If the algorithm diverges and `⍰` is true a **warning** is printed
-    indicating the iteration when this happened.
+    indicating the iteration when this happened. This algorithm may temporary
+    diverge, still reach convergence.
 
     The smaller the parameter ``p`` is, the slower and less likely the
     convergence is. If the algorithm does not converge, try increasing ``p``,
     initializing the algorithm with the output of [`geometricMean`](@ref)
     and/or eliminating the otliers from the input set ``𝐏``.
 
-    If `adaptStepSize` is false (default) a fixed step size ``ς=1`` is used,
-    otherwise ``ς`` is adapted at each iteration. This in general
-    speeds up convergence.
+    If `adaptStepSize` is true (default) the step-size ``ς`` is adapted at
+    each iteration, otherwise a fixed step size ``ς=1`` is used.
+    Adapting the step size in general speeds up convergence.
 
     ``tol`` defaults to the square root of `Base.eps` of the nearest
     real type of data input ``𝐏``. This corresponds to requiring the
@@ -1660,15 +1660,13 @@ gMean=geometricMean
     H, iter2, conv2 = geometricpMean(Pset, p, ⍰=true)
     # Get the geometric median
     H, iter2, conv2 = geometricpMean(Pset, 0.5, ⍰=true)
-    # Use adaptive step-size for the gradient descent algorithm
-    H, iter2, conv2 = geometricpMean(Pset, 0.5, ⍰=true, adaptStepSize=true)
 
     println(iter1, " ", iter2); println(conv1, " ", conv2)
 
     # trasform the first matrix in Pset to create an otlier
     Pset[1]=Pset[1]*10000
     G1, iter1, conv1 = geometricMean(Pset, ⍰=true)
-    H1, iter2, conv2 = geometricpMean(Pset, 0.5, ⍰=true, adaptStepSize=true)
+    H1, iter2, conv2 = geometricpMean(Pset, 0.5, ⍰=true)
     println(iter1, " ", iter2); println(conv1, " ", conv2)
 
     # collect the geometric and geometric-p means, before and after the
@@ -1706,7 +1704,7 @@ function geometricpMean(𝐏::ℍVector, p::Real=goldeninv;
                         maxiter::Int = 750,
                         ⍰ = false,
                         ⏩= false,
-                        adaptStepSize=false)
+                        adaptStepSize=true)
 
     k, n, type, thr = dim(𝐏, 1), dim(𝐏, 2), eltype(𝐏[1]), nthreads()
     𝑓, d², q, n², sqrtn = Fisher, distance², p-1, n^2, √n
@@ -1821,7 +1819,7 @@ gpMean=geometricpMean
  - `init` is a matrix to be used as initialization for the mean. If no matrix is provided, the [log Euclidean](@ref) mean will be used,
  - `tol` is the tolerance for the convergence (see below).
  - `maxiter` is the maximum number of iterations allowed.
- - if `⍰` is true, the convergence attained at each iteration is printed and a *warning* is printed if convergence is not attained.
+ - if `⍰`=true, the convergence attained at each iteration is printed and a *warning* is printed if convergence is not attained.
  - if ⏩=true the iterations are multi-threaded (see below).
 
 !!! warning "Multi-Threading"
@@ -1972,7 +1970,7 @@ ld0Mean=logdet0Mean
  - `init` is a matrix to be used as initialization for the mean. If no matrix is provided, the instance of [generalized means](@ref) with ``p=0.5`` will be used,
  - `tol` is the tolerance for the convergence (see below).
  - `maxiter` is the maximum number of iterations allowed.
- - if `⍰` is true, the convergence attained at each iteration is printed and a *warning* is printed if convergence is not attained.
+ - if `⍰`=true, the convergence attained at each iteration is printed and a *warning* is printed if convergence is not attained.
  - if ⏩=true the iterations are multi-threaded (see below).
 
  If the input is a 1d array of ``k`` real positive definite diagonal matrices
@@ -2143,7 +2141,7 @@ wasMean(𝐃::𝔻Vector;
  - `init` is a matrix to be used as initialization for the mean. If no matrix is provided, the instance of [generalized means](@ref) with parameter ``p`` will be used.
  - `tol` is the tolerance for the convergence (see below).
  - `maxiter` is the maximum number of iterations allowed.
- - if `⍰` is true, the convergence attained at each iteration is printed and a *warning* is printed if convergence is not attained.
+ - if `⍰`=true, the convergence attained at each iteration is printed and a *warning* is printed if convergence is not attained.
  - if ⏩=true the iterations are multi-threaded.
 
  If the input is a 1d array of ``k`` real positive definite diagonal matrices
