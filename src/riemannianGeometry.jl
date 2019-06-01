@@ -1609,9 +1609,9 @@ gMean=geometricMean
  - `init` is a matrix to be used as initialization for the mean. If no matrix is provided, the [log Euclidean](@ref) mean will be used,
  - `tol` is the tolerance for the convergence (see below).
  - `maxiter` is the maximum number of iterations allowed.
- - if `⍰`=true, the convergence attained at each iteration is printed and a *warning* is printed if convergence is not attained.
+ - if `⍰`=true, the step-size and convergence attained at each iteration is printed. Also, a *warning* is printed if convergence is not attained.
  - if ⏩=true the iterations are multi-threaded (see below).
- - if `adaptStepSize`=true the step size ``ς`` for the gradient descent is adapted at each iteration (see below).
+ - if `adaptStepSize`=true (default) the step size ``ς`` for the gradient descent is adapted at each iteration (see below).
 
 !!! warning "Multi-Threading"
     [Multi-threading](https://docs.julialang.org/en/v1/manual/parallel-computing/#Multi-Threading-(Experimental)-1)
