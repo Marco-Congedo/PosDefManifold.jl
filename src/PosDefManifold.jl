@@ -162,7 +162,7 @@ export
     distanceMat,
     laplacian,
     laplacianEigenMaps, laplacianEM,
-    spectralEmbedding,
+    spectralEmbedding, spEmb,
     mean,
     means,
     generalizedMean,

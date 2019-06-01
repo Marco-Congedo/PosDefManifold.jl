@@ -1376,9 +1376,9 @@ end
     Q*P*Q ≈ I ? println(" ⭐ ") : println(" ⛔ ")
 
 """
-invsqrt(P::ℍ{T}) where T<:RealOrComplex = spectralFunctions(P, x->1/sqrt(x))
+invsqrt(P::ℍ{T}) where T<:RealOrComplex = spectralFunctions(P, x->1/√x)
 
-invsqrt(D::𝔻{T}) where T<:Real = spectralFunctions(D, x->1/sqrt(x))
+invsqrt(D::𝔻{T}) where T<:Real = spectralFunctions(D, x->1/√x)
 
 
 
