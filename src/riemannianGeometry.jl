@@ -834,6 +834,8 @@ laplacianEM=laplacianEigenMaps
     < same optional keyword arguments as in (1) >) where T<:Real
 ```
 
+ **alias**: `spEmb`
+
  Given a 1d array ``𝐏`` of ``k`` positive definite matrices ``{P_1,...,P_k}``
  (real or complex), compute its *eigen maps* in ``q`` dimensions.
 
@@ -918,6 +920,7 @@ function spectralEmbedding(metric::Metric, 𝐏::ℍVector, q::Int;
                         ⍰=⍰)
 end
 
+spEmb=spectralEmbedding
 
 
 # -----------------------------------------------------------
@@ -1430,7 +1433,7 @@ end # function
  - `init` is a matrix to be used as initialization for the mean. If no matrix is provided, the [log Euclidean](@ref) mean will be used,
  - `tol` is the tolerance for the convergence (see below).
  - `maxiter` is the maximum number of iterations allowed
- - if `⍰` is true, the convergence attained at each iteration is printed.
+ - if `⍰` is true, the convergence attained at each iteration is printed and a *warning* is printed if convergence is not attained.
  - if ⏩=true the iterations are multi-threaded (see below).
 
  If the input is a 1d array of ``k`` real positive definite diagonal matrices
@@ -1450,10 +1453,10 @@ end # function
     If the algorithm diverges and `⍰` is true a **warning** is printed
     indicating the iteration when this happened.
 
-    ``tol`` defaults to 100 times the square root of `Base.eps` of the nearest
-    real type of data input ``𝐏``. This corresponds to requiring the relative
-    convergence criterion over two successive iterations to vanish for about
-    half the significant digits minus 2.
+    ``tol`` defaults to the square root of `Base.eps` of the nearest
+    real type of data input ``𝐏``. This corresponds to requiring the
+    norm of the satisfying matrix equation divided by the number of elements
+    to vanish for about half the significant digits.
 
  **See**: [Fisher](@ref) metric.
 
@@ -1475,7 +1478,7 @@ end # function
     G, iter, conv = geometricMean(Pset, w=weights)
 
     # print the convergence at all iterations
-    G, iter, conv = geometricMean(Pset; w=weights, ⍰=true)
+    G, iter, conv = geometricMean(Pset; ⍰=true)
 
     # now suppose Pset has changed a bit, initialize with G to hasten convergence
     Pset[1]=ℍ(Pset[1]+(randP(3)/100))
@@ -1498,44 +1501,51 @@ function geometricMean( 𝐏::ℍVector;
                         ⏩=false)
 
     k, n, type, thr = dim(𝐏, 1), dim(𝐏, 2), eltype(𝐏[1]), nthreads()
-    iter, conv, oldconv = 1, 0., maxpos
+    n², iter, conv, oldconv, converged = n^2, 1, 0., maxpos, false
     ⏩ && k>=thr*4 && thr > 1 ? threaded=true : threaded=false
     isempty(w) ? v=[] : v = _getWeights(w, ✓w)
     init == nothing ? M = mean(logEuclidean, 𝐏; w=v, ✓w=false, ⏩=⏩) : M = ℍ(init)
-    tol==0 ? tolerance = √eps(real(type))*1e2 : tolerance = tol
+    tol==0 ? tolerance = √eps(real(type)) : tolerance = tol
     💡 = similar(M, type)
     if threaded 𝐐 = similar(𝐏) end
+    ⍰ && println("")
     ⍰ && threaded && @info("Iterating multi-threaded geometricMean Fixed-Point...")
     ⍰ && !threaded && @info("Iterating geometricMean Fixed-Point...")
 
     while true
         M½, M⁻½ = pow(M, 0.5, -0.5)
-        #M -< M^1/2 {  exp[epsilon( 1/n{sum(i=1 to n) ln(M^-1/2 Mi M^-1/2)} )] } M^1/2
+        # M -< M½ {  exp[epsilon( 1/n{sum(i=1 to k) log(M⁻½ 𝐏[i] M⁻½)} )] } M½
         if threaded
             if isempty(w)
                 @threads for i=1:k 𝐐[i] = log(ℍ(M⁻½*𝐏[i]*M⁻½)) end
-                💡 = ℍ(M½*exp(fVec(𝛍, 𝐐))*M½)
+                ∇ = fVec(𝛍, 𝐐)
+                💡 = ℍ(M½*exp(∇)*M½)
             else
                 @threads for i=1:k 𝐐[i] = v[i] * log(ℍ(M⁻½*𝐏[i]*M⁻½)) end
-                💡 = ℍ(M½*exp(fVec(𝚺, 𝐐))*M½)
+                ∇ = fVec(𝚺, 𝐐)
+                💡 = ℍ(M½*exp(∇)*M½)
             end
         else
             if isempty(w)
-                💡 = ℍ(M½*exp(ℍ(𝛍(log(ℍ(M⁻½*P*M⁻½)) for P in 𝐏)))*M½)
+                ∇ = ℍ(𝛍(log(ℍ(M⁻½*P*M⁻½)) for P in 𝐏))
+                💡 = ℍ(M½*exp(∇)*M½)
             else
-                💡 = ℍ(M½*exp(ℍ(𝚺(ω * log(ℍ(M⁻½*P*M⁻½)) for (ω, P) in zip(v, 𝐏))))*M½)
+                ∇ = ℍ(𝚺(ω * log(ℍ(M⁻½*P*M⁻½)) for (ω, P) in zip(v, 𝐏)))
+                💡 = ℍ(M½*exp(∇)*M½)
             end
         end
 
-        conv = √norm(💡-M)/norm(M)
+        #conv = √norm(💡-M)/norm(M)
+        conv = norm(∇)/n²
         ⍰ && println("iteration: ", iter, "; convergence: ", conv)
         (diverging = conv > oldconv) && ⍰ && @warn("geometricMean diverged at:", iter)
         (overRun = iter == maxiter) && @warn("geometricMean reached the max number of iterations before convergence:", iter)
-        conv <= tolerance || overRun==true ? break : M = 💡
+        (converged = conv <= tolerance) || overRun==true ? break : M = 💡
         oldconv=conv
         iter += 1
     end # while
 
+    ⍰ ? (converged ? @info("Convergence has been attained.\n") : @warn("Convergence has not been attained.")) : nothing
     ⍰ && println("")
     return (💡, iter, conv)
 end
@@ -1563,7 +1573,8 @@ gMean=geometricMean
     tol::Real=0,
     maxiter::Int=750,
     ⍰=false,
-    ⏩=false >)
+    ⏩=false,
+    adaptStepSize=false >)
 ```
 
  **alias**: `gpmean`
@@ -1577,12 +1588,12 @@ gMean=geometricMean
  iterations and convergence attained by the algorithm.
 
  This function implements the p-dispersion gradient descent
- algorithm (to be published), yielding iterations
+ algorithm with step-size ``ς`` (to be published), yielding iterations
 
-``G ←G^{1/2}\\textrm{exp}\\big(\\sum_{i=1}^{k}pw_iδ^2(G, P_i)^{p-1}\\textrm{log}(G^{-1/2} P_i G^{-1/2})\\big)G^{1/2}.``
+``G ←G^{1/2}\\textrm{exp}\\big(ς\\sum_{i=1}^{k}pw_iδ^2(G, P_i)^{p-1}\\textrm{log}(G^{-1/2} P_i G^{-1/2})\\big)G^{1/2}.``
 
-- if ``p=1`` this yields the usual gradient descent algorithm implemented in [`geometricMean`](@ref).
-- if ``p=0.5`` this yields the Riemannian median.
+- if ``p=1`` this yields the geometric mean (implemented wit fixed step-size) in [`geometricMean`](@ref)).
+- if ``p=0.5`` this yields the geometric median.
 - the default value of ``p`` is the inverse of the golden ratio (0.61803...).
 
  If you don't pass a weight vector with *<optional keyword argument>* ``w``,
@@ -1598,8 +1609,9 @@ gMean=geometricMean
  - `init` is a matrix to be used as initialization for the mean. If no matrix is provided, the [log Euclidean](@ref) mean will be used,
  - `tol` is the tolerance for the convergence (see below).
  - `maxiter` is the maximum number of iterations allowed.
- - if `⍰` is true, the convergence attained at each iteration is printed.
+ - if `⍰` is true, the convergence attained at each iteration is printed and a *warning* is printed if convergence is not attained.
  - if ⏩=true the iterations are multi-threaded (see below).
+ - if adaptStepSize=true the step size ``ς`` for the gradient descent is adapted at each iteration (see below).
 
 !!! warning "Multi-Threading"
     [Multi-threading](https://docs.julialang.org/en/v1/manual/parallel-computing/#Multi-Threading-(Experimental)-1)
@@ -1613,13 +1625,18 @@ gMean=geometricMean
     indicating the iteration when this happened.
 
     The smaller the parameter ``p`` is, the slower and less likely the
-    convergence is. If the algorithm does not converge, increase ``p`` and/or
-    eliminate the otliers from the input set ``𝐏``.
+    convergence is. If the algorithm does not converge, try increasing ``p``,
+    initializing the algorithm with the output of [`geometricMean`](@ref)
+    and/or eliminating the otliers from the input set ``𝐏``.
 
-    ``tol`` defaults to 100 times the square root of `Base.eps` of the nearest
-    real type of data input ``𝐏``. This corresponds to requiring the relative
-    convergence criterion over two successive iterations to vanish for about
-    half the significant digits minus 2.
+    If `adaptStepSize` is false (default) a fixed step size ``ς=1`` is used,
+    otherwise ``ς`` is adapted at each iteration. This in general
+    speeds up convergence.
+
+    ``tol`` defaults to the square root of `Base.eps` of the nearest
+    real type of data input ``𝐏``. This corresponds to requiring the
+    norm of the satisfying matrix equation divided by the number of elements
+    to vanish for about half the significant digits.
 
  **See**: [Fisher](@ref) metric.
 
@@ -1635,17 +1652,23 @@ gMean=geometricMean
     # Generate a set of 100 random 10x10 SPD matrices
     Pset=randP(10, 100)
 
-    # change p to observe how the convergence behavior changes accordingly
-    p=goldeninv
-
+    # Get the usual geometric mean for comparison
     G, iter1, conv1 = geometricMean(Pset, ⍰=true)
+
+    # change p to observe how the convergence behavior changes accordingly
+    # Get the golden geometric-p mean (default)
     H, iter2, conv2 = geometricpMean(Pset, p, ⍰=true)
+    # Get the geometric median
+    H, iter2, conv2 = geometricpMean(Pset, 0.5, ⍰=true)
+    # Use adaptive step-size for the gradient descent algorithm
+    H, iter2, conv2 = geometricpMean(Pset, 0.5, ⍰=true, adaptStepSize=true)
+
     println(iter1, " ", iter2); println(conv1, " ", conv2)
 
     # trasform the first matrix in Pset to create an otlier
     Pset[1]=Pset[1]*10000
     G1, iter1, conv1 = geometricMean(Pset, ⍰=true)
-    H1, iter2, conv2 = geometricpMean(Pset, p, ⍰=true)
+    H1, iter2, conv2 = geometricpMean(Pset, 0.5, ⍰=true, adaptStepSize=true)
     println(iter1, " ", iter2); println(conv1, " ", conv2)
 
     # collect the geometric and geometric-p means, before and after the
@@ -1653,8 +1676,9 @@ gMean=geometricMean
     S=HermitianVector([G, G1, H, H1])
 
     # check the interdistance matrix Δ² to verify that the geometric mean
-    # after the introduction of the outlier (`G1``) is far away from the other means
-    # that is, that element (4,3) is much smaller than element (2,1).
+    # after the introduction of the outlier (``G1``) is farther away from
+    # the geometric mean as compared to how much ``H1`` is further away
+    # from ``H``, i.e., that element (4,3) is much smaller than element (2,1).
     Δ²=distance²Mat(Float64, Fisher, S)
 
     # how far are all these matrices from all the others?
@@ -1668,6 +1692,12 @@ gMean=geometricMean
     plot!([U[3, 1]], [U[3, 2]], seriestype=:scatter, label="g-p mean")
     plot!([U[4, 1]], [U[4, 2]], seriestype=:scatter, label="g-p mean outlier")
 
+    # run multi-threaded when the number of matrices is high
+    using BenchmarkTools
+    Pset=randP(20, 160)
+    @benchmark(geometricpMean(Pset)) # single-threaded
+    @benchmark(geometricpMean(Pset, ⏩=true)) # multi-threaded
+
 """
 function geometricpMean(𝐏::ℍVector, p::Real=goldeninv;
                         w::Vector = [], ✓w = true,
@@ -1675,17 +1705,20 @@ function geometricpMean(𝐏::ℍVector, p::Real=goldeninv;
                         tol::Real = 0,
                         maxiter::Int = 750,
                         ⍰ = false,
-                        ⏩= false)
+                        ⏩= false,
+                        adaptStepSize=false)
 
     k, n, type, thr = dim(𝐏, 1), dim(𝐏, 2), eltype(𝐏[1]), nthreads()
-    iter, conv, oldconv, 𝑓, d², q = 1, 0., maxpos, Fisher, distance², p-1
+    𝑓, d², q, n², sqrtn = Fisher, distance², p-1, n^2, √n
+    iter, conv, oldconv, converged, ς = 1, 0., maxpos, false, 1
     ⏩ && k>=thr*4 && thr > 1 ? threaded=true : threaded=false
     isempty(w) ? v=[] : v = _getWeights(w, ✓w)
     init == nothing ? M = mean(logEuclidean, 𝐏; w=v, ✓w=false, ⏩=⏩) : M = ℍ(init)
-    tol==0 ? tolerance = √eps(real(type))*1e2 : tolerance = tol
+    tol==0 ? tolerance = √eps(real(type)) : tolerance = tol #*1e1
     💡 = similar(M, type)
     𝐑 = similar(𝐏)
     if threaded 𝐐 = similar(𝐏); end
+    ⍰ && println("")
     ⍰ && threaded && @info("Iterating multi-threaded geometricpMean Fixed-Point...")
     ⍰ && !threaded && @info("Iterating geometricpMean Fixed-Point...")
 
@@ -1696,32 +1729,52 @@ function geometricpMean(𝐏::ℍVector, p::Real=goldeninv;
             @threads for i=1:k 𝐑[i] = ℍ(M⁻½ * 𝐏[i] * M⁻½) end
             if isempty(w)
                 @threads for i=1:k 𝐐[i] = p * d²(𝑓, 𝐑[i])^q * log(𝐑[i]) end
-                💡 = ℍ(M½ * exp(fVec(𝛍, 𝐐)) * M½)
+                ∇ = fVec(𝛍, 𝐐)
             else
                 @threads for i=1:k 𝐐[i] =  p * d²(𝑓, 𝐑[i])^q * v[i] * log(𝐑[i]) end
-                💡 = ℍ(M½ * exp(fVec(𝚺, 𝐐)) * M½)
+                ∇ = fVec(𝚺, 𝐐)
             end
         else
             for i=1:k 𝐑[i] = ℍ(M⁻½ * 𝐏[i] * M⁻½) end
             if isempty(w)
-                💡 = ℍ(M½ * exp(ℍ(𝛍(p * d²(𝑓, R)^q * log(R) for R in 𝐑))) * M½)
+                ∇ = ℍ(𝛍(p * d²(𝑓, R)^q * log(R) for R in 𝐑))
             else
-                💡 = ℍ(M½ * exp(ℍ(𝚺(p * d²(𝑓, R)^q * ω * log(R) for (ω, R) in zip(v, 𝐑)))) * M½)
+                ∇ = ℍ(𝚺(p * d²(𝑓, R)^q * ω * log(R) for (ω, R) in zip(v, 𝐑)))
             end
         end
 
-        conv = √norm(💡-M)/norm(M)
-        ⍰ && println("iteration: ", iter, "; convergence: ", conv)
+        #conv = √norm(💡-M)/norm(M)
+        conv = norm(∇) / n²
+
+        if adaptStepSize
+            if conv<oldconv
+                💡 = ℍ(M½ * exp(ς*∇) * M½)
+                ς = min(sqrtn, ς*1.1)
+                oldconv=conv
+            else
+                ς = max(ς/2.2, 1/sqrtn) # = min(1, ς/2)
+                💡 = ℍ(M½ * exp(ς*∇) * M½)
+            end
+            ⍰ && println("iteration: ", iter, "; convergence: ", conv, "; ς: ", round(ς*1000)/1000)
+        else
+            💡 = ℍ(M½ * exp(∇) * M½)
+            oldconv=conv
+            ⍰ && println("iteration: ", iter, "; convergence: ", conv)
+        end
+
         (diverging = conv > oldconv) && ⍰ && @warn("geometricpMean diverged at:", iter)
         (overRun = iter == maxiter) && @warn("geometricpMean reached the max number of iterations before convergence:", iter)
-        conv <= tolerance || overRun==true ? break : M = 💡
-        oldconv=conv
+        (converged = conv <= tolerance) || ς <= tolerance || overRun==true ? break : M = 💡
         iter += 1
+
     end # while
 
+    ⍰ ? (converged ? @info("Convergence has been attained") : @warn("Convergence has not been attained.")) : nothing
     ⍰ && println("")
     return (💡, iter, conv)
 end
+
+gpMean=geometricpMean
 
 
 """
@@ -1748,7 +1801,7 @@ end
  and convergence attained by the algorithm.
  Mean ``G`` is the unique positive definite matrix satisfying
 
- ``\\sum_{i=1}^{k}w_i\\big(\\frac{1}{2}P_i+\\frac{1}{2}G\\big)^{-1}=G^{-1}``.
+ ``\\sum_{i=1}^{k}w_i\\big(\\frac{1}{2}P_i+\\frac{1}{2}G\\big)^{-1}-G^{-1}=0``.
 
  For estimating it, this function implements the fixed-point iteration algorithm
  suggested by (Moakher, 2012, p315)[🎓](@ref), yielding iterations
@@ -1768,7 +1821,7 @@ end
  - `init` is a matrix to be used as initialization for the mean. If no matrix is provided, the [log Euclidean](@ref) mean will be used,
  - `tol` is the tolerance for the convergence (see below).
  - `maxiter` is the maximum number of iterations allowed.
- - if `⍰` is true, the convergence attained at each iteration is printed.
+ - if `⍰` is true, the convergence attained at each iteration is printed and a *warning* is printed if convergence is not attained.
  - if ⏩=true the iterations are multi-threaded (see below).
 
 !!! warning "Multi-Threading"
@@ -1783,7 +1836,8 @@ end
     indicating the iteration when this happened.
 
     ``tol`` defaults to 100 times the square root of `Base.eps` of the nearest
-    real type of data input ``𝐏``. This corresponds to requiring the relative
+    real type of data input ``𝐏``. This corresponds to requiring the
+    square root of the relative
     convergence criterion over two successive iterations to vanish for about
     half the significant digits minus 2.
 
@@ -1817,7 +1871,7 @@ end
     using BenchmarkTools
     Pset=randP(20, 160)
     @benchmark(logdet0Mean(Pset)) # single-threaded
-    @benchmark(logDet0Mean(Pset; ⏩=true)) # multi-threaded
+    @benchmark(logdet0Mean(Pset; ⏩=true)) # multi-threaded
 """
 function logdet0Mean(𝐏::Union{ℍVector, 𝔻Vector};
                     w::Vector=[],
@@ -1830,13 +1884,14 @@ function logdet0Mean(𝐏::Union{ℍVector, 𝔻Vector};
 
     𝕋=typeofMatrix(𝐏)
     k, n, type, thr = dim(𝐏, 1), dim(𝐏, 2), eltype(𝐏[1]), nthreads()
-    iter, conv, oldconv, l = 1, 0., maxpos, k/2
+    n², iter, conv, oldconv, converged, l = n^2, 1, 0., maxpos, false, k/2
     ⏩ && k>=thr*4 && thr > 1 ? threaded=true : threaded=false
     isempty(w) ? v=[] : v = _getWeights(w, ✓w)
     init == nothing ? M = mean(logEuclidean, 𝐏; w=v, ✓w=false, ⏩=⏩) : M = 𝕋(init)
-    tol==0 ? tolerance = √eps(real(type))*1e2 : tolerance = tol
+    tol==0 ? tolerance = √eps(real(type)) : tolerance = tol
     💡 = similar(M, type)
     if threaded 𝐐 = similar(𝐏) end
+    ⍰ && println("")
     ⍰ && threaded && @info("Iterating multi-threaded logDet0Mean Fixed-Point...")
     ⍰ && !threaded && @info("Iterating logDet0Mean Fixed-Point...")
 
@@ -1857,15 +1912,17 @@ function logdet0Mean(𝐏::Union{ℍVector, 𝔻Vector};
             end
         end
 
-        conv = √norm(💡-M)/norm(M)
+        #conv = √norm(💡-M)/norm(M)
+        conv = norm(💡-M)/n²
         ⍰ && println("iteration: ", iter, "; convergence: ", conv)
         (diverging = conv > oldconv) && ⍰ && @warn("logdet0Mean diverged at:", iter)
         (overRun = iter == maxiter) && @warn("logdet0Mean reached the max number of iterations before convergence:", iter)
-        conv <= tolerance || overRun==true ? break : M = 💡
+        (converged = conv <= tolerance) || overRun==true ? break : M = 💡
         oldconv=conv
         iter += 1
     end # while
 
+    ⍰ ? (converged ? @info("Convergence has been attained.\n") : @warn("Convergence has not been attained.")) : nothing
     ⍰ && println("")
     return (💡, iter, conv)
 end
@@ -1915,7 +1972,7 @@ ld0Mean=logdet0Mean
  - `init` is a matrix to be used as initialization for the mean. If no matrix is provided, the instance of [generalized means](@ref) with ``p=0.5`` will be used,
  - `tol` is the tolerance for the convergence (see below).
  - `maxiter` is the maximum number of iterations allowed.
- - if `⍰` is true, the convergence attained at each iteration is printed.
+ - if `⍰` is true, the convergence attained at each iteration is printed and a *warning* is printed if convergence is not attained.
  - if ⏩=true the iterations are multi-threaded (see below).
 
  If the input is a 1d array of ``k`` real positive definite diagonal matrices
@@ -1935,10 +1992,10 @@ ld0Mean=logdet0Mean
     If the algorithm diverges and `⍰` is true a **warning** is printed indicating
     the iteration when this happened.
 
-    ``tol`` defaults to 100 times the square root of `Base.eps` of the nearest
-    real type of data input ``𝐏``. This corresponds to requiring the relative
-    convergence criterion over two successive iterations to vanish for about
-    half the significant digits minus 2.
+    ``tol`` defaults to the square root of `Base.eps` of the nearest
+    real type of data input ``𝐏``. This corresponds to requiring the
+    norm of the satisfying matrix equation divided by the number of elements
+    to vanish for about half the significant digits.
 
  **See**: [Wasserstein](@ref) metric.
 
@@ -1983,13 +2040,14 @@ function wasMean(𝐏::ℍVector;
                 ⏩=false)
 
     k, n, type, thr = dim(𝐏, 1), dim(𝐏, 2), eltype(𝐏[1]), nthreads()
-    iter, conv, oldconv = 1, 0., maxpos
+    n², iter, conv, oldconv, converged = n^2, 1, 0., maxpos, false
     ⏩ && k>=thr*4 && thr > 1 ? threaded=true : threaded=false
     isempty(w) ? v=[] : v = _getWeights(w, ✓w)
     init == nothing ? M = generalizedMean(𝐏, 0.5; w=v, ✓w=false, ⏩=⏩) : M = ℍ(init)
     tol==0 ? tolerance = √eps(real(type))*1e2 : tolerance = tol
     💡 = similar(M, type)
     if threaded 𝐐 = similar(𝐏) end
+    ⍰ && println("")
     ⍰ && threaded && @info("Iterating multi-threaded wasMean Fixed-Point...")
     ⍰ && !threaded && @info("Iterating wasMean Fixed-Point...")
 
@@ -2011,15 +2069,17 @@ function wasMean(𝐏::ℍVector;
             end
         end
 
-        conv = √norm(💡-M)/norm(M)
+        #conv = √norm(💡-M)/norm(M)
+        conv = norm(💡-M)/n²
         ⍰ && println("iteration: ", iter, "; convergence: ", conv)
         (diverging = conv > oldconv) && ⍰ && @warn("wasMean diverged at:", iter)
         (overRun = iter == maxiter) && @warn("wasMean reached the max number of iterations before convergence:", iter)
-        conv <= tolerance || overRun==true ? break : M = 💡
+        (converged = conv <= tolerance) || overRun==true ? break : M = 💡
         oldconv=conv
         iter += 1
     end # while
 
+    ⍰ ? (converged ? @info("Convergence has been attained.\n") : @warn("Convergence has not been attained.")) : nothing
     ⍰ && println("")
     return (💡, iter, conv)
 end
@@ -2083,7 +2143,7 @@ wasMean(𝐃::𝔻Vector;
  - `init` is a matrix to be used as initialization for the mean. If no matrix is provided, the instance of [generalized means](@ref) with parameter ``p`` will be used.
  - `tol` is the tolerance for the convergence (see below).
  - `maxiter` is the maximum number of iterations allowed.
- - if `⍰` is true, the convergence attained at each iteration is printed.
+ - if `⍰` is true, the convergence attained at each iteration is printed and a *warning* is printed if convergence is not attained.
  - if ⏩=true the iterations are multi-threaded.
 
  If the input is a 1d array of ``k`` real positive definite diagonal matrices
@@ -2104,10 +2164,11 @@ wasMean(𝐃::𝔻Vector;
     If the algorithm diverges and `⍰` is true a **warning** is printed indicating
     the iteration when this happened.
 
-    ``tol`` defaults to 100 times the square root of `Base.eps` of the nearest
-    real type of data input ``𝐏``. This corresponds to requiring the relative
-    convergence criterion over two successive iterations to vanish for about
-    half the significant digits minus 2.
+    ``tol`` defaults to the square root of `Base.eps` of the nearest
+    real type of data input ``𝐏``. This corresponds to requiring the
+    norm of the difference of the matrix solution over two successive
+    iterations divided by the number of elements in the matrix
+    to vanish for about half the significant digits.
 
  (2) Like in (1), but for a 1d array ``𝐃={D_1,...,D_k}`` of ``k``
  real positive definite diagonal matrices of [𝔻Vector type](@ref).
@@ -2173,16 +2234,19 @@ function powerMean(𝐏::ℍVector, p::Real;
        return (mean(Euclidean, 𝐏; w=w, ✓w=✓w, ⏩=⏩), 1, 0)
     else
        # Set Parameters
-       k, n, absp, type, thr = dim(𝐏, 1), dim(𝐏, 2), abs(p), eltype(𝐏[1]), nthreads()
-       sqrtn, iter, conv, oldconv, r = √n, 1, 0., maxpos, -0.375/absp
+       k, n,  type, thr = dim(𝐏, 1), dim(𝐏, 2), eltype(𝐏[1]), nthreads()
+       absp, sqrtn, n² = abs(p), √n, n^2
+       r = -0.375/absp
+       iter, conv, oldconv, converged = 1, 0., maxpos, false
        ⏩ && k>=thr*4 && thr > 1 ? threaded=true : threaded=false
        isempty(w) ? v=[] : v = _getWeights(w, ✓w)
        init == nothing ? M = generalizedMean(𝐏, p; w=v, ✓w=false, ⏩=⏩) : M = ℍ(init)
        p<0 ? X=ℍ(M^(0.5)) : X=ℍ(M^(-0.5))
        💡, H, 𝒫 = similar(X, type), similar(X, type), similar(𝐏)
        p<0 ? 𝒫=[inv(P) for P in 𝐏] : 𝒫=𝐏
-       tol==0 ? tolerance = √eps(real(type))*1e2 : tolerance = tol
+       tol==0 ? tolerance = √eps(real(type)) : tolerance = tol
        if threaded 𝐐 = similar(𝐏) end
+       ⍰ && println("")
        ⍰ && threaded && @info("Iterating multi-threaded powerMean Fixed-Point...")
        ⍰ && !threaded && @info("Iterating powerMean Fixed-Point...")
 
@@ -2206,17 +2270,18 @@ function powerMean(𝐏::ℍVector, p::Real;
                💡 = ℍ(H)^r * X
            end
 
-       conv = √norm(H-I)/sqrtn # relative difference to identity
+       conv = norm(H-I)/n²
        ⍰ && println("iteration: ", iter, "; convergence: ", conv)
        (diverging = conv > oldconv) && ⍰ && @warn("powerMean diverged at:", iter)
        (overRun = iter == maxiter) && @warn("powerMean: reached the max number of iterations before convergence:", iter)
-       conv <= tolerance || overRun==true ? break : X = 💡
+       (converged = conv <= tolerance) || overRun==true ? break : X = 💡
        oldconv=conv
        iter += 1
        end # while
 
     end # if
 
+    ⍰ ? (converged ? @info("Convergence has been attained.\n") : @warn("Convergence has not been attained.")) : nothing
     ⍰ && println("")
     p<0 ? (return ℍ((💡)'*💡), iter, conv) : (return inv(ℍ((💡)'*💡)), iter, conv)
   end # if !(-1<=p<=1)
