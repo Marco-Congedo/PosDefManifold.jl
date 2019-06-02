@@ -947,9 +947,9 @@ spEmb=spectralEmbedding
 ```
  (1) Mean of ``k`` real or complex scalars, using the specified `metric`
  of type [Metric::Enumerated type](@ref). Note that using the Fisher,
- logEuclidean, Jeffrey and logdet0 metric, the resulting mean
- is the scalar geometric mean (the code of this method is in unit
- statistics.jl).
+ logEuclidean and Jeffrey metric, the resulting mean
+ is the scalar geometric mean. The code of this method is in unit
+ statistics.jl.
 
  (2) Mean of two positive definite matrices, passed in arbitrary order as
  arguments ``P`` and ``Q``, using the specified `metric` as in (1).
@@ -1194,8 +1194,8 @@ function mean(metric::Metric, 𝐃::𝔻Vector;
 
     elseif metric == logCholesky
         if threaded
-            if isempty(w) return fVec(𝛍, log, 𝐃)^2
-            else          return fVec(𝚺, log, 𝐃; w=v)^2 end
+            if isempty(w) return (fVec(𝛍, log, 𝐃))^2
+            else          return (fVec(𝚺, log, 𝐃; w=v))^2 end
         else
             if isempty(w) return (𝛍(log, 𝐃))^2
             else          return (𝚺(map(*, v, map(log, 𝐃))))^2 end

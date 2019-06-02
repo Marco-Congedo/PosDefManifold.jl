@@ -27,5 +27,5 @@ softmax
 
 
 ```@docs
-
+# mean
 ```

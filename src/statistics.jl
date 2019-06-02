@@ -50,11 +50,12 @@ softmax(χ::Vector{T}) where T<:Real = exp.(χ) ./ 𝚺(exp.(χ))
 """
 function mean(metric::Metric, ν::Vector{T}) where T<:RealOrComplex
     if      metric == Euclidean     return mean(ν)
-    elseif  metric == invEuclidean  return inv/mean(inv, ν)
+    elseif  metric == invEuclidean  return inv(mean(inv, ν))
     elseif  metric in (Fisher,
                        logEuclidean,
-                       Jeffrey,
-                       logdet0)     return exp(mean(log, ν))
+                       Jeffrey)     return exp(mean(log, ν))
+    elseif  metric == logdet0
+        @warn "function statistics.mean (scalar mean) not implemented for metric $metric"
     elseif  metric == ChoEuclidean  return (mean(sqrt, ν))^2
     elseif  metric == logCholesky   return (mean(log, ν))^2
     elseif  metric == VonNeumann

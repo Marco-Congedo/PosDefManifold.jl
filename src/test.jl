@@ -191,7 +191,6 @@ function tests();
 
 
 
-
     name="quadraticForm"; newTest(name)
     v=randn(n)
     vC=randn(ComplexF64, n)
@@ -214,6 +213,7 @@ function tests();
     name="fDiag"; newTest(name)
     D=fDiag(x->x^2, P_)
     D≈Diagonal(diagm(0 => [9.,16.,25.])) ? OK() : OH(name)
+
 
     name="DiagOfProd"; newTest(name)
     DiagOfProd(P, Q)≈Diagonal(P*Q) ? OK() : OH(name*" Real Input")
@@ -696,7 +696,7 @@ function tests();
 
     # functions in classification.jl
     println(" ")
-    print("\n- Unit 'classification.jl'")
+    print("\n- Unit 'statistics.jl'")
 
     name="softmax"; newTest(name);
     g=[1.0, 2.0, 3.0, 4.0, 1.0, 2.0, 3.0]
@@ -705,6 +705,10 @@ function tests();
     hh=softmax(g)
     hh ≈ h ? OK() : OH(name)
 
+    name="mean (scalar version)"; newTest(name);
+    g=[1.0, 2.0, 3.0]
+    for m=1:length(metrics)
+            if m ∉ (7, 9) mean(metrics[m], g) end end; RUN()
 
 end # function tests
 
