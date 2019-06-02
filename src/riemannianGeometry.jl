@@ -1598,7 +1598,7 @@ gMean=geometricMean
  This function implements the p-dispersion gradient descent
  algorithm with step-size ``ς`` (to be published), yielding iterations
 
-``G ←G^{1/2}\\textrm{exp}\\big(ς\\sum_{i=1}^{k}pw_iδ^2(G, P_i)^{p-1}\\textrm{log}(G^{-1/2} P_i G^{-1/2})\\big)G^{1/2}.``
+``G ←G^{1/2}\\textrm{exp}\\big(ς\\sum_{i=1}^{k}pδ^2(G, P_i)^{p-1}w_i\\textrm{log}(G^{-1/2} P_i G^{-1/2})\\big)G^{1/2}.``
 
 - if ``p=1`` this yields the geometric mean (implemented with fixed step-size in [`geometricMean`](@ref)).
 - if ``p=0.5`` this yields the geometric median.
