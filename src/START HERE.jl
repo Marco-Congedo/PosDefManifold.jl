@@ -16,11 +16,11 @@
 #
 #   Nota Bene: all you need is actually the 'push' line and
 #   the 'using' line. You can safely delete the rest once
-#   you have identified the 'srcDir'.
+#   you have identified the 'srcDir' to be used in the push command.
 
 begin
     projectName = "PosDefManifold"
-    # change the following path to the folder where your projects are
+    # change the 'juliaCodeDir' path to the folder where your projects are
     juliaCodeDir= homedir()*"\\Documents\\Code\\julia\\"
     srcDir      = juliaCodeDir*projectName*"\\src\\"
     docsDir     = juliaCodeDir*projectName*"\\docs\\"

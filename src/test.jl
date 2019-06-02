@@ -732,7 +732,7 @@ SKIP()=print(" skypped")
 failing_tests=[]
 
 function testall()
-    println("\n⭐"," PosDefManifold testing utility", "⭐\n")
+    println("\n⭐","  PosDefManifold testing utility ", "⭐\n")
     println("Starting tests...\n")
     tests()
     # print out the tests that have failed (if any)

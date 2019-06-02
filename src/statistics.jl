@@ -56,11 +56,11 @@ function mean(metric::Metric, ν::Vector{T}) where T<:RealOrComplex
                        Jeffrey)     return exp(mean(log, ν))
     elseif  metric == logdet0
         @warn "function statistics.mean (scalar mean) not implemented for metric $metric"
-    elseif  metric == ChoEuclidean  return (mean(sqrt, ν))^2
-    elseif  metric == logCholesky   return (mean(log, ν))^2
+    elseif  metric == ChoEuclidean  return (mean(√, ν))^2
+    elseif  metric == logCholesky   return exp((mean(log, sqrt.(ν))))^2
     elseif  metric == VonNeumann
         @warn "function statistics.mean and .geodesic not defined for metric $metric"
-    elseif  metric == Wasserstein   return (mean(sqrt, ν))^(-0.5)
+    elseif  metric == Wasserstein   return (mean(√, ν))^(-0.5)
     else
         @error "in RiemannianGeometry.mean function: the chosen 'metric' does not exist"
     end # if metric

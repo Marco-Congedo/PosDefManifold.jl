@@ -948,8 +948,9 @@ spEmb=spectralEmbedding
  (1) Mean of ``k`` real or complex scalars, using the specified `metric`
  of type [Metric::Enumerated type](@ref). Note that using the Fisher,
  logEuclidean and Jeffrey metric, the resulting mean
- is the scalar geometric mean. The code of this method is in unit
- statistics.jl.
+ is the scalar geometric mean. Note also that the code of this method
+ is in unit statistics.jl, while the code for all the others is
+ in riemannianGeometry.jl.
 
  (2) Mean of two positive definite matrices, passed in arbitrary order as
  arguments ``P`` and ``Q``, using the specified `metric` as in (1).
@@ -1185,20 +1186,20 @@ function mean(metric::Metric, 𝐃::𝔻Vector;
 
     elseif metric == ChoEuclidean
         if threaded
-            if isempty(w) L=fVec(𝛍, sqrt, 𝐃)
-            else          L=fVec(𝚺, sqrt, 𝐃; w=v) end
+            if isempty(w) L=fVec(𝛍, √, 𝐃)
+            else          L=fVec(𝚺, √, 𝐃; w=v) end
         else
-            isempty(w) ? L = 𝛍(sqrt, 𝐃) : L = 𝚺(map(*, v, map(sqrt, 𝐃)))
+            isempty(w) ? L = 𝛍(√, 𝐃) : L = 𝚺(map(*, v, map(√, 𝐃)))
         end
         return L*L
 
     elseif metric == logCholesky
         if threaded
-            if isempty(w) return (fVec(𝛍, log, 𝐃))^2
-            else          return (fVec(𝚺, log, 𝐃; w=v))^2 end
+            if isempty(w) return exp((fVec(𝛍, log, map(√, 𝐃))))^2
+            else          return exp((fVec(𝚺, log, map(√, 𝐃); w=v)))^2 end
         else
-            if isempty(w) return (𝛍(log, 𝐃))^2
-            else          return (𝚺(map(*, v, map(log, 𝐃))))^2 end
+            if isempty(w) return exp((𝛍(log, map(√, 𝐃))))^2
+            else          return exp((𝚺(map(*, v, map(log, map(√, 𝐃))))))^2 end
         end
 
     elseif metric == Jeffrey
