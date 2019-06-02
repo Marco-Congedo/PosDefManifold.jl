@@ -24,3 +24,7 @@ softmax
 | Function   | Description |
 |:---------- |:----------- |
 | [`mean`](@ref) | compute the mean of real or complex numbers according to the specified metric |
+
+    mean(metric::Metric, ν::Vector{T}) where T<:RealOrComplex
+
+See bottom of documentation of general function [`mean`](@ref) 
