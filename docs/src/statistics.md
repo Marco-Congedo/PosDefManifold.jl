@@ -6,7 +6,7 @@ Unit for statistics, probability and related functions.
 | Category  | Output |
 |:---------- |:----------- |
 | 1. [Probability](@ref) | functions relating to probability |
-| 1. [Decriptive Statistics](@ref) | functions relating to decriptive statistics |
+| 2. [Descriptive Statistics](@ref) | functions relating to decriptive statistics |
 
 
 ## Probability
@@ -19,13 +19,8 @@ Unit for statistics, probability and related functions.
 softmax
 ```
 
-## Decriptive Statistics
+## Descriptive Statistics
 
 | Function   | Description |
 |:---------- |:----------- |
 | [`mean`](@ref) | compute the mean of real or complex numbers according to the specified metric |
-
-
-```@docs
-# mean
-```
