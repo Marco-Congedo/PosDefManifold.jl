@@ -36,12 +36,12 @@ For starting using this package, browse the code units listed here below and exe
 **PosDefManifold** includes six code units (.jl files):
 
 | Unit   | Description |
-|:----------:| ----------- |
+|:----------|:----------|
 | [MainModule (PosDefManifold.jl)](@ref) | Main module, constants, types, aliases, tips & tricks |
 | [riemannianGeometry.jl](@ref) | The fundamental unit collecting all functions acting on the **P** manifold |
 | [linearAlgebra.jl](@ref) | Collection of linear algebra routines |
+| [statistics.jl](@ref) | Collection of statistics routines |
 | [signalProcessing.jl](@ref) | Collection of signal processing routines |
-| [classification.jl](@ref) | Collection of classification routines |
 | [test.jl](@ref) | Unit performing all tests |
 
 ## Contents
@@ -52,8 +52,8 @@ Pages = [       "index.md",
                 "MainModule.md",
                 "riemannianGeometry.md",
                 "linearAlgebra.md",
+                "statistics.md",
                 "signalProcessing.md",
-                "classification.md",
                 "test.md"]
 Depth = 1
 ```

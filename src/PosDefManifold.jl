@@ -187,7 +187,7 @@ export
 include("linearAlgebra.jl")
 include("signalProcessing.jl")
 include("riemannianGeometry.jl")
-include("classification.jl")
+include("statistics.jl")
 include("test.jl")
 
 println("\n⭐ "," Welcome to the PosDefManifold package", " ⭐\n")

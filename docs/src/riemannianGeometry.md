@@ -67,7 +67,7 @@ spectralEmbedding
 
 | Function   | Description |
 |:---------- |:----------- |
-| [`mean`](@ref) | Weighted Fréchet mean (wFm) of a matrix set using any metric |
+| [`mean`](@ref) | Weighted Fréchet mean (wFm) of a scalar or matrix set using any metric |
 | [`means`](@ref) | As above for several sets at once |
 | [`generalizedMean`](@ref) | Generalized wFm of a matrix set |
 | [`geometricMean`](@ref), `gMean` | wFm of a matrix set minimizing the dispersion according to the Fisher metric (iterative)|

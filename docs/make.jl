@@ -11,8 +11,8 @@ makedocs(
       "MainModule.md",
       "riemannianGeometry.md",
       "linearAlgebra.md",
+      "statistics.md",
       "signalProcessing.md",
-      "classification.md",
       "test.md"
    ]
 )
