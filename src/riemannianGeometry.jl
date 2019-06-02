@@ -929,38 +929,46 @@ spEmb=spectralEmbedding
 
 """
 ```
-    (1) mean(metric::Metric, P::ℍ{T}, Q::ℍ{T}) where T<:RealOrComplex
+    (1) mean(metric::Metric, ν::Vector{T}) where T<:RealOrComplex
 
-    (2) mean(metric::Metric, D::𝔻{T}, E::𝔻{T}) where T<:Real
+    (2) mean(metric::Metric, P::ℍ{T}, Q::ℍ{T}) where T<:RealOrComplex
 
-    (3) mean(metric::Metric, 𝐏::ℍVector;
+    (3) mean(metric::Metric, D::𝔻{T}, E::𝔻{T}) where T<:Real
+
+    (4) mean(metric::Metric, 𝐏::ℍVector;
     <
     w::Vector=[],
     ✓w=true,
     ⏩=false >)
 
-    (4) mean(metric::Metric, 𝐃::𝔻Vector;
-    < same optional keyword arguments as in (3) >)
-```
+    (5) mean(metric::Metric, 𝐃::𝔻Vector;
+    < same optional keyword arguments as in (4) >)
 
- (1) Mean of two positive definite matrices, passed in arbitrary order as
- arguments ``P`` and ``Q``, using the specified `metric` of type
- [Metric::Enumerated type](@ref).
+```
+ (1) Mean of ``k`` real or complex scalars, using the specified `metric`
+ of type [Metric::Enumerated type](@ref). Note that using the Fisher,
+ logEuclidean and Jeffrey metric, the resulting mean
+ is the scalar geometric mean. Note also that the code of this method
+ is in unit statistics.jl, while the code for all the others is
+ in riemannianGeometry.jl.
+
+ (2) Mean of two positive definite matrices, passed in arbitrary order as
+ arguments ``P`` and ``Q``, using the specified `metric` as in (1).
  The order is arbitrary as all metrics implemented in **PosDefManifold** are symmetric.
  This is the midpoint of the geodesic.
  For the weighted mean of two positive definite matrices use instead
  the [`geodesic`](@ref) function.
  ``P`` and ``Q`` must be flagged as `Hermitian`. See [typecasting matrices](@ref).
 
- (2) Like in (1), but for two real diagonal positive definite matrices
+ (3) Like in (2), but for two real diagonal positive definite matrices
  ``D`` and ``E``.
 
- (3) [Fréchet mean](@ref) of an 1d array ``𝐏`` of ``k`` positive definite
+ (4) [Fréchet mean](@ref) of an 1d array ``𝐏`` of ``k`` positive definite
  matrices ``𝐏={P_1,...,P_k}`` of [ℍVector type](@ref),
  with optional non-negative real weights ``w={w_1,...,w_k}`` and using the
  specified `metric`as in (1).
 
- (4) [Fréchet mean](@ref) of an 1d array ``𝐃`` of ``k`` positive definite
+ (5) [Fréchet mean](@ref) of an 1d array ``𝐃`` of ``k`` positive definite
  matrices ``𝐃={D_1,...,D_k}`` of [𝔻Vector type](@ref),
  with optional non-negative real weights ``w={w_1,...,w_k}`` and using the
  specified `metric`as in (1).
@@ -974,14 +982,14 @@ spEmb=spectralEmbedding
  calling this function repeatedly without normalizing the same weights
  vector each time.
 
- Adopting the `Fisher`, `logdet0` and `Wasserstein` metric in (3) and the
- `logdet0` metric in (4), the mean is computed by means of an iterative
+ Adopting the `Fisher`, `logdet0` and `Wasserstein` metric in (4) and the
+ `logdet0` metric in (5), the mean is computed by means of an iterative
  algorithm and information on its convergence is displayed in the REPL.
  For suppressing this information and for more options for computing these means
  call directly functions [`geometricMean`](@ref), [`logdet0Mean`](@ref)
  and [`wasMean`](@ref). See also the robust function [`geometricpMean`](@ref).
 
- For (3) and (4), if `⏩=true` is passed as *<optional keyword argument>*,
+ For (4) and (5), if `⏩=true` is passed as *<optional keyword argument>*,
  the computation of the mean is multi-threaded.
 
 !!! warning "Multi-Threading"
@@ -1167,7 +1175,7 @@ function mean(metric::Metric, 𝐃::𝔻Vector;
             else          return inv(𝚺(map(*, v, map(inv, 𝐃)))) end
         end
 
-    elseif metric in (logEuclidean, Fisher, logCholesky)
+    elseif metric in (logEuclidean, Fisher)
         if threaded
             if isempty(w) return exp(fVec(𝛍, log, 𝐃))
             else          return exp(fVec(𝚺, log, 𝐃; w=v)) end
@@ -1178,25 +1186,34 @@ function mean(metric::Metric, 𝐃::𝔻Vector;
 
     elseif metric == ChoEuclidean
         if threaded
-            if isempty(w) L=fVec(𝛍, sqrt, 𝐃)
-            else          L=fVec(𝚺, sqrt, 𝐃; w=v) end
+            if isempty(w) L=fVec(𝛍, √, 𝐃)
+            else          L=fVec(𝚺, √, 𝐃; w=v) end
         else
-            isempty(w) ? L = 𝛍(sqrt, 𝐃) : L = 𝚺(map(*, v, map(sqrt, 𝐃)))
+            isempty(w) ? L = 𝛍(√, 𝐃) : L = 𝚺(map(*, v, map(√, 𝐃)))
         end
         return L*L
+
+    elseif metric == logCholesky
+        if threaded
+            if isempty(w) return exp((fVec(𝛍, log, map(√, 𝐃))))^2
+            else          return exp((fVec(𝚺, log, map(√, 𝐃); w=v)))^2 end
+        else
+            if isempty(w) return exp((𝛍(log, map(√, 𝐃))))^2
+            else          return exp((𝚺(map(*, v, map(log, map(√, 𝐃))))))^2 end
+        end
 
     elseif metric == Jeffrey
         D=mean(Euclidean, 𝐃; w=w, ✓w=✓w, ⏩=⏩)
         return D*((inv(D)*mean(invEuclidean, 𝐃; w=w, ✓w=✓w, ⏩=⏩))^0.5)
 
     elseif metric == VonNeumann
-        @warn "function RiemannianGeometryP.mean and .geodesic not defined for metric $metric"
+        @warn "function RiemannianGeometry.mean and .geodesic not defined for metric $metric"
 
     elseif  metric == Wasserstein
         return generalizedMean(𝐃, 0.5; w=w, ✓w=✓w, ⏩=⏩)
 
     else
-        @error "in RiemannianGeometryP.mean function: the chosen 'metric' does not exist"
+        @error "in RiemannianGeometry.mean function: the chosen 'metric' does not exist"
     end # if metric
 end # function
 
@@ -1609,9 +1626,9 @@ gMean=geometricMean
  - `init` is a matrix to be used as initialization for the mean. If no matrix is provided, the [log Euclidean](@ref) mean will be used,
  - `tol` is the tolerance for the convergence (see below).
  - `maxiter` is the maximum number of iterations allowed.
- - if `⍰`=true, the convergence attained at each iteration is printed and a *warning* is printed if convergence is not attained.
+ - if `⍰`=true, the step-size and convergence attained at each iteration is printed. Also, a *warning* is printed if convergence is not attained.
  - if ⏩=true the iterations are multi-threaded (see below).
- - if `adaptStepSize`=true the step size ``ς`` for the gradient descent is adapted at each iteration (see below).
+ - if `adaptStepSize`=true (default) the step size ``ς`` for the gradient descent is adapted at each iteration (see below).
 
 !!! warning "Multi-Threading"
     [Multi-threading](https://docs.julialang.org/en/v1/manual/parallel-computing/#Multi-Threading-(Experimental)-1)
