@@ -929,7 +929,6 @@ spEmb=spectralEmbedding
 
 """
 ```
-
     (1) mean(metric::Metric, P::ℍ{T}, Q::ℍ{T}) where T<:RealOrComplex
 
     (2) mean(metric::Metric, D::𝔻{T}, E::𝔻{T}) where T<:Real
@@ -942,7 +941,6 @@ spEmb=spectralEmbedding
 
     (4) mean(metric::Metric, 𝐃::𝔻Vector;
     < same optional keyword arguments as in (3) >)
-
 ```
 
  (1) Mean of two positive definite matrices, passed in arbitrary order as
@@ -1584,7 +1582,7 @@ gMean=geometricMean
     maxiter::Int=750,
     ⍰=false,
     ⏩=false,
-    adaptStepSize=false >)
+    adaptStepSize=true >)
 ```
 
  **alias**: `gpmean`
