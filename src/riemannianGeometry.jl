@@ -929,7 +929,6 @@ spEmb=spectralEmbedding
 
 """
 ```
-
     (1) mean(metric::Metric, P::ℍ{T}, Q::ℍ{T}) where T<:RealOrComplex
 
     (2) mean(metric::Metric, D::𝔻{T}, E::𝔻{T}) where T<:Real
@@ -942,7 +941,6 @@ spEmb=spectralEmbedding
 
     (4) mean(metric::Metric, 𝐃::𝔻Vector;
     < same optional keyword arguments as in (3) >)
-
 ```
 
  (1) Mean of two positive definite matrices, passed in arbitrary order as
@@ -1584,7 +1582,7 @@ gMean=geometricMean
     maxiter::Int=750,
     ⍰=false,
     ⏩=false,
-    adaptStepSize=false >)
+    adaptStepSize=true >)
 ```
 
  **alias**: `gpmean`
@@ -1600,7 +1598,7 @@ gMean=geometricMean
  This function implements the p-dispersion gradient descent
  algorithm with step-size ``ς`` (to be published), yielding iterations
 
-``G ←G^{1/2}\\textrm{exp}\\big(ς\\sum_{i=1}^{k}pw_iδ^2(G, P_i)^{p-1}\\textrm{log}(G^{-1/2} P_i G^{-1/2})\\big)G^{1/2}.``
+``G ←G^{1/2}\\textrm{exp}\\big(ς\\sum_{i=1}^{k}pδ^2(G, P_i)^{p-1}w_i\\textrm{log}(G^{-1/2} P_i G^{-1/2})\\big)G^{1/2}.``
 
 - if ``p=1`` this yields the geometric mean (implemented with fixed step-size in [`geometricMean`](@ref)).
 - if ``p=0.5`` this yields the geometric median.
@@ -1642,7 +1640,7 @@ gMean=geometricMean
 
     If `adaptStepSize` is true (default) the step-size ``ς`` is adapted at
     each iteration, otherwise a fixed step size ``ς=1`` is used.
-    Adapting the step size in general speeds up convergence.
+    Adapting the step size in general hastens convergence.
 
     ``tol`` defaults to the square root of `Base.eps` of the nearest
     real type of data input ``𝐏``. This corresponds to requiring the
