@@ -1640,7 +1640,7 @@ gMean=geometricMean
 
     If `adaptStepSize` is true (default) the step-size ``ς`` is adapted at
     each iteration, otherwise a fixed step size ``ς=1`` is used.
-    Adapting the step size in general speeds up convergence.
+    Adapting the step size in general hastens convergence.
 
     ``tol`` defaults to the square root of `Base.eps` of the nearest
     real type of data input ``𝐏``. This corresponds to requiring the
