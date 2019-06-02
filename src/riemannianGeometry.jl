@@ -929,41 +929,35 @@ spEmb=spectralEmbedding
 
 """
 ```
-    (1) mean(metric::Metric, ν::Vector{T}) where T<:RealOrComplex
 
-    (2) mean(metric::Metric, P::ℍ{T}, Q::ℍ{T}) where T<:RealOrComplex
+    (1) mean(metric::Metric, P::ℍ{T}, Q::ℍ{T}) where T<:RealOrComplex
 
-    (3) mean(metric::Metric, D::𝔻{T}, E::𝔻{T}) where T<:Real
+    (2) mean(metric::Metric, D::𝔻{T}, E::𝔻{T}) where T<:Real
 
-    (4) mean(metric::Metric, 𝐏::ℍVector;
+    (3) mean(metric::Metric, 𝐏::ℍVector;
     <
     w::Vector=[],
     ✓w=true,
     ⏩=false >)
 
-    (5) mean(metric::Metric, 𝐃::𝔻Vector;
-    < same optional keyword arguments as in (4) >)
+    (4) mean(metric::Metric, 𝐃::𝔻Vector;
+    < same optional keyword arguments as in (3) >)
 
 ```
- (1) Mean of ``k`` real or complex scalars, using the specified `metric`
- of type [Metric::Enumerated type](@ref). Note that using the Fisher,
- logEuclidean and Jeffrey metric, the resulting mean
- is the scalar geometric mean. Note also that the code of this method
- is in unit statistics.jl, while the code for all the others is
- in riemannianGeometry.jl.
 
- (2) Mean of two positive definite matrices, passed in arbitrary order as
- arguments ``P`` and ``Q``, using the specified `metric` as in (1).
- The order is arbitrary as all metrics implemented in **PosDefManifold** are symmetric.
+ (1) Mean of two positive definite matrices, passed in arbitrary order as
+ arguments ``P`` and ``Q``, using the specified `metric` of type
+ [Metric::Enumerated type](@ref). The order is arbitrary as all metrics
+ implemented in **PosDefManifold** are symmetric.
  This is the midpoint of the geodesic.
  For the weighted mean of two positive definite matrices use instead
  the [`geodesic`](@ref) function.
  ``P`` and ``Q`` must be flagged as `Hermitian`. See [typecasting matrices](@ref).
 
- (3) Like in (2), but for two real diagonal positive definite matrices
+ (2) Like in (1), but for two real diagonal positive definite matrices
  ``D`` and ``E``.
 
- (4) [Fréchet mean](@ref) of an 1d array ``𝐏`` of ``k`` positive definite
+ (3) [Fréchet mean](@ref) of an 1d array ``𝐏`` of ``k`` positive definite
  matrices ``𝐏={P_1,...,P_k}`` of [ℍVector type](@ref),
  with optional non-negative real weights ``w={w_1,...,w_k}`` and using the
  specified `metric`as in (1).
@@ -982,14 +976,14 @@ spEmb=spectralEmbedding
  calling this function repeatedly without normalizing the same weights
  vector each time.
 
- Adopting the `Fisher`, `logdet0` and `Wasserstein` metric in (4) and the
- `logdet0` metric in (5), the mean is computed by means of an iterative
+ Adopting the `Fisher`, `logdet0` and `Wasserstein` metric in (3) and the
+ `logdet0` metric in (4), the mean is computed by means of an iterative
  algorithm and information on its convergence is displayed in the REPL.
  For suppressing this information and for more options for computing these means
  call directly functions [`geometricMean`](@ref), [`logdet0Mean`](@ref)
  and [`wasMean`](@ref). See also the robust function [`geometricpMean`](@ref).
 
- For (4) and (5), if `⏩=true` is passed as *<optional keyword argument>*,
+ For (3) and (4), if `⏩=true` is passed as *<optional keyword argument>*,
  the computation of the mean is multi-threaded.
 
 !!! warning "Multi-Threading"
@@ -1055,7 +1049,6 @@ spEmb=spectralEmbedding
     Pset=randP(20, 160)
     @benchmark(mean(logEuclidean, Pset)) # single-threaded
     @benchmark(mean(logEuclidean, Pset; ⏩=true)) # multi-threaded
-
 
 """
 mean(metric::Metric, P::ℍ{T}, Q::ℍ{T}) where T<:RealOrComplex = geodesic(metric, P, Q, 0.5)
@@ -1639,7 +1632,8 @@ gMean=geometricMean
 !!! note "Nota Bene"
     If the algorithm diverges and `⍰` is true a **warning** is printed
     indicating the iteration when this happened. This algorithm may temporary
-    diverge, still reach convergence.
+    diverge, still reach convergence. Overall, while all other iterative
+    algorithms implemented in **PosDefMaifold** are very stable, this is not.
 
     The smaller the parameter ``p`` is, the slower and less likely the
     convergence is. If the algorithm does not converge, try increasing ``p``,
