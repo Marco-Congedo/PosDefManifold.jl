@@ -817,7 +817,8 @@ tr(H::Union{ℍ{T}, 𝕄{T}}, D::𝔻{T}) where T<:RealOrComplex = tr(D, H)
 """
 quadraticForm(v::Vector{T}, P::ℍ{T}) where T<:Real = qf(v, 𝕃(P))
 
-quadraticForm(v::Vector{T}, X::𝕄{T}, forceLower::Bool=false) where T<: Real = forceLower==true ? qf(v, 𝕃(X)) : v'*X*v
+quadraticForm(v::Vector{T}, X::𝕄{T}, forceLower::Bool=false) where T<: Real =
+	forceLower==true ? qf(v, 𝕃(X)) : v' * X * v
 
 quadraticForm(v::Vector{T}, X::Union{𝕄{T}, ℍ{T}}) where T<:Complex = v'*X*v
 
@@ -826,12 +827,12 @@ function quadraticForm(v::Vector{T}, L::𝕃{T}) where T<:Real
     s=T(0)
     for j=1:r-1
         @inbounds s+=(v[j]^2 * L[j, j])
-        for i=j+1:r @inbounds s+=2*v[i]*v[j]*L[i, j]
-        end
+        for i=j+1:r @inbounds s+=2*v[i]*v[j]*L[i, j]  end
     end
     @inbounds s+=(v[r]^2 * L[r, r])
     return s
 end
+
 qf=quadraticForm
 
 

@@ -22,81 +22,151 @@ This here below is the output of the `testall()` function
 Starting tests...
 
 - Unit 'linearAlgebra.jl'
+
 typeofMatrix:           ☆
+
 dim:                    ☆
+
 det1:                   ⭐ ⭐
+
 function tr1:           ⭐ ⭐
+
 normalizeCol!:          ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐
+
 ispos:                  ⭐ ⭐
+
 colProd:                ⭐ ⭐ ⭐ ⭐
+
 colNorm:                ⭐ ⭐
+
 sumOfSqr:               ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐
+
 sumOfSqrDiag:           ⭐ ⭐ ⭐
+
 sumOfSqrTril:           ⭐ ⭐
+
 tr:                     ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐
+
 quadraticForm:          ⭐ ⭐ ⭐ ⭐ ⭐
+
 fidelity:               ☆ ☆
+
 fDiag:                  ⭐
+
 DiagOfProd:             ⭐ ⭐
+
 mgs:                    ⭐ ⭐
+
 fVec:                   ⭐ ⭐ ⭐ ⭐
+
 evd:                    ⭐ ⭐
+
 spectralFunctions:      ☆ ☆ ☆
+
 pow:                    ⭐ ⭐ ⭐
+
 invsqrt:                ⭐ ⭐ ⭐
+
 sqr:                    ⭐ ⭐ ⭐
+
 powerIterations:        ⭐ ⭐ ⭐ ⭐ ⭐
+
 choL:                   ⭐ ⭐ ⭐
 
 - Unit 'signalProcessing.jl'
+
 randλ:                  ☆
+
 randΛ:                  ☆ ☆
+
 randU:                  ⭐ ⭐
+
 randP:                  ☆ ☆
+
 regularize!:            ⭐ ⭐ ⭐ ⭐
+
 gram:                   ☆ ☆
+
 trade:                  ☆ ☆
 
 - Unit 'riemannianGeometry.jl'
+
 geodesic:               ☆ ☆ ☆
+
 distanceSqr (I):        ☆ ☆ ☆ ☆
+
 distanceSqr (II):       ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐
+
 distanceSqr (III):      ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐
+
 distance (I):           ☆ ☆ ☆ ☆
+
 distance (II):          ☆ ☆
+
 distanceSqrMat (I):     ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐
+
 distanceSqrMat (I ⏩ ):  ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐
+
 distanceSqrMat (II):    ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐
+
 distanceSqrMat (II ⏩ ): ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐
+
 distanceMat (I):        ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐
+
 distanceMat (I ⏩ ):     ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐
+
 distanceMat (II):       ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐
+
 distanceMat (II ⏩ ):    ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐
+
 laplacian:              ☆
+
 laplacianEigenMaps:     ☆
+
 spectralEmbedding:      ☆
+
 mean (I):               ☆ ☆ ☆ ☆ ☆
+
 mean (II):              ⭐ ⭐ ⭐ ⭐ ⭐ ⭐
+
 mean (⏩ ):              ☆ ☆
+
 means:                  ☆ ☆ ☆
+
 means (⏩ ):             ☆ ☆ ☆
+
 generalizedMean:        ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐ ⭐
+
 generalizedMean(⏩ ):    ☆ ☆ ☆ ☆ ☆ ☆
+
 geometricMean:          ☆ ☆ ☆ ☆ ☆ ☆
+
 geometricMean(⏩ ):      ☆ ☆ ☆ ☆ ☆ ☆
+
 logdet0Mean:            ⭐ ⭐ ⭐ ⭐ ⭐
+
 logdet0Mean(⏩ ):        ☆ ☆ ☆ ☆ ☆ ☆
+
 wasMean:                ☆ ☆ ☆ ☆ ☆ ☆
+
 wasMean(⏩ ):            ☆ ☆ ☆ ☆ ☆ ☆
+
 powerMean:              ☆ ☆ ☆ ☆ ☆ ☆
+
 powerMean(⏩ ):          ☆ ☆ ☆ ☆ ☆ ☆
+
 logMap:                 ☆ ☆
+
 expMap:                 ☆ ☆
+
 vecP:                   ☆ ☆
+
 matP:                   ☆ ☆
+
 procrustes:             ☆ ☆
 
 - Unit 'classification.jl'
+
 softmax:                ⭐
 
 [ Info: All tests were succesful!
