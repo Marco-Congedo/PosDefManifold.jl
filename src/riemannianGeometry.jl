@@ -1392,7 +1392,7 @@ end # function
 ``\\sum_{i=1}^{k}w_i\\textrm{log}\\big(G^{-1/2} P_i G^{-1/2}\\big)=0.``
 
  For estimating it, this function implements the well-known gradient descent
- algorithm with an exponential decaying step size, yielding iterations
+ algorithm, but with an exponential decaying step size ``ς``, yielding iterations
 
 ``G ←G^{1/2}\\textrm{exp}\\big(ς\\sum_{i=1}^{k}w_i\\textrm{log}(G^{-1/2} P_i G^{-1/2})\\big)G^{1/2}.``
 
@@ -1432,7 +1432,7 @@ end # function
     The exponential decaying step size features a faster convergence rate
     as compared to the fixed step size ``ς=1`` that is usually adopted.
     The decaying rate is inversely proportional to `maxiter`, thus,
-    increase/decrease `maxiter` in order to set a slower/fastr
+    increase/decrease `maxiter` in order to set a slower/faster
     decaying rate. `maxiter` should not be set too low though.
 
     ``tol`` defaults to the square root of `Base.eps` of the nearest
