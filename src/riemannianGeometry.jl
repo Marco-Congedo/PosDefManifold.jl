@@ -1392,9 +1392,9 @@ end # function
 ``\\sum_{i=1}^{k}w_i\\textrm{log}\\big(G^{-1/2} P_i G^{-1/2}\\big)=0.``
 
  For estimating it, this function implements the well-known gradient descent
- algorithm, yielding iterations
+ algorithm with an exponential decaying step size, yielding iterations
 
-``G ←G^{1/2}\\textrm{exp}\\big(\\sum_{i=1}^{k}w_i\\textrm{log}(G^{-1/2} P_i G^{-1/2})\\big)G^{1/2}.``
+``G ←G^{1/2}\\textrm{exp}\\big(ς\\sum_{i=1}^{k}w_i\\textrm{log}(G^{-1/2} P_i G^{-1/2})\\big)G^{1/2}.``
 
  If you don't pass a weight vector with *<optional keyword argument>* ``w``,
  return the *unweighted geometric mean*.
@@ -1409,7 +1409,7 @@ end # function
  - `init` is a matrix to be used as initialization for the mean. If no matrix is provided, the [log Euclidean](@ref) mean will be used,
  - `tol` is the tolerance for the convergence (see below).
  - `maxiter` is the maximum number of iterations allowed
- - if `⍰`=true, the convergence attained at each iteration is printed and a *warning* is printed if convergence is not attained.
+ - if `⍰`=true, the convergence attained at each iteration and the step size ``ς`` is printed. Also, a *warning* is printed if convergence is not attained.
  - if ⏩=true the iterations are multi-threaded (see below).
 
  If the input is a 1d array of ``k`` real positive definite diagonal matrices
@@ -1428,6 +1428,12 @@ end # function
     In normal circumstances this algorithm converges monothonically.
     If the algorithm diverges and `⍰` is true a **warning** is printed
     indicating the iteration when this happened.
+
+    The exponential decaying step size features a faster convergence rate
+    as compared to the fixed step size ``ς=1`` that is usually adopted.
+    The decaying rate is inversely proportional to `maxiter`, thus,
+    increase/decrease `maxiter` in order to set a slower/fastr
+    decaying rate. `maxiter` should not be set too low though.
 
     ``tol`` defaults to the square root of `Base.eps` of the nearest
     real type of data input ``𝐏``. This corresponds to requiring the
@@ -1458,13 +1464,24 @@ end # function
 
     # now suppose Pset has changed a bit, initialize with G to hasten convergence
     Pset[1]=ℍ(Pset[1]+(randP(3)/100))
-    G, iter, conv = geometricMean(Pset; w=weights, ✓w=false, ⍰=true, init=G)
+    G, iter, conv = geometricMean(Pset; w=weights, ✓w=true, ⍰=true, init=G)
 
     # run multi-threaded when the number of matrices is high
     using BenchmarkTools
-    Pset=randP(20, 160)
+    k=160
+    Pset=randP(20, k)
     @benchmark(geometricMean(Pset)) # single-threaded
     @benchmark(geometricMean(Pset; ⏩=true)) # multi-threaded
+
+    # show the mean and the input points using spectral embedding
+    using Plots
+    k=80
+    Pset=randP(20, k)
+    G, iter, conv = geometricMean(Pset; ⏩=true)
+    push!(Pset, G)
+    Λ, U, iter, conv=spectralEmbedding(Fisher, Pset, 2; ⍰=true)
+    plot(U[1:k, 1], U[1:k, 2], seriestype=:scatter, title="Spectral Embedding", label="Pset")
+    plot!(U[k+1:k+1, 1], U[k+1:k+1, 2], seriestype=:scatter, label="mean")
 
 """
 function geometricMean( 𝐏::ℍVector;
@@ -1472,48 +1489,39 @@ function geometricMean( 𝐏::ℍVector;
                         ✓w=true,
                         init=nothing,
                         tol::Real=0,
-                        maxiter::Int=500,
+                        maxiter::Int=200,
                         ⍰=false,
                         ⏩=false)
 
     k, n, type, thr = dim(𝐏, 1), dim(𝐏, 2), eltype(𝐏[1]), nthreads()
-    n², iter, conv, oldconv, converged = n^2, 1, 0., maxpos, false
+    n², iter, conv, oldconv, converged, ς = n^2, 1, 0., maxpos, false, 1.
     ⏩ && k>=thr*4 && thr > 1 ? threaded=true : threaded=false
-    isempty(w) ? v=[] : v = _getWeights(w, ✓w)
-    init == nothing ? M = mean(logEuclidean, 𝐏; w=v, ✓w=false, ⏩=⏩) : M = ℍ(init)
     tol==0 ? tolerance = √eps(real(type)) : tolerance = tol
-    💡 = similar(M, type)
-    if threaded 𝐐 = similar(𝐏) end
+
     ⍰ && println("")
     ⍰ && threaded && @info("Iterating multi-threaded geometricMean Fixed-Point...")
     ⍰ && !threaded && @info("Iterating geometricMean Fixed-Point...")
 
+    isempty(w) ? v=[] : v = _getWeights(w, ✓w)
+    init == nothing ? M = mean(logEuclidean, 𝐏; w=v, ✓w=false, ⏩=⏩) : M = ℍ(init)
+    💡 = similar(M, type)
+    threaded ? 𝐐 = 𝕄Vector(repeat([𝐏[1]], thr)) : nothing
+    c1(M⁻½::ℍ, 𝐏::ℍVector) = cong(M⁻½, 𝐏, ℍVector)
+    c2(M⁻½::ℍ, P::ℍ) = cong(M⁻½, P, ℍ)
+
+    # M -< M½ { exp[ς( w_i{sum(i=1 to k) log(M⁻½ 𝐏[i] M⁻½)} )] } M½
     while true
         M½, M⁻½ = pow(M, 0.5, -0.5)
-        # M -< M½ {  exp[epsilon( 1/n{sum(i=1 to k) log(M⁻½ 𝐏[i] M⁻½)} )] } M½
         if threaded
-            if isempty(w)
-                @threads for i=1:k 𝐐[i] = log(ℍ(M⁻½*𝐏[i]*M⁻½)) end
-                ∇ = fVec(𝛍, 𝐐)
-                💡 = ℍ(M½*exp(∇)*M½)
-            else
-                @threads for i=1:k 𝐐[i] = v[i] * log(ℍ(M⁻½*𝐏[i]*M⁻½)) end
-                ∇ = fVec(𝚺, 𝐐)
-                💡 = ℍ(M½*exp(∇)*M½)
-            end
+            isempty(w) ? ∇ = fVec(𝛍, log, c1(M⁻½, 𝐏), allocs=𝐐) : ∇ = fVec(𝚺, log, c1(M⁻½, 𝐏), w=v, ✓w=false, allocs=𝐐)
         else
-            if isempty(w)
-                ∇ = ℍ(𝛍(log(ℍ(M⁻½*P*M⁻½)) for P in 𝐏))
-                💡 = ℍ(M½*exp(∇)*M½)
-            else
-                ∇ = ℍ(𝚺(ω * log(ℍ(M⁻½*P*M⁻½)) for (ω, P) in zip(v, 𝐏)))
-                💡 = ℍ(M½*exp(∇)*M½)
-            end
+            isempty(w) ? ∇ = ℍ(𝛍(log(c2(M⁻½, P)) for P in 𝐏)) : ∇ = ℍ(𝚺(ω * log(c2(M⁻½, P)) for (ω, P) in zip(v, 𝐏)))
         end
+        💡 = ℍ(M½*exp(ς*∇)*M½)
 
-        #conv = √norm(💡-M)/norm(M)
         conv = norm(∇)/n²
-        ⍰ && println("iteration: ", iter, "; convergence: ", conv)
+        ς = exp(-ℯ * golden * iter / maxiter)
+        ⍰ && println("iteration: ", iter, "; convergence: ", conv, "; ς: ", round(ς * 1000)/1000)
         (diverging = conv > oldconv) && ⍰ && @warn("geometricMean diverged at:", iter)
         (overRun = iter == maxiter) && @warn("geometricMean reached the max number of iterations before convergence:", iter)
         (converged = conv <= tolerance) || overRun==true ? break : M = 💡
@@ -1525,6 +1533,7 @@ function geometricMean( 𝐏::ℍVector;
     ⍰ && println("")
     return (💡, iter, conv)
 end
+
 
 
 geometricMean(𝐃::𝔻Vector;
