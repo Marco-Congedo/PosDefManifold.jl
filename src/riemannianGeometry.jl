@@ -699,10 +699,10 @@ distanceMat(metric::Metric, 𝐏::ℍVector;
  First, a [Gaussian radial basis functions](https://bit.ly/1HVyf55)
  is applied to all elements of ``Δ^2``, such as
 
- ``W_{ij} = exp\\Big(\\frac{\\displaystyle{-Δ^2_{ij}}}{\\displaystyle{ε}}\\Big)``,
+ ``W_{ij} = exp\\bigg(\\frac{\\displaystyle{-Δ^2_{ij}}}{\\displaystyle{ε}}\\bigg)``,
 
   where ``ε`` is the Gaussian scale parameter given by
-  ``μ(σ+1)epsilon``, where
+  ``μ(σ+1)*epsilon``, where
   - ``μ`` is the geometric mean of the elements ``Δ^2_{ij}``,
   - ``σ`` is the geometric standard deviation of the elements ``Δ^2_{ij}``,
   - ``epsilon`` is a *<keyword optional parameter>* that defaults to 1 (see below).
@@ -882,7 +882,7 @@ laplacianEM=laplacianEigenMaps
  - The following are *<optional keyword arguments>* for the power method iterative algorithm:
    * `tol` is the tolerance for convergence of the power method (see below),
    * `maxiter` is the maximum number of iterations allowed for the power method,
-   * ``epsilon`` is a *<keyword optional parameter>* that defaults to 1 (see below).
+   * `epsilon` is a *<keyword optional parameter>* that defaults to 1 (see below).
    * if `⍰` is true the convergence at all iterations will be printed.
    * if ⏩=true the computation of inter-distances is multi-threaded.
 
