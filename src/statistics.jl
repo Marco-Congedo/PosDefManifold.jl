@@ -84,7 +84,8 @@ function mean(metric::Metric, ν::Vector{T}) where T<:RealOrComplex
 end
 
 """
-    std(metric::Metric, ν::Vector{T}) where T<:RealOrComplex
+    std(metric::Metric, ν::Vector{T};
+        corrected::Bool=true) where T<:RealOrComplex
 
  Standard deviation of ``k`` real or complex scalars,
  using the specified `metric`
@@ -109,11 +110,15 @@ end
     geometric_sd=std(Fisher, ν)
 
 """
-function std(metric::Metric, ν::Vector{T}) where T<:RealOrComplex
-    if      metric == Euclidean     return std(ν)
+function std(metric::Metric, ν::Vector{T};
+             corrected::Bool=true) where T<:RealOrComplex
+
+    if      metric == Euclidean     return std(ν; corrected=corrected)
+
     elseif  metric == Fisher
             μ=mean(Fisher, ν)
-            return exp(sqrt(mean(log(w/μ)^2 for w in ν)))
+            if corrected return exp(√((1/(length(ν)-1)) * 𝚺(log(w/μ)^2 for w in ν)))
+            else         return exp(√(𝛍(log(w/μ)^2 for w in ν))) end
 
     elseif  metric in (invEuclidean, logEuclidean, Jeffrey,
                         logdet0, ChoEuclidean, logCholesky,
