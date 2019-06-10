@@ -1,5 +1,5 @@
 #    Unit riemannianGeometry.jl, part of PosDefManifold Package for julia language
-#    v 0.3.1 - last update 30th of Mai 2019
+#    v 0.3.1 - last update 10th of Juin 2019
 #
 #    MIT License
 #    Copyright (c) 2019, Marco Congedo, CNRS, Grenobe, France:
@@ -21,7 +21,7 @@
 
 
 # -----------------------------------------------------------
-# 0. Internal Functions
+# 0. Internal Functions (not exported)
 #    By convention their name begin with underscore char
 # -----------------------------------------------------------
 
@@ -153,7 +153,7 @@ function geodesic(metric::Metric, P::ℍ{T}, Q::ℍ{T}, a::Real) where T<:RealOr
     if a ≈ 1 return Q end
     b = 1-a
 
-    if      metric==Euclidean    return P*b + Q*a
+    if      metric==Euclidean    return ℍ(P*b + Q*a)
 
     elseif  metric==invEuclidean return inv( ℍ(inv(P)b + inv(Q)a) )
 
@@ -688,7 +688,8 @@ distanceMat(metric::Metric, 𝐏::ℍVector;
 
 
 """
-    laplacian(Δ²:𝕃{S}) where S<:Real
+    laplacian(Δ²:𝕃{S};
+             <epsilon::Real=1.0>) where S<:Real
 
  Given a `LowerTriangular` matrix of squared inter-distances ``Δ^2``,
  return the lower triangular part of the *normalized Laplacian*.
@@ -698,10 +699,13 @@ distanceMat(metric::Metric, 𝐏::ℍVector;
  First, a [Gaussian radial basis functions](https://bit.ly/1HVyf55)
  is applied to all elements of ``Δ^2``, such as
 
- ``W_{ij} = exp(\\frac{\\displaystyle{-Δ^2_{ij}}}{\\displaystyle{ε}})``,
+ ``W_{ij} = exp\\Big(\\frac{\\displaystyle{-Δ^2_{ij}}}{\\displaystyle{ε}}\\Big)``,
 
-  where ``ε`` is the Gaussian scale parameter chosen automatically
-  as the median of the elements ``Δ^2_{ij}``.
+  where ``ε`` is the Gaussian scale parameter given by
+  ``μ(σ+1)epsilon``, where
+  - ``μ`` is the geometric mean of the elements ``Δ^2_{ij}``,
+  - ``σ`` is the geometric standard deviation of the elements ``Δ^2_{ij}``,
+  - ``epsilon`` is a *<keyword optional parameter>* that defaults to 1 (see below).
 
   Finally, the normalized Laplacian is defined as
 
@@ -717,6 +721,11 @@ distanceMat(metric::Metric, 𝐏::ℍVector;
     In any case, only the lower triangular part of the Laplacian is
     taken as input. See [typecasting matrices](@ref).
 
+    By tuning ``epsilon`` you can control both the rate of compression
+    of the ensuing [`spectralEmbedding`](@ref), that is, how many dimensions
+    purposefully embed the data and the spread of points in those embedding
+    dimensions.
+
  **See also**: [`distanceSqrMat`](@ref), [`laplacianEigenMaps`](@ref), [`spectralEmbedding`](@ref).
 
  ## Examples
@@ -727,11 +736,16 @@ distanceMat(metric::Metric, 𝐏::ℍVector;
     Ω=laplacian(Δ²)
 
  """
-function laplacian(Δ²::𝕃{T}) where T<:Real
+function laplacian(Δ²::𝕃{T};
+                   epsilon::Real=1.0) where T<:Real
     r=size(Δ², 1)
-    epsilon=median([Δ²[i, j] for j=1:r-1 for i=j+1:r]) # use geometric mean instead
+    vecΔ²=[Δ²[i, j] for j=1:r-1 for i=j+1:r]
+    μ=mean(Fisher, vecΔ²)
+    σ=std(Fisher, vecΔ²)
+    epsilon_=epsilon*μ*(σ+1)
     Ω=𝕃{T}(diagm(0 => ones(r)))
-    for j=1:r-1, i=j+1:r Ω[i, j]=exp(-Δ²[i, j]/epsilon)  end
+    for j=1:r-1, i=j+1:r Ω[i, j]=exp(-Δ²[i, j]/epsilon_)  end
+
     # 1/sqrt of the row (or col) sum of L+L'-diag(L) using only L
     D=Vector{T}(undef, r)
     for i=1:r
@@ -833,6 +847,7 @@ laplacianEM=laplacianEigenMaps
     <
     tol::Real=0,
     maxiter::Int=300,
+    epsilon::Real=1.0,
     ⍰=false,
     ⏩=false >)
 
@@ -867,6 +882,7 @@ laplacianEM=laplacianEigenMaps
  - The following are *<optional keyword arguments>* for the power method iterative algorithm:
    * `tol` is the tolerance for convergence of the power method (see below),
    * `maxiter` is the maximum number of iterations allowed for the power method,
+   * ``epsilon`` is a *<keyword optional parameter>* that defaults to 1 (see below).
    * if `⍰` is true the convergence at all iterations will be printed.
    * if ⏩=true the computation of inter-distances is multi-threaded.
 
@@ -882,12 +898,19 @@ laplacianEM=laplacianEigenMaps
     equality for the convergence criterion over two successive power iterations
     of about half of the significant digits.
 
+    By tuning ``epsilon`` you can control both the rate of compression
+    of the spectral embedding, that is, how many dimensions
+    purposefully embed the data and the spread of points in those embedding
+    dimensions. You should always check the eigenvalues and eigenvectors
+    (eigen maps) to make sure the current value of ``epsilon`` is adequate.
+
  **See also**: [`distanceSqrMat`](@ref), [`laplacian`](@ref), [`laplacianEigenMaps`](@ref).
 
  ## Examples
     using PosDefManifold
-    # Generate a set of 4 random 10x10 SPD matrices
-    Pset=randP(10, 4) # or, using unicode: 𝐏=randP(10, 4)
+    # Generate a set of k random 10x10 SPD matrices
+    k=10
+    Pset=randP(10, k) # or, using unicode: 𝐏=randP(10, k)
     evalues, maps, iter, conv=spectralEmbedding(logEuclidean, Pset, 2)
 
     # show convergence information
@@ -897,18 +920,35 @@ laplacianEM=laplacianEigenMaps
     evalues, maps, iter, conv=spectralEmbedding(Float64, logEuclidean, Pset, 2)
 
     # Multi-threaded
-    evalues, maps, iter, conv=spectralEmbedding(logEuclidean, Pset, 2, ⏩=true)
+    evalues, maps, iter, conv=spectralEmbedding(Fisher, Pset, k-1, ⍰=true, ⏩=true)
+
+    using Plots
+    # check eigevalues and eigenvectors
+    evalues
+    plot(maps[:, 1])
+    plot!(maps[:, 2])
+    plot!(maps[:, 3])
+
+    # plot the data in the embedded space
+    plot(maps[:, 1], maps[:, 2], seriestype=:scatter, title="Spectral Embedding", label="Pset")
+
+    # try a different value of epsilon
+    evalues, maps, iter, conv=spEmb(Fisher, Pset, k-1, ⏩=true, maxiter=1000, epsilon=10)
+    plot(maps[:, 1], maps[:, 2], seriestype=:scatter, title="Spectral Embedding", label="Pset")
+
 
 """
 function spectralEmbedding(type::Type{T}, metric::Metric, 𝐏::ℍVector, q::Int;
                             tol::Real=0,
                             maxiter::Int=300,
+                            epsilon::Real=1.0,
                             ⍰=false,
                             ⏩=false)                where T<:Real
 
     tol==0 ? tolerance = √eps(type) : tolerance = tol
     return (Λ, U, iter, conv) =
-            laplacianEM(laplacian(distance²Mat(type, metric, 𝐏, ⏩=⏩)), q;
+            laplacianEM(laplacian(distance²Mat(type, metric, 𝐏, ⏩=⏩);
+                        epsilon=epsilon), q;
                         tol=tolerance,
                         maxiter=maxiter,
                         ⍰=⍰)
@@ -917,12 +957,14 @@ end
 function spectralEmbedding(metric::Metric, 𝐏::ℍVector, q::Int;
                         tol::Real=0,
                         maxiter::Int=300,
+                        epsilon::Real=1.0,
                         ⍰=false,
                         ⏩=false)
 
     tol==0 ? tolerance = √eps(Float32) : tolerance = tol
     return (Λ, U, iter, conv) =
-            laplacianEM(laplacian(distance²Mat(metric, 𝐏, ⏩=⏩)), q;
+            laplacianEM(laplacian(distance²Mat(metric, 𝐏, ⏩=⏩);
+                        epsilon=epsilon), q;
                         tol=tolerance,
                         maxiter=maxiter,
                         ⍰=⍰)
@@ -1417,7 +1459,8 @@ end # function
     tol::Real=0,
     maxiter::Int=500,
     ⍰=false,
-    ⏩=false >)
+    ⏩=false,
+    adaptStepSize=true >)
 ```
 
  **alias**: `gmean`
@@ -1452,6 +1495,7 @@ end # function
  - `maxiter` is the maximum number of iterations allowed
  - if `⍰`=true, the convergence attained at each iteration and the step size ``ς`` is printed. Also, a *warning* is printed if convergence is not attained.
  - if ⏩=true the iterations are multi-threaded (see below).
+ - if `adaptStepSize`=false the step size `ς` is fixed to 1 at all iterations.
 
  If the input is a 1d array of ``k`` real positive definite diagonal matrices
  the solution is available in closed-form as the log Euclidean
@@ -1531,7 +1575,8 @@ function geometricMean( 𝐏::ℍVector;
                         tol::Real=0,
                         maxiter::Int=200,
                         ⍰=false,
-                        ⏩=false)
+                        ⏩=false,
+                        adaptStepSize=true)
 
     (k, n, type, thr, n², iter, conv, oldconv, converged, ς, threaded, tolerance, v) = _setVar_IterAlg(𝐏, w, ✓w, tol, ⏩)
     _giveStartInfo_IterAlg(threaded, ⍰, "geometricMean Fixed-Point")
@@ -1549,10 +1594,10 @@ function geometricMean( 𝐏::ℍVector;
         else
             isempty(w) ? ∇ = ℍ(𝛍(log(c2(M⁻½, P)) for P in 𝐏)) : ∇ = ℍ(𝚺(ω * log(c2(M⁻½, P)) for (ω, P) in zip(v, 𝐏)))
         end
-        💡 = ℍ(M½*exp(ς*∇)*M½)
+        adaptStepSize ? 💡 = ℍ(M½*exp(ς*∇)*M½) : 💡 = ℍ(M½*exp(∇)*M½)
 
         conv = norm(∇)/n² # norm of the satisfying equation. It must vanish upon convergence
-        ς = exp(-ℯ * golden * iter / maxiter) # exponetially decaying step size
+        if adaptStepSize ς = exp(-ℯ * golden * iter / maxiter) end # exponetially decaying step size
         ⍰ && println("iteration: ", iter, "; convergence: ", conv, "; ς: ", round(ς * 1000)/1000)
         (diverging = conv > oldconv) && ⍰ && @warn("geometricMean diverged at:", iter)
         (overRun = iter == maxiter) && @warn("geometricMean reached the max number of iterations before convergence:", iter)
@@ -1666,7 +1711,7 @@ gMean=geometricMean
     # as compared to the standard geometric mean algorithm
 
     # Generate a set of 100 random 10x10 SPD matrices
-    Pset=randP(10, 100)
+    Pset=randP(10, 40)
 
     # Get the usual geometric mean for comparison
     G, iter1, conv1 = geometricMean(Pset, ⍰=true, ⏩=true)
@@ -1679,8 +1724,8 @@ gMean=geometricMean
 
     println(iter1, " ", iter2); println(conv1, " ", conv2)
 
-    # trasform the first matrix in Pset to create an otlier
-    Pset[1]=Pset[1]*10000
+    # move the first matrix in Pset to create an otlier
+    Pset[1]=geodesic(Fisher, G, Pset[1], 3)
     G1, iter1, conv1 = geometricMean(Pset, ⍰=true, ⏩=true)
     H1, iter2, conv2 = geometricpMean(Pset, 0.5, ⍰=true, ⏩=true)
     println(iter1, " ", iter2); println(conv1, " ", conv2)
@@ -1702,10 +1747,10 @@ gMean=geometricMean
     # plot the matrices in `S` using spectral embedding.
     using Plots
     Λ, U, iter, conv = laplacianEM(laplacian(Δ²), 3;  ⍰=true)
-    plot([U[1, 1]], [U[1, 2]], seriestype=:scatter, label="g mean")
-    plot!([U[2, 1]], [U[2, 2]], seriestype=:scatter, label="g mean outlier")
-    plot!([U[3, 1]], [U[3, 2]], seriestype=:scatter, label="g-p mean")
-    plot!([U[4, 1]], [U[4, 2]], seriestype=:scatter, label="g-p mean outlier")
+    plot([U[1, 1]], [U[1, 2]], seriestype=:scatter, label="g-mean")
+    plot!([U[2, 1]], [U[2, 2]], seriestype=:scatter, label="g-mean outlier")
+    plot!([U[3, 1]], [U[3, 2]], seriestype=:scatter, label="p-mean")
+    plot!([U[4, 1]], [U[4, 2]], seriestype=:scatter, label="p-mean outlier")
 
     # estimate how much you gain running the algorithm in multi-threaded mode
     using BenchmarkTools
