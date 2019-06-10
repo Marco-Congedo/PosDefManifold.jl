@@ -1,5 +1,5 @@
 #    Main Module of the  PosDefManifold Package for julia language
-#    v 0.3.1 - last update 30th of Mai 2019
+#    v 0.3.1 - last update 10th of Juin 2019
 #
 #    MIT License
 #    Copyright (c) 2019, Marco Congedo, CNRS, Grenobe, France:
@@ -70,6 +70,7 @@ end
 
 import
     Statistics.mean,
+    Statistics.std,
     LinearAlgebra.tr
 
 export
@@ -177,8 +178,10 @@ export
     matP,
     procrustes,
 
-    # from classification.jl
+    # from statistics.jl
+    # mean # already exported by RiemannianGeometry.jl
     softmax,
+    std,
 
     # from Test.jl
     testall

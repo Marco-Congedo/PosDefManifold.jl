@@ -23,8 +23,14 @@ softmax
 
 | Function   | Description |
 |:---------- |:----------- |
-| [`mean`](@ref) | compute the mean of real or complex numbers according to the specified metric |
+| [`mean`](@ref) | scalar mean of real or complex numbers according to the specified metric |
+| [`std`](@ref) | scalar standard deviation of real or complex numbers according to the specified metric |
+
 
     mean(metric::Metric, ν::Vector{T}) where T<:RealOrComplex
 
-See bottom of documentation of general function [`mean`](@ref) 
+See bottom of documentation of general function [`mean`](@ref)
+
+```@docs
+std
+```

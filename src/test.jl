@@ -710,6 +710,12 @@ function tests();
     for m=1:length(metrics)
             if m ∉ (7, 9) mean(metrics[m], g) end end; RUN()
 
+    name="std (scalar version)"; newTest(name);
+    g=[1.0, 2.0, 3.0]
+    for m=1:length(metrics)
+            if m in (Fisher, Euclidean) std(metrics[m], g) end end; RUN()
+            
+
 end # function tests
 
 function newTest(name::String)

@@ -1,5 +1,5 @@
 #   Unit statistics.jl, part of PosDefManifold Package for julia language
-#   v 0.3.1 - last update 30th of Mai 2019
+#   v 0.3.1 - last update 10th of Juin 2019
 #
 #   MIT License
 #   Copyright (c) 2019, Marco Congedo, CNRS, Grenobe, France:
@@ -59,10 +59,10 @@ softmax(χ::Vector{T}) where T<:Real = exp.(χ) ./ 𝚺(exp.(χ))
     using PosDefManifold
     # Generate 10 random numbers distributed as a chi-square with 2 df.
     ν=[randχ²(2) for i=1:10]
-    arithmeticMean=mean(Euclidean, ν)
-    geometricMean=mean(Fisher, ν)
-    HarmonicMean=mean(invEuclidean, ν)
-    HarmonicMean<=geometricMean<=arithmeticMean # AGH inequality
+    arithmetic_mean=mean(Euclidean, ν)
+    geometric_mean=mean(Fisher, ν)
+    harmonic_mean=mean(invEuclidean, ν)
+    harmonic_mean<=geometric_mean<=arithmetic_mean # AGH inequality
 
 """
 function mean(metric::Metric, ν::Vector{T}) where T<:RealOrComplex
@@ -78,6 +78,47 @@ function mean(metric::Metric, ν::Vector{T}) where T<:RealOrComplex
     elseif  metric == VonNeumann
         @warn "function statistics.mean and .geodesic not defined for metric $metric"
     elseif  metric == Wasserstein   return (mean(√, ν))^(-0.5)
+    else
+        @error "in RiemannianGeometry.mean function: the chosen 'metric' does not exist"
+    end # if metric
+end
+
+"""
+    std(metric::Metric, ν::Vector{T}) where T<:RealOrComplex
+
+ Standard deviation of ``k`` real or complex scalars,
+ using the specified `metric`
+ of type [Metric::Enumerated type](@ref).
+
+ Only the Euclidean and Fisher
+ metric are supported by this function. Using the Euclidean
+ metric return the output of standard Julia
+ [std](https://docs.julialang.org/en/v1/stdlib/Statistics/#Statistics.std)
+ function. Using the Fisher metric return the scalar geometric standard deviation,
+ which is defined such as,
+
+ ``\\sigma=\\text{exp}\\Big(\\sqrt{k^{-1}\\sum_{i=1}^{k}\\text{ln}^2(v_i/\\mu})\\Big)``.
+
+ ## Examples
+    using PosDefManifold
+    # Generate 10 random numbers distributed as a chi-square with 2 df.
+    ν=[randχ²(2) for i=1:10]
+    arithmetic_mean=mean(Euclidean, ν)
+    geometric_mean=mean(Fisher, ν)
+    arithmetic_sd=std(Euclidean, ν)
+    geometric_sd=std(Fisher, ν)
+
+"""
+function std(metric::Metric, ν::Vector{T}) where T<:RealOrComplex
+    if      metric == Euclidean     return std(ν)
+    elseif  metric == Fisher
+            μ=mean(Fisher, ν)
+            return exp(sqrt(mean(log(w/μ)^2 for w in ν)))
+
+    elseif  metric in (invEuclidean, logEuclidean, Jeffrey,
+                        logdet0, ChoEuclidean, logCholesky,
+                        VonNeumann, Wasserstein)
+        @warn "function statistics.mean (scalar mean) not implemented for metric $metric"
     else
         @error "in RiemannianGeometry.mean function: the chosen 'metric' does not exist"
     end # if metric
