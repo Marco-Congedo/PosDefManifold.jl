@@ -100,6 +100,9 @@ end
 
  ``\\sigma=\\text{exp}\\Big(\\sqrt{k^{-1}\\sum_{i=1}^{k}\\text{ln}^2(v_i/\\mu})\\Big)``.
 
+ If `corrected` is `true`, then the sum is scaled with ``k-1``,
+ whereas if it is `false` the sum is scaled with ``k``.
+
  ## Examples
     using PosDefManifold
     # Generate 10 random numbers distributed as a chi-square with 2 df.
@@ -117,7 +120,7 @@ function std(metric::Metric, ν::Vector{T};
 
     elseif  metric == Fisher
             μ=mean(Fisher, ν)
-            if corrected return exp(√((1/(length(ν)-1)) * 𝚺(log(w/μ)^2 for w in ν)))
+            if corrected return exp(√(𝚺(log(w/μ)^2 for w in ν)/(length(ν)-1)))
             else         return exp(√(𝛍(log(w/μ)^2 for w in ν))) end
 
     elseif  metric in (invEuclidean, logEuclidean, Jeffrey,
