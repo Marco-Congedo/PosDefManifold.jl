@@ -84,7 +84,8 @@ function mean(metric::Metric, ν::Vector{T}) where T<:RealOrComplex
 end
 
 """
-    std(metric::Metric, ν::Vector{T}) where T<:RealOrComplex
+    std(metric::Metric, ν::Vector{T};
+        corrected::Bool=true) where T<:RealOrComplex
 
  Standard deviation of ``k`` real or complex scalars,
  using the specified `metric`
@@ -99,6 +100,9 @@ end
 
  ``\\sigma=\\text{exp}\\Big(\\sqrt{k^{-1}\\sum_{i=1}^{k}\\text{ln}^2(v_i/\\mu})\\Big)``.
 
+ If `corrected` is `true`, then the sum is scaled with ``k-1``,
+ whereas if it is `false` the sum is scaled with ``k``.
+
  ## Examples
     using PosDefManifold
     # Generate 10 random numbers distributed as a chi-square with 2 df.
@@ -109,11 +113,15 @@ end
     geometric_sd=std(Fisher, ν)
 
 """
-function std(metric::Metric, ν::Vector{T}) where T<:RealOrComplex
-    if      metric == Euclidean     return std(ν)
+function std(metric::Metric, ν::Vector{T};
+             corrected::Bool=true) where T<:RealOrComplex
+
+    if      metric == Euclidean     return std(ν; corrected=corrected)
+
     elseif  metric == Fisher
             μ=mean(Fisher, ν)
-            return exp(sqrt(mean(log(w/μ)^2 for w in ν)))
+            if corrected return exp(√(𝚺(log(w/μ)^2 for w in ν)/(length(ν)-1)))
+            else         return exp(√(𝛍(log(w/μ)^2 for w in ν))) end
 
     elseif  metric in (invEuclidean, logEuclidean, Jeffrey,
                         logdet0, ChoEuclidean, logCholesky,

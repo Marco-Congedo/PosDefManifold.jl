@@ -987,6 +987,7 @@ spEmb=spectralEmbedding
     <
     w::Vector=[],
     ✓w=true,
+    ⍰=false,
     ⏩=false >)
 
     (4) mean(metric::Metric, 𝐃::𝔻Vector;
@@ -1034,6 +1035,10 @@ spEmb=spectralEmbedding
  For (3) and (4), if `⏩=true` is passed as *<optional keyword argument>*,
  the computation of the mean is multi-threaded.
 
+ For (3) and (4), if `⍰=true` and the mean is found by an itartive algorithm,
+ the covergence attained at each iteration is printed. Other information
+ such as if the algorithm has diverged is printed.
+
 !!! warning "Multi-Threading"
     [Multi-threading](https://docs.julialang.org/en/v1/manual/parallel-computing/#Multi-Threading-(Experimental)-1)
     is still experimental in julia.
@@ -1055,7 +1060,7 @@ spEmb=spectralEmbedding
 |logCholesky| ``TT^*``, where `` T=\\sum_{i=1}^{k}(w_kS_k)+\\sum_{i=1}^{k}(w_k\\textrm{log}D_k)``|
 |Jeffrey | ``A^{1/2}\\big(A^{-1/2}HA^{-1/2}\\big)^{1/2}A^{1/2}`` |
 
- and for those that verify an equation:
+ and for those that are found by an iterative algorithm and that verify an equation:
 
 | Metric   | equation verified by the weighted Fréchet mean |
 |:----------:|:----------- |
@@ -1077,20 +1082,21 @@ spEmb=spectralEmbedding
     P=randP(3)
     Q=randP(3)
     M=mean(logdet0, P, Q) # (1)
-    M=mean(logdet0, P, Q) # (1)
+    M=mean(Euclidean, P, Q) # (1)
 
-    R=randP(3)
     # passing several matrices and associated weights listing them
     # weights vector, does not need to be normalized
+    R=randP(3)
     mean(Fisher, ℍVector([P, Q, R]); w=[1, 2, 3])
 
     # Generate a set of 4 random 3x3 SPD matrices
-    Pset=randP(3, 4) # or, using unicode: 𝐏=randP(3, 4)
+    Pset=randP(3, 4)
     weights=[1, 2, 3, 1]
     # passing a vector of Hermitian matrices (ℍVector type)
     M=mean(Euclidean, Pset; w=weights) # (2) weighted Euclidean mean
     M=mean(Wasserstein, Pset)  # (2) unweighted Wassertein mean
-    # using unicode: M=mean(Wasserstein, 𝐏)
+    # display convergence information when using an iterative algorithm
+    M=mean(Fisher, Pset; ⍰=true)
 
     # run multi-threaded when the number of matrices is high
     using BenchmarkTools
@@ -1105,21 +1111,22 @@ mean(metric::Metric, D::𝔻{T}, E::𝔻{T}) where T<:Real = geodesic(metric, D,
 function mean(metric::Metric, 𝐏::ℍVector;
               w::Vector=[],
               ✓w=true,
+              ⍰=false,
               ⏩=false)
 
     # iterative solutions
     if  metric == Fisher
-        (G, iter, conv) =   gMean(𝐏; w=w, ✓w=✓w, ⍰=true, ⏩=⏩);
+        (G, iter, conv) =   gMean(𝐏; w=w, ✓w=✓w, ⍰=⍰, ⏩=⏩);
         return G
     end
 
     if  metric == logdet0
-        (G, iter, conv) = ld0Mean(𝐏; w=w, ✓w=✓w, ⍰=true, ⏩=⏩);
+        (G, iter, conv) = ld0Mean(𝐏; w=w, ✓w=✓w, ⍰=⍰, ⏩=⏩);
         return G
     end
 
     if  metric == Wasserstein
-        (G, iter, conv) = wasMean(𝐏; w=w, ✓w=✓w, ⍰=true, ⏩=⏩);
+        (G, iter, conv) = wasMean(𝐏; w=w, ✓w=✓w, ⍰=⍰, ⏩=⏩);
         return G
     end
 
@@ -1188,11 +1195,12 @@ end # function
 function mean(metric::Metric, 𝐃::𝔻Vector;
               w::Vector=[],
               ✓w=true,
+              ⍰=false,
               ⏩=false)
 
     # iterative solutions
     if metric == logdet0
-        (G, iter, conv) = ld0Mean(𝐃; w=w, ✓w=✓w, ⍰=true, ⏩=⏩); return G
+        (G, iter, conv) = ld0Mean(𝐃; w=w, ✓w=✓w, ⍰=⍰, ⏩=⏩); return G
     end
 
     # closed-form expressions and exit
