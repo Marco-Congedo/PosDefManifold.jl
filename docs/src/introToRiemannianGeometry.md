@@ -112,7 +112,7 @@ The affine invariance implies the rotation invariance and is also named
 
 We are interested in distance or divergence functions, the difference between the two being that a divergence does not need to be symmetric nor to satisfy the triangle inequality. Note that in *PosDefManifold* we consider only distances and symmetric divergences. In fact those are of greater interest in practice. One can find several distances and divergences in the literature and they often turn out to be related to each other, see for example (Chebby and Moakher, 2012; Cichocki et *al.*, 2015; Sra, 2016)[🎓](@ref).
 Ten of them are implemented in **PosDefManifold** and two of them are Riemannian metrics (the Fisher and Wasserstein metric as we have said). In this section we give a complete list of the expressions for their induced
-- *distance* of a point ``P`` from the *origin*,  
+- *distance* of a point ``P`` from the *origin*,
 - *distance* between *two points* ``P`` and ``Q``,
 - *geodesic* relying ``P`` to ``Q`` (hence the weighted means of ``P`` and ``Q``)
 - *weighted Fréchet mean* ``G(P,w)`` of a set of ``k>2`` points ``\{P_1,...,P_k\}`` with associated real non-negative weights ``\{w_1,...,w_k\}`` summing up to 1.
@@ -226,7 +226,7 @@ Alternatively, and more efficiently, one can ask for an approximate solution
 invoking the MPM algorithm (Congedo et *al.*, 2017b)[🎓](@ref), which is also implemented (in order to estimate the geometric mean use function [`powerMean`](@ref) with parameter ``p=0`` or with a very small value of ``p``).
 
 This mean is known under many different names (Fisher, Rao, Fisher-Rao, Pusz-Woronowicz,
-Cartan, Fréchet, Karcher, **geometric**....).  
+Cartan, Fréchet, Karcher, **geometric**....).
 The ‘centrality’ of this mean among a wide family of divergence-based means
 can be appreciated in Fig. 4 of Cichocki et *al.* (2015)[🎓](@ref).
 
@@ -385,7 +385,7 @@ It enjoyes all three [invariances](@ref) we have listed.
 
 |  distance² to ``I`` | distance² |
 |:----------:| ----------- |
-|``\frac{1}{2}\textrm{tr} \big(P+P^{-1}\big)-n``|``\frac{1}{2}\textrm{tr}(Q^{-1}P+P^{-1}Q)-n``|  
+|``\frac{1}{2}\textrm{tr} \big(P+P^{-1}\big)-n``|``\frac{1}{2}\textrm{tr}(Q^{-1}P+P^{-1}Q)-n``|
 
 **geodesic**: we use the Fréchet mean with appropriate weights.
 
@@ -452,7 +452,7 @@ In the special case ``k``=2 and equal weight the mean is
 ``W=\frac{1}{4}\big(P+Q+(PQ) ^{1/2}+(QP)^{1/2}\big)``.
 
 
-## 🎓    
+## 🎓
 
 **References**
 
@@ -517,6 +517,10 @@ A. Cichocki, S. Cruces, S-I- Amari (2015)
 [Log-Determinant Divergences Revisited: Alpha-Beta and Gamma Log-Det Divergences](https://bit.ly/2TMdNz3),
 Entropy, 17(5), 2988-3034.
 
+R.R. Coifman, Y. Shkolnisky, F.J. Sigworth, A. Singer (2008)
+[Graph Laplacian Tomography From Unknown Random Projections](http://bit.ly/2MFB965),
+IEEE Transactions on Image Processing, 17(10), 1891-1899.
+
 M. Congedo, B. Afsari, A. Barachant, M Moakher (2015)
 [Approximate Joint Diagonalization and Geometric Mean of Symmetric Positive Definite Matrices](https://bit.ly/2HGMxum),
 PLoS ONE 10(4): e0121423.
@@ -545,8 +549,12 @@ M.T. Harandi, R. Hartley, B. Lovell, C. Sanderson (2016)
 [Sparse coding on symmetric positive definite manifolds using bregman divergences](https://bit.ly/2UKiYvG),
 IEEE transactions on neural networks and learning systems, 27 (6), 1294-1306.
 
+S. Lafon (2004)
+[Diffusion maps and geometric harmonics](http://bit.ly/2Kg4ZMH),
+Ph.D. dissertation, Yale University, New Heaven, CT.
+
 Y. Lim, M. Pálfia (2012)
-[Matrix power means and the Karcher mean](https://core.ac.uk/download/pdf/82248854.pdf),  
+[Matrix power means and the Karcher mean](https://core.ac.uk/download/pdf/82248854.pdf),
 Journal of Functional Analysis, 262(4), 1498-1514.
 
 Z. Lin (2019) Riemannian Geometry of Symmetric Positive Definite Matrices via Cholesky Decomposition. In press.

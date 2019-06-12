@@ -491,10 +491,9 @@ distance(metric::Metric, D::𝔻{T}, E::𝔻{T}) where T<:Real = √(distance²(
  <optional keyword arguments>:
  - if ⏩=true the computation of inter-distances is multi-threaded.
 
-!!! warning "Multi-Threading"
+!!! note "Nota Bene"
     [Multi-threading](https://docs.julialang.org/en/v1/manual/parallel-computing/#Multi-Threading-(Experimental)-1)
-    is still experimental in julia.
-    Multi-threading is automatically disabled if the number of threads
+    is automatically disabled if the number of threads
     Julia is instructed to use is ``<2`` or ``<2k``. See [Threads](@ref).
 
  **See**: [distance](@ref).
@@ -688,43 +687,59 @@ distanceMat(metric::Metric, 𝐏::ℍVector;
 
 
 """
-    laplacian(Δ²:𝕃{S};
-             <epsilon::Real=1.0>) where S<:Real
+    laplacian(Δ²::𝕃{S}, epsilon::Real=0;
+              <densityInvariant=false>) where S<:Real
 
  Given a `LowerTriangular` matrix of squared inter-distances ``Δ^2``,
- return the lower triangular part of the *normalized Laplacian*.
+ return the lower triangular part of the so-called
+ *normalized Laplacian* or *density-invariant normalized Laplacian*,
+ which in both cases is a symmetric Laplacian.
  The elements of the Laplacian are of the same type as the elements of ``Δ^2``.
  The result is a `LowerTriangular` matrix.
 
- First, a [Gaussian radial basis functions](https://bit.ly/1HVyf55)
+ The definition of Laplacian given by Lafon (2004)[🎓](@ref) is implemented:
+
+ First, a [Gaussian radial basis functions](https://bit.ly/1HVyf55),
+ known as *Gaussian kernel* or *heat kernel*,
  is applied to all elements of ``Δ^2``, such as
 
- ``W_{ij} = exp\\bigg(\\frac{\\displaystyle{-Δ^2_{ij}}}{\\displaystyle{ε}}\\bigg)``,
+ ``W_{ij} = exp\\bigg(\\frac{\\displaystyle{-Δ^2_{ij}}}{\\displaystyle{2ε}}\\bigg)``,
 
-  where ``ε`` is the Gaussian scale parameter given by
-  ``μ(σ+1)*epsilon``, where
-  - ``μ`` is the geometric mean of the elements ``Δ^2_{ij}``,
-  - ``σ`` is the geometric standard deviation of the elements ``Δ^2_{ij}``,
-  - ``epsilon`` is a *<keyword optional parameter>* that defaults to 1 (see below).
+  where ``ε`` is the *bandwidth* of the kernel.
 
-  Finally, the normalized Laplacian is defined as
+  If <optional keyword argument> `densityInvariant=true` is used,
+  then the density-invariant transformation is applied
+
+   ``W <- E^{-1}WE^{-1}``
+
+  where ``E`` is the diagonal matrix holding on the main diagonal
+  the sum of the rows (or columns) of ``W``.
+
+  Finally, the normalized Laplacian (density-invariant or not) is defined as
 
  ``Ω = D^{-1/2}WD^{-1/2}``,
 
   where ``D`` is the diagonal matrix holding on the main diagonal
   the sum of the rows (or columns) of ``W``.
 
+  If you do not provide argument `epsilon`, the bandwidth ``ε`` is set to the
+  median of the elements of squared distance matrix ``Δ^2_{ij}``.
+  Another educated guess is the dimension of the original data, that is,
+  the data that has been used to compute the squared distance matrix.
+  For positive definite matrices this is ``n(n-1)/2``, where ``n`` is the
+  dimension of the matrices. Still another is the dimension of the ensuing
+  [`spectralEmbedding`](@ref) space.
+  Keep in mind that by tuning the `epsilon` parameter
+  (which must be positive) you can control both the rate of compression of the
+  embedding space and the spread of points in the embedding space.
+  See Coifman et *al.* (2008)[🎓](@ref) for a discussion on ``ε``.
+
 !!! note "Nota Bene"
-    The normalized Laplacian as here defined can be requested for any
+    The Laplacian as here defined can be requested for any
     input matrix of squared inter-distances, for example,
     those obtained on scalars or on vectors using appropriate metrics.
     In any case, only the lower triangular part of the Laplacian is
     taken as input. See [typecasting matrices](@ref).
-
-    By tuning ``epsilon`` you can control both the rate of compression
-    of the ensuing [`spectralEmbedding`](@ref), that is, how many dimensions
-    purposefully embed the data and the spread of points in those embedding
-    dimensions.
 
  **See also**: [`distanceSqrMat`](@ref), [`laplacianEigenMaps`](@ref), [`spectralEmbedding`](@ref).
 
@@ -735,29 +750,46 @@ distanceMat(metric::Metric, 𝐏::ℍVector;
     Δ²=distanceSqrMat(Fisher, Pset)
     Ω=laplacian(Δ²)
 
- """
-function laplacian(Δ²::𝕃{T};
-                   epsilon::Real=1.0) where T<:Real
-    r=size(Δ², 1)
-    vecΔ²=[Δ²[i, j] for j=1:r-1 for i=j+1:r]
-    μ=mean(Fisher, vecΔ²)
-    σ=std(Fisher, vecΔ²)
-    epsilon_=epsilon*μ*(σ+1)
-    Ω=𝕃{T}(diagm(0 => ones(r)))
-    for j=1:r-1, i=j+1:r Ω[i, j]=exp(-Δ²[i, j]/epsilon_)  end
+    # density-invariant Laplacian
+    Ω=laplacian(Δ²; densityInvariant=true)
 
-    # 1/sqrt of the row (or col) sum of L+L'-diag(L) using only L
-    D=Vector{T}(undef, r)
-    for i=1:r
-        D[i]=T(0)
-        for j=1:i   D[i] += Ω[i, j] end
-        for l=i+1:r D[i] += Ω[l, i] end # conj(L[l, i]) for complex matrices
-        D[i]=1/√D[i]
-    end
-    # D * (L+L'-diag(L))* D using only L
-    for j=1:r, i=j:r Ω[i, j]*=D[i]*D[j] end
-    return Ω # see laplacianEigenMaps
-end
+    # increase the bandwidth
+    r=size(Δ², 1)
+    myεFactor=0.1
+    med=Statistics.median([Δ²[i, j] for j=1:r-1 for i=j+1:r])
+    ε=2*myεFactor*med
+    Ω=laplacian(Δ², ε; densityInvariant=true)
+
+ """
+ function laplacian(Δ²::𝕃{T}, epsilon::Real=0;
+                    densityInvariant=false) where T<:Real
+
+     # vector of sum of columns of W, using only the lower triangle Ω of W
+     function sumCol(Ω::𝕃{T}, r::Int) where T<:Real
+         D=zeros(T, r)
+         for i=1:r
+             for j=1:i   D[i] += Ω[i, j] end
+             for l=i+1:r D[i] += Ω[l, i] end # conj(L[l, i]) for complex matrices
+         end
+         return D
+     end
+
+     # product DWD with D diagonal, using only the lower triangle Ω of W
+     # overwrite Ω wirg the lower triangle of the result
+     DWD!(D::Vector{T}, Ω::𝕃{T}, r::Int) where T<:Real =
+                 for j=1:r, i=j:r Ω[i, j]*=D[i]*D[j] end
+
+     r=size(Δ², 1)
+
+     # Apply a Gaussian (heat) kernel
+     epsilon≈0 ? ε=2*Statistics.median([Δ²[i, j] for j=1:r-1 for i=j+1:r]) : ε=2*epsilon
+     Ω=𝕃{T}(diagm(0 => ones(r)))
+     for j=1:r-1, i=j+1:r Ω[i, j]=exp(-Δ²[i, j]/ε) end
+
+     if densityInvariant DWD!(inv.(sumCol(Ω, r)), Ω, r) end
+     DWD!(sqrt.(inv.(sumCol(Ω, r))), Ω, r)
+     return Ω # see laplacianEigenMaps
+ end
 
 
 """
@@ -771,27 +803,32 @@ end
 
  **alias**: `laplacianEM`
 
- Given the lower triangular part of a normalized Laplacian ``Ω``
+ Given the lower triangular part of a Laplacian ``Ω``
  (see [`laplacian`](@ref) ) return the *eigen maps* in ``q`` dimensions,
- i.e., the ``q`` eigenvectors of
- the normalized Laplacian associated with the largest ``q``
+ i.e., the ``q`` eigenvectors of the Laplacian associated with the largest ``q``
  eigenvalues, excluding the first (which is always equal to 1.0).
- The eigenvectors are of the same type as ``Ω``.
+ The eigenvectors are of the same type as ``Ω``. They are all divided
+ element-wise by the first eigenvector (see Lafon, 2004[🎓](@ref)).
 
- The eigenvectors of the normalized Laplacian are computed by the
+ The eigenvectors of the Laplacian are computed by the
  power iterations+modified Gram-Schmidt method (see [`powerIterations`](@ref)),
  allowing the execution of this function for Laplacian matrices of very large size.
 
  Return the 4-tuple ``(Λ, U, iterations, convergence)``, where:
  - ``Λ`` is a ``q⋅q`` diagonal matrix holding on diagonal the eigenvalues corresponding to the ``q`` dimensions of the Laplacian eigen maps,
- - ``U`` holds in columns the eigen maps, that is, the ``q`` eigenvectors,
+ - ``U`` holds in columns the ``q`` eigenvectors holding the ``q`` coordinates of the points in the embedding space,
  - ``iterations`` is the number of iterations executed by the power method,
  - ``convergence`` is the convergence attained by the power method.
 
- The eigenvectors of ``U`` holds the coordinates of the points in a
- low-dimension Euclidean space (typically two or three for plotting).
- This is done for, among other purposes, plotting data in low-dimension
- classifying them and following their trajectories over time or other dimensions.
+ Using the notion of Laplacian, spectral embedding seek a
+ low-dimension representation of the data emphasizing local neighbothood
+ information while neglecting long-distance information.
+ The embedding is non-linear, however the embedding space is Euclidean.
+ The eigenvectors of ``U`` holds the coordinates of the points in the
+ embedding space (typically two- or three-dimensional for plotting or more
+ for clustering). Spectral embedding is done for plotting data in low-dimension,
+ clustering, imaging, classification, following their trajectories over time
+ or other dimensions, and much more.
  For examples of applications see Ridrigues et *al.* (2018) [🎓](@ref)
  and references therein.
 
@@ -817,12 +854,12 @@ end
  ## Examples
     using PosDefManifold
     # Generate a set of 4 random 10x10 SPD matrices
-    Pset=randP(10, 4) # or, using unicode: 𝐏=randP(10, 4)
-    Dsqr=distanceSqrMat(Fisher, Pset) #or: Δ²=distanceSqrMat(Fisher, 𝐏)
-    lap= laplacian(Dsqr) # or: Ω=laplacian(Δ²)
-    evalues, maps, iterations, convergence=laplacianEM(lap, 2)
-    evalues, maps, iterations, convergence=laplacianEM(lap, 2; maxiter=100)
-    evalues, maps, iterations, convergence=laplacianEM(lap, 2; ⍰=true)
+    Pset=randP(10, 4)
+    Δ²=distanceSqrMat(Fisher, Pset)
+    Ω=laplacian(Δ²)
+    evalues, maps, iterations, convergence=laplacianEM(Ω, 2)
+    evalues, maps, iterations, convergence=laplacianEM(Ω, 2; ⍰=true)
+    evalues, maps, iterations, convergence=laplacianEM(Ω, 2; ⍰=true, maxiter=500)
 
 """
 function laplacianEigenMaps(Ω::𝕃{T}, q::Int;
@@ -836,6 +873,7 @@ function laplacianEigenMaps(Ω::𝕃{T}, q::Int;
                                 tol=tolerance,
                                 maxiter=maxiter,
                                 ⍰=⍰)
+    for i=2:q+1 U[:, i]=U[:, i]./U[:, 1] end
     return 𝔻(Λ[2:q+1, 2:q+1]), U[1:size(U, 1), 2:q+1], iter, conv
 end
 laplacianEM=laplacianEigenMaps
@@ -843,15 +881,15 @@ laplacianEM=laplacianEigenMaps
 
 """
 ```
-    (1) spectralEmbedding(metric::Metric, 𝐏::ℍVector, q::Int;
+    (1) spectralEmbedding(metric::Metric, 𝐏::ℍVector, q::Int, epsilon::Real=0;
     <
     tol::Real=0,
     maxiter::Int=300,
-    epsilon::Real=1.0,
+    densityInvariant=false,
     ⍰=false,
     ⏩=false >)
 
-    (2) spectralEmbedding(type::Type{T}, metric::Metric, 𝐏::ℍVector, q::Int;
+    (2) spectralEmbedding(type::Type{T}, metric::Metric, 𝐏::ℍVector, q::Int, epsilon::Real=0;
     < same optional keyword arguments as in (1) >) where T<:Real
 ```
 
@@ -871,26 +909,24 @@ laplacianEM=laplacianEigenMaps
 
   Return the 4-tuple `(Λ, U, iterations, convergence)`, where:
  - ``Λ`` is a ``q⋅q`` diagonal matrix holding on diagonal the eigenvalues corresponding to the ``q`` dimensions of the Laplacian eigen maps,
- - ``U`` holds in columns the ``q`` eigenvectors, i.e., the ``q`` coordinates of the points in the embedded space,
+ - ``U`` holds in columns the ``q`` eigenvectors holding the ``q`` coordinates of the points in the embedding space,
  - ``iterations`` is the number of iterations executed by the power method,
  - ``convergence`` is the convergence attained by the power method.
 
  **Arguments**:
  - `metric` is the metric of type [Metric::Enumerated type](@ref) used for computing the inter-distances,
  - ``𝐏`` is a 1d array of ``k`` positive matrices of [ℍVector type](@ref),
- - ``q`` is the dimension of the Laplacian eigen maps;
- - The following are *<optional keyword arguments>* for the power method iterative algorithm:
-   * `tol` is the tolerance for convergence of the power method (see below),
-   * `maxiter` is the maximum number of iterations allowed for the power method,
-   * `epsilon` is a *<keyword optional parameter>* that defaults to 1 (see below).
-   * if `⍰` is true the convergence at all iterations will be printed.
-   * if ⏩=true the computation of inter-distances is multi-threaded.
+ - ``q`` is the dimension of the Laplacian eigen maps,
+ - ``epsilon`` is the bandwidth of the Laplacian (see [`laplacian`](@ref));
+ - The following *<optional keyword argument>* applyies for computing the inter-distances:
+   * if `⏩=true` the computation of inter-distances is multi-threaded.
+ - The following *<optional keyword argument>* applyies to the computation of the Laplacian by the [`laplacian`](@ref) function:
+   * if `densityInvariant=true` the density-invariant Laplacian is computed (see [`laplacian`](@ref)).
+ - The following are *<optional keyword arguments>* for the power method iterative algorithm invoked by [`laplacianEigenMaps`](@ref):
+     * `tol` is the tolerance for convergence of the power method (see below),
+     * `maxiter` is the maximum number of iterations allowed for the power method,
+     * if `⍰=true` the convergence at all iterations will be printed;
 
-!!! warning "Multi-Threading"
-    [Multi-threading](https://docs.julialang.org/en/v1/manual/parallel-computing/#Multi-Threading-(Experimental)-1)
-    is still experimental in julia. You should check the result on each computer.
-    Multi-threading is automatically disabled if the number of threads
-    Julia is instructed to use is ``<2`` or ``<2k``. See [Threads](@ref).
 
 !!! note "Nota Bene"
     ``tol`` defaults to the square root of `Base.eps` of the `Float32` type (1)
@@ -898,11 +934,9 @@ laplacianEM=laplacianEigenMaps
     equality for the convergence criterion over two successive power iterations
     of about half of the significant digits.
 
-    By tuning ``epsilon`` you can control both the rate of compression
-    of the spectral embedding, that is, how many dimensions
-    purposefully embed the data and the spread of points in those embedding
-    dimensions. You should always check the eigenvalues and eigenvectors
-    (eigen maps) to make sure the current value of ``epsilon`` is adequate.
+    [Multi-threading](https://docs.julialang.org/en/v1/manual/parallel-computing/#Multi-Threading-(Experimental)-1)
+    is automatically disabled if the number of threads
+    Julia is instructed to use is ``<2`` or ``<2k``. See [Threads](@ref).
 
  **See also**: [`distanceSqrMat`](@ref), [`laplacian`](@ref), [`laplacianEigenMaps`](@ref).
 
@@ -910,21 +944,21 @@ laplacianEM=laplacianEigenMaps
     using PosDefManifold
     # Generate a set of k random 10x10 SPD matrices
     k=10
-    Pset=randP(10, k) # or, using unicode: 𝐏=randP(10, k)
-    evalues, maps, iter, conv=spectralEmbedding(logEuclidean, Pset, 2)
+    Pset=randP(10, k)
+    evalues, maps, iter, conv=spectralEmbedding(Fisher, Pset, 2)
 
     # show convergence information
-    evalues, maps, iter, conv=spectralEmbedding(logEuclidean, Pset, 2; ⍰=true)
+    evalues, maps, iter, conv=spectralEmbedding(Fisher, Pset, 2; ⍰=true)
 
     # use Float64 precision.
-    evalues, maps, iter, conv=spectralEmbedding(Float64, logEuclidean, Pset, 2)
+    evalues, maps, iter, conv=spectralEmbedding(Float64, Fisher, Pset, 2)
 
     # Multi-threaded
-    evalues, maps, iter, conv=spectralEmbedding(Fisher, Pset, k-1, ⍰=true, ⏩=true)
+    evalues, maps, iter, conv=spectralEmbedding(Fisher, Pset, k-1; ⍰=true, ⏩=true)
 
     using Plots
     # check eigevalues and eigenvectors
-    evalues
+    plot(diag(evalues))
     plot(maps[:, 1])
     plot!(maps[:, 2])
     plot!(maps[:, 3])
@@ -933,42 +967,39 @@ laplacianEM=laplacianEigenMaps
     plot(maps[:, 1], maps[:, 2], seriestype=:scatter, title="Spectral Embedding", label="Pset")
 
     # try a different value of epsilon
-    evalues, maps, iter, conv=spEmb(Fisher, Pset, k-1, ⏩=true, maxiter=1000, epsilon=10)
+    evalues, maps, iter, conv=spEmb(Fisher, Pset, k-1, 0.01; ⏩=true, maxiter=1000)
     plot(maps[:, 1], maps[:, 2], seriestype=:scatter, title="Spectral Embedding", label="Pset")
-
+    # see the example in `Laplacian function for more on this`
 
 """
-function spectralEmbedding(type::Type{T}, metric::Metric, 𝐏::ℍVector, q::Int;
-                            tol::Real=0,
-                            maxiter::Int=300,
-                            epsilon::Real=1.0,
-                            ⍰=false,
-                            ⏩=false)                where T<:Real
+function spectralEmbedding(type::Type{T}, metric::Metric, 𝐏::ℍVector, q::Int, epsilon::Real=0;
+                           tol::Real=0,
+                           maxiter::Int=300,
+                           densityInvariant=false,
+                           ⍰=false,
+                           ⏩=false)                where T<:Real
 
     tol==0 ? tolerance = √eps(type) : tolerance = tol
     return (Λ, U, iter, conv) =
-            laplacianEM(laplacian(distance²Mat(type, metric, 𝐏, ⏩=⏩);
-                        epsilon=epsilon), q;
+            laplacianEM(laplacian(distance²Mat(type, metric, 𝐏, ⏩=⏩), epsilon;
+                        densityInvariant=densityInvariant), q;
                         tol=tolerance,
                         maxiter=maxiter,
                         ⍰=⍰)
 end
 
-function spectralEmbedding(metric::Metric, 𝐏::ℍVector, q::Int;
-                        tol::Real=0,
-                        maxiter::Int=300,
-                        epsilon::Real=1.0,
-                        ⍰=false,
-                        ⏩=false)
-
-    tol==0 ? tolerance = √eps(Float32) : tolerance = tol
-    return (Λ, U, iter, conv) =
-            laplacianEM(laplacian(distance²Mat(metric, 𝐏, ⏩=⏩);
-                        epsilon=epsilon), q;
-                        tol=tolerance,
-                        maxiter=maxiter,
-                        ⍰=⍰)
-end
+spectralEmbedding(metric::Metric, 𝐏::ℍVector, q::Int, epsilon::Real=0;
+                  tol::Real=0,
+                  maxiter::Int=300,
+                  densityInvariant=false,
+                  ⍰=false,
+                  ⏩=false) =
+    spectralEmbedding(Float32, metric, 𝐏, q, epsilon;
+                      tol=tol,
+                      maxiter=maxiter,
+                      densityInvariant=densityInvariant,
+                      ⍰=⍰,
+                      ⏩=⏩)
 
 spEmb=spectralEmbedding
 
