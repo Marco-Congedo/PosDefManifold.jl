@@ -51,7 +51,7 @@ distance
 | [`distanceMat`](@ref) | Lower triangular matrix of all inter-distances|
 | [`laplacian`](@ref) | Laplacian of a squared inter-distances matrix|
 | [`laplacianEigenMaps`](@ref), `laplacianEM` | Eigen maps (eigenvectors) of a Laplacian|
-| [`spectralEmbedding`](@ref), `spEmb` | Spectral Embedding (all the above function run in series)|
+| [`spectralEmbedding`](@ref), `spEmb` | Spectral Embedding (the above functions run in series)|
 
 ⋅
 
