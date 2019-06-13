@@ -1497,9 +1497,9 @@ end # function
     init=nothing,
     tol::Real=0,
     maxiter::Int=500,
+    adaptStepSize=true,
     ⍰=false,
-    ⏩=false,
-    adaptStepSize=true >)
+    ⏩=false >)
 ```
 
  **alias**: `gmean`
@@ -1613,9 +1613,9 @@ function geometricMean( 𝐏::ℍVector;
                         init=nothing,
                         tol::Real=0,
                         maxiter::Int=200,
+                        adaptStepSize=true,
                         ⍰=false,
-                        ⏩=false,
-                        adaptStepSize=true)
+                        ⏩=false)
 
     (k, n, type, thr, n², iter, conv, oldconv, converged, ς, threaded, tolerance, v) = _setVar_IterAlg(𝐏, w, ✓w, tol, ⏩)
     _giveStartInfo_IterAlg(threaded, ⍰, "geometricMean Fixed-Point")
@@ -1664,24 +1664,24 @@ gMean=geometricMean
 
 """
 ```
-    geometricpMean(𝐏::ℍVector, p::Real=goldeninv;
+    geometricpMean(𝐏::ℍVector, p::Real=0.5;
     <
     w::Vector=[],
     ✓w=true,
     init=nothing,
     tol::Real=0,
-    maxiter::Int=750,
+    maxiter::Int=500,
+    adaptStepSize=true,
     ⍰=false,
-    ⏩=false,
-    adaptStepSize=true >)
+    ⏩=false >)
 ```
 
  **alias**: `gpmean`
 
  Given a 1d array ``𝐏={P_1,...,P_k}`` of ``k`` positive definite matrices of
- [ℍVector type](@ref), a real parameter ``0<p<1`` and optional non-negative real
+ [ℍVector type](@ref), a real parameter ``0<p<=1`` and optional non-negative real
  weights vector ``w={w_1,...,w_k}``, return the 3-tuple ``(G, iter, conv)``,
- where ``G`` is the *geometric-p mean*, i.e., the mean according to the
+ where ``G`` is the *p-mean*, i.e., the mean according to the
  [Fisher](@ref) metric minimizing the *p-dispersion* (see below) and
  ``iter``, ``conv`` are the number of
  iterations and convergence attained by the algorithm.
@@ -1691,9 +1691,8 @@ gMean=geometricMean
 
 ``G ←G^{1/2}\\textrm{exp}\\big(ς\\sum_{i=1}^{k}pδ^2(G, P_i)^{p-1}w_i\\textrm{log}(G^{-1/2} P_i G^{-1/2})\\big)G^{1/2}.``
 
-- if ``p=1`` this yields the geometric mean (implemented with fixed step-size in [`geometricMean`](@ref)).
-- if ``p=0.5`` this yields the geometric median.
-- the default value of ``p`` is the inverse of the golden ratio (0.61803...),yielding the *geometric-golden mean*.
+- if ``p=1`` this yields the geometric mean (implemented specifically in [`geometricMean`](@ref)).
+- if ``p=0.5`` this yields the geometric median (default).
 
  If you don't pass a weight vector with *<optional keyword argument>* ``w``,
  return the *unweighted geometric-p mean*.
@@ -1708,9 +1707,9 @@ gMean=geometricMean
  - `init` is a matrix to be used as initialization for the mean. If no matrix is provided, the [log Euclidean](@ref) mean will be used,
  - `tol` is the tolerance for the convergence (see below).
  - `maxiter` is the maximum number of iterations allowed.
+ - if `adaptStepSize`=true (default) the step size ``ς`` for the gradient descent is adapted at each iteration (see below).
  - if `⍰`=true, the step-size and convergence attained at each iteration is printed. Also, a *warning* is printed if convergence is not attained.
  - if ⏩=true the iterations are multi-threaded (see below).
- - if `adaptStepSize`=true (default) the step size ``ς`` for the gradient descent is adapted at each iteration (see below).
 
 !!! warning "Multi-Threading"
     [Multi-threading](https://docs.julialang.org/en/v1/manual/parallel-computing/#Multi-Threading-(Experimental)-1)
@@ -1731,7 +1730,8 @@ gMean=geometricMean
 
     If `adaptStepSize` is true (default) the step-size ``ς`` is adapted at
     each iteration, otherwise a fixed step size ``ς=1`` is used.
-    Adapting the step size in general hastens convergence.
+    Adapting the step size in general hastens convergence and improves
+    the convergence behavior.
 
     ``tol`` defaults to the square root of `Base.eps` of the nearest
     real type of data input ``𝐏``. This corresponds to requiring the
@@ -1756,17 +1756,17 @@ gMean=geometricMean
     G, iter1, conv1 = geometricMean(Pset, ⍰=true, ⏩=true)
 
     # change p to observe how the convergence behavior changes accordingly
-    # Get the golden p-mean (default)
+    # Get the median (default)
     H, iter2, conv2 = geometricpMean(Pset, ⍰=true, ⏩=true)
-    # Get the median (0.5-mean)
-    H, iter2, conv2 = geometricpMean(Pset, 0.5, ⍰=true, ⏩=true)
+    # Get the p-mean for p=0.25
+    H, iter2, conv2 = geometricpMean(Pset, 0.25, ⍰=true, ⏩=true)
 
     println(iter1, " ", iter2); println(conv1, " ", conv2)
 
     # move the first matrix in Pset to create an otlier
     Pset[1]=geodesic(Fisher, G, Pset[1], 3)
     G1, iter1, conv1 = geometricMean(Pset, ⍰=true, ⏩=true)
-    H1, iter2, conv2 = geometricpMean(Pset, 0.5, ⍰=true, ⏩=true)
+    H1, iter2, conv2 = geometricpMean(Pset, 0.25, ⍰=true, ⏩=true)
     println(iter1, " ", iter2); println(conv1, " ", conv2)
 
     # collect the geometric and p-means, before and after the
@@ -1795,21 +1795,21 @@ gMean=geometricMean
     using BenchmarkTools
     Pset=randP(20, 120)
     @benchmark(geometricpMean(Pset)) # single-threaded
-    @benchmark(geometricpMean(Pset, ⏩=true)) # multi-threaded
+    @benchmark(geometricpMean(Pset; ⏩=true)) # multi-threaded
 
 """
 function geometricpMean(𝐏::ℍVector, p::Real=goldeninv;
                         w::Vector = [], ✓w = true,
                         init = nothing,
                         tol::Real = 0,
-                        maxiter::Int = 750,
+                        maxiter::Int = 500,
+                        adaptStepSize=true,
                         ⍰ = false,
-                        ⏩= false,
-                        adaptStepSize=true)
+                        ⏩= false)
 
     (k, n, type, thr, n², iter, conv, oldconv, converged, ς, threaded, tolerance, v) = _setVar_IterAlg(𝐏, w, ✓w, tol, ⏩)
     _giveStartInfo_IterAlg(threaded, ⍰, "geometricpMean Fixed-Point")
-    𝑓, d², q, sqrtn = Fisher, distance², p-1, √n
+    𝑓, d², q, ςHasNotChanged, ςold = Fisher, distance², p-1, 0, 0
     init == nothing ? M = mean(logEuclidean, 𝐏; w=v, ✓w=false, ⏩=⏩) : M = ℍ(init)
     💡 = similar(M, type)
     𝐑 = similar(𝐏)
@@ -1839,14 +1839,14 @@ function geometricpMean(𝐏::ℍVector, p::Real=goldeninv;
         conv = norm(∇) / n²
 
         if adaptStepSize
-            if conv<oldconv
+            if  conv<=oldconv
                 💡 = ℍ(M½ * exp(ς*∇) * M½)
-                ς = min(sqrtn, ς*1.1)
+                ς < 1 ? ς/=1.1 : ς*=1.1
                 oldconv=conv
             else
-                ς = max(ς/2.2, 1/sqrtn) # = min(1, ς/2)
-                💡 = ℍ(M½ * exp(ς*∇) * M½)
+                ς=1
             end
+            #oldconv=conv
             ⍰ && println("iteration: ", iter, "; convergence: ", conv, "; ς: ", round(ς*1000)/1000)
         else
             💡 = ℍ(M½ * exp(∇) * M½)
