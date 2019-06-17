@@ -1750,7 +1750,7 @@ gMean=geometricMean
     # as compared to the standard geometric mean algorithm
 
     # Generate a set of 100 random 10x10 SPD matrices
-    Pset=randP(10, 40)
+    Pset=randP(10, 100)
 
     # Get the usual geometric mean for comparison
     G, iter1, conv1 = geometricMean(Pset, ⍰=true, ⏩=true)
@@ -1763,7 +1763,7 @@ gMean=geometricMean
 
     println(iter1, " ", iter2); println(conv1, " ", conv2)
 
-    # move the first matrix in Pset to create an otlier
+    # move the first matrix in Pset to possibly create an otlier
     Pset[1]=geodesic(Fisher, G, Pset[1], 3)
     G1, iter1, conv1 = geometricMean(Pset, ⍰=true, ⏩=true)
     H1, iter2, conv2 = geometricpMean(Pset, 0.25, ⍰=true, ⏩=true)
@@ -2371,9 +2371,12 @@ powerMean(𝐃::𝔻Vector, p::Real;
 # -----------------------------------------------------------
 
 """
-    logMap(metric::Metric, P::ℍ{T}, G::ℍ{T}) where T<:RealOrComplex
+    (1) logMap(metric::Metric, P::ℍ{T}, G::ℍ{T})
 
- *Logaritmic Map:* map a positive definite matrix ``P`` from the SPD or
+    (2) logMap(metric::Metric, 𝐏::ℍVector, G::ℍ{T})
+    for all the above: where T<:RealOrComplex
+
+ (1) *Logaritmic Map:* map a positive definite matrix ``P`` from the SPD or
  Hermitian manifold into the tangent space at base-point ``G`` using the [Fisher](@ref) metric.
 
  ``P`` and ``G`` must be flagged as `Hermitian`. See [typecasting matrices](@ref).
@@ -2382,26 +2385,37 @@ powerMean(𝐃::𝔻Vector, p::Real;
 
  `` Log_G(P)=S=G^{1/2}\\textrm{log}\\big(G^{-1/2}PG^{-1/2}\\big)G^{1/2}``.
 
+ `metric` is a metric of type [Metric::Enumerated type](@ref).
+
  The result is an `Hermitian` matrix.
+
+ (2) *Logarithmic map* (1) at base-point ``G`` at once for ``k`` positive definite
+ matrices in 1d array ``𝐏={P_1,...,P_k}`` of [ℍVector type](@ref).
+
+ The result is an `ℍVector`.
+
+!!! note "Nota Bene"
+    Currently only the [Fisher](@ref) metric is supported for tangent space operations.
+
  The inverse operation is [`expMap`](@ref).
 
- **Arguments** `(metric, P, G)`:
- - `metric` is a metric of type [Metric::Enumerated type](@ref).
- - ``P`` is the positive definite matrix to be projected onto the tangent space,
- - ``G`` is the tangent space base point,
-
- Currently only the [Fisher](@ref) metric is supported for tangent space operations.
-
- **See also**: [`vecP`](@ref).
+ **See also**: [`vecP`](@ref), [`parallelTransport`](@ref).
 
  ## Examples
     using PosDefManifold
+    (1)
     P=randP(3)
     Q=randP(3)
     metric=Fisher
     G=mean(metric, P, Q)
     # projecting P at the base point given by the geometric mean of P and Q
     S=logMap(metric, P, G)
+
+    (2)
+    Pset=randP(3, 4)
+    # projecting all matrices in Pset at the base point given by their geometric mean.
+    Sset=logMap(Fisher, Pset, mean(Fisher, Pset))
+
 """
 function logMap(metric::Metric, P::ℍ{T}, G::ℍ{T}) where T<:RealOrComplex
     if   metric==Fisher
@@ -2412,38 +2426,65 @@ function logMap(metric::Metric, P::ℍ{T}, G::ℍ{T}) where T<:RealOrComplex
     end
 end
 
+function logMap(metric::Metric, 𝐏::ℍVector, G::ℍ{T}) where T<:RealOrComplex
+    if   metric==Fisher
+         G½, G⁻½=pow(G, 0.5, -0.5)
+         return ℍVector([ℍ(G½ * log(ℍ(G⁻½ * P * G⁻½)) * G½) for P in 𝐏])
+    else @warn "in RiemannianGeometryP.logMap function:
+                 only the Fisher metric is supported for the logarithmic map."
+    end
+end
+
 """
 
-    expMap(metric::Metric, S::ℍ{T}, G::ℍ{T}) where T<:RealOrComplex
+    (1) expMap(metric::Metric, S::ℍ{T}, G::ℍ{T})
 
- *Exponential Map:* map an `Hermitian` matrix ``S`` from the tangent space at base
- point ``G`` into the SPD or Hermitian manifold (using the [Fisher](@ref) metric).
+    (2) expMap(metric::Metric, 𝐒::ℍVector, G::ℍ{T})
+    for all the above: where T<:RealOrComplex
+
+ (1) *Exponential Map:* map a tangent vector (a matrix) ``S`` from the tangent
+ space at base-point ``G`` into the SPD or Hermitian manifold
+ (using the [Fisher](@ref) metric).
 
  ``S`` and ``G`` must be flagged as `Hermitian`. See [typecasting matrices](@ref).
 
  The map is defined as
 
- `` Exp_G(S)=P=G^{1/2}\\textrm{exp}\\big(G^{-1/2}SG^{-1/2}\\big)G^{1/2}``.
+ ``Exp_G(S)=P=G^{1/2}\\textrm{exp}\\big(G^{-1/2}SG^{-1/2}\\big)G^{1/2}``.
 
- The result is a positive definite matrix.
+ `metric` is a metric of type [Metric::Enumerated type](@ref).
+
+ The result is an `Hermitian` matrix.
+
+ (2) *Exponential map* (1) at base-point ``G`` at once for ``k`` tangent vectors
+ (matrices) in 1d array ``𝐒={S_1,...,S_k}`` of [ℍVector type](@ref).
+
+ The result is an `ℍVector`.
+
+!!! note "Nota Bene"
+    Currently only the [Fisher](@ref) metric is supported for tangent space operations.
+
  The inverse operation is [`logMap`](@ref).
 
- **Arguments** `(metric, S, G)`:
- - `metric` is a metric of type [Metric::Enumerated type](@ref),
- - ``S`` is a Hermitian matrix, real or complex, to be projected on the SPD or Hermitian manifold,
- - ``G`` is the tangent space base point.
-
-  Currently only the Fisher metric is supported for tangent space operations.
-
  ## Examples
+    (1)
     using PosDefManifold, LinearAlgebra
     P=randP(3)
     Q=randP(3)
     G=mean(Fisher, P, Q)
     # projecting P on the tangent space at the Fisher mean base point G
     S=logMap(Fisher, P, G)
-    # adding the identity in the tangent space and reprojecting back onto the manifold
-    H=expMap(Fisher, ℍ(S+I), G)
+    # projecting back onto the manifold
+    P2=expMap(Fisher, S, G)
+
+    (2)
+    Pset=randP(3, 4)
+    # projecting all matrices in Pset at the base point given by their geometric mean.
+    G=mean(Fisher, Pset)
+    Sset=logMap(Fisher, Pset, G)
+    # projecting back onto the manifold
+    Pset2=expMap(Fisher, Sset, G)
+
 """
 function expMap(metric::Metric, S::ℍ{T}, G::ℍ{T}) where T<:RealOrComplex
     if   metric==Fisher
@@ -2454,6 +2495,14 @@ function expMap(metric::Metric, S::ℍ{T}, G::ℍ{T}) where T<:RealOrComplex
     end
 end
 
+function expMap(metric::Metric, 𝐒::ℍVector, G::ℍ{T}) where T<:RealOrComplex
+    if   metric==Fisher
+         G½, G⁻½=pow(G, 0.5, -0.5)
+         return ℍVector([ℍ(G½ * exp(ℍ(G⁻½ * S * G⁻½)) * G½) for S in 𝐒])
+    else @warn "in RiemannianGeometryP.expMap function:
+              only the Fisher metric is supported for the exponential map"
+    end
+end
 
 """
     vecP(S::ℍ{T}) where T<:RealOrComplex
@@ -2530,6 +2579,120 @@ function matP(ς::Vector{T}) where T<:RealOrComplex
   return ℍ(S, :L)
 end
 
+# export also alias, docstring
+"""
+    (1) parallelTransport(S::ℍ{T}, P::ℍ{T}, Q::ℍ{T})
+
+    (2) parallelTransport(S::ℍ{T}, P::ℍ{T})
+
+    (3) parallelTransport(𝐒::ℍVector, P::ℍ{T}, Q::ℍ{T})
+
+    (4) parallelTransport(𝐒::ℍVector, P::ℍ{T})
+    for all the above: where T<:RealOrComplex
+
+ **alias**: `pt`
+
+ (1) *Parallel transport* of tangent vector ``S`` (a matrix) lying on the tangent space
+ at base-point ``P`` to the tangent space at base-point ``Q``.
+
+ ``S``, ``P`` and ``Q`` must all be `Hermitian` matrices.
+ Return an `Hermitian` matrix.
+ The transport is defined as:
+
+``∥_{(P→Q)}(S)=\\big(QP^{-1}\\big)^{1/2}S\\big(QP^{-1}\\big)^{H/2}``.
+
+ If ``S`` is a positive definite matrix in the manifold (and not a tangent vector)
+ it will be 'trasported' from ``P`` to ``Q``, amounting to (Yair et *al.*, 2019[🎓](@ref))
+ - project ``S`` onto the tangent space at base-point ``P``,
+ - parallel transport it to the tangent space at base-point ``Q``,
+ - project it back onto the manifold at base-point ``Q``.
+
+(2) *Parallel transport* as in (1), but to the tangent space at base-point
+the *identity matrix*.
+
+The transport reduces in this case to:
+
+``∥_{(P→I)}(S)=P^{-1/2}SP^{-1/2}``.
+
+(3) *Parallel transport* as in (1) at once for ``k`` tangent vectors
+(matrices) in 1d array ``𝐒={S_1,...,S_k}`` of [ℍVector type](@ref).
+
+(4) *Parallel transport* as in (2) at once for ``k`` tangent vectors
+(matrices) in 1d array ``𝐒={S_1,...,S_k}`` of [ℍVector type](@ref).
+
+!!! note "Nota Bene"
+    Currently only the [Fisher](@ref) metric is supported for parallel transport.
+
+  **See also**: [`logMap`](@ref), [`expMap`](@ref), [`vecP`](@ref), [`matP`](@ref).
+
+ ## Examples
+    using PosDefManifold
+
+    (1)
+    P=randP(3)
+    Q=randP(3)
+    G=mean(Fisher, P, Q)
+
+    # i. projecting P onto the tangent space at base-point G
+    S=logMap(Fisher, P, G)
+    # ii. parallel transport S to the tangent space at base-point Q
+    S_=parallelTransport(S, G, Q)
+    # iii. projecting back into the manifold at base-point Q
+    P_=expMap(Fisher, S_, Q)
+
+    # i., ii. and iii. can be done simply by
+    PP_=parallelTransport(P, G, Q)
+    # check
+    P_≈PP_ ? println(" ⭐ ") : println(" ⛔ ")
+
+    (2)
+    P=randP(3)
+    Q=randP(3)
+    G=mean(Fisher, P, Q)
+    # transport to the tangent space at base-point the identity
+    PP_=parallelTransport(P, G)
+
+    (3)
+    Pset=randP(3, 4)
+    Q=randP(3)
+    G=mean(Fisher, Pset)
+    # trasport at once all matrices in Pset
+    Pset2=parallelTransport(Pset, G, Q)
+
+    (4)
+    Pset=randP(3, 4)
+    G=mean(Fisher, Pset)
+    # recenter all matrices so to have mean=I
+    Pset2=parallelTransport(Pset, G)
+    # check
+    mean(Fisher, Pset2) ≈ I ? println(" ⭐ ") : println(" ⛔ ")
+
+"""
+function parallelTransport(S::ℍ{T}, P::ℍ{T}, Q::ℍ{T}) where T<:RealOrComplex
+    # this is the classical definition of parallel transport.
+    # IT DOES NOT TRANSPORT MATRICES ALONG THE MANIFOLD
+    # M = mean(Fisher, P, Q)
+    # W = sqrt(M) * inv(P) # curious: if W=M*inv(P), return=M
+    T<:Real ? W = real(√(Q * inv(P))) : W = √(Q * inv(P))
+    return ℍ(W * S * W')
+end
+
+function parallelTransport(S::ℍ{T}, P::ℍ{T}) where T<:RealOrComplex
+    W = invsqrt(P)
+    return ℍ(W * S * W')
+end
+
+function parallelTransport(𝐒::ℍVector, P::ℍ{T}, Q::ℍ{T}) where T<:RealOrComplex
+    T<:Real ? W = real(√(Q * inv(P))) : W = √(Q * inv(P))
+    return ℍVector([ℍ(W * S * W') for S in 𝐒])
+end
+
+function parallelTransport(𝐒::ℍVector, P::ℍ{T}) where T<:RealOrComplex
+    W = invsqrt(P)
+    return ℍVector([ℍ(W * S * W') for S in 𝐒])
+end
+
+pt=parallelTransport
 
 
 # -----------------------------------------------------------
@@ -2542,16 +2705,16 @@ end
  Given two positive definite matrices ``P`` and ``Q``,
  return by default the solution of problem
 
- ``\\textrm{argmin}_Uδ(P,U^*QU)``,
+ ``\\textrm{argmin}_Uδ(P,U^HQU)``,
 
  where ``U`` varies over the set of unitary matrices and ``δ(.,.)`` is a
  distance or divergence function.
 
- ``U^*QU`` is named in physics the *unitary orbit* of ``Q``.
+ ``U^HQU`` is named in physics the *unitary orbit* of ``Q``.
 
  If the argument `extremum` is passed as "max", it returns instead the solution of
 
- ``\\textrm{argmax}_Uδ(P,U^*QU)``.
+ ``\\textrm{argmax}_Uδ(P,U^HQU)``.
 
   ``P`` and ``Q`` must be flagged as `Hermitian`. See [typecasting matrices](@ref).
 
@@ -2561,7 +2724,7 @@ end
  the best approximant to ``P`` from the unitary orbit of ``Q``
  commutes with ``P`` and, surprisingly, has the same closed-form expression, namely
 
- ``U_Q^↓U_P^{↓*}`` for the argmin and ``U_Q^↑U_P^{↓*}`` for the argmax,
+ ``U_Q^↓U_P^{↓H}`` for the argmin and ``U_Q^↑U_P^{↓H}`` for the argmax,
 
  where ``U^↓`` denotes the eigenvector matrix of the subscript argument with
  eigenvectors in columns sorted by *decreasing* order of corresponding eigenvalues and
@@ -2570,6 +2733,12 @@ end
 
  The same solutions are known since a long time also by solving the extremal
  problem here above using the [Euclidean](@ref) metric (Umeyama, 1988).
+
+ The generalized Procrustes problem
+
+ ``\\textrm{argmin}_Usum_{i=1}^{k}δ(P_i,U^HQ_iU)``
+
+ can be solved using Julia package [Manopt](https://github.com/kellertuer/Manopt.jl).
 
  ## Examples
     using PosDefManifold

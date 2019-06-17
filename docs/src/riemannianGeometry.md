@@ -10,10 +10,10 @@ The functions are divided in six categories:
 |:---------- |:----------- |
 | 1. [Geodesic equations](@ref) | interpolation, extrapolation, weighted mean of two matrices, ... |
 | 2. [Distances](@ref) | length of geodesics |
-| 3. [Graphs and Laplacians](@ref) | spectral embedding, eigenmaps, track system dynamics, ...|
-| 4. [Means](@ref) | mid-points of geodesics, centers of mass of several points |
-| 5. [Tangent Space operations](@ref) | maps from the manifold to the tangent space and viceversa |
-| 6. [Procrustes problems](@ref) | data matching, transfer learning, ...|
+| 3. [Graphs and Laplacians](@ref) | inter-distance matrices, spectral embedding, eigenmaps, ...|
+| 4. [Means](@ref) | mid-points of geodesics, Fréchet means of several points |
+| 5. [Tangent Space operations](@ref) | maps from the manifold to the tangent space and viceversa, parallel transport,... |
+| 6. [Procrustes problems](@ref) | data matching, transfer learning (domain adaptation), ...|
 
 ⋅
 
@@ -96,7 +96,9 @@ powerMean
 | [`logMap`](@ref) | Logarithmic map (from manifold to tangent space) |
 | [`expMap`](@ref) | Exponential map (from tangent space to manifold) |
 | [`vecP`](@ref) | vectorization of matrices in the tangent space |
-| [`matP`](@ref) | matrization of matrices in the tangent space (inverse of ``vecp`)|
+| [`matP`](@ref) | matrization of matrices in the tangent space (inverse of `vecp`) |
+| [`parallelTransport`](@ref), pt | Parallel transport of tangent vectors and matrices |
+
 
 ⋅
 
@@ -105,6 +107,7 @@ logMap
 expMap
 vecP
 matP
+parallelTransport
 ```
 
 ## Procrustes problems

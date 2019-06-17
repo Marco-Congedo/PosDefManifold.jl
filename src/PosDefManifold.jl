@@ -176,6 +176,7 @@ export
     expMap,
     vecP,
     matP,
+    parallelTransport, pt,
     procrustes,
 
     # from statistics.jl

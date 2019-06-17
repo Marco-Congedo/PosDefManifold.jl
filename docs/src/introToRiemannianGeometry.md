@@ -480,7 +480,6 @@ A. Barachant, S. Bonnet, M. Congedo, C. Jutten (2013)
 [Classification of covariance matrices using a Riemannian-based kernel for BCI applications](https://hal.archives-ouvertes.fr/hal-00820475/document),
 Neurocomputing, 112, 172-178.
 
-
 R. Bhatia (2007)
 Positive Definite Matrices.
 Princeton University press.
@@ -586,3 +585,7 @@ arXiv:1902.01182v1
 S. Umeyama (1988)
 [An Eigendecomposition Approach to Weighted Graph Matching Problems](https://bit.ly/2Uofyml),
 IEEE Trans. Pattern. Anal. Mach. Intell., 10(5), 695-703.
+
+O. Yair, M. Ben-Chen, R. Talmon (2019)
+[Parallel Transport on the Cone Manifold of SPD Matrices for Domain Adaptation](https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=8624413)
+IEEE Trans. Sig. Process. 67(7), 1797-1811.
