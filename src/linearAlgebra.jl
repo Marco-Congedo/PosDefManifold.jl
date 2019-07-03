@@ -878,7 +878,7 @@ end
  for numbering of diagonals.
 
  Bt default the main diagonal is considered.
- - If ``X`` is `Diagonal`, ``k`` must be zero (main diagonal).
+ - If ``X`` is `Diagonal`, ``k`` is set automatically to zero (main diagonal).
  - If ``X`` is `LowerTriangular`, ``k`` cannot be positive.
 
  Note that if ``X`` is rectangular the dimension of the result depends
@@ -913,7 +913,7 @@ end
 	# using an anonymous function for the square of the eigenvalues
     Δ=fDiag(x->x^2, Λ)
 """
-fDiag(func::Function, X::𝔻{T}, k::Int=0) where T<:RealOrComplex = func.(X)
+fDiag(func::Function, X::𝔻{T}, k::Int=0) where T<:RealOrComplex = 𝔻(func.(diag(X)))
 
 function fDiag(func::Function, X::𝕃{T}, k::Int=0)  where T<:RealOrComplex
  if k>0 @error("in function fDiag (linearAlgebra.jl): k argument cannot be positive.")
@@ -1299,7 +1299,7 @@ function spectralFunctions(P::ℍ{T}, func::Function) where T<:RealOrComplex
     return ℍ(F.vectors * 𝔻(func.(F.values)) * F.vectors')
 end
 
-spectralFunctions(D::𝔻{T}, func::Function) where T<:Real = func.(D)
+spectralFunctions(D::𝔻{T}, func::Function) where T<:Real = fDiag(func, D)
 
 
 

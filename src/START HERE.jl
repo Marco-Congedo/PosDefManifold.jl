@@ -32,6 +32,13 @@ begin
     Base.Threads, LinearAlgebra, BenchmarkTools, Revise,
     PosDefManifold
 
+    # add moduls to be used
+    Modules = juliaCodeDir*"Modules"
+    push!(LOAD_PATH, Modules)
+
+    using IOtxt
+
+    # for compiling the documentation
     cd(docsDir)
     clipboard("""makedocs(sitename="$projectName", modules=[$projectName])""")
     @info("\nhit CTRL+V+ENTER on the REPL for building the documentation.");
