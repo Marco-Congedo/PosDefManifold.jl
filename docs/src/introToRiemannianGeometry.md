@@ -279,6 +279,10 @@ above talking about the [Fisher](@ref) metric. In particular:
 
 Thus, the family of power means continuously interpolate between the arithmetic and harmonic mean passing through the the geometric mean.
 
+Power means are the unique positive definite solution of (Yamazaki, 2019)[🎓](@ref)
+
+``\sum_{i=1}^{k}w_i\big(G^{-1/2} P_i G^{-1/2}\big)^p=I.``.
+
 All power means enjoy the congruence invariance (hence the rotation invariance),
 but only the geometric mean enjoy also the inversion invariance.
 
@@ -589,3 +593,7 @@ IEEE Trans. Pattern. Anal. Mach. Intell., 10(5), 695-703.
 O. Yair, M. Ben-Chen, R. Talmon (2019)
 [Parallel Transport on the Cone Manifold of SPD Matrices for Domain Adaptation](https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=8624413)
 IEEE Trans. Sig. Process. 67(7), 1797-1811.
+
+T. Yamazaki (2019)
+[The Ando-Hiai inequalities for the solution of the generalized Karcher Equation and related results](https://arxiv.org/pdf/1802.06200.pdf)
+arXiv:1802.06200v2.

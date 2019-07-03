@@ -42,7 +42,7 @@ end
 # thr   = number of threads set in Julia for multi-threading
 # n²    = `n`²
 # iter  = count of iterations. It is just initialized to 1
-# conv  = convergence attained at each teration. It is just initialized to 0
+# conv  = convergence attained at each iteration. It is just initialized to 0
 # oldconv = convergence attained at last iteration. It is just initiaized to maxpos=1e15
 # converged = true if the algorithm has converged. It is just initialized to false
 # ς     = step size for gradient descent. It is not used by all algorithms. It is just initialized to 1
@@ -2496,6 +2496,9 @@ function expMap(metric::Metric, S::ℍ{T}, G::ℍ{T}) where T<:RealOrComplex
 end
 
 function expMap(metric::Metric, 𝐒::ℍVector, G::ℍ{T}) where T<:RealOrComplex
+#    k, thr = dim(𝐒, 1), nthreads()
+#    ⏩ && k>=thr*4 && thr > 1 ? threaded=true : threaded=false
+#    if threaded 𝐐 = similar(𝐒)
     if   metric==Fisher
          G½, G⁻½=pow(G, 0.5, -0.5)
          return ℍVector([ℍ(G½ * exp(ℍ(G⁻½ * S * G⁻½)) * G½) for S in 𝐒])
