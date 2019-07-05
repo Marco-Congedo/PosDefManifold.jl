@@ -11,3 +11,5 @@ This package computes **distances**, **geodesics** and **weighted Fréchet means
 The [documentation](https://Marco-Congedo.github.io/PosDefManifold.jl/latest) is rich and gives all mathematical details pertaining to the implemented functions.
 
 For similar code resources in other programming languages see [here](https://sites.google.com/site/marcocongedo/science/code-resources).
+
+[About the author.](https://sites.google.com/site/marcocongedo)
