@@ -12,4 +12,4 @@ The [documentation](https://Marco-Congedo.github.io/PosDefManifold.jl/latest) is
 
 For similar code resources in other programming languages see [here](https://sites.google.com/site/marcocongedo/science/code-resources).
 
-[About the author.](https://sites.google.com/site/marcocongedo)
+[**About the author.**](https://sites.google.com/site/marcocongedo)
