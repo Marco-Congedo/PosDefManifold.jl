@@ -6,7 +6,6 @@
 
 **PosDefManifold** is a [**Julia**](https://julialang.org/) package for manipulating data in the manifold **P** of real or complex [**positive definite matrices**](https://en.wikipedia.org/wiki/Definiteness_of_a_matrix). The package supports **10 metrics** acting on **P**, two of which define [**Riemannian manifolds**](https://en.wikipedia.org/wiki/Riemannian_manifold).
 
-| Schematic Representation of the **P** manifold | 
 |:---------------------------------------:|
 |![](/docs/src/assets/Fig1.jpg)|
 
