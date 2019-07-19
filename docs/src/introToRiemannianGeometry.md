@@ -552,6 +552,14 @@ M.T. Harandi, R. Hartley, B. Lovell, C. Sanderson (2016)
 [Sparse coding on symmetric positive definite manifolds using bregman divergences](https://bit.ly/2UKiYvG),
 IEEE transactions on neural networks and learning systems, 27 (6), 1294-1306.
 
+J. Ho, G. Cheng, H. Salehian, B.C. Vemuri (2013)
+[Recursive Karcher Expectation Estimators and Geometric Law of Large Numbers](http://proceedings.mlr.press/v31/ho13a.pdf),
+Proc. of the AISTATS Conf.
+
+B. Iannazzo (2016)
+[The geometric mean of two matrices from a computational viewpoint](https://arxiv.org/pdf/1201.0101.pdf)
+Numerical Linear Algebra with Applications, 23-2, 208-229.
+
 S. Lafon (2004)
 [Diffusion maps and geometric harmonics](http://bit.ly/2Kg4ZMH),
 Ph.D. dissertation, Yale University, New Heaven, CT.
@@ -561,10 +569,6 @@ Y. Lim, M. Pálfia (2012)
 Journal of Functional Analysis, 262(4), 1498-1514.
 
 Z. Lin (2019) Riemannian Geometry of Symmetric Positive Definite Matrices via Cholesky Decomposition. In press.
-
-J. Ho, G. Cheng, H. Salehian, B.C. Vemuri (2013)
-[Recursive Karcher Expectation Estimators and Geometric Law of Large Numbers](http://proceedings.mlr.press/v31/ho13a.pdf),
-Proc. of the AISTATS Conf.
 
 E. Massart, J.M. Hendrickx, P.-A. Absil (2018)
 [Matrix Geometric Meansbased on shuffled inductive sequences](https://dial.uclouvain.be/downloader/downloader.php?pid=boreal:185613&datastream=PDF_01)
@@ -577,6 +581,10 @@ SIAM Journal on Matrix Analysis and Applications, 26(3), 735-747.
 M. Moakher (2012)
 Divergence measures and means of symmetric positive-definite matrices,
 in D.H Lailaw and A. Vilanova (Eds) "New Developments in the Visualization and Processing of Tensor Fields", Springer, Berlin.
+
+C. Mostajeran, C. Grussler, R. Sepulchre (2019)
+[Geometric Matrix Midranges](https://arxiv.org/pdf/1907.04188.pdf)
+arXiv:1907.04188.
 
 X. Pennec, P. Fillard, N. Ayache (2006)
 [A Riemannian Framework for Tensor Computing](https://hal.inria.fr/inria-00614990/document),

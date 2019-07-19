@@ -11,7 +11,7 @@ The functions are divided in six categories:
 | 1. [Geodesic equations](@ref) | interpolation, extrapolation, weighted mean of two matrices, ... |
 | 2. [Distances](@ref) | length of geodesics |
 | 3. [Graphs and Laplacians](@ref) | inter-distance matrices, spectral embedding, eigenmaps, ...|
-| 4. [Means](@ref) | mid-points of geodesics, Fréchet means of several points |
+| 4. [Means](@ref) | mid-points of geodesics, Fréchet means of several points, midrange,... |
 | 5. [Tangent Space operations](@ref) | maps from the manifold to the tangent space and viceversa, parallel transport,... |
 | 6. [Procrustes problems](@ref) | data matching, transfer learning (domain adaptation), ...|
 
@@ -75,7 +75,9 @@ spectralEmbedding
 | [`logdet0Mean`](@ref), `ld0Mean` | wFm of a matrix set according to the logdet0 metric (iterative)|
 | [`wasMean`](@ref) | wFm of a matrix set according to the Wasserstein metric (iterative)|
 | [`powerMean`](@ref) | Power wFm of a matrix set (iterative)|
-| [`inductiveMean`](@ref), `iMean` | Recursive Fréchet mean of a matrix set (constructive)|
+| [`inductiveMean`](@ref), `indMean` | Recursive Fréchet mean of a matrix set (constructive)|
+| [`midrange`](@ref) | Geometric midrange of two matrices |
+
 
 
 ⋅
@@ -90,6 +92,7 @@ logdet0Mean
 wasMean
 powerMean
 inductiveMean
+midrange
 ```
 
 ## Tangent Space operations

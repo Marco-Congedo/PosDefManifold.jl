@@ -1,5 +1,5 @@
 #    Unit riemannianGeometry.jl, part of PosDefManifold Package for julia language
-#    v 0.3.1 - last update 10th of Juin 2019
+#    v 0.3.2 - last update 19th of July 2019
 #
 #    MIT License
 #    Copyright (c) 2019, Marco Congedo, CNRS, Grenobe, France:
@@ -100,8 +100,9 @@ end
  ``P`` and ``Q`` must be flagged by julia as `Hermitian`.
  See [typecasting matrices](@ref).
 
- Note that if ``Q=I``, the Fisher geodesic move is simply ``P^a``
- (no need to call this funtion then).
+ The Fisher geodesic move is computed by the Cholesky-Schur algorithm
+ given in Eq. 4.2 by Iannazzo(2016)[🎓](@ref). If ``Q=I``,
+ the Fisher geodesic move is simply ``P^a`` (no need to call this funtion).
 
 !!! note "Nota Bene"
     For the [logdet zero](@ref) and [Jeffrey](@ref) metric no closed form expression
@@ -160,8 +161,15 @@ function geodesic(metric::Metric, P::ℍ{T}, Q::ℍ{T}, a::Real) where T<:RealOr
     elseif  metric==logEuclidean return ℍ( exp( ℍ(log(P)b + log(Q)a) ) )
 
     elseif  metric==Fisher
-            P½, P⁻½ = pow(P, 0.5, -0.5)
-            return ℍ( P½ * (P⁻½ * Q * P⁻½)^a * P½ )
+            # Cholesky-Schur form (faster):
+            L = cholesky(P, check=true)
+            U⁻¹ = inv(L.U)
+            F = schur(U⁻¹' * Q * U⁻¹)
+            return ℍ(L.U' * (F.Z * F.T^a * F.Z') * L.U)
+
+            # classical form (slower):
+            #P½, P⁻½ = pow(P, 0.5, -0.5)
+            #return ℍ( P½ * (P⁻½ * Q * P⁻½)^a * P½ )
 
     elseif  metric ∈ (logdet0, Jeffrey)
             return mean(metric, ℍVector([P, Q]), w=[b, a], ✓w=false)
@@ -2371,7 +2379,7 @@ powerMean(𝐃::𝔻Vector, p::Real;
 
     (2) inductiveMean(metric::Metric, 𝐏::ℍVector, q::Int, Q::ℍ)
 
-**alias**: `iMean`
+**alias**: `indMean`
 
  (1) Compute the Fréchet mean of 1d array ``𝐏={P_1,...,P_k}`` of ``k``
  positive definite matrices of [ℍVector type](@ref) with a law of large
@@ -2439,6 +2447,35 @@ function inductiveMean(metric::Metric, 𝐏::ℍVector)
 end
 
 
+"""
+    midrange(metric::Metric, P::ℍ{T}, Q::ℍ{T}) where T<:RealOrComplex
+
+ Midrange (average of extremal values) of positive definite matrices
+ ``P`` and ``Q``. Only the Fisher metric is supported, allowing the so-called
+ *geometric midrange*. This has been defined in Mostajeran et *al.* (2019)
+ [🎓](@ref) as
+
+ ``P * Q = \\frac{1}{\\sqrt{\\lambda_(min)}+\\sqrt{\\lambda_(max)}}\\Big(Q+\\sqrt{\\lambda_(min)*\\lambda_(max)}P\\Big)``,
+
+ where ``\\lambda_(min)`` and ``\\lambda_(max)`` are the extremal generalized
+ eigenvalues of ``P`` and ``Q``.
+
+## Examples
+
+    P=randP(3)
+    Q=randP(3)
+    M=midrange(Fisher, P, Q)
+"""
+function midrange(metric::Metric, P::ℍ{T}, Q::ℍ{T}) where T<:RealOrComplex
+    if metric == Fisher
+        λ=eigvals(𝕄(A), 𝕄(B))
+        λmin=λ[1]
+        λmax=λ[end]
+        return (1/(√λmin+√λmax)) * (Q + P*√(λmin*λmax))
+    else @warn "The matrix midrange is available only for the Fisher metric."
+    end
+end
+
 function inductiveMean(metric::Metric, 𝐏::ℍVector, q::Int, Q::ℍ)
     if metric ∉ (VonNeumann)
         G = Q
@@ -2449,7 +2486,7 @@ function inductiveMean(metric::Metric, 𝐏::ℍVector, q::Int, Q::ℍ)
     end
 end
 
-iMean=inductiveMean
+indMean=inductiveMean
 
 
 # -----------------------------------------------------------
