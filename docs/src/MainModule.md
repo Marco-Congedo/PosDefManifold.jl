@@ -72,9 +72,9 @@ end
 ```
  ## Example
  # generate a 15x15 symmetric positive definite matrix
- P=randP(15)              
+ P=randP(15)
  # distance from P to the identity matrix according to the logdet0 metric
- d=distance(logdet0, P)  
+ d=distance(logdet0, P)
 ```
 
  If you want to work consistently with a specific metric,
@@ -121,7 +121,7 @@ To see the list of metrics in type `Metric` use:
 !!! warning "Nota bene"
     This object is meant to hold matrices living in the same manifold,
     therefore it is assumed by all methods that all matrices it holds are of the same dimension.
-    However the several `𝕄Vector` objects it holds do not need to have the same length.    
+    However the several `𝕄Vector` objects it holds do not need to have the same length.
 
  **See** [`dim`](@ref), [`typeofMatrix`](@ref)
 
@@ -149,7 +149,7 @@ To see the list of metrics in type `Metric` use:
 !!! warning "Nota bene"
     This object is meant to hold matrices living in the same manifold,
     therefore it is assumed by all methods that all matrices it holds are of the same dimension.
-    However the several `𝔻Vector` objects it holds do not need to have the same length.    
+    However the several `𝔻Vector` objects it holds do not need to have the same length.
 
  **See** [`dim`](@ref), [`typeofMatrix`](@ref)
 
@@ -177,7 +177,7 @@ To see the list of metrics in type `Metric` use:
 !!! warning "Nota bene"
     This object is meant to hold matrices living in the same manifold,
     therefore it is assumed by all methods that all matrices it holds are of the same dimension.
-    However the several `𝕃Vector` objects it holds do not need to have the same length.    
+    However the several `𝕃Vector` objects it holds do not need to have the same length.
 
  **See** [`dim`](@ref), [`typeofMatrix`](@ref)
 

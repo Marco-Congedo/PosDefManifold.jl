@@ -5,7 +5,6 @@
 #    Copyright (c) 2019, Marco Congedo, CNRS, Grenobe, France:
 #    https://sites.google.com/site/marcocongedo/home
 
-
 # __precompile__()
 
 module PosDefManifold
@@ -172,6 +171,7 @@ export
     logdet0Mean, ld0Mean,
     wasMean,
     powerMean,
+    inductiveMean,
     logMap,
     expMap,
     vecP,

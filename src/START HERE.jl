@@ -20,9 +20,10 @@
 #   you have identified the 'srcDir' to be used in the push command.
 
 begin
-    projectName = "PosDefManifold"
     # change the 'juliaCodeDir' path to the folder where your projects are
     juliaCodeDir= homedir()*"\\Documents\\Code\\julia\\"
+
+    projectName = "PosDefManifold"
     srcDir      = juliaCodeDir*projectName*"\\src\\"
     docsDir     = juliaCodeDir*projectName*"\\docs\\"
 

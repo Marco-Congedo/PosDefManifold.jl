@@ -75,6 +75,8 @@ spectralEmbedding
 | [`logdet0Mean`](@ref), `ld0Mean` | wFm of a matrix set according to the logdet0 metric (iterative)|
 | [`wasMean`](@ref) | wFm of a matrix set according to the Wasserstein metric (iterative)|
 | [`powerMean`](@ref) | Power wFm of a matrix set (iterative)|
+| [`inductiveMean`](@ref), `iMean` | Recursive Fréchet mean of a matrix set (constructive)|
+
 
 ⋅
 
@@ -87,6 +89,7 @@ geometricpMean
 logdet0Mean
 wasMean
 powerMean
+inductiveMean
 ```
 
 ## Tangent Space operations
@@ -98,7 +101,6 @@ powerMean
 | [`vecP`](@ref) | vectorization of matrices in the tangent space |
 | [`matP`](@ref) | matrization of matrices in the tangent space (inverse of `vecp`) |
 | [`parallelTransport`](@ref), pt | Parallel transport of tangent vectors and matrices |
-
 
 ⋅
 
