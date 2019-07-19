@@ -562,6 +562,14 @@ Journal of Functional Analysis, 262(4), 1498-1514.
 
 Z. Lin (2019) Riemannian Geometry of Symmetric Positive Definite Matrices via Cholesky Decomposition. In press.
 
+J. Ho, G. Cheng, H. Salehian, B.C. Vemuri (2013)
+[Recursive Karcher Expectation Estimators and Geometric Law of Large Numbers](http://proceedings.mlr.press/v31/ho13a.pdf),
+Proc. of the AISTATS Conf.
+
+E. Massart, J.M. Hendrickx, P.-A. Absil (2018)
+[Matrix Geometric Meansbased on shuffled inductive sequences](https://dial.uclouvain.be/downloader/downloader.php?pid=boreal:185613&datastream=PDF_01)
+Linear Algebra and its Aplications, 252, 334-359.
+
 M. Moakher (2005)
 [A Differential Geometric Approach to the Geometric Mean of Symmetric Positive-Definite Matrices](https://bit.ly/2OiVWJV),
 SIAM Journal on Matrix Analysis and Applications, 26(3), 735-747.
