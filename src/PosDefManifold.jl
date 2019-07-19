@@ -171,6 +171,7 @@ export
     logdet0Mean, ld0Mean,
     wasMean,
     powerMean,
+    inductiveMean,
     logMap,
     expMap,
     vecP,

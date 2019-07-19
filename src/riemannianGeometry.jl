@@ -2521,8 +2521,8 @@ function logMap(metric::Metric, 𝐏::ℍVector, G::ℍ{T}) where T<:RealOrCompl
     end
 end
 
-"""
 
+"""
     (1) expMap(metric::Metric, S::ℍ{T}, G::ℍ{T})
 
     (2) expMap(metric::Metric, 𝐒::ℍVector, G::ℍ{T})
@@ -2592,6 +2592,7 @@ function expMap(metric::Metric, 𝐒::ℍVector, G::ℍ{T}) where T<:RealOrCompl
               only the Fisher metric is supported for the exponential map"
     end
 end
+
 
 """
     vecP(S::ℍ{T}) where T<:RealOrComplex
