@@ -100,8 +100,9 @@ end
  ``P`` and ``Q`` must be flagged by julia as `Hermitian`.
  See [typecasting matrices](@ref).
 
- Note that if ``Q=I``, the Fisher geodesic move is simply ``P^a``
- (no need to call this funtion then).
+ The Fisher geodesic move is computed by the Cholesky-Schur algorithm
+ given in Eq. 4.2 by Iannazzo(2016)[🎓](@ref). If ``Q=I``,
+ the Fisher geodesic move is simply ``P^a`` (no need to call this funtion).
 
 !!! note "Nota Bene"
     For the [logdet zero](@ref) and [Jeffrey](@ref) metric no closed form expression
@@ -160,8 +161,15 @@ function geodesic(metric::Metric, P::ℍ{T}, Q::ℍ{T}, a::Real) where T<:RealOr
     elseif  metric==logEuclidean return ℍ( exp( ℍ(log(P)b + log(Q)a) ) )
 
     elseif  metric==Fisher
-            P½, P⁻½ = pow(P, 0.5, -0.5)
-            return ℍ( P½ * (P⁻½ * Q * P⁻½)^a * P½ )
+            # Cholesky-Schur form (faster):
+            L = cholesky(P, check=true)
+            U⁻¹ = inv(L.U)
+            F = schur(U⁻¹' * Q * U⁻¹)
+            return ℍ(L.U' * (F.Z * F.T^a * F.Z') * L.U)
+
+            # classical form (slower):
+            #P½, P⁻½ = pow(P, 0.5, -0.5)
+            #return ℍ( P½ * (P⁻½ * Q * P⁻½)^a * P½ )
 
     elseif  metric ∈ (logdet0, Jeffrey)
             return mean(metric, ℍVector([P, Q]), w=[b, a], ✓w=false)
@@ -2371,7 +2379,7 @@ powerMean(𝐃::𝔻Vector, p::Real;
 
     (2) inductiveMean(metric::Metric, 𝐏::ℍVector, q::Int, Q::ℍ)
 
-**alias**: `iMean`
+**alias**: `indMean`
 
  (1) Compute the Fréchet mean of 1d array ``𝐏={P_1,...,P_k}`` of ``k``
  positive definite matrices of [ℍVector type](@ref) with a law of large
@@ -2449,7 +2457,7 @@ function inductiveMean(metric::Metric, 𝐏::ℍVector, q::Int, Q::ℍ)
     end
 end
 
-iMean=inductiveMean
+indMean=inductiveMean
 
 
 # -----------------------------------------------------------

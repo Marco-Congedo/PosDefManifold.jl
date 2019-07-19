@@ -75,7 +75,7 @@ spectralEmbedding
 | [`logdet0Mean`](@ref), `ld0Mean` | wFm of a matrix set according to the logdet0 metric (iterative)|
 | [`wasMean`](@ref) | wFm of a matrix set according to the Wasserstein metric (iterative)|
 | [`powerMean`](@ref) | Power wFm of a matrix set (iterative)|
-| [`inductiveMean`](@ref), `iMean` | Recursive Fréchet mean of a matrix set (constructive)|
+| [`inductiveMean`](@ref), `indMean` | Recursive Fréchet mean of a matrix set (constructive)|
 
 
 ⋅
