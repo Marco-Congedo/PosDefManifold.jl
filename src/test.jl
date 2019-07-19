@@ -1,5 +1,5 @@
 #    Unit test.jl, part of PosDefManifold Package for julia language
-#    v 0.3.1 - last update 30th of Mai 2019
+#    v 0.3.2 - last update 30th of Mai 2019
 #
 #    MIT License
 #    Copyright (c) 2019, Marco Congedo, CNRS, Grenobe, France:
@@ -714,7 +714,7 @@ function tests();
     g=[1.0, 2.0, 3.0]
     for m=1:length(metrics)
             if m in (Fisher, Euclidean) std(metrics[m], g) end end; RUN()
-            
+
 
 end # function tests
 

@@ -582,6 +582,10 @@ M. Moakher (2012)
 Divergence measures and means of symmetric positive-definite matrices,
 in D.H Lailaw and A. Vilanova (Eds) "New Developments in the Visualization and Processing of Tensor Fields", Springer, Berlin.
 
+C. Mostajeran, C. Grussler, R. Sepulchre (2019)
+[Geometric Matrix Midranges](https://arxiv.org/pdf/1907.04188.pdf)
+arXiv:1907.04188.
+
 X. Pennec, P. Fillard, N. Ayache (2006)
 [A Riemannian Framework for Tensor Computing](https://hal.inria.fr/inria-00614990/document),
 International Journal of Computer Vision, 66(1), 41-66.
