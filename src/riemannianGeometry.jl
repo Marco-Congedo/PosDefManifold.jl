@@ -2383,15 +2383,15 @@ powerMean(𝐃::𝔻Vector, p::Real;
 
  (1) Compute the Fréchet mean of 1d array ``𝐏={P_1,...,P_k}`` of ``k``
  positive definite matrices of [ℍVector type](@ref) with a law of large
- number inductive procedure given by (Ho et *al.,* 2013; Massart et *al.*, 2018)
- [🎓](@ref)
+ number inductive procedure (Ho et *al.,* 2013; Massart et *al.*, 2018),
+ such as [🎓](@ref)
 
  ``G_1=P_1,``
 
- ``G_i=γ(i^-1, G_(i-1), P_i), i=2,...,k,``
+ ``G_i=γ(i^(-1), G_{(i-1)}, P_i), i=2,...,k,``
 
- where ``γ(i^(-1), G_(i-1), P_i)`` is a step on the [geodesic](@ref) relying
- ``G_(i-1)`` to ``P_i`` with arclength ``k^(-1)``
+ where ``γ(i^(-1), G_{(i-1)}, P_i)`` is a step on the [geodesic](@ref) relying
+ ``G_{(i-1)}`` to ``P_i`` with arclength ``k^{-1}``
  using the specified `metric`, of type [Metric::Enumerated type](@ref).
 
  (2) Like (1), but for the set of matrices ``𝐐 ∪ 𝐏``,
