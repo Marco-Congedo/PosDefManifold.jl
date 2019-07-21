@@ -18,6 +18,6 @@ makedocs(
 
 deploydocs(
     repo = "github.com/Marco-Congedo/PosDefManifold.jl.git",
+    target = "build",
     devurl = "dev",
-    forcepush = true
 )
