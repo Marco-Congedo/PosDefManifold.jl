@@ -2388,10 +2388,10 @@ powerMean(𝐃::𝔻Vector, p::Real;
 
  ``G_1=P_1,``
 
- ``G_i=γ(i^(-1), G_{(i-1)}, P_i), i=2,...,k,``
+ ``G_i=γ(i^{-1}, G_{(i-1)}, P_i), i=2,...,k,``
 
- where ``γ(i^(-1), G_{(i-1)}, P_i)`` is a step on the [geodesic](@ref) relying
- ``G_{(i-1)}`` to ``P_i`` with arclength ``k^{-1}``
+ where ``γ(i^{-1}, G_{(i-1)}, P_i)`` is a step on the [geodesic](@ref) relying
+ ``G_{(i-1)}`` to ``P_i`` with arclength ``i^{-1}``
  using the specified `metric`, of type [Metric::Enumerated type](@ref).
 
  (2) Like (1), but for the set of matrices ``𝐐 ∪ 𝐏``,
