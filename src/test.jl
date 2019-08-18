@@ -691,8 +691,17 @@ function tests();
     end
 
     name="procrustes"; newTest(name);
-    procrustes(P, Q); RUN()
-    procrustes(PC, QC); RUN()
+    U=randU(size(P, 1))
+    rotatedP=Hermitian(U'*P*U)
+    procrustesU=procrustes(P, rotatedP)
+    newP=Hermitian(procrustesU'*rotatedP*procrustesU)
+    newP ≈ P ? OK() : OH(name*" Real Input")
+
+    U=randU(ComplexF64, size(PC, 1))
+    rotatedP=Hermitian(U'*PC*U)
+    procrustesU=procrustes(PC, rotatedP)
+    newP=Hermitian(procrustesU'*rotatedP*procrustesU)
+    newP ≈ PC ? OK() : OH(name*" Complex Input")
 
     # functions in classification.jl
     println(" ")

@@ -977,7 +977,7 @@ laplacianEM=laplacianEigenMaps
     # try a different value of epsilon
     evalues, maps, iter, conv=spEmb(Fisher, Pset, k-1, 0.01; ⏩=true, maxiter=1000)
     plot(maps[:, 1], maps[:, 2], seriestype=:scatter, title="Spectral Embedding", label="Pset")
-    # see the example in `Laplacian function for more on this`
+    # see the example in `Laplacian` function for more on this
 
 """
 function spectralEmbedding(type::Type{T}, metric::Metric, 𝐏::ℍVector, q::Int, epsilon::Real=0;
@@ -2882,9 +2882,9 @@ function procrustes(P::ℍ{T}, Q::ℍ{T}, extremum="min") where T<:RealOrComplex
     Pdown=reverse(Pup, dims=(2))
     if      extremum=="min"
             Qdown=reverse(Qup, dims=(2))
-            return Qdown*Pdown
+            return Qdown*Pdown'
     elseif  extremum=="max"
-            return Qup*Pdown
+            return Qup*Pdown'
     else    @warn "in RiemannianGeometryP.procrustes: the argument 'extremum' is incorrect."
     end
 end
