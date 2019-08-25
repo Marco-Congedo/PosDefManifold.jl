@@ -92,17 +92,19 @@ function tests();
     name="dim"; newTest(name)
     dim(𝐏); RUN()
 
-    ## 2. Matrix Normalizations
+    ## 2. Matrix Normalizations and approximations
 
     name="det1"; newTest(name)
     det(det1(P))  ≈ 1 ?  OK() : OH(name*" real case")
     det(det1(PC)) ≈ 1 ?  OK() : OH(name*" complex case")
 
-
     name="function tr1"; newTest(name)
     tr(tr1(P))  ≈ 1 ?    OK() : OH(name*" real case")
     tr(tr1(PC)) ≈ 1 ?    OK() : OH(name*" complex case")
 
+    name="function nearestPosDef"; newTest(name)
+    nearestPosDef(X); RUN()
+    nearestPosDef(XC); RUN()
 
     name="normalizeCol!"; newTest(name)
     j=rand(1:n)

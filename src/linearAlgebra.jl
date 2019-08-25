@@ -264,12 +264,12 @@ dim(vector₂::AnyMatrixVector₂) =
 #  ------------------------
 
 """
-    function det1(X::AnyMatrix; <tol::Real=0>)
+    function det1(X::AnyMatrix; <tol::Real=0.>)
 
  Return the argument matrix ``X`` normalized so as to have *unit determinant*.
  For square positive definite matrices this is the best approximant
  from the set of matrices in the [special linear group](https://bit.ly/2W5jDZ6) -
- see Bhatia and Jain (2014)[🎓].
+ see Bhatia and Jain (2014)[🎓](@ref).
 
  ``X`` can be a real or complex `Diagonal`, `LowerTriangular`,
  `Matrix`, or `Hermitian` matrix. (see [AnyMatrix type](@ref))
@@ -294,8 +294,8 @@ dim(vector₂::AnyMatrixVector₂) =
     # using a tolerance
     Q=det1(P; tol=1e-12)
 """
-function det1(X::AnyMatrix; tol::Real=0)
-    tol>=0 ? tolerance=tol : tolerance = 0
+function det1(X::AnyMatrix; tol::Real=0.)
+    tol>=0. ? tolerance=tol : tolerance = 0.
     Det = det(X)
     if Det>tolerance X/Det^(1/size(X, 1)) else @warn det1Msg Det tolerance; X end
 end
@@ -303,7 +303,7 @@ det1Msg="function det1 in LinearAlgebra.jl of PosDefMaifold package: the determi
 
 
 """
-    tr1(X::AnyMatrix)
+    tr1(X::AnyMatrix; tol::Real=0.)
 
  Return the argument matrix ``X`` normalized so as to have *unit trace*.
 
@@ -326,12 +326,58 @@ det1Msg="function det1 in LinearAlgebra.jl of PosDefMaifold package: the determi
     Q=tr1(P; tol=1e-12)
 
 """
-function tr1(X::AnyMatrix; tol::Real=0)
-    tol>=0 ? tolerance=tol : tolerance = 0
+function tr1(X::AnyMatrix; tol::Real=0.)
+    tol>=0. ? tolerance=tol : tolerance = 0.
     trace = tr(X)
     if trace>tolerance X/trace else @warn tr1Msg trace tolerance; X end
 end
 tr1Msg="function tr1 in LinearAlgebra.jl of PosDefMaifold package: the trace of the input matrix is not greater than the tolerance."
+
+
+"""
+    nearestPosDef(X::Union{𝔻, 𝕄}; tol::Real=0.)
+
+ Return the nearest symmetric/Hermitian positive semi-definite matrix
+ of a diagonal or of an arbitary square matrix `X` according to the
+ Frobenius norm.
+ If the eigenvalues of the symmetric part of `X` are all non-negative,
+ the result is positive definite and will be falgged as `Hermitian`,
+ otherwise it is positive semi-definite and will not be flagged.
+ The nearest matrix is given by
+
+ ``(Y+H)/2``
+
+ where
+
+ ``Y=(X+X^H)/2``
+
+ is the symmetric part of ``X``, and ``H`` is the symmetric polar factor
+ of ``Y``. See Higham(1988)[🎓](@ref) for details and for the way it is computed.
+
+ **See also**: [`det1`](@ref), [`procrustes`](@ref).
+
+ ## Examples
+    using LinearAlgebra, PosDefManifold
+    X=randn(5, 5) # generate an arbitrary 5x5 matrix
+    S=nearestPosDef(X)
+
+	P=randP(5) # generate a random real positive definite 5x5 matrix
+	S=nearestPosDef(Matrix(P)) # typecasting an Hermitian matrix as a `Matrix`
+	# Since P is a positive definite matrix S must be equal to P
+	S ≈ P ? println(" ⭐ ") : println(" ⛔ ")
+"""
+function nearestPosDef(D::𝔻; tol::Real=0.)
+	tol>=0. ? tolerance=tol : tolerance = 0.
+	return 𝔻([D[i, i]>=tolerance ? D[i, i] : 0 for i=1:size(D, 1)])
+end
+
+function nearestPosDef(X::𝕄; tol::Real=0.)
+    tol>=0. ? tolerance=tol : tolerance = 0.
+	F = eigen((X+X')/2)
+	λispos = ispos(F.values; 🔔=false, rev=false)
+    λispos ? D = 𝔻(F.values) : D = nearestPosDef(𝔻(F.values), tol=tolerance)
+	return λispos ? ℍ(F.vectors * D * F.vectors') : (F.vectors * D * F.vectors')
+end
 
 
 """
@@ -425,7 +471,8 @@ normalizeCol!(X::𝕄{T}, range::UnitRange, by::Number) where T<:RealOrComplex =
 
  The following are *<optional keyword arguments>*:
 
- - If ``rev=true`` the (1) elements in ``λ`` or (2) the diagonal elements in ``Λ`` will be chacked in reverse order.
+ - If ``rev=true`` the (1) elements in ``λ`` or (2) the diagonal elements
+ in ``Λ`` will be chacked in reverse order.
  This is done for allowing a very fast check when the elements
  are sorted and it is known from where is best to start checking.
 
@@ -1210,7 +1257,7 @@ cong=congruence
 #  -----------------------------------------------
 
 """
-    evd(S::ℍ{T}) where T<:RealOrComplex
+    evd(S::Union{𝕄{T}, ℍ{T}}) where T<:RealOrComplex
 
  Given a positive semi-definite matrix ``S``,
  returns a 2-tuple ``(Λ, U)``, where ``U`` is the matrix holding in columns
@@ -1222,7 +1269,9 @@ cong=congruence
  As for the `eigen` function, the eigenvalues and associated
  eigenvectors are sorted by increasing values of eigenvalues.
 
- ``S`` may be real or complex and must be flagged by Julia as `Hermitian`.
+ ``S`` may be real or complex and may be flagged by Julia as `Hermitian`
+ (in this case **PosDefManifold** assumes it is positive definite).
+
  See [typecasting matrices](@ref).
 
  **See also**: [`spectralFunctions`](@ref).
@@ -1230,12 +1279,12 @@ cong=congruence
  ## Examples
     using PosDefManifold
     A=randn(3, 3);
-    S=ℍ(A+A');
+    S=A+A';
     Λ, U=evd(S); # which is equivalent to (Λ, U)=evd(P)
     (U*Λ*U') ≈ S ? println(" ⭐ ") : println(" ⛔ ")
     # => UΛU'=S, UΛ=SU, ΛU'=U'S
 """
-function evd(S::ℍ{T}) where T<:RealOrComplex # return tuple (Λ, U)
+function evd(S::Union{𝕄{T}, ℍ{T}}) where T<:RealOrComplex # return tuple (Λ, U)
     F = eigen(S)
     return  𝔻(F.values), F.vectors # 𝔻=LinearAlgebra.Diagonal
 end
