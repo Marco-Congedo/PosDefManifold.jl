@@ -121,6 +121,7 @@ export
     dim,
     det1,
     tr1,
+    nearestPosDef,
     normalizeCol!,
     colProd,
     sumOfSqr, ss,

@@ -552,6 +552,10 @@ M.T. Harandi, R. Hartley, B. Lovell, C. Sanderson (2016)
 [Sparse coding on symmetric positive definite manifolds using bregman divergences](https://bit.ly/2UKiYvG),
 IEEE transactions on neural networks and learning systems, 27 (6), 1294-1306.
 
+N.J. Higham (1988)
+Computing a Nearest Symmetric Positive Semidefinite Matrix
+Linear Algebra and its Applications, 103, 103-118.
+
 J. Ho, G. Cheng, H. Salehian, B.C. Vemuri (2013)
 [Recursive Karcher Expectation Estimators and Geometric Law of Large Numbers](http://proceedings.mlr.press/v31/ho13a.pdf),
 Proc. of the AISTATS Conf.

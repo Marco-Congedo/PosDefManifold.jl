@@ -9,7 +9,7 @@
 | Category  | Output |
 |:---------- |:----------- |
 | 1. [Utilities](@ref)  | - - - |
-| 2. [Matrix normalizations](@ref) | matrix |
+| 2. [Matrix normalizations and approximations](@ref) | matrix |
 | 3. [Boolean functions of matrices](@ref) | matrix |
 | 4. [Scalar functions of matrices](@ref) | scalar |
 | 5. [Diagonal functions of matrices](@ref) | diagonal matrix |
@@ -37,12 +37,13 @@ typeofVector
 dim
 ```
 
-## Matrix normalizations
+## Matrix normalizations and approximations
 
 | Function   | Description |
 |:---------- |:----------- |
 | [`det1`](@ref) | Normalize the determinant|
 | [`tr1`](@ref) | Normalize the trace|
+| [`nearestPosDef`](@ref) | Nearest Symmetric/Hermitian Positive Semi-definite matrix|
 | [`normalizeCol!`](@ref) | Normalize one or more columns|
 
 ⋅
@@ -50,6 +51,7 @@ dim
 ```@docs
 det1
 tr1
+nearestPosDef
 normalizeCol!
 ```
 
