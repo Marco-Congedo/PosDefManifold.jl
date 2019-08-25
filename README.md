@@ -8,7 +8,7 @@
 
 ![](/docs/src/assets/Fig1.jpg)
 
-This package computes **distances**, **geodesics**, **weighted Fréchet means** and **inductive Fréchet means** for the supported metrics, **graph Laplacians**, **Lapacian eigen maps**, **tangent space projections**, **parallel transport**, the **geometric midrange** and a special solution of the [**Procrustes problem**](https://en.wikipedia.org/wiki/Orthogonal_Procrustes_problem) in **P**. Key functions are *multi-threaded*.
+This package computes **distances**, **geodesics**, **weighted Fréchet means** and **inductive Fréchet means** for the supported metrics, **graph Laplacians**, **Lapacian eigen maps**, **tangent space projections**, **parallel transport**, the **geometric midrange**, matrix **approximations** and a special solution of the [**Procrustes problem**](https://en.wikipedia.org/wiki/Orthogonal_Procrustes_problem) in **P**. Key functions are *multi-threaded*.
 
 The [documentation](https://marco-congedo.github.io/PosDefManifold.jl/dev/) is rich and gives all mathematical details pertaining to the implemented functions.
 
