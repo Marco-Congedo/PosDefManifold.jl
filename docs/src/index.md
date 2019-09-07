@@ -2,7 +2,7 @@
 
 ## Requirements
 
-Julia version ≥ 1.0.3
+Julia version ≥ 1.1.1
 
 ## Installation
 
@@ -13,6 +13,12 @@ Execute the following command in Julia's REPL:
 To obtain the latest development version execute instead
 
     ]add PosDefManifold#master
+
+## About the Author
+
+[Marco Congedo](https://sites.google.com/site/marcocongedo) is
+a research scientist of CNRS (Centre National de la Recherche Scientifique),
+working in Grenoble, France.
 
 
 ## Overview

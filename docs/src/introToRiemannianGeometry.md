@@ -572,7 +572,8 @@ Y. Lim, M. Pálfia (2012)
 [Matrix power means and the Karcher mean](https://core.ac.uk/download/pdf/82248854.pdf),
 Journal of Functional Analysis, 262(4), 1498-1514.
 
-Z. Lin (2019) Riemannian Geometry of Symmetric Positive Definite Matrices via Cholesky Decomposition. In press.
+Z. Lin (2019)
+[Riemannian Geometry of Symmetric Positive Definite Matrices via Cholesky Decomposition](https://arxiv.org/abs/1908.09326), in press.
 
 E. Massart, J.M. Hendrickx, P.-A. Absil (2018)
 [Matrix Geometric Meansbased on shuffled inductive sequences](https://dial.uclouvain.be/downloader/downloader.php?pid=boreal:185613&datastream=PDF_01)

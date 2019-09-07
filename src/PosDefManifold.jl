@@ -99,7 +99,6 @@ export
     LowerTriangularVector₂, 𝕃Vector₂,
     HermitianVector, ℍVector,
     HermitianVector₂, ℍVector₂,
-    RealOrComplex,
     AnyMatrix,
     AnyMatrixVector,
     AnyMatrixVector₂,
@@ -196,9 +195,9 @@ include("riemannianGeometry.jl")
 include("statistics.jl")
 include("test.jl")
 
-println("\n⭐ "," Welcome to the PosDefManifold package", " ⭐\n")
+println("\n⭐ "," Welcome to the","\x1b[91m"," PosDefManifold ","\x1b[0m","package", " ⭐\n")
 @info(" ")
-println(" Your Machine ",gethostname()," (",Sys.MACHINE, ")")
+println(" Your Machine `",gethostname(),"` (",Sys.MACHINE, ")")
 println(" runs on kernel ",Sys.KERNEL," with word size ",Sys.WORD_SIZE,".")
 println(" CPU  Threads: ",Sys.CPU_THREADS)
 # Sys.BINDIR # julia bin directory
