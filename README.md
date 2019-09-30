@@ -19,7 +19,7 @@ For similar code resources in other programming languages see [here](https://sit
 ```
 using PosDefManifold
  
-P, Q = randP(20), randP(20)       # random PDMs of size 20x20
+P, Q = randP(20), randP(20)       # random Positive Definite Matrices (PDMs) of size 20x20
 d = distance(Fisher, P, Q)        # distance between P and Q 
 R = geodesic(Fisher, P, Q, 0.1)   # move on the geodesic relying P and Q 
 G = mean(Fisher, P, Q)            # mean of P and Q (geodesic mid-point) 
