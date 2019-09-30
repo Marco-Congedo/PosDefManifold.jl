@@ -19,15 +19,15 @@ For similar code resources in other programming languages see [here](https://sit
 ```
 using PosDefManifold
  
-P, Q = randP(20), randP(20) 			# random PDMs of size 20x20
-d = distance(Fisher, P, Q) 			  # distance between P and Q 
-R = geodesic(Fisher, P, Q, 0.1) 	# move on the geodesic relying P and Q 
-G = mean(Fisher, P, Q) 				    # mean of P and Q (geodesic mid-point) 
-U = procrustes(P, Q)					    # solution to a special Procrustes problem
-S = logMap(Fisher, P, G)				  # tangent space mapping  
+P, Q = randP(20), randP(20)       # random PDMs of size 20x20
+d = distance(Fisher, P, Q)        # distance between P and Q 
+R = geodesic(Fisher, P, Q, 0.1)   # move on the geodesic relying P and Q 
+G = mean(Fisher, P, Q)            # mean of P and Q (geodesic mid-point) 
+U = procrustes(P, Q)              # solution to a special Procrustes problem
+S = logMap(Fisher, P, G)          # tangent space mapping  
  
-𝐏 = randP(20, 100) 					     # random set 𝐏 of 100 PDMs of size (20x20)
-G = mean(Fisher, 𝐏) 					     # mean of all matrices in set 𝐏 
-λ, U, i, c = spEmb(Fisher, 𝐏, 2)	 # spectral embedding
+𝐏 = randP(20, 100)                 # random set 𝐏 of 100 PDMs of size (20x20)
+G = mean(Fisher, 𝐏)                # mean of all matrices in set 𝐏 
+λ, U, i, c = spEmb(Fisher, 𝐏, 2)   # spectral embedding
 ```
 
