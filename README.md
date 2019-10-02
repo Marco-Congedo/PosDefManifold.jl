@@ -14,7 +14,7 @@ The [documentation](https://marco-congedo.github.io/PosDefManifold.jl/dev/) is r
 
 For **machine learning** in **P** see [PosDefManifoldML.jl](https://github.com/Marco-Congedo/PosDefManifoldML.jl).
 
-For **optimization** in **P** see [manopt.jl](http://www.manoptjl.org/stable/).
+For **optimization** in **P** see [Manopt.jl](http://www.manoptjl.org/stable/).
 
 For similar code resources in other programming languages see [here](https://sites.google.com/site/marcocongedo/science/code-resources).
 
