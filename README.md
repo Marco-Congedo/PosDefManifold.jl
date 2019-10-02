@@ -30,7 +30,7 @@ G = mean(Fisher, P, Q)            # mean of P and Q (geodesic mid-point)
 U = procrustes(P, Q)              # solution to a special Procrustes problem
 S = logMap(Fisher, P, G)          # tangent space mapping  
  
-𝐏 = randP(20, 100)                 # random set 𝐏 of 100 PDMs of size (20x20)
+𝐏 = randP(20, 100)                 # random set 𝐏 of 100 PDMs of size 20x20
 G = mean(Fisher, 𝐏)                # mean of all matrices in set 𝐏 
 λ, U, i, c = spEmb(Fisher, 𝐏, 3)   # spectral embedding in 3D
 ```
