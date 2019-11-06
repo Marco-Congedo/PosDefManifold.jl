@@ -1,5 +1,5 @@
 authors = ["congedom "]
-version = "0.3.4"
+version = "0.3.5"
 
 [deps]
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
