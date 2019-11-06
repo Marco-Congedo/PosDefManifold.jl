@@ -1,9 +1,9 @@
-#    Main Module of the  PosDefManifold Package for julia language
-#    v 0.3.4 - last update 5th of September 2019
+#   Main Module of the  PosDefManifold Package for julia language
+#   v 0.3.5 - last update 6th of November 2019
 #
-#    MIT License
-#    Copyright (c) 2019, Marco Congedo, CNRS, Grenobe, France:
-#    https://sites.google.com/site/marcocongedo/home
+#   MIT License
+#   Copyright (c) 2019, Marco Congedo, CNRS, Grenobe, France:
+#   https://sites.google.com/site/marcocongedo/home
 
 # __precompile__()
 
@@ -196,7 +196,7 @@ include("statistics.jl")
 include("test.jl")
 
 println("\n⭐ "," Welcome to the","\x1b[91m"," PosDefManifold ","\x1b[0m","package", " ⭐\n")
-@info(" ")
+@info " "
 println(" Your Machine `",gethostname(),"` (",Sys.MACHINE, ")")
 println(" runs on kernel ",Sys.KERNEL," with word size ",Sys.WORD_SIZE,".")
 println(" CPU  Threads: ",Sys.CPU_THREADS)

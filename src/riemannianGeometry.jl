@@ -1,5 +1,5 @@
 #    Unit riemannianGeometry.jl, part of PosDefManifold Package for julia language
-#    v 0.3.4 - last update 5th of September 2019
+#    v 0.3.5 - last update 6th of November 2019
 #
 #    MIT License
 #    Copyright (c) 2019, Marco Congedo, CNRS, Grenobe, France:
@@ -2500,9 +2500,11 @@ indMean=inductiveMean
     for all the above: where T<:RealOrComplex
 
  (1) *Logaritmic Map:* map a positive definite matrix ``P`` from the SPD or
- Hermitian manifold into the tangent space at base-point ``G`` using the [Fisher](@ref) metric.
+ Hermitian manifold into the tangent space at base-point ``G``
+ using the [Fisher](@ref) metric.
 
- ``P`` and ``G`` must be flagged as `Hermitian`. See [typecasting matrices](@ref).
+ ``P`` and ``G`` must be flagged as `Hermitian`.
+ See [typecasting matrices](@ref).
 
  The map is defined as
 
@@ -2518,7 +2520,8 @@ indMean=inductiveMean
  The result is an `ℍVector`.
 
 !!! note "Nota Bene"
-    Currently only the [Fisher](@ref) metric is supported for tangent space operations.
+    Currently only the [Fisher](@ref) metric is supported for
+    tangent space operations.
 
  The inverse operation is [`expMap`](@ref).
 
@@ -2569,7 +2572,8 @@ end
  space at base-point ``G`` into the SPD or Hermitian manifold
  (using the [Fisher](@ref) metric).
 
- ``S`` and ``G`` must be flagged as `Hermitian`. See [typecasting matrices](@ref).
+ ``S`` and ``G`` must be flagged as `Hermitian`.
+ See [typecasting matrices](@ref).
 
  The map is defined as
 
@@ -2632,11 +2636,11 @@ end
 
 
 """
-    vecP(S::ℍ{T}) where T<:RealOrComplex
+    vecP(S::ℍ{T}; range::UnitRange=1:size(S, 2)) where T<:RealOrComplex
 
- *Vectorize* a tangent vector (which is an `Hermitian` matrix) ``S``:  mat -> vec.
+ *Vectorize* a tangent vector (which is an `Hermitian` matrix) ``S``:  mat ↦ vec.
 
- It gives weight ``1`` to diagonal elements and √2 to off-diagonal elements
+ It gives weight ``1`` to diagonal elements and ``√2`` to off-diagonal elements
  (Barachant et *al.*, 2012)[🎓](@ref).
 
  The result is a vector holding ``n(n+1)/2`` elements, where ``n``
@@ -2644,7 +2648,13 @@ end
 
  ``S`` must be flagged as Hermitian. See [typecasting matrices](@ref).
 
- The inverse operation is provided by [`matP`](@ref).
+ The reverse operation is provided by [`matP`](@ref).
+
+ If an optional keyword argument `range` is provided,
+ the vectorization concerns only the rows (or columns,
+ since the input matrix is symmetric or Hermitian)
+ in the range. Note that in this case the operation
+ cannot be reverted by [`matP`](@ref).
 
  ## Examples
     using PosDefManifold
@@ -2655,9 +2665,11 @@ end
     S=logMap(Fisher, P, G)
     # vectorize S
     v=vecP(S)
+    # vectorize onlt the first two columns of S
+    v=vecP(S; range=1:2)
 """
-vecP(S::ℍ{T}) where T<:RealOrComplex =
-    [(if i==j return S[i, j] else return (S[i, j])*sqrt2 end) for j=1:size(S, 2) for i=j:size(S, 1)]
+vecP(S::ℍ{T}; range::UnitRange=1:size(S, 2)) where T<:RealOrComplex =
+    [(if i==j return S[i, j] else return (S[i, j])*sqrt2 end) for j=range for i=j:size(S, 1)]
 
 
 """
@@ -2672,7 +2684,7 @@ vecP(S::ℍ{T}) where T<:RealOrComplex =
  ``ς``  is a tangent vector of size ``n(n+1)/2``.
  The result of calling `matP(ς)` is then ``n⋅n`` matrix ``S``.
 
- **To Do**: This function needs to be rewritten more efficiently.
+ **To Do**: This function may be rewritten more efficiently.
 
  ## Examples
     using PosDefManifold
@@ -2706,7 +2718,6 @@ function matP(ς::Vector{T}) where T<:RealOrComplex
   return ℍ(S, :L)
 end
 
-# export also alias, docstring
 """
     (1) parallelTransport(S::ℍ{T}, P::ℍ{T}, Q::ℍ{T})
 
@@ -2719,8 +2730,8 @@ end
 
  **alias**: `pt`
 
- (1) *Parallel transport* of tangent vector ``S`` (a matrix) lying on the tangent space
- at base-point ``P`` to the tangent space at base-point ``Q``.
+ (1) *Parallel transport* of tangent vector ``S`` (a matrix) lying on
+ the tangent space at base-point ``P`` to the tangent space at base-point ``Q``.
 
  ``S``, ``P`` and ``Q`` must all be `Hermitian` matrices.
  Return an `Hermitian` matrix.
