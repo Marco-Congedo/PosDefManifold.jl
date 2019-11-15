@@ -85,11 +85,13 @@ end
 
 """
     std(metric::Metric, ν::Vector{T};
-        corrected::Bool=true) where T<:RealOrComplex
+        corrected::Bool=true,
+        mean=nothing) where T<:RealOrComplex
 
  Standard deviation of ``k`` real or complex scalars,
  using the specified `metric`
- of type [Metric::Enumerated type](@ref).
+ of type [Metric::Enumerated type](@ref) and the
+ specified `mean` if provided.
 
  Only the Euclidean and Fisher
  metric are supported by this function. Using the Euclidean
@@ -107,19 +109,19 @@ end
     using PosDefManifold
     # Generate 10 random numbers distributed as a chi-square with 2 df.
     ν=[randχ²(2) for i=1:10]
-    arithmetic_mean=mean(Euclidean, ν)
+    arithmetic_sd=std(Euclidean, ν) # mean not provided
     geometric_mean=mean(Fisher, ν)
-    arithmetic_sd=std(Euclidean, ν)
-    geometric_sd=std(Fisher, ν)
+    geometric_sd=std(Fisher, ν, mean=geometric_mean) # mean provided
 
 """
 function std(metric::Metric, ν::Vector{T};
-             corrected::Bool=true) where T<:RealOrComplex
+             corrected::Bool=true,
+             mean=nothing) where T<:RealOrComplex
 
-    if      metric == Euclidean     return std(ν; corrected=corrected)
+    if      metric == Euclidean     return std(ν; corrected=corrected, mean=mean)
 
     elseif  metric == Fisher
-            μ=mean(Fisher, ν)
+            mean==nothing ? μ=mean(Fisher, ν) : μ=mean
             if corrected return exp(√(𝚺(log(w/μ)^2 for w in ν)/(length(ν)-1)))
             else         return exp(√(𝛍(log(w/μ)^2 for w in ν))) end
 
