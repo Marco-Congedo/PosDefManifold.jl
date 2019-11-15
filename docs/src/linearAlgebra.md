@@ -26,7 +26,7 @@
 |:---------- |:----------- |
 | [`typeofMatrix`](@ref), `typeofMat` | Return the type of the matrix argument |
 | [`typeofVector`](@ref), `typeofVec` | Return the type of the matrix vector argument |
-| [`dim`](@ref)| length of the dimansions of matrices and vectors of matrices |
+| [`dim`](@ref)| length of the dimensions of matrices and vectors of matrices |
 
 
 ⋅

@@ -1026,6 +1026,7 @@ spEmb=spectralEmbedding
     <
     w::Vector=[],
     ✓w=true,
+    tol::Real=0.,
     ⍰=false,
     ⏩=false >)
 
@@ -1066,10 +1067,14 @@ spEmb=spectralEmbedding
 
  Adopting the `Fisher`, `logdet0` and `Wasserstein` metric in (3) and the
  `logdet0` metric in (4), the mean is computed by means of an iterative
- algorithm and information on its convergence is displayed in the REPL.
+ algorithm. The convergence for these algorithm is required with a tolerance
+ given by *<optional keyword argument>* `tol`. Information on the convergence
+ is displayed in the REPL at each iteration.
  For suppressing this information and for more options for computing these means
  call directly functions [`geometricMean`](@ref), [`logdet0Mean`](@ref)
  and [`wasMean`](@ref). See also the robust function [`geometricpMean`](@ref).
+ For the the meaning of the `tol` default value see the documentation of
+ these functions.
 
  For (3) and (4), if `⏩=true` is passed as *<optional keyword argument>*,
  the computation of the mean is multi-threaded.
@@ -1150,22 +1155,23 @@ mean(metric::Metric, D::𝔻{T}, E::𝔻{T}) where T<:Real = geodesic(metric, D,
 function mean(metric::Metric, 𝐏::ℍVector;
               w::Vector=[],
               ✓w=true,
+              tol::Real=0.,
               ⍰=false,
               ⏩=false)
 
     # iterative solutions
     if  metric == Fisher
-        (G, iter, conv) =   gMean(𝐏; w=w, ✓w=✓w, ⍰=⍰, ⏩=⏩);
+        (G, iter, conv) =   gMean(𝐏; w=w, ✓w=✓w, tol=tol, ⍰=⍰, ⏩=⏩);
         return G
     end
 
     if  metric == logdet0
-        (G, iter, conv) = ld0Mean(𝐏; w=w, ✓w=✓w, ⍰=⍰, ⏩=⏩);
+        (G, iter, conv) = ld0Mean(𝐏; w=w, ✓w=✓w, tol=tol, ⍰=⍰, ⏩=⏩);
         return G
     end
 
     if  metric == Wasserstein
-        (G, iter, conv) = wasMean(𝐏; w=w, ✓w=✓w, ⍰=⍰, ⏩=⏩);
+        (G, iter, conv) = wasMean(𝐏; w=w, ✓w=✓w, tol=tol, ⍰=⍰, ⏩=⏩);
         return G
     end
 
@@ -1239,7 +1245,7 @@ function mean(metric::Metric, 𝐃::𝔻Vector;
 
     # iterative solutions
     if metric == logdet0
-        (G, iter, conv) = ld0Mean(𝐃; w=w, ✓w=✓w, ⍰=⍰, ⏩=⏩); return G
+        (G, iter, conv) = ld0Mean(𝐃; w=w, ✓w=✓w, tol=tol, ⍰=⍰, ⏩=⏩); return G
     end
 
     # closed-form expressions and exit
@@ -1505,7 +1511,7 @@ end # function
     init=nothing,
     tol::Real=0,
     maxiter::Int=500,
-    adaptStepSize=true,
+    adaptStepSize::Bool=true,
     ⍰=false,
     ⏩=false >)
 ```
@@ -1621,7 +1627,7 @@ function geometricMean( 𝐏::ℍVector;
                         init=nothing,
                         tol::Real=0,
                         maxiter::Int=200,
-                        adaptStepSize=true,
+                        adaptStepSize::Bool=true,
                         ⍰=false,
                         ⏩=false)
 
