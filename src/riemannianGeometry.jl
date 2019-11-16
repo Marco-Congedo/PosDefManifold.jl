@@ -1023,12 +1023,13 @@ spEmb=spectralEmbedding
     (2) mean(metric::Metric, D::𝔻{T}, E::𝔻{T}) where T<:Real
 
     (3) mean(metric::Metric, 𝐏::ℍVector;
-    <
-    w::Vector=[],
-    ✓w=true,
-    tol::Real=0.,
-    ⍰=false,
-    ⏩=false >)
+        <
+        w::Vector=[],
+        ✓w=true,
+        init::Union{ℍ, Nothing}=nothing,
+        tol::Real=0.,
+        ⍰=false,
+        ⏩=false >)
 
     (4) mean(metric::Metric, 𝐃::𝔻Vector;
     < same optional keyword arguments as in (3) >)
@@ -1051,7 +1052,7 @@ spEmb=spectralEmbedding
  with optional non-negative real weights ``w={w_1,...,w_k}`` and using the
  specified `metric`as in (1).
 
- (5) [Fréchet mean](@ref) of an 1d array ``𝐃`` of ``k`` positive definite
+ (4) [Fréchet mean](@ref) of an 1d array ``𝐃`` of ``k`` positive definite
  matrices ``𝐃={D_1,...,D_k}`` of [𝔻Vector type](@ref),
  with optional non-negative real weights ``w={w_1,...,w_k}`` and using the
  specified `metric`as in (1).
@@ -1067,21 +1068,22 @@ spEmb=spectralEmbedding
 
  Adopting the `Fisher`, `logdet0` and `Wasserstein` metric in (3) and the
  `logdet0` metric in (4), the mean is computed by means of an iterative
- algorithm. The convergence for these algorithm is required with a tolerance
- given by *<optional keyword argument>* `tol`. Information on the convergence
- is displayed in the REPL at each iteration.
- For suppressing this information and for more options for computing these means
- call directly functions [`geometricMean`](@ref), [`logdet0Mean`](@ref)
- and [`wasMean`](@ref). See also the robust function [`geometricpMean`](@ref).
- For the the meaning of the `tol` default value see the documentation of
- these functions.
+ algorithm. A particular initialization for these algorithms can be
+ provided passing an Hermitian matrix as *<optional keyword argument>* `init`.
+ The convergence for these algorithm is required with a tolerance
+ given by *<optional keyword argument>* `tol`.
+ if `⍰=true` the covergence attained at each iteration is printed.
+ Other information such as if the algorithm has diverged is also printed.
+ For more options in computing these means call directly
+ functions [`geometricMean`](@ref), [`logdet0Mean`](@ref)
+ and [`wasMean`](@ref), which are called hereby.
+ For the meaning of the `tol` default value see the documentation of
+ these functions. See also the robust mean function [`geometricpMean`](@ref),
+ which cannot be called from here. Notice that arguments `init` and `tol`
+ have an effect only for the aferomentioned metrics in methods (3) and (4).
 
  For (3) and (4), if `⏩=true` is passed as *<optional keyword argument>*,
- the computation of the mean is multi-threaded.
-
- For (3) and (4), if `⍰=true` and the mean is found by an itartive algorithm,
- the covergence attained at each iteration is printed. Other information
- such as if the algorithm has diverged is printed.
+ the computation of the mean is multi-threaded for all metrics.
 
 !!! warning "Multi-Threading"
     [Multi-threading](https://docs.julialang.org/en/v1/manual/parallel-computing/#Multi-Threading-(Experimental)-1)
@@ -1155,23 +1157,24 @@ mean(metric::Metric, D::𝔻{T}, E::𝔻{T}) where T<:Real = geodesic(metric, D,
 function mean(metric::Metric, 𝐏::ℍVector;
               w::Vector=[],
               ✓w=true,
+              init::Union{ℍ, Nothing}=nothing,
               tol::Real=0.,
               ⍰=false,
               ⏩=false)
 
     # iterative solutions
     if  metric == Fisher
-        (G, iter, conv) =   gMean(𝐏; w=w, ✓w=✓w, tol=tol, ⍰=⍰, ⏩=⏩);
+        (G, iter, conv) =   gMean(𝐏; w=w, ✓w=✓w, init=init, tol=tol, ⍰=⍰, ⏩=⏩);
         return G
     end
 
     if  metric == logdet0
-        (G, iter, conv) = ld0Mean(𝐏; w=w, ✓w=✓w, tol=tol, ⍰=⍰, ⏩=⏩);
+        (G, iter, conv) = ld0Mean(𝐏; w=w, ✓w=✓w, init=init, tol=tol, ⍰=⍰, ⏩=⏩);
         return G
     end
 
     if  metric == Wasserstein
-        (G, iter, conv) = wasMean(𝐏; w=w, ✓w=✓w, tol=tol, ⍰=⍰, ⏩=⏩);
+        (G, iter, conv) = wasMean(𝐏; w=w, ✓w=✓w, init=init, tol=tol, ⍰=⍰, ⏩=⏩);
         return G
     end
 
@@ -1240,12 +1243,14 @@ end # function
 function mean(metric::Metric, 𝐃::𝔻Vector;
               w::Vector=[],
               ✓w=true,
+              init::Union{ℍ, Nothing}=nothing,
+              tol::Real=0.,
               ⍰=false,
               ⏩=false)
 
     # iterative solutions
     if metric == logdet0
-        (G, iter, conv) = ld0Mean(𝐃; w=w, ✓w=✓w, tol=tol, ⍰=⍰, ⏩=⏩); return G
+        (G, iter, conv) = ld0Mean(𝐃; w=w, ✓w=✓w, init=init, tol=tol, ⍰=⍰, ⏩=⏩); return G
     end
 
     # closed-form expressions and exit
