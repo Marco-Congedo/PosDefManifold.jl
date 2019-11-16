@@ -2647,9 +2647,11 @@ end
 
 
 """
-    vecP(S::ℍ{T}; range::UnitRange=1:size(S, 2)) where T<:RealOrComplex
+    vecP(S::Union{ℍ{T}, Symmetric};
+         range::UnitRange=1:size(S, 2)) where T<:RealOrComplex
 
- *Vectorize* a tangent vector (which is an `Hermitian` matrix) ``S``:  mat ↦ vec.
+ *Vectorize* a tangent vector (which is an `Hermitian` or `Symmetric` matrix)
+ ``S``:  mat ↦ vec.
 
  It gives weight ``1`` to diagonal elements and ``√2`` to off-diagonal elements
  (Barachant et *al.*, 2012)[🎓](@ref).
@@ -2657,15 +2659,18 @@ end
  The result is a vector holding ``n(n+1)/2`` elements, where ``n``
  is the size of ``S``.
 
- ``S`` must be flagged as Hermitian. See [typecasting matrices](@ref).
+ ``S`` must be flagged as `Hermitian` or `Symmetric`.
+ See [typecasting matrices](@ref).
 
- The reverse operation is provided by [`matP`](@ref).
+ The reverse operation is provided by [`matP`](@ref),
+ which always return an `Hermitian` matrix.
 
  If an optional keyword argument `range` is provided,
  the vectorization concerns only the rows (or columns,
  since the input matrix is symmetric or Hermitian)
  in the range. Note that in this case the operation
- cannot be reverted by [`matP`](@ref).
+ cannot be reverted by the [`matP`](@ref), that is,
+ in this case the matrix is 'stuck' in the tangent space.
 
  ## Examples
     using PosDefManifold
@@ -2679,8 +2684,9 @@ end
     # vectorize onlt the first two columns of S
     v=vecP(S; range=1:2)
 """
-vecP(S::ℍ{T}; range::UnitRange=1:size(S, 2)) where T<:RealOrComplex =
-    [(if i==j return S[i, j] else return (S[i, j])*sqrt2 end) for j=range for i=j:size(S, 1)]
+vecP(S::Union{ℍ{T}, Symmetric};
+     range::UnitRange=1:size(S, 2)) where T<:RealOrComplex =
+     [(if i==j return S[i, j] else return (S[i, j])*sqrt2 end) for j=range for i=j:size(S, 1)]
 
 
 """
@@ -2691,9 +2697,11 @@ vecP(S::ℍ{T}; range::UnitRange=1:size(S, 2)) where T<:RealOrComplex =
  This is the function reversing the [`vecP`](@ref) function,
  thus the weighting applied therein is reversed as well.
 
- If ``ς=vecP(S)`` and ``S`` is a ``n⋅n`` Hermitian matrix,
+ If ``ς=vecP(S)`` and ``S`` is a ``n⋅n`` Hermitian or Symmetric matrix,
  ``ς``  is a tangent vector of size ``n(n+1)/2``.
  The result of calling `matP(ς)` is then ``n⋅n`` matrix ``S``.
+ ``S`` is always returned flagged as `Hermitian`.
+
 
  **To Do**: This function may be rewritten more efficiently.
 
