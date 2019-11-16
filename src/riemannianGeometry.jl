@@ -2647,8 +2647,8 @@ end
 
 
 """
-    vecP(S::Union{ℍ{T}, Symmetric};
-         range::UnitRange=1:size(S, 2)) where T<:RealOrComplex
+    vecP(S::Union{ℍ{T}, Symmetric{R}};
+         range::UnitRange=1:size(S, 2)) where T<:RealOrComplex where R<:Real =
 
  *Vectorize* a tangent vector (which is an `Hermitian` or `Symmetric` matrix)
  ``S``:  mat ↦ vec.
@@ -2684,8 +2684,8 @@ end
     # vectorize onlt the first two columns of S
     v=vecP(S; range=1:2)
 """
-vecP(S::Union{ℍ{T}, Symmetric};
-     range::UnitRange=1:size(S, 2)) where T<:RealOrComplex =
+vecP(S::Union{ℍ{T}, Symmetric{R}};
+     range::UnitRange=1:size(S, 2)) where T<:RealOrComplex where R<:Real =
      [(if i==j return S[i, j] else return (S[i, j])*sqrt2 end) for j=range for i=j:size(S, 1)]
 
 
