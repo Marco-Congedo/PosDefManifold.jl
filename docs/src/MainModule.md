@@ -349,7 +349,11 @@ for multi-threaded computations (given by the output of `Threads.nthreads()`).
 In Windows this latter number of threads is set to half the avaiable threads.
 In Linux and OSX defaults to one and is controlled by an environment variable, i.e.,
 
-   `export JULIA_NUM_THREADS=4`
+   `export JULIA_NUM_THREADS=4`.
+
+In Linux, working with the Atom IDE, you also have to
+set to `global` the field found in Atom under
+`Settings(or Preferences)/julia-client/Settings/Julia Options/Number of Threads`.
 
 See this [post](https://discourse.julialang.org/t/issue-number-of-threads/14593), this [post](https://discourse.julialang.org/t/customize-number-of-threads-interactively/11574/2) and julia
 [doc on threads](https://docs.julialang.org/en/v1/manual/parallel-computing/#Multi-Threading-(Experimental)-1).
