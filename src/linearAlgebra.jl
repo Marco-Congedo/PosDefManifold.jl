@@ -47,8 +47,8 @@ end
 function _GetThreads(n::Int, callingFunction::String)
 	threads=Threads.nthreads()
 	threads==1 && @warn "Function "*callingFunction*": Julia is instructed to use only one thread."
-	if n<threads*4
-		@warn "Function "*callingFunction*": the number of operations (n) is too low for taking advantage of multi-threading" threads n
+	if n<=threads
+		#@warn "Function "*callingFunction*": the number of operations (n) is too low for taking advantage of multi-threading" threads n
 		threads=1
 	end
 	return threads
@@ -1141,6 +1141,21 @@ end # mgs function
 	# fVec
 	@benchmark(fVec(mean, log, Pset))				# (1.540 s)
 """
+
+function fVec(f::Function, 𝐏::AnyMatrixVector;
+			  w::Vector=[],
+			  ✓w=false,
+			  allocs=[])
+
+	threads, ranges, 𝐐, v = _fVec_common(𝐏; w=w, ✓w=✓w, allocs=allocs)
+	if isempty(w)
+		@threads for r=1:threads 𝐐[r]=f(𝐏[i] for i in ranges[r]) end
+	else
+		@threads for r=1:threads 𝐐[r]=f(v[i]*𝐏[i] for i in ranges[r]) end
+	end
+    threads==1 ? (return typeofMatrix(𝐏)(𝐐[1])) : (return typeofMatrix(𝐏)(f(𝐐)))
+end
+
 function fVec(f::Function, g::Function, 𝐏::AnyMatrixVector;
 			  w::Vector=[],
 			  ✓w=false,
@@ -1152,14 +1167,8 @@ function fVec(f::Function, g::Function, 𝐏::AnyMatrixVector;
 	else
 		@threads for r=1:threads 𝐐[r]=f(v[i]*g(𝐏[i]) for i in ranges[r]) end
 	end
-    threads==1 ? (return 𝐐[1]) : (return typeofMatrix(𝐏)(f(𝐐)))
+    threads==1 ? (return typeofMatrix(𝐏)(𝐐[1])) : (return typeofMatrix(𝐏)(f(𝐐)))
 end
-
-fVec(f::Function, 𝐏::AnyMatrixVector;
-     w::Vector=[],
-	 ✓w=false,
-	 allocs=[]) =
-  fVec(f, identity, 𝐏; w=w, ✓w=✓w, allocs=allocs)
 
 
 """
@@ -1221,10 +1230,10 @@ fVec(f::Function, 𝐏::AnyMatrixVector;
 	Qset=cong(M, Pset, ℍVector) # = [M*Pset_1*M',...,M*Pset_k*M'] as an ℍVector type
 
 	# recenter the matrices in Pset to their Fisher mean:
-	Qset=cong(invsqrt(mean(Fisher, Pset; ⏩=true)), Pset, ℍVector)
+	Qset=cong(invsqrt(mean(Fisher, Pset)), Pset, ℍVector)
 
 	# as a check, the Fisher mean of Qset is now the identity
-	mean(Fisher, Qset; ⏩=true)≈I ? println("⭐") : println("⛔")
+	mean(Fisher, Qset)≈I ? println("⭐") : println("⛔")
 
 """
 congruence(B::AnyMatrix, P::AnyMatrix, matrixType) = matrixType(B*P*B')
@@ -1458,7 +1467,7 @@ sqr(X::Union{𝕄{T}, 𝕃{T}, 𝔻{S}}) where T<:RealOrComplex where S<:Real = 
 	evalues=false,
 	tol::Real=0,
 	maxiter::Int=300,
-	⍰=false>) where T<:RealOrComplex
+	verbose=false>) where T<:RealOrComplex
 
     powerIterations(L::𝕃{S}, q::Int;
     < same optional keyword arguments in (1)>) where S<:Real
@@ -1480,7 +1489,7 @@ sqr(X::Union{𝕄{T}, 𝕃{T}, 𝔻{S}}) where T<:RealOrComplex where S<:Real = 
  The following are *<optional keyword arguments>*:
  - `tol is the tolerance for the convergence of the power method (see below),
  - `maxiter is the maximum number of iterations allowed for the power method,
- - if `⍰=true, the convergence of all iterations will be printed,
+ - if `verbose=true, the convergence of all iterations will be printed,
  - if `evalues=true, return the 4-tuple ``(Λ, U, iterations, covergence)``,
  - if `evalues=false return the 3-tuple ``(U, iterations, covergence)``.
 
@@ -1508,9 +1517,9 @@ sqr(X::Union{𝕄{T}, 𝕃{T}, 𝔻{S}}) where T<:RealOrComplex where S<:Real = 
     # Generate an Hermitian (complex) matrix
     H=randP(ComplexF64, 10);
     # 3 eigenvectors and eigenvalues
-    U, iterations, convergence=powIter(H, 3, ⍰=true)
+    U, iterations, convergence=powIter(H, 3, verbose=true)
     # all eigenvectors
-    Λ, U, iterations, convergence=powIter(H, size(H, 2), evalues=true, ⍰=true);
+    Λ, U, iterations, convergence=powIter(H, size(H, 2), evalues=true, verbose=true);
     U'*U ≈ I && U*Λ*U'≈H ? println(" ⭐ ") : println(" ⛔ ")
 
     # passing a `Matrix` object
@@ -1525,7 +1534,7 @@ function powerIterations(H::𝕄{T}, q::Int;
   						evalues=false,
 						tol::Real=0,
 						maxiter::Int=300,
-						⍰=false) 			where T<:RealOrComplex
+						verbose=false) 			where T<:RealOrComplex
 
     (n, sqrtn, type) = size(H, 1), √(size(H, 1)), eltype(H)
     tol==0 ? tolerance = √eps(real(type))*1e2 : tolerance = tol
@@ -1535,7 +1544,7 @@ function powerIterations(H::𝕄{T}, q::Int;
     normalizeCol!(U, 1:q)
     💡=similar(U) # 💡 is the poweriteration matrix
     (iter, conv, oldconv) = 1, 0., maxpos
-    ⍰ && @info("Running Power Iterations...")
+    verbose && @info("Running Power Iterations...")
     while true
         # power iteration U-<H*U of the q vectors of U and their Gram-Schmidt Orth.
         type<:Real ? 💡=mgs(BLAS.symm('L', 'L', H, U)) : 💡=mgs(BLAS.gemm('N', 'N', H, U))
@@ -1543,7 +1552,7 @@ function powerIterations(H::𝕄{T}, q::Int;
         (saddlePoint = conv ≈ oldconv)  && @info(msg1, iter)
         (overRun     = iter == maxiter) && @warn(msg2, iter)
         #diverged    = conv > oldconv && @warn(msg3, iter)
-        ⍰ && println("iteration: ", iter, "; convergence: ", conv)
+        verbose && println("iteration: ", iter, "; convergence: ", conv)
         if conv<=tolerance || saddlePoint==true || overRun==true
             break
         else U = 💡 end
@@ -1563,15 +1572,15 @@ powerIterations(H::ℍ{T}, q::Int;
     			evalues=false,
 				tol::Real=0,
 				maxiter::Int=300,
-				⍰=false) 			where T<:RealOrComplex =
-    powIter(Matrix(H), q; evalues=evalues, tol=tol, maxiter=maxiter, ⍰=⍰)
+				verbose=false) 			where T<:RealOrComplex =
+    powIter(Matrix(H), q; evalues=evalues, tol=tol, maxiter=maxiter, verbose=verbose)
 
 powerIterations(L::𝕃{T}, q::Int;
         		evalues=false,
 				tol::Real=0,
 				maxiter::Int=300,
-				⍰=false) 			where T<:Real =
-    powIter(𝕄(L), q; evalues=evalues, tol=tol, maxiter=maxiter, ⍰=⍰)
+				verbose=false) 			where T<:Real =
+    powIter(𝕄(L), q; evalues=evalues, tol=tol, maxiter=maxiter, verbose=verbose)
 
 powIter=powerIterations
 
