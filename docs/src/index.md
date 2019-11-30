@@ -2,7 +2,7 @@
 
 ## Requirements
 
-Julia version ≥ 1.1.1
+Julia version ≥ 1.3
 
 ## Installation
 
