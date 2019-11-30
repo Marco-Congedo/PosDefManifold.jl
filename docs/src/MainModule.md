@@ -343,11 +343,10 @@ the BLAS library should use by:
 
 where `n` is the number of threads.
 By default, **PosDefManifold** reserves to BLAS
-all CPU threads available on your computer (given by the output of `Sys.CPU_THREADS`)
-minus the number threads used by Julia
-for multi-threaded computations (given by the output of `Threads.nthreads()`).
-In Windows this latter number of threads is set to half the avaiable threads.
-In Linux and OSX defaults to one and is controlled by an environment variable, i.e.,
+all CPU threads available on your computer (given by the output of `Sys.CPU_THREADS`).
+The number of threads used by Julia
+for multi-threaded computations is given by the output of function `Threads.nthreads()`.
+In Windows this latter number of threads is set to half the available threads. In Linux and OSX defaults to one and is controlled by an environment variable, i.e.,
 
    `export JULIA_NUM_THREADS=4`.
 
@@ -355,7 +354,10 @@ In Linux, working with the Atom IDE, you also have to
 set to `global` the field found in Atom under
 `Settings(or Preferences)/julia-client/Settings/Julia Options/Number of Threads`.
 
-See this [post](https://discourse.julialang.org/t/issue-number-of-threads/14593), this [post](https://discourse.julialang.org/t/customize-number-of-threads-interactively/11574/2) and julia
+In Windows, set the desired number of threads in the settings
+of the julia-client Juno package.
+
+See for example this [post](https://discourse.julialang.org/t/issue-number-of-threads/14593), this [post](https://discourse.julialang.org/t/customize-number-of-threads-interactively/11574/2) and julia
 [doc on threads](https://docs.julialang.org/en/v1/manual/parallel-computing/#Multi-Threading-(Experimental)-1).
 
 Notice that **PosDefManifold** features many multi-threaded functions and these

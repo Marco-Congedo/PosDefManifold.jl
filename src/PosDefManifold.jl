@@ -1,5 +1,5 @@
 #   Main Module of the  PosDefManifold Package for julia language
-#   v 0.3.5 - last update 6th of November 2019
+#   v 0.3.6 - last update 30th of November 2019
 #
 #   MIT License
 #   Copyright (c) 2019, Marco Congedo, CNRS, Grenobe, France:
@@ -12,7 +12,7 @@ module PosDefManifold
 using LinearAlgebra, Statistics, Base.Threads
 
 # Special instructions and variables
-BLAS.set_num_threads(Sys.CPU_THREADS-Threads.nthreads())
+BLAS.set_num_threads(Sys.CPU_THREADS)
 
 # constants
 const sqrt2     =   √2
@@ -202,6 +202,5 @@ println(" runs on kernel ",Sys.KERNEL," with word size ",Sys.WORD_SIZE,".")
 println(" CPU  Threads: ",Sys.CPU_THREADS)
 # Sys.BINDIR # julia bin directory
 println(" Base.Threads: ", "$(Threads.nthreads())")
-println(" BLAS Threads: ", "$(Sys.CPU_THREADS-Threads.nthreads())", "\n")
-
+println(" BLAS Threads: ", "$(Sys.CPU_THREADS)", "\n")
 end # module

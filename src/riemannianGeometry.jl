@@ -1,5 +1,5 @@
 #    Unit riemannianGeometry.jl, part of PosDefManifold Package for julia language
-#    v 0.3.5 - last update 6th of November 2019
+#    v 0.3.6 - last update 30th of November 2019
 #
 #    MIT License
 #    Copyright (c) 2019, Marco Congedo, CNRS, Grenobe, France:
@@ -53,7 +53,7 @@ function _setVar_IterAlg(𝐏::Union{ℍVector, 𝔻Vector}, w::Vector, ✓w::Bo
     k, n, type, thr = dim(𝐏, 1), dim(𝐏, 2), eltype(𝐏[1]), nthreads()
     n², iter, conv, oldconv, converged, ς = n^2, 1, 0., maxpos, false, 1.
     ⏩ && k>=thr*4 && thr > 1 ? threaded=true : threaded=false
-    tol==0 ? tolerance = √eps(real(type)) : tolerance = tol
+    tol≈0. ? tolerance = √eps(real(type)) : tolerance = tol
     isempty(w) ? v=[] : v = _getWeights(w, ✓w)
     return (k, n, type, thr, n², iter, conv, oldconv, converged, ς, threaded, tolerance, v)
 end
@@ -218,11 +218,11 @@ function geodesic(metric::Metric, D::𝔻{T}, E::𝔻{T}, a::Real) where T<:Real
             @warn("An expression for the geodesic is not available for the Von Neumann metric")
 
     elseif  metric==ChoEuclidean
-            Z=(√D)b + (√E)a;     return Z*Z
+            Z=ℍ(√D)b + ℍ(√E)a;     return Z*Z
 
     elseif  metric==logCholesky # ???
-            LD=√D
-            Z=𝑓𝔻(x->x, LD)*exp((𝑓𝔻(log, √E)a-𝑓𝔻(log, LD)))
+            LD=ℍ(√D)
+            Z=𝑓𝔻(x->x, LD)*exp((𝑓𝔻(log, ℍ(√E))a-𝑓𝔻(log, LD)))
                                  return Z*Z
 
     elseif  metric==Wasserstein  return (b^2)D + (a^2)E + (a*b)(D*E)
@@ -386,7 +386,11 @@ function distanceSqr(metric::Metric, P::ℍ{T}, Q::ℍ{T}) where T<:RealOrComple
 
     elseif metric==logEuclidean return  max(z, ss(ℍ(log(P) - log(Q))))
 
-    elseif metric==Fisher       return  max(z, 𝚺(log.(eigvals(P, Q)).^2))
+    elseif metric==Fisher
+           if  size(P, 1) <= 80 && T<:Real
+                                return  max(z, 𝚺(log.(eigvals(inv(P)*Q)).^2))
+           else                 return  max(z, 𝚺(log.(eigvals(P, Q)).^2))
+           end
 
     elseif metric==logdet0      return  max(z, real(logdet(0.5*(P + Q)) - 0.5*logdet(P * Q)))
 
@@ -399,7 +403,7 @@ function distanceSqr(metric::Metric, P::ℍ{T}, Q::ℍ{T}) where T<:RealOrComple
     elseif metric==Jeffrey      return  max(z, 0.5*(tr(inv(Q), P) + tr(inv(P), Q)) - size(P, 1)) #using formula tr(Q⁻¹P)/2 + tr(P⁻¹Q)/2 -n
 
     elseif metric==VonNeumann              # using formula: tr(PlogP - PlogQ + QlogQ - QlogP)/2=(tr(P(logP - LoqQ)) + tr(Q(logQ - logP)))/2=
-           R=log(P)-log(Q);     return  max(z, 0.5*real(tr(P, R) - tr(Q, R)))  # (tr(P(logP - LoqQ)) - tr(Q(logP - LoqQ)))/2
+           R=ℍ(log(P)-log(Q));  return  max(z, 0.5*real(tr(P, R) - tr(Q, R)))  # (tr(P(logP - LoqQ)) - tr(Q(logP - LoqQ)))/2
 
     elseif metric==Wasserstein
            P½=sqrt(P);          return  max(z, tr(P) + tr(Q) - 2*real(tr(sqrt(ℍ(P½ * Q * P½)))))
@@ -804,7 +808,7 @@ distanceMat(metric::Metric, 𝐏::ℍVector;
 ```
     laplacianEigenMaps(Ω::𝕃{S}, q::Int;
     <
-    tol::Real=0,
+    tol::Real=0.,
     maxiter::Int=300,
     ⍰=false >) where S<:Real
 ```
@@ -871,11 +875,11 @@ distanceMat(metric::Metric, 𝐏::ℍVector;
 
 """
 function laplacianEigenMaps(Ω::𝕃{T}, q::Int;
-                            tol::Real=0,
+                            tol::Real=0.,
                             maxiter::Int=300,
                             ⍰=false)                where T<:Real
     # make a check for q<size(Ω, 1)
-    tol==0 ? tolerance = √eps(T) : tolerance = tol
+    tol≈0. ? tolerance = √eps(T) : tolerance = tol
     (Λ, U, iter, conv) = powIter(Ω, q+1;
                                 evalues=true,
                                 tol=tolerance,
@@ -891,7 +895,7 @@ laplacianEM=laplacianEigenMaps
 ```
     (1) spectralEmbedding(metric::Metric, 𝐏::ℍVector, q::Int, epsilon::Real=0;
     <
-    tol::Real=0,
+    tol::Real=0.,
     maxiter::Int=300,
     densityInvariant=false,
     ⍰=false,
@@ -981,13 +985,13 @@ laplacianEM=laplacianEigenMaps
 
 """
 function spectralEmbedding(type::Type{T}, metric::Metric, 𝐏::ℍVector, q::Int, epsilon::Real=0;
-                           tol::Real=0,
+                           tol::Real=0.,
                            maxiter::Int=300,
                            densityInvariant=false,
                            ⍰=false,
                            ⏩=false)                where T<:Real
 
-    tol==0 ? tolerance = √eps(type) : tolerance = tol
+    tol≈0. ? tolerance = √eps(type) : tolerance = tol
     return (Λ, U, iter, conv) =
             laplacianEM(laplacian(distance²Mat(type, metric, 𝐏, ⏩=⏩), epsilon;
                         densityInvariant=densityInvariant), q;
@@ -997,7 +1001,7 @@ function spectralEmbedding(type::Type{T}, metric::Metric, 𝐏::ℍVector, q::In
 end
 
 spectralEmbedding(metric::Metric, 𝐏::ℍVector, q::Int, epsilon::Real=0;
-                  tol::Real=0,
+                  tol::Real=0.,
                   maxiter::Int=300,
                   densityInvariant=false,
                   ⍰=false,
@@ -1514,7 +1518,7 @@ end # function
     w::Vector=[],
     ✓w=true,
     init=nothing,
-    tol::Real=0,
+    tol::Real=0.,
     maxiter::Int=500,
     adaptStepSize::Bool=true,
     ⍰=false,
@@ -1630,7 +1634,7 @@ function geometricMean( 𝐏::ℍVector;
                         w::Vector=[],
                         ✓w=true,
                         init=nothing,
-                        tol::Real=0,
+                        tol::Real=0.,
                         maxiter::Int=200,
                         adaptStepSize::Bool=true,
                         ⍰=false,
@@ -1673,7 +1677,7 @@ geometricMean(𝐃::𝔻Vector;
               w::Vector=[],
               ✓w=true,
               init=nothing,
-              tol::Real=0,
+              tol::Real=0.,
               ⍰=false,
               ⏩=false) = mean(logEuclidean, 𝐃; w=w, ✓w=false, ⏩=⏩), 1, 0
 
@@ -1688,7 +1692,7 @@ gMean=geometricMean
     w::Vector=[],
     ✓w=true,
     init=nothing,
-    tol::Real=0,
+    tol::Real=0.,
     maxiter::Int=500,
     adaptStepSize=true,
     ⍰=false,
@@ -1820,7 +1824,7 @@ gMean=geometricMean
 function geometricpMean(𝐏::ℍVector, p::Real=goldeninv;
                         w::Vector = [], ✓w = true,
                         init = nothing,
-                        tol::Real = 0,
+                        tol::Real = 0.,
                         maxiter::Int = 500,
                         adaptStepSize=true,
                         ⍰ = false,
@@ -1894,7 +1898,7 @@ gpMean=geometricpMean
     w::Vector=[],
     ✓w=true,
     init=nothing,
-    tol::Real=0,
+    tol::Real=0.,
     maxiter::Int=500,
     ⍰=false,
     ⏩=false >)
@@ -1987,7 +1991,7 @@ function logdet0Mean(𝐏::Union{ℍVector, 𝔻Vector};
                     w::Vector=[],
                     ✓w=true,
                     init=nothing,
-                    tol::Real=0,
+                    tol::Real=0.,
                     maxiter::Int = 500,
                     ⍰=false,
                     ⏩=false)
@@ -2040,7 +2044,7 @@ ld0Mean=logdet0Mean
     w::Vector=[],
     ✓w=true,
     init=nothing,
-    tol::Real=0,
+    tol::Real=0.,
     maxiter::Int=500,
     ⍰=false,
     ⏩=false >)
@@ -2137,7 +2141,7 @@ function wasMean(𝐏::ℍVector;
                 w::Vector=[],
                 ✓w=true,
                 init=nothing,
-                tol::Real=0,
+                tol::Real=0.,
                 maxiter::Int = 500,
                 ⍰=false,
                 ⏩=false)
@@ -2145,7 +2149,6 @@ function wasMean(𝐏::ℍVector;
     (k, n, type, thr, n², iter, conv, oldconv, converged, ς, threaded, tolerance, v) = _setVar_IterAlg(𝐏, w, ✓w, tol, ⏩)
     _giveStartInfo_IterAlg(threaded, ⍰, "wasMean Fixed-Point")
     init == nothing ? M = generalizedMean(𝐏, 0.5; w=v, ✓w=false, ⏩=⏩) : M = ℍ(init)
-    tol==0 ? tolerance = √eps(real(type))*1e2 : tolerance = tol
     💡 = similar(M, type)
     if threaded 𝐐 = similar(𝐏) end
 
@@ -2153,17 +2156,17 @@ function wasMean(𝐏::ℍVector;
         M½, M⁻½ = pow(M, 0.5, -0.5)
         if threaded
             if isempty(w)
-                @threads for i=1:k 𝐐[i] = √(ℍ(M½*𝐏[i]*M½)) end
+                @threads for i=1:k 𝐐[i] = ℍ(√ℍ(M½*𝐏[i]*M½)) end
                 💡 = ℍ(M⁻½ * sqr(fVec(𝛍, 𝐐)) * M⁻½)
             else
-                @threads for i=1:k 𝐐[i] = v[i] * √(ℍ(M½*𝐏[i]*M½)) end
+                @threads for i=1:k 𝐐[i] = v[i] * ℍ(√ℍ(M½*𝐏[i]*M½)) end
                 💡 = ℍ(M⁻½ * sqr(fVec(𝚺, 𝐐)) * M⁻½)
             end
         else
             if isempty(w)
-                💡 = ℍ(M⁻½ * sqr(𝛍(√(ℍ(M½*P*M½)) for P in 𝐏)) * M⁻½)
+                💡 = ℍ(M⁻½ * sqr(ℍ(𝛍(√ℍ(M½*P*M½) for P in 𝐏))) * M⁻½)
             else
-                💡 = ℍ(M⁻½ * sqr(𝚺((√(ℍ(M½*P*M½)) * ω) for (ω, P) in zip(v, 𝐏))) * M⁻½)
+                💡 = ℍ(M⁻½ * sqr(ℍ(𝚺((√ℍ(M½*P*M½) * ω) for (ω, P) in zip(v, 𝐏)))) * M⁻½)
             end
         end
 
@@ -2182,7 +2185,7 @@ function wasMean(𝐏::ℍVector;
 end
 
 wasMean(𝐃::𝔻Vector;
-        w::Vector=[], ✓w=true, init=nothing, tol::Real=0, ⍰=false, ⏩=false) =
+        w::Vector=[], ✓w=true, init=nothing, tol::Real=0., ⍰=false, ⏩=false) =
         generalizedMean(𝐃, 0.5, w=w, ✓w=✓w, ⏩=⏩), 1, 0
 
 
@@ -2193,7 +2196,7 @@ wasMean(𝐃::𝔻Vector;
     w::Vector=[],
     ✓w=true,
     init=nothing,
-    tol::Real=0,
+    tol::Real=0.,
     maxiter::Int=500,
     ⍰=false,
     ⏩=false >)
@@ -2310,7 +2313,7 @@ function powerMean(𝐏::ℍVector, p::Real;
          w::Vector=[],
          ✓w=true,
          init=nothing,
-         tol::Real=0,
+         tol::Real=0.,
          maxiter::Int=500,
          ⍰=false,
          ⏩=false)
@@ -2378,7 +2381,7 @@ powerMean(𝐃::𝔻Vector, p::Real;
           w::Vector=[],
           ✓w=true,
           init=nothing,
-          tol::Real=0,
+          tol::Real=0.,
           maxiter::Int=500,
           ⍰=false,
           ⏩=false) = generalizedMean(𝐃, p; w=w, ✓w=✓w, ⏩=⏩), 1, 0
@@ -2654,7 +2657,9 @@ end
  ``S``:  mat ↦ vec.
 
  It gives weight ``1`` to diagonal elements and ``√2`` to off-diagonal elements
- (Barachant et *al.*, 2012)[🎓](@ref).
+ so as to preserve the norm (Barachant et *al.*, 201E)[🎓](@ref), such as
+
+ ``∥S∥_F=∥vecP(S)∥_F``.
 
  The result is a vector holding ``n(n+1)/2`` elements, where ``n``
  is the size of ``S``.
