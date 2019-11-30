@@ -420,7 +420,7 @@ function tests();
 
     name="distanceSqrMat (I)"; newTest(name);
     for m in metrics
-            L1=distanceSqrMat(Float64, m, 𝐏)
+            L1=distanceSqrMat(Float64, m, 𝐏, ⏩=false)
             manualL1=𝕃{Float64}(diagm(0 => zeros(k)))
             for j=1:k-1, i=j+1:k manualL1[i, j]=distanceSqr(m, 𝐏[i], 𝐏[j]) end
             manualL1≈L1 ? OK() : OH(name*" Real Input, metric "*string(m))
@@ -428,7 +428,7 @@ function tests();
 
     name="distanceSqrMat (I ⏩ )"; newTest(name);
     for m in metrics
-            L2=distanceSqrMat(Float64, m, 𝐏, ⏩=true)
+            L2=distanceSqrMat(Float64, m, 𝐏)
             manualL2=𝕃{Float64}(diagm(0 => zeros(k)))
             for j=1:k-1, i=j+1:k manualL2[i, j]=distanceSqr(m, 𝐏[i], 𝐏[j]) end
             manualL2≈L2 ? OK() : OH(name*" Real Input, metric "*string(m))
@@ -436,7 +436,7 @@ function tests();
 
     name="distanceSqrMat (II)"; newTest(name);
     for m in metrics
-            L3=distanceSqrMat(Float64, m, 𝐏C)
+            L3=distanceSqrMat(Float64, m, 𝐏C, ⏩=false)
             manualL3=𝕃{Float64}(diagm(0 => zeros(kC)))
             for j=1:kC-1, i=j+1:kC manualL3[i, j]=distanceSqr(m, 𝐏C[i], 𝐏C[j]) end
             manualL3≈L3 ? OK() : OH(name*" Complex Input, metric "*string(m))
@@ -444,7 +444,7 @@ function tests();
 
     name="distanceSqrMat (II ⏩ )"; newTest(name);
     for m in metrics
-            L4=distanceSqrMat(Float64, m, 𝐏C, ⏩=true)
+            L4=distanceSqrMat(Float64, m, 𝐏C)
             manualL4=𝕃{Float64}(diagm(0 => zeros(kC)))
             for j=1:kC-1, i=j+1:kC manualL4[i, j]=distanceSqr(m, 𝐏C[i], 𝐏C[j]) end
             manualL4≈L4 ? OK() : OH(name*" Complex Input, metric "*string(m))
@@ -453,7 +453,7 @@ function tests();
 
     name="distanceMat (I)"; newTest(name);
     for m in metrics
-            L5=distanceMat(Float64, m, 𝐏)
+            L5=distanceMat(Float64, m, 𝐏, ⏩=false)
             manualL5=𝕃{Float64}(diagm(0 => zeros(k)))
             for j=1:k-1, i=j+1:k manualL5[i, j]=distance(m, 𝐏[i], 𝐏[j]) end
             manualL5≈L5 ? OK() : OH(name*" Real Input, metric "*string(m))
@@ -461,7 +461,7 @@ function tests();
 
     name="distanceMat (I ⏩ )"; newTest(name);
     for m in metrics
-            L6=distanceMat(Float64, m, 𝐏, ⏩=true)
+            L6=distanceMat(Float64, m, 𝐏)
             manualL6=𝕃{Float64}(diagm(0 => zeros(k)))
             for j=1:k-1, i=j+1:k manualL6[i, j]=distance(m, 𝐏[i], 𝐏[j]) end
             manualL6≈L6 ? OK() : OH(name*" Real Input, metric "*string(m))
@@ -469,7 +469,7 @@ function tests();
 
     name="distanceMat (II)"; newTest(name);
     for m in metrics
-            L7=distanceMat(Float64, m, 𝐏C)
+            L7=distanceMat(Float64, m, 𝐏C, ⏩=false)
             manualL7=𝕃{Float64}(diagm(0 => zeros(kC)))
             for j=1:kC-1, i=j+1:kC manualL7[i, j]=distance(m, 𝐏C[i], 𝐏C[j]) end
             manualL7≈L7 ? OK() : OH(name*" Complex Input, metric "*string(m))
@@ -477,7 +477,7 @@ function tests();
 
     name="distanceMat (II ⏩ )"; newTest(name);
     for m in metrics
-            L8=distanceMat(Float64, m, 𝐏C, ⏩=true)
+            L8=distanceMat(Float64, m, 𝐏C)
             manualL8=𝕃{Float64}(diagm(0 => zeros(kC)))
             for j=1:kC-1, i=j+1:kC manualL8[i, j]=distance(m, 𝐏C[i], 𝐏C[j]) end
             manualL8≈L8 ? OK() : OH(name*" Complex Input, metric "*string(m))
@@ -514,30 +514,30 @@ function tests();
     k=length(𝐃)
     for m=1:length(metrics)
         if m ∉ (6, 7, 9, 10)
-            D1=mean(metrics[m], 𝐃)
+            D1=mean(metrics[m], 𝐃, ⏩=false)
             𝐃H=Vector{Hermitian}(undef, k)
             for i=1:k 𝐃H[i]=Hermitian(Matrix(𝐃[i])) end
-            D2=mean(metrics[m], 𝐃H)
+            D2=mean(metrics[m], 𝐃H, ⏩=false)
             norm(𝕄(D1)-𝕄(D2))/k<0.0001 ? OK() : OH(name*" Real Diagonal Input, metric "*string(m))
         end
     end
 
     name="mean (⏩ )"; newTest(name);
     for m=1:length(metrics)
-            if m ∉ (6, 7, 9, 10) mean(metrics[m], 𝐏; ⏩=true) end end; RUN()
+            if m ∉ (6, 7, 9, 10) mean(metrics[m], 𝐏) end end; RUN()
     for m=1:length(metrics)
-            if m ∉ (7, 9) mean(metrics[m], 𝐃; ⏩=true) end end; RUN()
+            if m ∉ (7, 9) mean(metrics[m], 𝐃) end end; RUN()
 
 
     name="means"; newTest(name);
+    means(logEuclidean, ℍVector₂([𝐏, 𝐐]); ⏩=false); RUN()
+    means(logEuclidean, ℍVector₂([𝐏C, 𝐐C]); ⏩=false); RUN()
+    means(logEuclidean, 𝔻Vector₂([𝐃, 𝐄]); ⏩=false); RUN()
+
+    name="means (⏩ )"; newTest(name);
     means(logEuclidean, ℍVector₂([𝐏, 𝐐])); RUN()
     means(logEuclidean, ℍVector₂([𝐏C, 𝐐C])); RUN()
     means(logEuclidean, 𝔻Vector₂([𝐃, 𝐄])); RUN()
-
-    name="means (⏩ )"; newTest(name);
-    means(logEuclidean, ℍVector₂([𝐏, 𝐐]); ⏩=true); RUN()
-    means(logEuclidean, ℍVector₂([𝐏C, 𝐐C]); ⏩=true); RUN()
-    means(logEuclidean, 𝔻Vector₂([𝐃, 𝐄]); ⏩=true); RUN()
 
 
     name="generalizedMean"; newTest(name);
@@ -560,16 +560,16 @@ function tests();
     ℍ( (ℍ(0.4*PC_^p)+ℍ(1.6*QC_^p))  )^(1/p) ≈ generalizedMean(𝐏2, p; w=w, ✓w=false) ? OK() : OH(name*" Complex Input 5")
     ((𝐃[1]^p+𝐃[2]^p)/2)^(1/p) ≈ generalizedMean(𝔻Vector([𝐃[1], 𝐃[2]]), p) ? OK() : OH(name*" Real Diagonal Input")
 
-    name="generalizedMean(⏩ )"; newTest(name);
-    generalizedMean(𝐏, 0.5; ⏩=true); RUN()
-    generalizedMean(𝐏, 0.5; w=weights, ✓w=false, ⏩=true); RUN()
-    generalizedMean(𝐏C, 0.5; ⏩=true); RUN()
-    generalizedMean(𝐏C, 0.5; w=weights, ✓w=false, ⏩=true); RUN()
-    generalizedMean(𝐃, 0.5; ⏩=true); RUN()
-    generalizedMean(𝐃, 0.5; w=weights, ✓w=false, ⏩=true); RUN()
+    name="generalizedMean"; newTest(name);
+    generalizedMean(𝐏, 0.5; ⏩=false); RUN()
+    generalizedMean(𝐏, 0.5; w=weights, ✓w=false, ⏩=false); RUN()
+    generalizedMean(𝐏C, 0.5; ⏩=false); RUN()
+    generalizedMean(𝐏C, 0.5; w=weights, ✓w=false, ⏩=false); RUN()
+    generalizedMean(𝐃, 0.5; ⏩=false); RUN()
+    generalizedMean(𝐃, 0.5; w=weights, ✓w=false, ⏩=false); RUN()
 
 
-    name="geometricMean"; newTest(name);
+    name="geometricMean(⏩ )"; newTest(name);
     geometricMean(𝐏); RUN()
     geometricMean(𝐏, w=weights, ✓w=false);  RUN()
     geometricMean(𝐏C); RUN()
@@ -577,42 +577,42 @@ function tests();
     geometricMean(𝐃); RUN()
     geometricMean(𝐃, w=weights, ✓w=false); RUN()
 
-    name="geometricMean(⏩ )"; newTest(name);
-    geometricMean(𝐏; ⏩=true); RUN()
-    geometricMean(𝐏; w=weights, ✓w=false, ⏩=true); RUN()
-    geometricMean(𝐏C; ⏩=true); RUN()
-    geometricMean(𝐏C; w=weights, ✓w=false, ⏩=true); RUN()
-    geometricMean(𝐃; ⏩=true); RUN()
-    geometricMean(𝐃, w=weights, ✓w=false, ⏩=true); RUN()
+    name="geometricMean"; newTest(name);
+    geometricMean(𝐏; ⏩=false); RUN()
+    geometricMean(𝐏; w=weights, ✓w=false, ⏩=false); RUN()
+    geometricMean(𝐏C; ⏩=false); RUN()
+    geometricMean(𝐏C; w=weights, ✓w=false, ⏩=false); RUN()
+    geometricMean(𝐃; ⏩=false); RUN()
+    geometricMean(𝐃, w=weights, ✓w=false, ⏩=false); RUN()
 
     name="logdet0Mean"; newTest(name);
     w=[0.5, 0.5]
     P½, P½ⁱ=pow(P_, 0.5, -0.5)
     GM=P½*(P½ⁱ*Q_*P½ⁱ)^0.5*P½  # Fisher mean for k=2
-    ldG, iter, conv = logdet0Mean(ℍVector([P_, Q_])) # logdet0 mean for k=2
+    ldG, iter, conv = logdet0Mean(ℍVector([P_, Q_]); ⏩=false) # logdet0 mean for k=2
     GM ≈ ldG ? OK() : OH(name*" Real Input 1")
-    ldG, iter, conv = logdet0Mean(ℍVector([P_, Q_]); w=w) # weighted logdet0 mean for k=2
+    ldG, iter, conv = logdet0Mean(ℍVector([P_, Q_]); w=w, ⏩=false) # weighted logdet0 mean for k=2
     GM ≈ ldG ? OK() : OH(name*" Real Input 2")
     P½, P½ⁱ=pow(PC_, 0.5, -0.5)
     GM=P½*(P½ⁱ*QC_*P½ⁱ)^0.5*P½  # Fisher mean for k=2
-    ldG, iter, conv = logdet0Mean(ℍVector([PC_, QC_])) # logdet0 mean for k=2
+    ldG, iter, conv = logdet0Mean(ℍVector([PC_, QC_]); ⏩=false) # logdet0 mean for k=2
     GM ≈ ldG ? OK() : OH(name*" Complex Input 1")
-    ldG, iter, conv = logdet0Mean(ℍVector([PC_, QC_]); w=w) # weighted logdet0 mean for k=2
+    ldG, iter, conv = logdet0Mean(ℍVector([PC_, QC_]); w=w, ⏩=false) # weighted logdet0 mean for k=2
     GM ≈ ldG ? OK() : OH(name*" Complex Input 2")
     GM=(inv(𝐃[1])*𝐃[2])^0.5*𝐃[1]  # Fisher mean for k=2
-    ldG, iter, conv = logdet0Mean(𝔻Vector([𝐃[1], 𝐃[2]])) # logdet0 mean for k=2
+    ldG, iter, conv = logdet0Mean(𝔻Vector([𝐃[1], 𝐃[2]]); ⏩=false) # logdet0 mean for k=2
     GM ≈ ldG ? OK() : OH(name*" Real Diagonal Input")
 
     name="logdet0Mean(⏩ )"; newTest(name);
-    logdet0Mean(𝐏; ⏩=true); RUN()
-    logdet0Mean(𝐏; w=weights, ✓w=false, ⏩=true); RUN()
-    logdet0Mean(𝐏C; ⏩=true); RUN()
-    logdet0Mean(𝐏C; w=weights, ✓w=false, ⏩=true); RUN()
-    logdet0Mean(𝐃; ⏩=true); RUN()
-    logdet0Mean(𝐃, w=weights, ✓w=false, ⏩=true); RUN()
+    logdet0Mean(𝐏); RUN()
+    logdet0Mean(𝐏; w=weights, ✓w=false); RUN()
+    logdet0Mean(𝐏C); RUN()
+    logdet0Mean(𝐏C; w=weights, ✓w=false); RUN()
+    logdet0Mean(𝐃); RUN()
+    logdet0Mean(𝐃, w=weights, ✓w=false); RUN()
 
 
-    name="wasMean"; newTest(name);
+    name="wasMean(⏩ )"; newTest(name);
     wasMean(𝐏); RUN()
     wasMean(𝐏; w=weights); RUN()
     wasMean(𝐏C); RUN()
@@ -620,17 +620,17 @@ function tests();
     wasMean(𝐃); RUN()
     wasMean(𝐃; w=weights); RUN()
 
-    name="wasMean(⏩ )"; newTest(name);
-    wasMean(𝐏; ⏩=true); RUN()
-    wasMean(𝐏; w=weights, ✓w=false, ⏩=true); RUN()
-    wasMean(𝐏C; ⏩=true); RUN()
-    wasMean(𝐏C; w=weights, ✓w=false, ⏩=true); RUN()
-    wasMean(𝐃; ⏩=true); RUN()
-    wasMean(𝐃, w=weights, ✓w=false, ⏩=true); RUN()
+    name="wasMean"; newTest(name);
+    wasMean(𝐏; ⏩=false); RUN()
+    wasMean(𝐏; w=weights, ✓w=false, ⏩=false); RUN()
+    wasMean(𝐏C; ⏩=false); RUN()
+    wasMean(𝐏C; w=weights, ✓w=false, ⏩=false); RUN()
+    wasMean(𝐃; ⏩=false); RUN()
+    wasMean(𝐃, w=weights, ✓w=false, ⏩=false); RUN()
 
 
 
-    name="powerMean"; newTest(name);
+    name="powerMean(⏩ )"; newTest(name);
     powerMean(𝐏, 0.5); RUN()
     powerMean(𝐏, 0.5; w=weights); RUN()
     powerMean(𝐏C, 0.5); RUN()
@@ -639,12 +639,12 @@ function tests();
     powerMean(𝐃, 0.5; w=weights); RUN()
 
     name="powerMean(⏩ )"; newTest(name);
-    powerMean(𝐏, 0.5; ⏩=true); RUN()
-    powerMean(𝐏, 0.5; w=weights, ✓w=false, ⏩=true); RUN()
-    powerMean(𝐏C, 0.5; ⏩=true); RUN()
-    powerMean(𝐏C, 0.5; w=weights, ✓w=false, ⏩=true); RUN()
-    powerMean(𝐃, 0.5; ⏩=true); RUN()
-    powerMean(𝐃, 0.5, w=weights, ✓w=false, ⏩=true); RUN()
+    powerMean(𝐏, 0.5; ⏩=false); RUN()
+    powerMean(𝐏, 0.5; w=weights, ✓w=false, ⏩=false); RUN()
+    powerMean(𝐏C, 0.5; ⏩=false); RUN()
+    powerMean(𝐏C, 0.5; w=weights, ✓w=false, ⏩=false); RUN()
+    powerMean(𝐃, 0.5; ⏩=false); RUN()
+    powerMean(𝐃, 0.5, w=weights, ✓w=false, ⏩=false); RUN()
 
 
     name="logMap"; newTest(name);
