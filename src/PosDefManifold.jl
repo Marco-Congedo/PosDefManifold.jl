@@ -1,5 +1,5 @@
 #   Main Module of the  PosDefManifold Package for julia language
-#   v 0.3.8 - last update 30th of November 2019
+#   v 0.3.9 - last update 3rd of December 2019
 #
 #   MIT License
 #   Copyright (c) 2019, Marco Congedo, CNRS, Grenobe, France:

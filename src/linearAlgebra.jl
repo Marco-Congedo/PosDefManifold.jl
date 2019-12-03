@@ -1,5 +1,5 @@
 #   Unit linearAlgebra.jl, part of PosDefManifold Package for julia language
-#   v 0.3.8 - last update 30th of November 2019
+#   v 0.3.9 - last update 3rd of December 2019
 #
 #   MIT License
 #   Copyright (c) 2019, Marco Congedo, CNRS, Grenobe, France:
@@ -45,13 +45,13 @@ end
 
 
 function _GetThreads(n::Int, callingFunction::String)
-	threads=Threads.nthreads()
-	threads==1 && @warn "Function "*callingFunction*": Julia is instructed to use only one thread."
-	if n<=threads
-		#@warn "Function "*callingFunction*": the number of operations (n) is too low for taking advantage of multi-threading" threads n
-		threads=1
-	end
-	return threads
+	Threads.nthreads()==1 && @warn "Function "*callingFunction*": Julia is instructed to use only one thread. See the Tips&Tricks in the documentation (main module section)"
+	thr = n>=Threads.nthreads() ? Threads.nthreads() : 1 #threads=min(Threads.nthreads(), n*2)
+	#if n*2<threads
+	 #  @warn "Function "*callingFunction*": the number of operations (n) should be higher then the number of threads" threads n
+	 #  threads=1
+	#end
+	return thr
 end
 
 function _GetThreadsAndLinRanges(n::Int, callingFunction::String)
@@ -1066,18 +1066,25 @@ end # mgs function
 
  ``(2)\\hspace{6pt}f_{i=1}^{k}(w_ig(P_i))``,
 
- where ``f`` is a linear matrix function iterating over all elements of ``𝐏``,
- typically the `mean` or `sum` function and ``g`` is whatever matrix function
+ where ``f`` is either the `mean` or the `sum` standard julia functions
+ and ``g`` is whatever matrix function
  applying to each matrix ``P_k``, such as `exp`, `log, `sqrt`, etc,
  and [anonymous functions](https://docs.julialang.org/en/v1/manual/functions/#man-anonymous-functions-1).
 
- This function is always **multi-threaded**. It works by partitioning the ``k``
+ This function is **multi-threaded**. It works by partitioning the ``k``
  operations required by the ``f`` function in several groups,
- passing each group to a separate thread and applying the ``f`` function
- again on the intermediate results (that's why ``f`` must be linear).
+ passing each group to a separate thread and combining the result
+ of the intermediate operations.
  This function allows a gain in computational time only when the number of
  matrices (1) and/or their size (2) is high. Use `mean` and `sum` otherwise.
  For the number of threads Julia is instructed to use see [Threads](@ref).
+
+ !!! note "Nota Bene"
+     if ``k``<= the number of threads julia is istructed to use, this
+ 	function will run on a single thread.
+
+     Contrarily to Julia `mean` and `sum` function (v 1.1.0) the `fVec` function
+     returns a matrix of the same type of the matrices in ``𝐏``.
 
  *<optional keword argument>* `allocs` allows to pass pre-allocated memory
  for holding the intermediate result of each thread.
@@ -1092,10 +1099,6 @@ end # mgs function
  normalized so as to sum up to 1, otherwise they are used as they are passed.
  This option is provided to allow calling this function repeatedly without
  normalizing the same weights vector each time. By default `✓w` is false.
-
-!!! note "Nota Bene"
-    Contrarily to Julia `mean` and `sum` function (v 1.1.0) the `fVec` function
-    returns a matrix of the same type of the matrices in ``𝐏``.
 
  ## Examples
 
@@ -1142,34 +1145,35 @@ end # mgs function
 	@benchmark(fVec(mean, log, Pset))				# (1.540 s)
 """
 
-function fVec(f::Function, 𝐏::AnyMatrixVector;
-			  w::Vector=[],
-			  ✓w=false,
-			  allocs=[])
-
-	threads, ranges, 𝐐, v = _fVec_common(𝐏; w=w, ✓w=✓w, allocs=allocs)
-	if isempty(w)
-		@threads for r=1:threads 𝐐[r]=f(𝐏[i] for i in ranges[r]) end
-	else
-		@threads for r=1:threads 𝐐[r]=f(v[i]*𝐏[i] for i in ranges[r]) end
-	end
-    threads==1 ? (return typeofMatrix(𝐏)(𝐐[1])) : (return typeofMatrix(𝐏)(f(𝐐)))
-end
-
 function fVec(f::Function, g::Function, 𝐏::AnyMatrixVector;
 			  w::Vector=[],
 			  ✓w=false,
 			  allocs=[])
-
-	threads, ranges, 𝐐, v = _fVec_common(𝐏; w=w, ✓w=✓w, allocs=allocs)
-	if isempty(w)
-		@threads for r=1:threads 𝐐[r]=f(g(𝐏[i]) for i in ranges[r]) end
-	else
-		@threads for r=1:threads 𝐐[r]=f(v[i]*g(𝐏[i]) for i in ranges[r]) end
+    f≠mean && f≠sum && begin
+	    @error "the `f` argument of the fVec function must be `mean` or `sum`"
+		return
 	end
-    threads==1 ? (return typeofMatrix(𝐏)(𝐐[1])) : (return typeofMatrix(𝐏)(f(𝐐)))
+	threads, ranges, 𝐐, v = _fVec_common(𝐏; w=w, ✓w=✓w, allocs=allocs)
+	#println("treads ", threads)
+	if isempty(w)
+		@threads for r=1:threads 𝐐[r]=sum(g(𝐏[i]) for i in ranges[r]) end
+	else
+		@threads for r=1:threads 𝐐[r]=sum(v[i]*g(𝐏[i]) for i in ranges[r]) end
+	end
+	if f==sum
+    	return threads==1 ? typeofMatrix(𝐏)(𝐐[1]) : typeofMatrix(𝐏)(sum(𝐐))
+    else
+		invn=inv(length(𝐏))
+		return threads==1 ? typeofMatrix(𝐏)(𝐐[1]*invn) : typeofMatrix(𝐏)(sum(𝐐)*invn)
+	end
 end
 
+
+fVec(f::Function, 𝐏::AnyMatrixVector;
+     w::Vector=[],
+	 ✓w=false,
+	 allocs=[]) =
+  fVec(f::Function, identity, 𝐏; w=w, ✓w=✓w, allocs=allocs)
 
 """
 	(1) congruence(B::AnyMatrix, P::AnyMatrix, matrixType)
