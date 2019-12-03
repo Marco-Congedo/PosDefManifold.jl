@@ -1351,7 +1351,7 @@ function spectralFunctions(P::ℍ{T}, func::Function) where T<:RealOrComplex
     F = eigen(P)
     ispos(F.values, msg="function "*string(func)*": at least one eigenvalue is smaller than the default tolerance")
     # optimize by computing only the upper trinagular part
-    return ℍ(F.vectors * 𝔻(func.(F.values)) * F.vectors')
+    return ℍ((F.vectors * 𝔻(func.(F.values))) * F.vectors')
 end
 
 spectralFunctions(D::𝔻{T}, func::Function) where T<:Real = fDiag(func, D)
@@ -1394,7 +1394,7 @@ function pow(P::ℍ{T}, args...) where T<:RealOrComplex # several arguments
     (Λ, U) = evd(P)
     ispos(Λ, msg="function pow: at least one eigenvalue is smaller than the default tolerance")
     # optimize by computing only the upper trinagular part
-    return  (ℍ(U * Λ^p * U') for p in args)
+    return  (ℍ((U * Λ^p) * U') for p in args)
 end
 
 function pow(D::𝔻{T}, args...) where T<:Real  # several arguments
