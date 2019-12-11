@@ -1,5 +1,4 @@
 #    Unit riemannianGeometry.jl, part of PosDefManifold Package for julia language
-#   v 0.4.0 - last update 3rd of December 2019
 #
 #    MIT License
 #    Copyright (c) 2019, Marco Congedo, CNRS, Grenobe, France:
@@ -1144,7 +1143,15 @@ spEmb=spectralEmbedding
     @benchmark(mean(logEuclidean, Pset)) # multi-threaded
 
 """
-mean(metric::Metric, P::ℍ{T}, Q::ℍ{T}) where T<:RealOrComplex = geodesic(metric, P, Q, 0.5)
+mean(metric::Metric, P::ℍ{T}, Q::ℍ{T}) where T<:RealOrComplex =
+    if metric==Fisher && size(P, 1)>=120 #(faster proc: Congedo et al., 2005)
+        λ, B=eigen(P, Q) # the eigenvalues of Q are all 1.0 after diagonalization
+        A=(Diagonal(λ))^(0.25)*inv(B)
+        return ℍ(A'*A)
+    else
+        return geodesic(metric, P, Q, 0.5)
+    end
+
 mean(metric::Metric, D::𝔻{T}, E::𝔻{T}) where T<:Real = geodesic(metric, D, E, 0.5)
 
 function mean(metric::Metric, 𝐏::ℍVector;

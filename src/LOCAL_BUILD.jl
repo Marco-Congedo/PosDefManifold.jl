@@ -29,7 +29,7 @@ begin
 
     push!(LOAD_PATH, srcDir)
 
-    using Documenter, LinearAlgebra, Statistics, Base.Threads,
+    using Documenter, LinearAlgebra, Statistics,
           Revise, PosDefManifold
 
     # add other local moduls to be used, e.g.,

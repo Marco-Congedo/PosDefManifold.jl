@@ -1,5 +1,4 @@
 #    Unit test.jl, part of PosDefManifold Package for julia language
-#    v 0.4.0 - last update 3rd of December 2019
 #
 #    MIT License
 #    Copyright (c) 2019, Marco Congedo, CNRS, Grenobe, France:
