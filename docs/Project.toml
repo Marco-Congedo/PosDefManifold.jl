@@ -7,4 +7,4 @@ Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 #Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 
 [compat]
-Documenter = "~0.23"
+Documenter = "~0.24"
