@@ -1143,7 +1143,6 @@ end # mgs function
 	# fVec
 	@benchmark(fVec(mean, log, Pset))				# (1.540 s)
 """
-
 function fVec(f::Function, g::Function, 𝐏::AnyMatrixVector;
 			  w::Vector=[],
 			  ✓w=false,
