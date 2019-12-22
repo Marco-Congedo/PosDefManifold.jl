@@ -1127,7 +1127,7 @@ end # mgs function
 
 	# pre-allocating memory
 	Pset=randP(100, 1000); # generate 1000 positive definite 100x100 matrices
-	Qset=MatrixVector(repeat([Pset[1]], nthreads()))
+	Qset=MatrixVector(repeat([Pset[1]], Threads.nthreads()))
 	fVec(mean, log, Pset, allocs=Qset)
 
 	# How much computing time we save ?
@@ -1262,20 +1262,45 @@ congruence(B::AnyMatrix, P::AnyMatrix, matrixType) = matrixType(B*P*B')
 
 function congruence(B::AnyMatrix, 𝐏::AnyMatrixVector, matrixVectorType)
 	k, 𝕋 = dim(𝐏, 1), typeofMat(matrixVectorType(undef, 0))
+
+	threads = _GetThreads(k, "congruence")
+	if threads==1
+		return matrixVectorType([congruence(B, P, 𝕋) for P in 𝐏])
+	else
+		𝐐=matrixVectorType(undef, k)
+		@threads for i=1:k 𝐐[i] = congruence(B, 𝐏[i], 𝕋) end
+		return 𝐐
+	end
+
+	# this does not work; it needs julia v1.3 and gives problem
+	# since passing to v1.3 gived problem with fVec function
+	#=
 	𝐐=matrixVectorType(undef, k)
 	@async for i=1:k
 		Threads.@spawn 𝐐[i] = congruence(B, 𝐏[i], 𝕋)
 	end
+	=#
 	return 𝐐
 end
 
 function congruence(B::AnyMatrix, 𝐏::AnyMatrixVector₂, matrixVector₂Type)
 	m, k, 𝕋 = dim(𝐏, 1), dim(𝐏, 2), typeofVec(matrixVector₂Type(undef, 0)) #NB: k is a vector
+	threads = _GetThreads(m, "congruence")
 	𝐐=matrixVector₂Type(undef, m)
+
+	if threads==1
+		for i=1:m 𝐐[i] = congruence(B, 𝐏[i], 𝕋) end
+	else
+		@threads for i=1:m 𝐐[i] = congruence(B, 𝐏[i], 𝕋) end
+	end
+	return 𝐐
+
+	#=
 	@async for i=1:m
 		Threads.@spawn 𝐐[i] = congruence(B, 𝐏[i], 𝕋)
 	end
 	return 𝐐
+	=#
 end
 
 cong=congruence
