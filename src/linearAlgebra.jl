@@ -44,13 +44,8 @@ end
 
 
 function _GetThreads(n::Int, callingFunction::String)
-	Threads.nthreads()==1 && @warn "Function "*callingFunction*": Julia is instructed to use only one thread. See the Tips&Tricks in the documentation (main module section)"
-	thr = n>=Threads.nthreads() ? Threads.nthreads() : 1 #threads=min(Threads.nthreads(), n*2)
-	#if n*2<threads
-	 #  @warn "Function "*callingFunction*": the number of operations (n) should be higher then the number of threads" threads n
-	 #  threads=1
-	#end
-	return thr
+#	Threads.nthreads()==1 && @warn "Function "*callingFunction*": Julia is instructed to use only one thread. See the Tips&Tricks in the documentation (main module section)"
+	return n>=Threads.nthreads() ? Threads.nthreads() : 1 #threads=min(Threads.nthreads(), n*2)
 end
 
 function _GetThreadsAndLinRanges(n::Int, callingFunction::String)
@@ -1175,7 +1170,8 @@ fVec(f::Function, 𝐏::AnyMatrixVector;
 
 """
 	(1) congruence(B::AnyMatrix, P::AnyMatrix, matrixType)
-	(2) congruence(B::AnyMatrix, 𝐏::AnyMatrixVector, vectorType)
+	(2) congruence(B::AnyMatrix, 𝐏::AnyMatrixVector, matrixVectorType)
+	(3) congruence(B::AnyMatrix, 𝐏::AnyMatrixVector₂, matrixVector₂Type)
 
  **alias**: `cong`
 
@@ -1199,17 +1195,34 @@ fVec(f::Function, 𝐏::AnyMatrixVector;
  `Diagonal` or `Matrix` (``B``) and vector of matrices type `ℍVector`, `𝔻Vector`,
  `𝕃Vector` and `𝕄Vector` (``𝐏``). See [Array of Matrices types](@ref).
 
- The result is a vector of matrices of the `vectorType` argument, which must be
- provided and must be one of the following abstract types:
+ The result is a vector of matrices of the `matrixVectorType` argument,
+ which must be provided and must be one of the following abstract types:
  `ℍVector`, `𝔻Vector`, `𝕃Vector` or `𝕄Vector`
  (and not an instance of these types).
 
- Method (2) is **multi-threaded**. See [Threads](@ref).
+ (2) Return a vector of vector of matrices holding the
+ congruent transformations
+
+ ``BP_{mk}B^H``,
+
+ for all ``m`` vectors of ``k[m]`` vectors of matrices in ``𝐏``,
+ for ``B`` and ``𝐏`` any combination of matrix type `Hermitian`,
+ `LowerTriangular`, `Diagonal` or `Matrix` (``B``) and vector of matrices type
+ `ℍVector₂`, `𝔻Vector₂`,
+ `𝕃Vector₂` and `𝕄Vector₂` (``𝐏``). See [Array of Matrices types](@ref).
+
+ The result is a vector of vector of matrices of the `matrixVector₂Type`
+ argument, which must be provided and must be one of the following
+ abstract types: `ℍVector₂`, `𝔻Vector₂`, `𝕃Vector₂` or `𝕄Vector₂`
+ (and not an instance of these types).
+
+ Method (2) and (3) are **multi-threaded**. See [Threads](@ref).
 
 !!! warning "Nota Bene"
 	Types `ℍ`, `𝔻`, `𝕃` or `𝕄` are actually constructors, thus they may
-	modify the result of the congruence(s). It is your responsibility to
-	pick the right argument `matrixType` in (1) and `vectorType` in (2).
+	modify the result of the congruence(s). This greatly expand the
+	possibilities of this function , but it is your responsibility to
+	pick the right argument `matrixType` in (1) and `matrixVectorType` in (2).
 	For example, in (1) if ``B`` and ``P`` are `Hermitian`,
 	calling `cong(B, P, 𝔻)` will actually
 	return the diagonal part of B*P*B' and calling `cong(B, P, 𝕃)` will
@@ -1237,19 +1250,32 @@ fVec(f::Function, 𝐏::AnyMatrixVector;
 	# as a check, the Fisher mean of Qset is now the identity
 	mean(Fisher, Qset)≈I ? println("⭐") : println("⛔")
 
+	# (3)
+    Pset1=randP(4, 100); # generate 100 positive definite 4x4 matrices
+	Pset2=randP(4, 40);
+	Pset=ℍVector₂([Pset1, Pset2]);
+	M=randn(4, 4)
+	Qset=cong(M, Pset, MatrixVector₂)
+	Qset[1][1]≈M*Pset[1][1]*M' ? println("⭐") : println("⛔")
 """
 congruence(B::AnyMatrix, P::AnyMatrix, matrixType) = matrixType(B*P*B')
 
-function congruence(B::AnyMatrix, 𝐏::AnyMatrixVector, vectorType)
-	k, 𝕋 = dim(𝐏, 1), typeofMat(vectorType(undef, 0))
-	threads = _GetThreads(k, "congruence")
-	if threads==1
-		return vectorType([congruence(B, P, 𝕋) for P in 𝐏])
-	else
-		𝐐=vectorType(undef, k)
-		@threads for i=1:k 𝐐[i] = congruence(B, 𝐏[i], 𝕋) end
-		return 𝐐
+function congruence(B::AnyMatrix, 𝐏::AnyMatrixVector, matrixVectorType)
+	k, 𝕋 = dim(𝐏, 1), typeofMat(matrixVectorType(undef, 0))
+	𝐐=matrixVectorType(undef, k)
+	@async for i=1:k
+		Threads.@spawn 𝐐[i] = congruence(B, 𝐏[i], 𝕋)
 	end
+	return 𝐐
+end
+
+function congruence(B::AnyMatrix, 𝐏::AnyMatrixVector₂, matrixVector₂Type)
+	m, k, 𝕋 = dim(𝐏, 1), dim(𝐏, 2), typeofVec(matrixVector₂Type(undef, 0)) #NB: k is a vector
+	𝐐=matrixVector₂Type(undef, m)
+	@async for i=1:m
+		Threads.@spawn 𝐐[i] = congruence(B, 𝐏[i], 𝕋)
+	end
+	return 𝐐
 end
 
 cong=congruence
