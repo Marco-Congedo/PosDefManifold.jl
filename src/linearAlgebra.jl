@@ -1252,10 +1252,11 @@ fVec(f::Function, 𝐏::AnyMatrixVector;
 
 	# (3)
     Pset1=randP(4, 100); # generate 100 positive definite 4x4 matrices
-	Pset2=randP(4, 40)
-	Pset=ℍVector₂([Pset1, Pset2])
+	Pset2=randP(4, 40);
+	Pset=ℍVector₂([Pset1, Pset2]);
 	M=randn(4, 4)
 	Qset=cong(M, Pset, MatrixVector₂)
+	Qset[1][1]≈M*Pset[1][1]*M' ? println("⭐") : println("⛔")
 """
 congruence(B::AnyMatrix, P::AnyMatrix, matrixType) = matrixType(B*P*B')
 
