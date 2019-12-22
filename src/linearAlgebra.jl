@@ -1255,7 +1255,7 @@ fVec(f::Function, 𝐏::AnyMatrixVector;
 	Pset2=randP(4, 40)
 	Pset=ℍVector₂([Pset1, Pset2])
 	M=randn(4, 4)
-	Qset=cong(M, Pset, MatrixVector₂) 
+	Qset=cong(M, Pset, MatrixVector₂)
 """
 congruence(B::AnyMatrix, P::AnyMatrix, matrixType) = matrixType(B*P*B')
 
