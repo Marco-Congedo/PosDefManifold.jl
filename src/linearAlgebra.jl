@@ -1168,10 +1168,11 @@ fVec(f::Function, 𝐏::AnyMatrixVector;
 	 allocs=[]) =
   fVec(f::Function, identity, 𝐏; w=w, ✓w=✓w, allocs=allocs)
 
-"""
+@doc raw"""
 	(1) congruence(B::AnyMatrix, P::AnyMatrix, matrixType)
 	(2) congruence(B::AnyMatrix, 𝐏::AnyMatrixVector, matrixVectorType)
-	(3) congruence(B::AnyMatrix, 𝐏::AnyMatrixVector₂, matrixVector₂Type)
+	(3) congruence(B::AnyMatrix, 𝑷::AnyMatrixVector₂, matrixVector₂Type)
+	(4) congruence(𝐁::AnyMatrixVector, 𝑷::AnyMatrixVector₂, matrixVector₂Type)
 
  **alias**: `cong`
 
@@ -1200,35 +1201,67 @@ fVec(f::Function, 𝐏::AnyMatrixVector;
  `ℍVector`, `𝔻Vector`, `𝕃Vector` or `𝕄Vector`
  (and not an instance of these types).
 
- (2) Return a vector of vector of matrices holding the
+ (3) Return a vector of vector of matrices holding the
  congruent transformations
 
  ``BP_{mk}B^H``,
 
- for all ``m`` vectors of ``k[m]`` vectors of matrices in ``𝐏``,
- for ``B`` and ``𝐏`` any combination of matrix type `Hermitian`,
+ for all ``m`` vectors of ``k[m]`` vectors of matrices in ``𝑷``,
+ for ``B`` and ``𝑷`` any combination of matrix type `Hermitian`,
  `LowerTriangular`, `Diagonal` or `Matrix` (``B``) and vector of matrices type
  `ℍVector₂`, `𝔻Vector₂`,
- `𝕃Vector₂` and `𝕄Vector₂` (``𝐏``). See [Array of Matrices types](@ref).
+ `𝕃Vector₂` and `𝕄Vector₂` (``𝑷``). See [Array of Matrices types](@ref).
 
  The result is a vector of vector of matrices of the `matrixVector₂Type`
  argument, which must be provided and must be one of the following
  abstract types: `ℍVector₂`, `𝔻Vector₂`, `𝕃Vector₂` or `𝕄Vector₂`
  (and not an instance of these types).
 
- Method (2) and (3) are **multi-threaded**. See [Threads](@ref).
+ (4) Return a vector of vector of matrices holding the
+ congruent transformations
 
-!!! warning "Nota Bene"
-	Types `ℍ`, `𝔻`, `𝕃` or `𝕄` are actually constructors, thus they may
-	modify the result of the congruence(s). This greatly expand the
-	possibilities of this function , but it is your responsibility to
-	pick the right argument `matrixType` in (1) and `matrixVectorType` in (2).
-	For example, in (1) if ``B`` and ``P`` are `Hermitian`,
-	calling `cong(B, P, 𝔻)` will actually
-	return the diagonal part of B*P*B' and calling `cong(B, P, 𝕃)` will
-	actually return its lower triangular part. The full congruence can
-	be obtained as an `Hermitian` matrix by `cong(B, P, ℍ)` and as a generic
-	matrix object by `cong(B, P, 𝕄)`.
+ ``B_iP_{ij}B_j^H``, for ``i,j∈[1,...,m]``.
+
+ for ``𝐁`` holding ``m`` matrices and ``𝑷`` holding ``m`` vectors
+ holding ``m`` matrices each.
+ Note that, differently from method (3), here the vectors of ``𝑷``
+ are all of the same length and this is eaxctly the length of ``𝐁``.
+ ``𝐁`` and ``𝑷`` may be any combination of matrix vector type `ℍVector`,
+ `𝔻Vector`, `𝕃Vector` and `𝕄Vector` (``𝐁``) and vector of matrices type
+ `ℍVector₂`, `𝔻Vector₂`, `𝕃Vector₂` and `𝕄Vector₂` (``𝑷``).
+ See [Array of Matrices types](@ref).
+
+ Note that this function computes the following algebraic expression:
+
+ ``\begin{pmatrix} B_1 & \hspace{0.01cm} & 0 \\ \hspace{0.01cm} & \ddots & \hspace{0.01cm} \\ 0 & \hspace{0.01cm} & B_m \end{pmatrix}
+ \begin{pmatrix} C_{11} & \cdots & C_{1m} \\ \vdots & \ddots & \vdots \\ C_{m1} & \cdots & C_{mm} \end{pmatrix}
+ \begin{pmatrix}B_1^T & \hspace{0.01cm} & 0 \\ \hspace{0.01cm} & \ddots & \hspace{0.01cm} \\ 0 & \hspace{0.01cm} & B_m^T\end{pmatrix}``
+.
+
+ The result is a vector of vector of matrices of the `matrixVector₂Type`
+ argument, which must be provided and must be one of the following
+ abstract types: `ℍVector₂`, `𝔻Vector₂`, `𝕃Vector₂` or `𝕄Vector₂`
+ (and not an instance of these types).
+
+ When you pass it to this function, make sure to typecast ``𝐁``
+ as an `ℍVector`, `𝔻Vector`, `𝕃Vector` or `𝕄Vector` type if it is not
+ already created as one of these types. See the example here below
+ and [typecasting matrices](@ref).
+
+ Method (2), (3) and (4) are **multi-threaded**. See [Threads](@ref).
+
+!!! note "Nota Bene"
+    Types `ℍ`, `𝔻`, `𝕃` or `𝕄` are actually constructors, thus they may
+    modify the result of the congruence(s). This greatly expand the
+    possibilities of this function , but it is your responsibility to
+    pick the right argument `matrixType` in (1), `matrixVectorType` in (2)
+	and `matrixVector₂Type` in (3)-(4).
+    For example, in (1) if ``B`` and ``P`` are `Hermitian`,
+    calling `cong(B, P, 𝔻)` will actually
+    return the diagonal part of ``B*P*B'`` and calling `cong(B, P, 𝕃)` will
+    actually return its lower triangular part. The full congruence can
+    be obtained as an `Hermitian` matrix by `cong(B, P, ℍ)` and as a generic
+    matrix object by `cong(B, P, 𝕄)`.
 
  ## Examples
 
@@ -1251,12 +1284,27 @@ fVec(f::Function, 𝐏::AnyMatrixVector;
 	mean(Fisher, Qset)≈I ? println("⭐") : println("⛔")
 
 	# (3)
-    Pset1=randP(4, 100); # generate 100 positive definite 4x4 matrices
-	Pset2=randP(4, 40);
+    Pset1=randP(4, 10); # generate 10 positive definite 4x4 matrices
+	Pset2=randP(4, 8);
 	Pset=ℍVector₂([Pset1, Pset2]);
 	M=randn(4, 4)
 	Qset=cong(M, Pset, MatrixVector₂)
 	Qset[1][1]≈M*Pset[1][1]*M' ? println("⭐") : println("⛔")
+	Qset[1][5]≈M*Pset[1][5]*M' ? println("⭐") : println("⛔")
+	Qset[2][1]≈M*Pset[2][1]*M' ? println("⭐") : println("⛔")
+	Qset[2][4]≈M*Pset[2][4]*M' ? println("⭐") : println("⛔")
+
+
+	# (4)
+    Pset1=randP(4, 2); # generate 2 positive definite 4x4 matrices
+	Pset2=randP(4, 2);
+	Pset=ℍVector₂([Pset1, Pset2]);
+	U=𝕄Vector([randU(4), randU(4)])
+	Qset=cong(U, Pset, MatrixVector₂)
+	Qset[1][1]≈U[1]*Pset[1][1]*U[1]' ? println("⭐") : println("⛔")
+	Qset[1][2]≈U[1]*Pset[1][2]*U[2]' ? println("⭐") : println("⛔")
+	Qset[2][1]≈U[2]*Pset[2][1]*U[1]' ? println("⭐") : println("⛔")
+	Qset[2][2]≈U[2]*Pset[2][2]*U[2]' ? println("⭐") : println("⛔")
 """
 congruence(B::AnyMatrix, P::AnyMatrix, matrixType) = matrixType(B*P*B')
 
@@ -1283,25 +1331,45 @@ function congruence(B::AnyMatrix, 𝐏::AnyMatrixVector, matrixVectorType)
 	return 𝐐
 end
 
-function congruence(B::AnyMatrix, 𝐏::AnyMatrixVector₂, matrixVector₂Type)
-	m, k, 𝕋 = dim(𝐏, 1), dim(𝐏, 2), typeofVec(matrixVector₂Type(undef, 0)) #NB: k is a vector
+
+function congruence(B::AnyMatrix, 𝑷::AnyMatrixVector₂, matrixVector₂Type)
+	m, k, 𝕋 = dim(𝑷, 1), dim(𝑷, 2), typeofVec(matrixVector₂Type(undef, 0)) #NB: k is a vector
 	threads = _GetThreads(m, "congruence")
-	𝐐=matrixVector₂Type(undef, m)
+	𝓠=matrixVector₂Type(undef, m)
 
 	if threads==1
-		for i=1:m 𝐐[i] = congruence(B, 𝐏[i], 𝕋) end
+		for i=1:m 𝓠[i] = congruence(B, 𝑷[i], 𝕋) end
 	else
-		@threads for i=1:m 𝐐[i] = congruence(B, 𝐏[i], 𝕋) end
+		@threads for i=1:m 𝓠[i] = congruence(B, 𝑷[i], 𝕋) end
 	end
-	return 𝐐
+	return 𝓠
 
 	#=
 	@async for i=1:m
-		Threads.@spawn 𝐐[i] = congruence(B, 𝐏[i], 𝕋)
+		Threads.@spawn 𝓠[i] = congruence(B, 𝓟[i], 𝕋)
 	end
-	return 𝐐
+	return 𝓠
 	=#
 end
+
+
+function congruence(𝐁::AnyMatrixVector, 𝑷::AnyMatrixVector₂, matrixVector₂Type)
+	m, k, dummy = dim(𝑷, 1), dim(𝑷, 2), matrixVector₂Type(undef, 0) #NB: k is a vector
+    𝕊, 𝕋=typeofMat(dummy), typeofVec(dummy)
+	threads = _GetThreads(sum(m*k), "congruence")
+	𝓠=matrixVector₂Type(undef, m)
+	for i=1:m 𝓠[i]=𝕋(undef, k[i]) end
+
+	if threads==1
+		for i=1:m, j=1:k[i] 𝓠[i][j] = 𝕊(𝐁[i]*𝑷[i][j]*𝐁[j]') end
+	else
+		@threads for i=1:m
+			@threads for j=1:k[i] 𝓠[i][j] = 𝕊(𝐁[i]*𝑷[i][j]*𝐁[j]') end
+		end
+	end
+	return 𝓠
+end
+
 
 cong=congruence
 

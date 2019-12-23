@@ -39,6 +39,6 @@ begin
 
     # for compiling the documentation
     cd(docsDir);
-    clipboard("""include("make.jl")""")
+    clipboard("""makedocs(sitename="PosDefManifold", modules=[PosDefManifold])""")
     @info("\nhit CTRL+V+ENTER on the REPL for building the documentation.");
 end

@@ -97,11 +97,11 @@ function tests();
     det(det1(P))  ≈ 1 ?  OK() : OH(name*" real case")
     det(det1(PC)) ≈ 1 ?  OK() : OH(name*" complex case")
 
-    name="function tr1"; newTest(name)
+    name="tr1"; newTest(name)
     tr(tr1(P))  ≈ 1 ?    OK() : OH(name*" real case")
     tr(tr1(PC)) ≈ 1 ?    OK() : OH(name*" complex case")
 
-    name="function nearestPosDef"; newTest(name)
+    name="nearestPosDef"; newTest(name)
     nearestPosDef(X); RUN()
     nearestPosDef(XC); RUN()
 
@@ -240,12 +240,36 @@ function tests();
     mean(Pset[i]*fVecw[i] for i=1:64)≈fVec(mean, Pset; w=fVecw) ? OK() : OH(name*" simple weighted mean, real")
     mean(sqrt(Pset[i])*fVecw[i] for i=1:64)≈fVec(mean, sqrt, Pset; w=fVecw) ? OK() : OH(name*" weighted mean, sqrt, real")
 
-    name="congruence"; newTest(name)
+    name="congruence (I)"; newTest(name)
     M=randn(n, n)
-    congruence(M, P, ℍ)≈M*P*M' ? OK() : OH(name*"Matrix method")
+    congruence(M, P, ℍ)≈M*P*M' ? OK() : OH(name)
+
+    name="congruence (II)"; newTest(name)
     Pset=randP(n, n*4)
     Qset=cong(M, Pset, ℍVector)
-    Qset≈[M*Pset[i]*M' for i=1:n*4] ? OK() : OH(name*"Matrix Vector method")
+    Qset≈[M*Pset[i]*M' for i=1:n*4] ? OK() : OH(name)
+
+    name="congruence (III)"; newTest(name)
+    Pset1=randP(4, 10); # generate 10 positive definite 4x4 matrices
+    Pset2=randP(4, 8);
+    Pset=ℍVector₂([Pset1, Pset2]);
+    M=randn(4, 4)
+    Qset=cong(M, Pset, MatrixVector₂)
+    Qset[1][1]≈M*Pset[1][1]*M' &&
+    Qset[1][5]≈M*Pset[1][5]*M' &&
+    Qset[2][1]≈M*Pset[2][1]*M' &&
+    Qset[2][4]≈M*Pset[2][4]*M' ? OK() : OH(name)
+
+    name="congruence (IV)"; newTest(name)
+    Pset1=randP(4, 2); # generate 2 positive definite 4x4 matrices
+    Pset2=randP(4, 2);
+    Pset=ℍVector₂([Pset1, Pset2]);
+    U=𝕄Vector([randU(4), randU(4)])
+    Qset=cong(U, Pset, MatrixVector₂)
+    Qset[1][1]≈U[1]*Pset[1][1]*U[1]' &&
+    Qset[1][2]≈U[1]*Pset[1][2]*U[2]' &&
+    Qset[2][1]≈U[2]*Pset[2][1]*U[1]' &&
+    Qset[2][2]≈U[2]*Pset[2][2]*U[2]' ? OK() : OH(name)
 
     ## 8. Spectral decompositions of positive matrices
 
