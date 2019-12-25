@@ -41,12 +41,12 @@ Thus, a Riemannian metric turns the metric space ``(``**P**``, δ^2)`` into a Ri
 
 ![Figure 1](assets/Fig1.jpg)
 Figure 1. Schematic illustration of the Riemannian manifold of positive definite matrices. Left: geodesic relying points ``P`` and ``Q`` passing through its-mid-point (mean) ``G`` (green curve), tangent space at point ``G`` with tangent vectors to geodesic from ``G`` to ``P`` and from ``G`` to ``Q`` (blue arrowed lines) and distance ``δ(G, Q)``.
-Right: the center of mass (also named mean) ``G`` of points ``P1,…,P4`` defined as the point minimizing the sum of the four squared distances ``δ2(G, P_i)``, for ``i={1,…,4}``.
+Right: the center of mass (also named mean) ``G`` of points ``P_1,…,P_4`` defined as the point minimizing the sum of the four squared distances ``δ2(G, P_i)``, for ``i={1,…,4}``.
 
 ## geodesic
 
 The key object in the **P** manifold is the **geodesic**, the shortest path joining two points ``P`` and ``Q`` on the manifold, analogous to straight lines in the Euclidean space (Fig. 1). The gedesic equation with arclength ``0≤a≤1`` is the equation
-of the points along the path, where with ``a=0`` we stay at ``P`` and with ``a=1``
+of the points along the path, denoted ``\gamma(P, Q, a)`` where with ``a=0`` we stay at ``P`` and with ``a=1``
 we move all the way to ``Q``.
 The points along the geodesic in between ``P`` and ``Q`` ``(0<a<1)``
 can be understood as *weighted means* of ``P`` and ``Q``. For example,
@@ -100,8 +100,8 @@ The most important invariance properties are:
 
 | invariance | effect on distance ``δ(P,Q)`` | effect on mean ``G\{P_i\}``|
 |:----------:| ----------- | ----------- |
-|rotation|``δ(P,Q)=δ(U^*PU,U^*QU)``|``G\{U^*P_iU\}=U^*G\{P_i\}U``|
-|affinity|``δ(P,Q)=δ(B^*PB,B^*QB)``|``G\{B^*P_iB\}=B^*G\{P_i\}B``|
+|rotation|``δ(P,Q)=δ(U^HPU,U^HQU)``|``G\{U^HP_iU\}=U^HG\{P_i\}U``|
+|affinity|``δ(P,Q)=δ(B^HPB,B^HQB)``|``G\{B^HP_iB\}=B^HG\{P_i\}B``|
 |inversion|``δ(P,Q)=δ(P^{-1},Q^{-1})``|``G\{P_i^{-1}\}=G^{-1}\{P_i\}``|
 for any unitary ``U`` unitary and non-singular ``B``.
 
@@ -118,7 +118,7 @@ Ten of them are implemented in **PosDefManifold** and two of them are Riemannian
 - *weighted Fréchet mean* ``G(P,w)`` of a set of ``k>2`` points ``\{P_1,...,P_k\}`` with associated real non-negative weights ``\{w_1,...,w_k\}`` summing up to 1.
 
 !!! note "Nota Bene"
-    In the following, the weights ``\{w_1,...,w_k\}`` are always supposed summing up to 1, superscript ``*`` indicate conjugate transpose (or just transpose if the matrix is real) and if ``a`` is the arclength of a geodesic, we define for convenience ``b=1-a``.
+    In the following, the weights ``\{w_1,...,w_k\}`` are always supposed summing up to 1, superscript ``H`` indicate conjugate transpose (or just transpose if the matrix is real) and if ``a`` is the arclength of a geodesic, we define for convenience ``b=1-a``.
 
 ### Euclidean
 
@@ -159,7 +159,7 @@ lower triangular [Cholesky factor](https://bit.ly/1KFkeCN) of ``P``, then
 
 | geodesic | Fréchet mean |
 |:----------|:-----------|
-|``(bL_P+aL_Q)(bL_{P}+aL_{Q})^*``|``\big(\sum_{i=1}^{k}w_i L_{P_i}\big)\big(\sum_{i=1}^{k}w_i L_{P_i}\big)^*``|
+|``(bL_P+aL_Q)(bL_{P}+aL_{Q})^H``|``\big(\sum_{i=1}^{k}w_i L_{P_i}\big)\big(\sum_{i=1}^{k}w_i L_{P_i}\big)^H``|
 
 ### log Euclidean
 If matrices ``\{P_1,...,P_k\}`` all pair-wise commute, then this metric coincides
@@ -181,7 +181,7 @@ has been proposed in Congedo et *al.* (2015)[🎓](@ref).
 
 ### log Cholesky
 
-It is a recently proposed distance in **P**. Like the [Cholesky Euclidean](@ref) metric here above, it exploits the diffeomorphism between matrices in **P** and their Cholesky factor, such that ``L_PL_P^*=P``, thanks to the fact that the Cholesky factor is unique and that the map is smooth (Lin, 2019)[🎓](@ref).
+It is a recently proposed distance in **P**. Like the [Cholesky Euclidean](@ref) metric here above, it exploits the diffeomorphism between matrices in **P** and their Cholesky factor, such that ``L_PL_P^H=P``, thanks to the fact that the Cholesky factor is unique and that the map is smooth (Lin, 2019)[🎓](@ref).
 The mean has the same determinant as the Fisher and log-Euclidean mean.
 
 Let ``L_X``,``S_X`` and ``D_X``
@@ -194,7 +194,7 @@ and the diagonal part of ``X``, respectively (hence, ``S_X+D_X=L_X``), then
 
 **geodesic**: ``S_P+a(S_Q-S_P)+D_P\hspace{2pt}\textrm{exp}\big(a\textrm{log}D_Q-a\textrm{log}D_P\big)``
 
-**Fréchet mean**: ``TT^*``, where
+**Fréchet mean**: ``TT^H``, where
 ``T=\sum_{i=1}^{k}w_iS_{P_i}+\sum_{i=1}^{k}w_i\textrm{log}D_{P_i}``
 
 ### Fisher
@@ -231,22 +231,22 @@ The ‘centrality’ of this mean among a wide family of divergence-based means
 can be appreciated in Fig. 4 of Cichocki et *al.* (2015)[🎓](@ref).
 
 The geometric mean ``G`` of two matrices ``P`` and ``Q`` is
-denoted shortly as ``P\textrm{#}Q``. Currently it is an object
+denoted ``\gamma(P, Q, 1/2)``. Currently it is an object
 of intense study because of its interesting mathematical properties.
 For instance,
 - it is the unique solution to Riccati equation ``GQ^{-1}G=P``
-- it is equal to ``F^{-*}D_1^{1/2}D_2^{1/2}F^{-1}`` for whatever joint diagonalizer ``F`` of ``P`` and ``Q``, *i.e.*, for whatever matrix ``F`` satisfying ``F^*PF=D_1`` and ``F^*QF=D_2``, with ``D_1``, ``D_1`` non-singular diagonal matrices (Congedo et *al.*, 2015)[🎓](@ref).
+- it is equal to ``F^{-H}D_1^{1/2}D_2^{1/2}F^{-1}`` for whatever joint diagonalizer ``F`` of ``P`` and ``Q``, *i.e.*, for whatever matrix ``F`` satisfying ``F^HPF=D_1`` and ``F^HQF=D_2``, with ``D_1``, ``D_1`` non-singular diagonal matrices (Congedo et *al.*, 2015)[🎓](@ref).
 - it enjoys all 10 properties of means postulated in the seminal work of Ando et *al.* (2010)[🎓](@ref).
 
 When ``P`` and ``Q`` commutes, the Fisher mean of two matrices reduces to
 ``P^{1/2}Q^{1/2}``, which indeed in this case is the log-Euclidean mean
 ``\frac{1}{2}\textrm{log}P + \frac{1}{2}\textrm{log}Q``.
 
-The Fisher geodesic equation is usually denoted ``P\textrm{#}_aQ``.
-Note that ``I\textrm{#}_aP=P^a`` and ``P\textrm{#}_aI=P^{b}``, where ``b=1-a``.
+We denote the Fisher geodesic equation as ``\gamma(P, Q, a)``.
+Note that ``\gamma(I, P, a)=P^a`` and ``\gamma(P, I, a)=P^{b}``, where ``b=1-a``.
 
-Fisher geodesic equation verifies ``P\textrm{#}_aQ=Q\textrm{#}_{b}P``
-and ``(P\textrm{#}_aQ)^{-1}=P^{-1}\textrm{#}_aQ^{-1}``.
+Fisher geodesic equation verifies ``\gamma(P, Q, a)=\gamma(Q, P, b)``
+and ``(\gamma(P, Q, a))^{-1}=\gamma(P{-1}, Q{-1}, a)``.
 
 An interesting property of the Fisher metric is that using its
 geodesic equation we can extrapolate positive matrices, always
@@ -268,10 +268,9 @@ of power means of scalars (also known as Hölder means or
 [generalized means](https://bit.ly/2Fpjpp0)).
 The family of power means ``G`` with parameter ``p`` satisfies equation
 
-``G=\sum_{i=1}^{k}w_i\big(G\textrm{#}_pP_i\big)``,
+``G=\sum_{i=1}^{k}w_i\gamma(G, P, p)``,
 
-where``G\textrm{#}_pP_i`` is the Fisher geodesic equation we have discussed here
-above talking about the [Fisher](@ref) metric. In particular:
+where``𝛾(G, P, p)`` is the Fisher geodesic equation we have discussed here above talking about the [Fisher](@ref) metric. In particular:
 
 - with ``p=-1`` this is the harmonic mean (see the [inverse Euclidean](@ref) metric)
 - with ``p=+1`` this is the arithmetic mean (see the [Euclidean](@ref) metric)
@@ -289,7 +288,9 @@ but only the geometric mean enjoy also the inversion invariance.
 The power mean with ``p=\frac{1}{2}`` is the solution of the [Fréchet mean](@ref)
 problem using the following divergence (Bhatia, Gaubert and Jain, 2019)[🎓](@ref)
 
-``δ^2(P,Q)=\textrm{tr}(P+Q)-2\textrm{tr}P\textrm{#}Q = \textrm{tr}(\textrm{arithm. mean}(P, Q)) – \textrm{tr}(\textrm{geom. mean}(P, Q)).``
+``δ^2(P,Q)=\textrm{tr}(P+Q)-2\textrm{tr}\gamma(G, P, 1/2) = \textrm{tr}(\textrm{arithm. mean}(P, Q)) – \textrm{tr}(\textrm{geom. mean}(P, Q)).``
+
+
 
 
 ### generalized means
