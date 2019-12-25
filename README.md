@@ -16,6 +16,8 @@ For **machine learning** in **P** see [PosDefManifoldML.jl](https://github.com/M
 
 For **optimization** in **P** see [Manopt.jl](http://www.manoptjl.org/stable/).
 
+See also [Manifolds.jl](https://github.com/JuliaNLSolvers/Manifolds.jl).
+
 For similar code resources in other programming languages see [here](https://sites.google.com/site/marcocongedo/science/code-resources).
 
 ## About the author
