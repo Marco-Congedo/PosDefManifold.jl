@@ -231,7 +231,7 @@ The ‘centrality’ of this mean among a wide family of divergence-based means
 can be appreciated in Fig. 4 of Cichocki et *al.* (2015)[🎓](@ref).
 
 The geometric mean ``G`` of two matrices ``P`` and ``Q`` is
-denoted ``\gamma(P, Q, 1/2)``. Currently it is an object
+denoted ``\gamma(P, Q, \frac{1}{2})``. Currently it is an object
 of intense study because of its interesting mathematical properties.
 For instance,
 - it is the unique solution to Riccati equation ``GQ^{-1}G=P``
@@ -246,7 +246,7 @@ We denote the Fisher geodesic equation as ``\gamma(P, Q, a)``.
 Note that ``\gamma(I, P, a)=P^a`` and ``\gamma(P, I, a)=P^{b}``, where ``b=1-a``.
 
 Fisher geodesic equation verifies ``\gamma(P, Q, a)=\gamma(Q, P, b)``
-and ``(\gamma(P, Q, a))^{-1}=\gamma(P{-1}, Q{-1}, a)``.
+and ``(\gamma(P, Q, a))^{-1}=\gamma(P^{-1}, Q^{-1}, a)``.
 
 An interesting property of the Fisher metric is that using its
 geodesic equation we can extrapolate positive matrices, always
@@ -270,17 +270,17 @@ The family of power means ``G`` with parameter ``p`` satisfies equation
 
 ``G=\sum_{i=1}^{k}w_i\gamma(G, P, p)``,
 
-where``𝛾(G, P, p)`` is the Fisher geodesic equation we have discussed here above talking about the [Fisher](@ref) metric. In particular:
+where``\gamma(G, P, p)`` is the Fisher geodesic equation we have discussed here above talking about the [Fisher](@ref) metric. In particular:
 
-- with ``p=-1`` this is the harmonic mean (see the [inverse Euclidean](@ref) metric)
-- with ``p=+1`` this is the arithmetic mean (see the [Euclidean](@ref) metric)
-- at the limit of ``p`` evaluated at zero from both side this is the geometric mean (see the [Fisher](@ref) metric).
+* with ``p=-1`` this is the harmonic mean (see the [inverse Euclidean](@ref) metric)
+* with ``p=+1`` this is the arithmetic mean (see the [Euclidean](@ref) metric)
+* at the limit of ``p`` evaluated at zero from both side this is the geometric mean (see the [Fisher](@ref) metric).
 
 Thus, the family of power means continuously interpolate between the arithmetic and harmonic mean passing through the the geometric mean.
 
 Power means are the unique positive definite solution of (Yamazaki, 2019)[🎓](@ref)
 
-``\sum_{i=1}^{k}w_i\big(G^{-1/2} P_i G^{-1/2}\big)^p=I.``.
+``\sum_{i=1}^{k}w_i\big(G^{-1/2} P_i G^{-1/2}\big)^p=I``.
 
 All power means enjoy the congruence invariance (hence the rotation invariance),
 but only the geometric mean enjoy also the inversion invariance.
@@ -288,7 +288,7 @@ but only the geometric mean enjoy also the inversion invariance.
 The power mean with ``p=\frac{1}{2}`` is the solution of the [Fréchet mean](@ref)
 problem using the following divergence (Bhatia, Gaubert and Jain, 2019)[🎓](@ref)
 
-``δ^2(P,Q)=\textrm{tr}(P+Q)-2\textrm{tr}\gamma(G, P, 1/2) = \textrm{tr}(\textrm{arithm. mean}(P, Q)) – \textrm{tr}(\textrm{geom. mean}(P, Q)).``
+``δ^2(P,Q)=\textrm{tr}(P+Q)-2\textrm{tr}\gamma(G, P, \frac{1}{2}) = \textrm{tr}(\textrm{arithm. mean}(P, Q)) – \textrm{tr}(\textrm{geom. mean}(P, Q)).``
 
 
 
