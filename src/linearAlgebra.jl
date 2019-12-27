@@ -366,12 +366,50 @@ function nearestPosDef(D::𝔻; tol::Real=0.)
 end
 
 function nearestPosDef(X::𝕄; tol::Real=0.)
+	size(X, 1)==size(X, 2) || throw(ArgumentError("PosDefManifold.jl, function nearestPosDef: the input matrix must be square"))
     tol>=0. ? tolerance=tol : tolerance = 0.
 	F = eigen((X+X')/2)
 	λispos = ispos(F.values; 🔔=false, rev=false)
     λispos ? D = 𝔻(F.values) : D = nearestPosDef(𝔻(F.values), tol=tolerance)
 	return λispos ? ℍ(F.vectors * D * F.vectors') : (F.vectors * D * F.vectors')
 end
+
+
+"""
+    nearestOrthogonal(X::AnyMatrix)
+
+**alias**: `nearestOrth`
+
+ Return the nearest orthogonal matrix
+ of a square `Hermitian`, `LowerTriangular`, `Diagonal` or generic `Matrix` `X`
+ (see [AnyMatrix type](@ref)).
+ This is given by
+
+ ``UV^T``,
+
+ where
+
+ ``\\textrm(SVD)=UΛV^T``.
+
+ If `X` is `Diagonal`, return `X`.
+
+ **See also**: [`nearestPosDef`](@ref), [`procrustes`](@ref).
+
+ ## Examples
+    using PosDefManifold
+    U=nearestOrth(randn(5, 5))
+
+"""
+function nearestOrthogonal(X::AnyMatrix)
+	size(X, 1)==size(X, 2) || throw(ArgumentError("PosDefManild.jl, function nearestOrthogonal: the input matrix must be square"))
+	if X isa Diagonal return X
+	else
+		sv = svd(X)
+		return BLAS.gemm('N', 'N', sv.U, sv.Vt) # sv.U * sv.Vt
+	end
+end
+nearestOrth=nearestOrthogonal
+
 
 
 """
