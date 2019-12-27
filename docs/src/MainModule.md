@@ -312,17 +312,15 @@ To see the list of metrics in type `Metric` use:
 
  - Typecasting `Adjoint` matrices:
 
-    Matrix(X')
+    ```Matrix(X')```
 
- - here is how to get an `Hermitian` matrix out of the
- diagonal part of an `Hermitian` matrix H:
+ - here is how to get an `Hermitian` matrix out of the diagonal part of an `Hermitian` matrix H:
 
-    Hermitian(Matrix(Diagonal(H)))
+    ```Hermitian(Matrix(Diagonal(H)))```
 
- - here is how to get a `LowerTriangular` matrix out of an
- `Hermitian` matrix H:
+ - here is how to get a `LowerTriangular` matrix out of an `Hermitian` matrix H:
 
-    LowerTriangular(Matrix(H))
+    ```LowerTriangular(Matrix(H))```
 
  For example, you can use this to pass a full inter-distance matrix to the [`laplacian`](@ref) function to obtain the Laplacian matrix.
 

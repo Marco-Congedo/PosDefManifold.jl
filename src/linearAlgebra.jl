@@ -401,7 +401,7 @@ end
 
 """
 function nearestOrthogonal(X::AnyMatrix)
-	size(X, 1)==size(X, 2) || throw(ArgumentError("PosDefManild.jl, function nearestOrthogonal: the input matrix must be square"))
+	size(X, 1)==size(X, 2) || throw(ArgumentError("PosDefManifold.jl, function nearestOrthogonal: the input matrix must be square"))
 	if X isa Diagonal return X
 	else
 		sv = svd(X)
