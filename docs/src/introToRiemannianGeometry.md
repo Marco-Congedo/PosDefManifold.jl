@@ -41,11 +41,11 @@ Thus, a Riemannian metric turns the metric space ``(``**P**``, δ^2)`` into a Ri
 
 ![Figure 1](assets/Fig1.jpg)
 Figure 1. Schematic illustration of the Riemannian manifold of positive definite matrices. Left: geodesic relying points ``P`` and ``Q`` passing through its-mid-point (mean) ``G`` (green curve), tangent space at point ``G`` with tangent vectors to geodesic from ``G`` to ``P`` and from ``G`` to ``Q`` (blue arrowed lines) and distance ``δ(G, Q)``.
-Right: the center of mass (also named mean) ``G`` of points ``P_1,…,P_4`` defined as the point minimizing the sum of the four squared distances ``δ2(G, P_i)``, for ``i={1,…,4}``.
+Right: the center of mass (also named mean) ``G`` of points ``P_1,…,P_4`` defined as the point minimizing the sum of the four squared distances ``δ²(G, P_i)``, for ``i={1,…,4}``.
 
 ## geodesic
 
-The key object in the **P** manifold is the **geodesic**, the shortest path joining two points ``P`` and ``Q`` on the manifold, analogous to straight lines in the Euclidean space (Fig. 1). The gedesic equation with arclength ``0≤a≤1`` is the equation
+The key object in the **P** manifold is the **geodesic**, loosely defined as the shortest path joining two points ``P`` and ``Q`` on the manifold, analogous to straight lines in the Euclidean space (Fig. 1). The gedesic equation with arclength ``0≤a≤1`` is the equation
 of the points along the path, denoted ``\gamma(P, Q, a)`` where with ``a=0`` we stay at ``P`` and with ``a=1``
 we move all the way to ``Q``.
 The points along the geodesic in between ``P`` and ``Q`` ``(0<a<1)``
@@ -103,7 +103,7 @@ The most important invariance properties are:
 |rotation|``δ(P,Q)=δ(U^HPU,U^HQU)``|``G\{U^HP_iU\}=U^HG\{P_i\}U``|
 |affinity|``δ(P,Q)=δ(B^HPB,B^HQB)``|``G\{B^HP_iB\}=B^HG\{P_i\}B``|
 |inversion|``δ(P,Q)=δ(P^{-1},Q^{-1})``|``G\{P_i^{-1}\}=G^{-1}\{P_i\}``|
-for any unitary ``U`` unitary and non-singular ``B``.
+for any unitary ``U`` and non-singular ``B``.
 
 The affine invariance implies the rotation invariance and is also named
 *congruence invariance*.
@@ -212,7 +212,7 @@ Endowed with the Fisher metric the manifold **P** is Riemannian, has nonpositive
 |``P^{1/2} \big(P^{-1/2} Q P^{-1/2}\big)^a P^{1/2}``|
 
 **Fréchet mean**: it does not have a closed-form solution in general.
-The solution is the unique positive definite matrix **G** satisfying
+The solution is the unique positive definite matrix ``G`` satisfying
 (Bhatia and Holbrook, 2006; Moakher, 2005).[🎓](@ref)
 
 ``\sum_{i=1}^{k}w_i\textrm{log}\big(G^{-1/2} P_i G^{-1/2}\big)=0.``
