@@ -44,6 +44,7 @@ dim
 | [`det1`](@ref) | Normalize the determinant|
 | [`tr1`](@ref) | Normalize the trace|
 | [`nearestPosDef`](@ref) | Nearest Symmetric/Hermitian Positive Semi-definite matrix|
+| [`nearestOrthogonal`](@ref) `nearestOrth`| Nearest Orthogonal matrix |
 | [`normalizeCol!`](@ref) | Normalize one or more columns|
 
 ⋅
@@ -52,6 +53,7 @@ dim
 det1
 tr1
 nearestPosDef
+nearestOrthogonal
 normalizeCol!
 ```
 
