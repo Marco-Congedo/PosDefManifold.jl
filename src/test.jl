@@ -280,6 +280,18 @@ function tests();
     U*Λ*U'≈PC ? OK() : OH(name*" Complex Input")
 
 
+    name="frf"; newTest(name)
+    F = frf(P)
+    F*F'≈P ? OK() : OH(name*" Real Input")
+    F = frf(PC)
+    F*F'≈PC ? OK() : OH(name*" Complex Input")
+
+    name="invfrf"; newTest(name)
+    F = invfrf(P)
+    F*P*F'≈I ? OK() : OH(name*" Real Input")
+    F = invfrf(PC)
+    F*PC*F'≈I ? OK() : OH(name*" Complex Input")
+
     name="spectralFunctions"; newTest(name);
     spectralFunctions(P, x->x+1); RUN()
     spectralFunctions(PC, abs2); RUN()

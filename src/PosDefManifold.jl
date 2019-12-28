@@ -137,6 +137,8 @@ export
     fVec,
     congruence, cong,
     evd,
+    frf,
+    invfrf,
     spectralFunctions,
     ispos,
     pow,
