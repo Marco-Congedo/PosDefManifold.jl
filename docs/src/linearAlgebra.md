@@ -141,6 +141,8 @@ congruence
 | Function   | Description |
 |:---------- |:----------- |
 | [`evd`](@ref) | Eigenvalue-Eigenvector decomposition of a matrix in ``UΛU'=P`` form|
+| [`frf`](@ref) | Full-rank factorization of an Hermitian matrix |
+| [`invfrf`](@ref) | Inverse of the full-rank factorization of an Hermitian matrix (whitening) |
 | [`spectralFunctions`](@ref) | Mother function for creating spectral functions of eigenvalues|
 | [`pow`](@ref)| Power of a positive matrix for any number of exponents in one pass|
 | [`invsqrt`](@ref)| Principal square root inverse (whitening) of a positive matrix|
@@ -151,6 +153,8 @@ congruence
 
 ```@docs
 evd
+frf
+invfrf
 spectralFunctions
 pow
 invsqrt
