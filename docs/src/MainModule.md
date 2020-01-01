@@ -101,7 +101,7 @@ To see the list of metrics in type `Metric` use:
    `𝕄Vector=Vector{𝕄}`
 
  This is a vector of general `Matrix` matrices, alias of `MatrixVector`.
- Julia sees is at: `Array{Array{T,2} where T,1}`.See [aliases](@ref) for the 𝕄 symbol and [typecasting matrices](@ref) for the use of matrices in **PosDefManifold**.
+ Julia sees it as: `Array{Array{T,2} where T,1}`. See [aliases](@ref) for the 𝕄 symbol and [typecasting matrices](@ref) for the use of matrices in **PosDefManifold**.
 
 !!! warning "Nota bene"
     This object is meant to hold matrices living in the same manifold,
@@ -129,7 +129,7 @@ To see the list of metrics in type `Metric` use:
    `𝔻Vector=Vector{𝔻}`
 
  This is a vector of `Diagonal` matrices, alias of `DiagonalVector`.
- Julia sees is at: `Array{Diagonal,1}`.See [aliases](@ref) for the 𝔻 symbol and [typecasting matrices](@ref) for the use of Diagonal matrices in **PosDefManifold**.
+ Julia sees it as: `Array{Diagonal,1}`. See [aliases](@ref) for the 𝔻 symbol and [typecasting matrices](@ref) for the use of Diagonal matrices in **PosDefManifold**.
 
 !!! warning "Nota bene"
     This object is meant to hold matrices living in the same manifold,
@@ -157,7 +157,7 @@ To see the list of metrics in type `Metric` use:
    `𝕃Vector=Vector{𝕃}`
 
  This is a vector of `LowerTriangular` matrices, alias of `LowerTriangularVector`.
- Julia sees is at: `Array{LowerTriangular,1}`.See [aliases](@ref) for the 𝕃 symbol and [typecasting matrices](@ref) for the use of LowerTriangular matrices in **PosDefManifold**.
+ Julia sees it as: `Array{LowerTriangular,1}`. See [aliases](@ref) for the 𝕃 symbol and [typecasting matrices](@ref) for the use of LowerTriangular matrices in **PosDefManifold**.
 
 !!! warning "Nota bene"
     This object is meant to hold matrices living in the same manifold,
