@@ -195,13 +195,13 @@ function tests();
     name="quadraticForm"; newTest(name)
     v=randn(n)
     vC=randn(ComplexF64, n)
-    quadraticForm(v, Matrix(P)) ≈ v'*P*v ? OK() : OH(name*" Method 1 real case")
-    quadraticForm(v, P) ≈ v'*P*v ? OK() : OH(name*" Method 2 real case")
-    quadraticForm(v, LowerTriangular(Matrix(P))) ≈ v'*P*v ? OK() : OH(name*" Method 3 real case")
-    quadraticForm(vC, Matrix(PC)) ≈ vC'*PC*vC ? OK() : OH(name*" Method 1 complex case")
-    quadraticForm(vC, PC) ≈ vC'*PC*vC ? OK() : OH(name*" Method 2 complex case")
-
-
+    quadraticForm(v, P) ≈ v'*P*v ? OK() : OH(name*" Method 1 real case")
+    quadraticForm(v, LowerTriangular(Matrix(P))) ≈ v'*LowerTriangular(Matrix(P))*v ? OK() : OH(name*" Method 2 real case")
+    quadraticForm(v, Matrix(P), true) ≈ v'*P*v ? OK() : OH(name*" Method 3a real case")
+    quadraticForm(v, Matrix(P), false) ≈ v'*P*v ? OK() : OH(name*" Method 3b real case")
+    quadraticForm(vC, PC) ≈ vC'*PC*vC ? OK() : OH(name*" Method 4a complex case")
+    quadraticForm(vC, Matrix(PC)) ≈ vC'*PC*vC ? OK() : OH(name*" Method 4b complex case")
+    quadraticForm(vC, LowerTriangular(Matrix(PC))) ≈ vC'*LowerTriangular(Matrix(PC))*vC ? OK() : OH(name*" Method 4c complex case")
 
     name="fidelity"; newTest(name);
     # Test compilation only
