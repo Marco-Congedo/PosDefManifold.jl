@@ -268,7 +268,7 @@ dim(vector₂::AnyMatrixVector₂) =
  ``X`` can be a real or complex `Diagonal`, `LowerTriangular`,
  `Matrix`, or `Hermitian` matrix. (see [AnyMatrix type](@ref))
 
- If the determinant is not greater to `tol` (which defalts to zero)
+ If the determinant is not greater than `tol` (which defalts to zero)
  a warning is printed and ``X`` is returned.
 
 !!! note "Nota Bene"
@@ -303,9 +303,11 @@ det1Msg="function det1 in LinearAlgebra.jl of PosDefMaifold package: the determi
 
  ``X`` can be a real or complex `Diagonal`, `LowerTriangular`,
  `Matrix` or `Hermitian` matrix (see [AnyMatrix type](@ref)).
-
- If the trace is not greater to `tol`
- (which defalts to zero) a warning is printed and ``X`` is returned.
+ Its trace must be real. If the absolute value of its imaginary part
+ is greater than `tol` (which defalts to zero) a warning is printed
+ and ``X`` is returned.
+ Also, if the trace is not greater than `tol`
+ a warning is printed and ``X`` is returned.
 
  **See**: [Julia trace function](https://bit.ly/2HoOLiM).
 
@@ -313,19 +315,38 @@ det1Msg="function det1 in LinearAlgebra.jl of PosDefMaifold package: the determi
 
  ## Examples
     using LinearAlgebra, PosDefManifold
+
     P=randP(5) # generate a random real positive definite matrix 5x5
     Q=tr1(P)
     tr(Q)  # must be 1
     # using a tolerance
     Q=tr1(P; tol=1e-12)
 
+	Pc=randP(ComplexF64, 5) # generate a random real positive definite matrix 5x5
+    Qc=tr1(Pc)
+    tr(Qc)  # must be 1
+
+
 """
 function tr1(X::AnyMatrix; tol::Real=0.)
     tol>=0. ? tolerance=tol : tolerance = 0.
     trace = tr(X)
-    if trace>tolerance X/trace else @warn tr1Msg trace tolerance; X end
+	imagtr = imag(trace)
+	if abs(imagtr)>tolerance
+		@warn tr1Msg2 imagtr tolerance
+		return X
+	else
+		trace=real(trace)
+	end
+    if trace>tolerance
+		return X/trace
+	else
+		@warn tr1Msg1 trace tolerance
+		return X
+	end
 end
-tr1Msg="function tr1 in LinearAlgebra.jl of PosDefMaifold package: the trace of the input matrix is not greater than the tolerance."
+tr1Msg1="function tr1 in LinearAlgebra.jl of PosDefMaifold package: the trace of the input matrix is not greater than the tolerance."
+tr1Msg2="function tr1 in LinearAlgebra.jl of PosDefMaifold package: the imaginary part of the trace of the input matrix is greater than the tolerance."
 
 
 """
@@ -385,11 +406,11 @@ end
  (see [AnyMatrix type](@ref)).
  This is given by
 
- ``UV^T``,
+ ``UV^H``,
 
  where
 
- ``\\textrm(SVD)=UΛV^T``.
+ ``\\textrm(SVD)=UΛV^H``.
 
  If `X` is `Diagonal`, return `X`.
 

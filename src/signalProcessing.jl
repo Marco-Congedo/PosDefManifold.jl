@@ -266,7 +266,7 @@ randPosDefMat(n::Int;
 
 randPosDefMat(::Type{Complex{T}}, n::Int;
              df::Int=2,
-             eigvalsSNR::Real=10e3)     where {T<:AbstractFloat} =
+             eigvalsSNR::Real=10e3) where {T<:AbstractFloat} =
     congruence(randU(ComplexF64, n), randΛ(n, df=df, eigvalsSNR=eigvalsSNR), ℍ)
 
 
