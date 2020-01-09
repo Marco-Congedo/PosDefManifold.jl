@@ -36,16 +36,26 @@
 # and `threads`=4, return Array{UnitRange{Int64},1}:[1:25, 26:50, 51:75, 76:99].
 # This function is called by threaded function `fVec`
 function _partitionLinRange4threads(n::Int, threads::Int=0)
-    threads==0 ? thr=nthreads() : thr=threads
-    n<thr ? thr = n : nothing
-    d = max(round(Int64, n / thr), 1)
-    return [(r<thr ? (d*r-d+1:d*r) : (d*thr-d+1:n)) for r=1:thr]
+    threads<1 ? thr=nthreads() : thr=threads
+    #n<thr && throw(ArgumentError("PosDefManifold, internal function `_partitionLinRange4threads`: n must be larger than the number of threads"))
+	d=n ÷ thr # integer division
+	e=n % thr # reminder
+	range=Vector{Any}(undef, thr)
+	if e==0
+	  	for r=1:thr range[r]=d*r-d+1:d*r end
+	else
+		for r=1:thr-1 range[r]=d*r-d+1:d*r end
+		range[thr]=	d*(thr-1)+1:n
+	end
+	return range
 end
 
 
 function _GetThreads(n::Int, callingFunction::String)
-#	Threads.nthreads()==1 && @warn "Function "*callingFunction*": Julia is instructed to use only one thread. See the Tips&Tricks in the documentation (main module section)"
-	return n>=Threads.nthreads() ? Threads.nthreads() : 1 #threads=min(Threads.nthreads(), n*2)
+	thr=Threads.nthreads()
+	n<1 && throw(ArgumentError("PosDefManifold.jl, internal function `_GetThreads`: `n` must be a positive integer (n=($n))"))
+	#return n>=thr ? thr : 1
+	return min(n, thr)
 end
 
 function _GetThreadsAndLinRanges(n::Int, callingFunction::String)
@@ -60,7 +70,8 @@ function _fVec_common(𝐏::AnyMatrixVector;
     threads, ranges = _GetThreadsAndLinRanges(dim(𝐏, 1), "fVec")
 	isempty(w) ? v=[] : v = _getWeights(w, ✓w)
 	#allocs==[] ? 𝐐=𝕄Vector([𝕄{type}(undef, n, n) for i=1:threads]) : 𝐐=allocs
-	allocs==[] ? 𝐐=𝕄Vector(repeat([𝐏[1]], threads)) : 𝐐=allocs
+	#allocs==[] ? 𝐐=𝕄Vector(repeat([zeros(eltype(𝐏[1]), size(𝐏[1]))], threads)) : 𝐐=allocs
+	allocs==[] ? 𝐐=𝕄Vector(repeat([similar(𝐏[1])], threads)) : 𝐐=allocs
 	return (threads, ranges, 𝐐, v)
 end
 
@@ -1155,11 +1166,11 @@ end # mgs function
  of the intermediate operations.
  This function allows a gain in computational time only when the number of
  matrices (1) and/or their size (2) is high. Use `mean` and `sum` otherwise.
- For the number of threads Julia is instructed to use see [Threads](@ref).
+ The maximal gain is obtained when the number of matrices in `𝐏` is an exact
+ multiple of the number of threads Julia is instructed to use.
+ For this latter, see [Threads](@ref).
 
  !!! note "Nota Bene"
-     if ``k``<= the number of threads julia is istructed to use, this
- 	function will run on a single thread.
 
      Contrarily to Julia `mean` and `sum` function (v 1.1.0) the `fVec` function
      returns a matrix of the same type of the matrices in ``𝐏``.
@@ -1183,7 +1194,7 @@ end # mgs function
     using LinearAlgebra, PosDefManifold
     Pset=randP(4, 1000); # generate 1000 positive definite 4x4 matrices
 	mean(Pset) # arithmetic mean calling Julia function
-	Threads.nthreads() # check that at least two threads are available
+	Threads.nthreads() # check how many threads are available
 	fVec(mean, Pset) # multi-threaded arithmetic mean
 
 	inv(mean(inv, Pset)) # Harmonic mean calling Julia function
@@ -1211,7 +1222,7 @@ end # mgs function
 
 	# pre-allocating memory
 	Pset=randP(100, 1000); # generate 1000 positive definite 100x100 matrices
-	Qset=MatrixVector(repeat([Pset[1]], Threads.nthreads()))
+	Qset=MatrixVector(repeat([similar(Pset[1])], Threads.nthreads()))
 	fVec(mean, log, Pset, allocs=Qset)
 
 	# How much computing time we save ?
@@ -1232,10 +1243,14 @@ function fVec(f::Function, g::Function, 𝐏::AnyMatrixVector;
 	end
 	threads, ranges, 𝐐, v = _fVec_common(𝐏; w=w, ✓w=✓w, allocs=allocs)
 	#println("treads ", threads)
+	#println("ranges ", ranges)
+
 	if isempty(w)
-		@threads for r=1:threads 𝐐[r]=sum(g(𝐏[i]) for i in ranges[r]) end
+		g==identity ?   (@threads for r=1:threads 𝐐[r]=sum(𝐏[i] for i in ranges[r]) end) :
+ 						(@threads for r=1:threads 𝐐[r]=sum(g(𝐏[i]) for i in ranges[r]) end)
 	else
-		@threads for r=1:threads 𝐐[r]=sum(v[i]*g(𝐏[i]) for i in ranges[r]) end
+		g==identity ?   (@threads for r=1:threads 𝐐[r]=sum(v[i]*𝐏[i] for i in ranges[r]) end) :
+						(@threads for r=1:threads 𝐐[r]=sum(v[i]*g(𝐏[i]) for i in ranges[r]) end)
 	end
 	if f==sum
     	return threads==1 ? typeofMatrix(𝐏)(𝐐[1]) : typeofMatrix(𝐏)(sum(𝐐))
@@ -1250,7 +1265,7 @@ fVec(f::Function, 𝐏::AnyMatrixVector;
      w::Vector=[],
 	 ✓w=false,
 	 allocs=[]) =
-  fVec(f::Function, identity, 𝐏; w=w, ✓w=✓w, allocs=allocs)
+  fVec(f, identity, 𝐏; w=w, ✓w=✓w, allocs=allocs)
 
 @doc raw"""
 	(1) congruence(B::AnyMatrix, P::AnyMatrix, matrixType)

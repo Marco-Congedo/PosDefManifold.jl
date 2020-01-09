@@ -344,7 +344,8 @@ By default, **PosDefManifold** reserves to BLAS
 all CPU threads available on your computer (given by the output of `Sys.CPU_THREADS`).
 The number of threads used by Julia
 for multi-threaded computations is given by the output of function `Threads.nthreads()`.
-In Windows this latter number of threads is set to half the available threads. In Linux and OSX defaults to one and is controlled by an environment variable, i.e.,
+In Windows this latter number of threads is set to half the available threads.
+In Linux and OSX defaults to one and is controlled by an environment variable, i.e.,
 
    `export JULIA_NUM_THREADS=4`.
 

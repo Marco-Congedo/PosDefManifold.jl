@@ -1,5 +1,5 @@
 #   Main Module of the  PosDefManifold Package for julia language
-#   v0.4.5 last update 8th of January 2020
+#   v0.4.6 last update 9th of January 2020
 
 #   MIT License
 #   Copyright (c) 2019, Marco Congedo, CNRS, Grenobe, France:
@@ -198,7 +198,7 @@ include("riemannianGeometry.jl")
 include("statistics.jl")
 include("test.jl")
 
-println("\n⭐ "," Welcome to the","\x1b[91m"," PosDefManifold ","\x1b[0m","package", " ⭐\n")
+println("\n⭐ "," Welcome to the","\x1b[91m"," PosDefManifold.jl ","\x1b[0m","package", " ⭐\n")
 @info " "
 println(" Your Machine `",gethostname(),"` (",Sys.MACHINE, ")")
 println(" runs on kernel ",Sys.KERNEL," with word size ",Sys.WORD_SIZE,".")
