@@ -221,7 +221,7 @@ randU=randUnitaryMat
 
   ``UΛ_iU^H+ηI,\\hspace{8pt}``, for ``i``=1:``k``
 
- otherwise they are generated accrding to model
+ otherwise they are generated according to model
 
  ``(UΛ_iU^H+ηI)+φ(V_iΔ_iV_i^H+ηI),\\hspace{8pt}``, for ``i``=1:``k``  Eq.[1]
 
