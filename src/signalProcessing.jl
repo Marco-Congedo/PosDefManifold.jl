@@ -76,6 +76,7 @@ randλ=randEigvals
  **alias**: `randΛ`
 
  (1) Generate an ``n⋅n`` diagonal matrix of random real positive eigenvalues.
+
  (2) An array 1d (of [𝔻Vector type](@ref)) of ``k`` matrices of the kind in (1)
 
  The eigenvalues are generated according to model
@@ -109,6 +110,8 @@ randλ=randEigvals
  random positive definite matrices with added white noise in order
  to emulate eigenvalues observed in real data and to
  improve the conditioning of the generated matrices with respect to inversion.
+
+
 
  **See also**: `randλ` ([`randEigvals`](@ref)), `randU` ([`randUnitaryMat`](@ref)),
  `randP` ([`randPosDefMat`](@ref)), `randχ²` ([`randChi²`](@ref)).
