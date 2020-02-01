@@ -1921,26 +1921,38 @@ choL(D::𝔻{T}) where T<:Real = √D
  **Notes:**
  Output ``L^{-H}`` is an inverse square root (whitening matrix) of ``P``,
  since ``L^{-1}PL^{-H}=I``. It therefore yields the inversion of ``P`` as
- ``P^{-1}=L^{-H}L^{-1}``. It is the fastes whitening matrix to be computed,
+ ``P^{-1}=L^{-H}L^{-1}``. It is the fastest whitening matrix to be computed,
  however it yields poor numerical precision, especially for large matrices.
 
- The following relations holds: ``L=PL^{-H}``; ``L^{H}=L^{-1}P``;
- ``L^{-H}=P^{-1}L``; ``L^{-1}=L^{H}P^{-1}``.
+ The following relations holds:
+ - ``L=PL^{-H}``
+ - ``L^{H}=L^{-1}P``
+ - ``L^{-H}=P^{-1}L``
+ - ``L^{-1}=L^{H}P^{-1}``.
 
- We also have ``L^{H}L=L^{-1}P^{2}L^{-H}=UPU^H``, with
- ``U`` orthogonal (see below) and
- ``L^{-1}L^{-H}=L^{H}P^{-2}L=UP^{-1}U^H``.
+ We also have
+ - ``L^{H}L=L^{-1}P^{2}L^{-H}=UPU^H``, with ``U`` orthogonal (see below) and
+ - ``L^{-1}L^{-H}=L^{H}P^{-2}L=UP^{-1}U^H``.
 
  ``LL^{H}`` and ``L^{H}L`` are unitarily similar, that is,
+
  ``ULL^{H}U^H=L^{H}L``,
- where ``U=L^{-1}P^{1/2}``, with ``P^{1/2}=H`` the *principal* (unique symmetric)
- square root of ``P``. This is seen writing
+
+ where ``U=L^{-1}P^{1/2}``, with ``P^{1/2}=H`` the *principal*
+ (unique symmetric) square root of ``P``. This is seen writing
  ``PP^{-1}=HHL^{-H}L^{-1}``; multiplying both sides on the left by ``L^{-1}``
  and on the right by ``L`` we obtain
- ``L^{-1}PP^{-1}L=L^{-1}HHL^{-H}=I=(L^{-1}H)(L^{-1}H)^H`` and since
- ``L^{-1}H`` is square it must be unitary.
 
- From these expressions we have ``H=LU=U^HL^H; L=HU^H; H^{-1}=U^HL^{-1}; L^{-1}=UH^{-1}``.
+ ``L^{-1}PP^{-1}L=L^{-1}HHL^{-H}=I=(L^{-1}H)(L^{-1}H)^H``
+
+ and since ``L^{-1}H`` is square it must be unitary.
+
+ From these expressions we have
+ - ``H=LU=U^HL^H``
+ - ``L=HU^H``
+ - ``H^{-1}=U^HL^{-1}``
+ - ``L^{-1}=UH^{-1}``.
+ 
  ``U`` is the *polar factor* of ``L^{H}``, *i.e.*, ``L^{H}=UH``,
  since ``LL^{H}=HU^HUH^H=H^2=P``.
 
