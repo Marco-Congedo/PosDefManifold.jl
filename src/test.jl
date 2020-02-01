@@ -347,6 +347,24 @@ function tests();
     L*L'≈D_ ? OK() : OH(name*" Real Input method 2")
 
 
+    name="choInv"; newTest(name)
+    L, Linv=choInv(P_)
+    invP_=inv(P_)
+    L*L'≈P_ ? OK() : OH(name*" Real Input test L")
+    Linv*Linv'≈invP_ ? OK() : OH(name*" Real Input test Linv")
+    L, D, Linv=choInv(P_; kind=:LDLt)
+    L*D*L'≈P_ ? OK() : OH(name*" Real Input, kind :LDLt test L")
+    Linv*inv(D)*Linv'≈invP_ ? OK() : OH(name*" Real Input, kind :LDLt test Linv")
+
+    L, Linv=choInv(PC_)
+    invPC_=inv(PC_)
+    L*L'≈PC_ ? OK() : OH(name*" Complex Input test L")
+    Linv*Linv'≈invPC_ ? OK() : OH(name*" Complex Input test Linv")
+    L, D, Linv=choInv(PC_; kind=:LDLt)
+    L*D*L'≈PC_ ? OK() : OH(name*" Complex Input, kind :LDLt test L")
+    Linv*inv(D)*Linv'≈invPC_ ? OK() : OH(name*" Complex Input, kind :LDLt test Linv")
+
+
     # 9. Decompositions involving triangular matrices
 
     # functions in SignalProcessinginP.jl

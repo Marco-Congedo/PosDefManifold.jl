@@ -1,5 +1,5 @@
 #   Main Module of the  PosDefManifold Package for julia language
-#   v0.4.6 last update 9th of January 2020
+#   v0.4.7 last update 1st of February 2020
 
 #   MIT License
 #   Copyright (c) 2019, Marco Congedo, CNRS, Grenobe, France:
@@ -146,6 +146,8 @@ export
     sqr,
     powerIterations, powIter,
     choL,
+    choInv,
+    choInv!,
 
     # from SignalProcessing.jl
     randChi², randχ²,

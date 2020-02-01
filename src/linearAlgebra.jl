@@ -54,8 +54,8 @@ end
 function _GetThreads(n::Int, callingFunction::String)
 	thr=Threads.nthreads()
 	n<1 && throw(ArgumentError("PosDefManifold.jl, internal function `_GetThreads`: `n` must be a positive integer (n=($n))"))
-	#return n>=thr ? thr : 1
-	return min(n, thr)
+	return n>=thr ? thr : 1
+	# return min(n, thr) # this does not work
 end
 
 function _GetThreadsAndLinRanges(n::Int, callingFunction::String)
@@ -1352,9 +1352,9 @@ fVec(f::Function, 𝐏::AnyMatrixVector;
 !!! note "Nota Bene"
     Types `ℍ`, `𝔻`, `𝕃` or `𝕄` are actually constructors, thus they may
     modify the result of the congruence(s). This greatly expand the
-    possibilities of this function , but it is your responsibility to
-    pick the right argument `matrixType` in (1), `matrixVectorType` in (2)
-	and `matrixVector₂Type` in (3)-(4).
+    possibilities of this function, but it is your responsibility to
+    pick the right argument `matrixType` in (1), `matrixVectorType` in (2) and
+	`matrixVector₂Type` in (3)-(4).
     For example, in (1) if ``B`` and ``P`` are `Hermitian`,
     calling `cong(B, P, 𝔻)` will actually
     return the diagonal part of ``B*P*B'`` and calling `cong(B, P, 𝕃)` will
@@ -1418,16 +1418,6 @@ function congruence(B::AnyMatrix, 𝐏::AnyMatrixVector, matrixVectorType)
 		@threads for i=1:k 𝐐[i] = congruence(B, 𝐏[i], 𝕋) end
 		return 𝐐
 	end
-
-	# this does not work; it needs julia v1.3 and gives problem
-	# since passing to v1.3 gived problem with fVec function
-	#=
-	𝐐=matrixVectorType(undef, k)
-	@async for i=1:k
-		Threads.@spawn 𝐐[i] = congruence(B, 𝐏[i], 𝕋)
-	end
-	=#
-	return 𝐐
 end
 
 
@@ -1442,13 +1432,6 @@ function congruence(B::AnyMatrix, 𝑷::AnyMatrixVector₂, matrixVector₂Type)
 		@threads for i=1:m 𝓠[i] = congruence(B, 𝑷[i], 𝕋) end
 	end
 	return 𝓠
-
-	#=
-	@async for i=1:m
-		Threads.@spawn 𝓠[i] = congruence(B, 𝓟[i], 𝕋)
-	end
-	return 𝓠
-	=#
 end
 
 
@@ -1894,6 +1877,8 @@ powIter=powerIterations
 
  (2) For a real `Diagonal` matrix ``D``, return ``D^{1/2}``.
 
+**See also**: [`choInv`](@ref).
+
  ## Examples
     using PosDefManifold
     P=randP(5);
@@ -1907,3 +1892,161 @@ function choL(P::ℍ{T}) where T<:RealOrComplex
 end
 
 choL(D::𝔻{T}) where T<:Real = √D
+
+
+"""
+    choInv(P::AbstractArray{T};
+		kind::Symbol = :LLt, tol::Real = √eps(T)) where T<:RealOrComplex
+
+ For a real or complex positive definite matrix ``P``, let ``P=LL^H`` be its
+ *Cholesky decomposition* and ``P=L_1DL_1^H`` the related *LDLt* decomposition.
+ In the above, ``L`` is a lower triangular matrix, ``D`` a positive-definite
+ diagonal matrix and ``L_1`` a unit lower triangular matrix.
+ Return:
+ - if `kind`is `:LLt` (default), the 2-tuple ``L``, ``L^{-H}``
+ - if `kind`is `:LDLt`, the 3-tuple ``L_1``, ``D``, ``L_1^{-H}``.
+
+ Those are obtained in one pass and this is faster then calling Julia's
+ [chelosky](https://docs.julialang.org/en/v1/stdlib/LinearAlgebra/#LinearAlgebra.cholesky)
+ function and inverting the lower factor.
+
+ Input matrix `P` may be of type `Matrix` or `Hermitian`. Since only the
+ lower triangle is used, `P` may also be a `LowerTriangular` view of a
+ positive definite matrix.
+ If `P` is real, it can also be of the `Symmetric` type.
+
+ The algorithm is a *multiplicative Gaussian elimination*.
+ If run completely, in input matrix `P` there will be the Identity at the end.
+
+ **Notes:**
+ Output ``L^{-H}`` is an inverse square root (whitening matrix) of ``P``,
+ since ``L^{-1}PL^{-H}=I``. It therefore yields the inversion of ``P`` as
+ ``P^{-1}=L^{-H}L^{-1}``. It is the fastes whitening matrix to be computed,
+ however it yields poor numerical precision, especially for large matrices.
+
+ The following relations holds: ``L=PL^{-H}``; ``L^{H}=L^{-1}P``;
+ ``L^{-H}=P^{-1}L``; ``L^{-1}=L^{H}P^{-1}``.
+
+ We also have ``L^{H}L=L^{-1}P^{2}L^{-H}=UPU^H``, with
+ ``U`` orthogonal (see below) and
+ ``L^{-1}L^{-H}=L^{H}P^{-2}L=UP^{-1}U^H``.
+
+ ``LL^{H}`` and ``L^{H}L`` are unitarily similar, that is,
+ ``ULL^{H}U^H=L^{H}L``,
+ where ``U=L^{-1}P^{1/2}``, with ``P^{1/2}=H`` the *principal* (unique symmetric)
+ square root of ``P``. This is seen writing
+ ``PP^{-1}=HHL^{-H}L^{-1}``; multiplying both sides on the left by ``L^{-1}``
+ and on the right by ``L`` we obtain
+ ``L^{-1}PP^{-1}L=L^{-1}HHL^{-H}=I=(L^{-1}H)(L^{-1}H)^H`` and since
+ ``L^{-1}H`` is square it must be unitary.
+
+ From these expressions we have ``H=LU=U^HL^H; L=HU^H; H^{-1}=U^HL^{-1}; L^{-1}=UH^{-1}``.
+ ``U`` is the *polar factor* of ``L^{H}``, *i.e.*, ``L^{H}=UH``,
+ since ``LL^{H}=HU^HUH^H=H^2=P``.
+
+ From ``L^{H}L=UCU^H`` we have ``L^{H}LU=UC=ULL^{H}`` and from
+ ``U=L^{-1}H`` we have ``L=HU^H``.
+
+**See also**: [`choInv!`](@ref), [`choL`](@ref).
+
+ ## Examples
+    using PosDefManifold
+	n, t = 800, 6000
+	etol = 1e-9
+	Z=randn(t, n)
+	Y=Z'*Z
+	Yi=inv(Y)
+
+	A, B=choInv!(copy(Y))
+	norm(A*A'-Y)/√n < etol ? println(" ⭐ ") : println(" ⛔ ")
+	norm(B*B'-Yi)/√n < etol ? println(" ⭐ ") : println(" ⛔ ")
+
+	A, D, B=choInv!(copy(Y); kind=:LDLt)
+	norm(Y-A*D*A')/√n < etol ? println(" ⭐ ") : println(" ⛔ ")
+	norm(Yi-B*inv(D)*B')/√n < etol ? println(" ⭐ ") : println(" ⛔ ")
+
+	# repeat the test for complex matrices
+	Z=randn(ComplexF64, t, n)
+	Y=Z'*Z
+	Yi=inv(Y)
+
+	A, B=choInv!(copy(Y))
+	norm(A*A'-Y)/√n < etol ? println(" ⭐ ") : println(" ⛔ ")
+	norm(B*B'-Yi)/√n < etol ? println(" ⭐ ") : println(" ⛔ ")
+
+	A, D, B=choInv!(copy(Y); kind=:LDLt)
+	norm(Y-A*D*A')/√n < etol ? println(" ⭐ ") : println(" ⛔ ")
+	norm(Yi-B*inv(D)*B')/√n < etol ? println(" ⭐ ") : println(" ⛔ ")
+
+"""
+choInv(P::AbstractArray{T};
+	   kind::Symbol = :LLt, tol::Real = √eps(T)) where T<:Real =
+    choInv!(P isa Hermitian || P isa Symmetric ? copy(Matrix(P)) : copy(P);
+			kind=kind, tol=tol)
+
+choInv(P::AbstractArray{T};
+	   kind::Symbol=:LLt, tol::Real = √eps(real(T))) where T<:Complex =
+	choInv!(P isa Hermitian ? copy(Matrix(P)) : copy(P);
+			kind=kind, tol=tol)
+
+"""
+    choInv!(P::AbstractArray{T};
+		kind::Symbol = :LLt, tol::Real = √eps(T)) where T<:RealOrComplex
+
+ The same thing as [`choInv`](@ref), but destroys the input matrix.
+ This function does nt require copying the input matrix,
+ thus it is slightly faster.
+"""
+function choInv!(P::AbstractArray{T};
+			  	 kind::Symbol = :LLt, tol::Real = √eps(T)) where T<:Real
+
+	P isa Matrix || P isa LowerTriangular || throw(ArgumentError("function choInv!: input matrix must be of the Matrix or LowerTriangular type. Call `choinv` instead"))
+	n 	= size(P, 1)
+	L₁ 	= kind==:LDLt ? UnitLowerTriangular(zeros(T, n, n)) : LowerTriangular(Matrix{T}(I, n, n))
+	U₁⁻¹= kind==:LDLt ? UnitUpperTriangular(zeros(T, n, n)) : UpperTriangular(Matrix{T}(I, n, n))
+
+	@inbounds begin
+		for j=1:n-1
+			P[j, j]<tol && throw(LinearAlgebra.PosDefException(1))
+			for i=j+1:n
+				θ = P[i, j] / -P[j, j]
+				for k=i:n P[k, i] += θ * P[k, j] end # update A and write D
+				L₁[i, j] = -θ
+				for k=1:j-1 U₁⁻¹[k, i] += θ * U₁⁻¹[k, j] end
+				U₁⁻¹[j, i] = θ
+			end
+		end
+	end
+
+	kind == :LDLt ? (return L₁, Diagonal(P), U₁⁻¹) : begin
+		D=sqrt.(Diagonal(P))
+		return L₁*D, U₁⁻¹*inv(D)
+	end
+end
+
+
+function choInv!(P::AbstractArray{T};
+			  	 kind::Symbol=:LLt, tol::Real = √eps(real(T))) where T<:Complex
+	P isa Matrix || P isa LowerTriangular || throw(ArgumentError("function choInv!: input matrix must be of the Matrix or LowerTriangular type Call `choInv` instead"))
+	n 	= size(P, 1)
+	L₁ 	= kind==:LDLt ? UnitLowerTriangular(zeros(T, n, n)) : LowerTriangular(Matrix{T}(I, n, n))
+	U₁⁻¹= kind==:LDLt ? UnitUpperTriangular(zeros(T, n, n)) : UpperTriangular(Matrix{T}(I, n, n))
+
+	@inbounds begin
+		for j=1:n-1
+			abs2(P[j, j])<tol && throw(LinearAlgebra.PosDefException(1))
+			for i=j+1:n
+				θ = conj(P[i, j] / -P[j, j])
+				for k=i:n P[k, i] += θ * P[k, j] end # update A and write D
+				L₁[i, j] = conj(-θ)
+				for k=1:j-1 U₁⁻¹[k, i] += θ * U₁⁻¹[k, j] end
+				U₁⁻¹[j, i] = θ
+			end
+		end
+	end
+
+	kind == :LDLt ? (return L₁, Diagonal(P), U₁⁻¹) : begin
+		D=sqrt.(Diagonal(P))
+		return L₁*D, U₁⁻¹*inv(D)
+	end
+end

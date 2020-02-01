@@ -166,10 +166,14 @@ powerIterations
 
 | Function   | Description |
 |:---------- |:----------- |
-| [`choL`](@ref) | Lower triangula factor of Cholesky decomposition|
+| [`choL`](@ref) | Lower triangular factor of Cholesky decomposition|
+| [`choInv`](@ref) | Lower triangular factor of Cholesky decomposition and its inverse in one pass|
+| [`choInv!`](@ref) | as [`choInv`](@ref), but destroying the input matrix|
 
 ⋅
 
 ```@docs
 choL
+choInv
+choInv!
 ```
