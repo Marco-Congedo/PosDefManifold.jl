@@ -1906,7 +1906,8 @@ choL(D::𝔻{T}) where T<:Real = √D
  - if `kind`is `:LLt` (default), the 2-tuple ``L``, ``L^{-H}``
  - if `kind`is `:LDLt`, the 3-tuple ``L_1``, ``D``, ``L_1^{-H}``.
 
- Those are obtained in one pass and this is faster then calling Julia's
+ Those are obtained in one pass and for small matrices this is faster
+ then calling Julia's
  [chelosky](https://docs.julialang.org/en/v1/stdlib/LinearAlgebra/#LinearAlgebra.cholesky)
  function and inverting the lower factor.
 
@@ -1952,7 +1953,7 @@ choL(D::𝔻{T}) where T<:Real = √D
  - ``L=HU^H``
  - ``H^{-1}=U^HL^{-1}``
  - ``L^{-1}=UH^{-1}``.
- 
+
  ``U`` is the *polar factor* of ``L^{H}``, *i.e.*, ``L^{H}=UH``,
  since ``LL^{H}=HU^HUH^H=H^2=P``.
 
