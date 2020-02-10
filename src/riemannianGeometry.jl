@@ -2379,8 +2379,8 @@ powerMean(𝐃::𝔻Vector, p::Real;
 
  (1) Compute the Fréchet mean of 1d array ``𝐏={P_1,...,P_k}`` of ``k``
  positive definite matrices of [ℍVector type](@ref) with a law of large
- number inductive procedure (Ho et *al.,* 2013; Massart et *al.*, 2018),
- such as [🎓](@ref)
+ number inductive procedure (Ho et *al.,* 2013; Lim and Palfia, 2019;
+ Massart et *al.*, 2018)[🎓](@ref), such as
 
  ``G_1=P_1,``
 
@@ -2404,9 +2404,9 @@ powerMean(𝐃::𝔻Vector, p::Real;
  two iterations of gradient descent or fixed-point algorithms. This comes at
  the price of an approximation.
  In fact, the solution is not invariant to permutations of the matrices
- in array 𝐏 and convergence to the Fréchet mean with the
- implemented procedure is not ensured
- (see Massart et *al.*, 2018)[🎓](@ref).
+ in array 𝐏 and convergence to the Fréchet mean for finite samples
+ is not ensured
+ (see Lim and Palfia, 2019; Massart et *al.*, 2018)[🎓](@ref).
 
  Since the inductive mean uses the [`geodesic`](@ref) function,
  it is not available for the Von Neumann metric.
