@@ -264,6 +264,54 @@ end
 dim(vector₂::AnyMatrixVector₂) =
     (length(vector₂), collect(length(vec) for vec in vector₂), size(vector₂[1][1], 1), size(vector₂[1][1], 2))
 
+
+"""
+```
+function remove(X::Union{Vector, Matrix}, what::Union{Int, Vector{Int}};
+				dims=1)
+```
+
+Remove one or more elements from a vector or one or more
+columns or rows from a matrix.
+
+If `X` is a Matrix, `dims`=1 (default) remove rows,
+`dims`=2 remove columns.
+
+If `X` is a Vector, `dims` has no effect.
+
+The second argument is either an integer or a vector of integers.
+ ## Examples:
+	a=randn(5)
+	b=remove(a, 2)
+	b=remove(a, collect(1:3)) # remove rows 1 to 3
+	A=randn(3, 3)
+	B=remove(A, 2)
+	B=remove(A, 2; dims=2)
+	A=randn(5, 5)
+	B=remove(A, collect(1:2:5)) # remove rows 1, 3 and 5
+	C=remove(A, [1, 4])
+	A=randn(10, 10)
+	A=remove(A, [collect(2:3); collect(8:10)]; dims=2)
+"""
+function remove(X::Union{Vector, Matrix}, what::Union{Int, Vector{Int}}; dims=1)
+    1<dims<2 && throw(ArgumentError("function `remove`: the `dims` keyword argument must be 1 or 2"))
+    di = X isa Vector ? 1 : dims
+    d = size(X, di)
+    mi, ma = minimum(what), maximum(what)
+    (1≤mi≤d && 1≤ma≤d) || throw(ArgumentError("function `remove`: the second argument must holds elements comprised in between 1 and $d. Check also the `dims` keyword"))
+    b = filter(what isa Int ? x->x≠what : x->x∉what, 1:d)
+    return X isa Vector ? X[b] : X[di==1 ? b : 1:end, di==2 ? b : 1:end]
+end
+
+
+"""
+	function isSquare(X::Matrix)=size(X, 1)==size(X, 2)
+
+Return true if matrix `X` is square, false otherwise.
+"""
+isSquare(X::Matrix)=size(X, 1)==size(X, 2)
+
+
 #  ------------------------
 ## 2. Matrix Normalizations
 #  ------------------------
@@ -402,7 +450,7 @@ function nearestPosDef(X::𝕄; tol::Real=0.)
     tol>=0. ? tolerance=tol : tolerance = 0.
 	F = eigen((X+X')/2)
 	λispos = ispos(F.values; 🔔=false, rev=false)
-    λispos ? D = 𝔻(F.values) : D = nearestPosDef(𝔻(F.values), tol=tolerance)
+    D = λispos ? 𝔻(F.values) : nearestPosDef(𝔻(F.values), tol=tolerance)
 	return λispos ? ℍ(F.vectors * D * F.vectors') : (F.vectors * D * F.vectors')
 end
 
@@ -1906,9 +1954,12 @@ choL(D::𝔻{T}) where T<:Real = √D
  - if `kind`is `:LLt` (default), the 2-tuple ``L``, ``L^{-H}``
  - if `kind`is `:LDLt`, the 3-tuple ``L_1``, ``D``, ``L_1^{-H}``.
 
- Those are obtained in one pass and this is faster then calling Julia's
+ Those are obtained in one pass and for small matrices this is faster
+ then calling Julia's
  [chelosky](https://docs.julialang.org/en/v1/stdlib/LinearAlgebra/#LinearAlgebra.cholesky)
- function and inverting the lower factor.
+ function and inverting the lower factor unless you set
+
+	 BLAS.set_num_threads(1).
 
  Input matrix `P` may be of type `Matrix` or `Hermitian`. Since only the
  lower triangle is used, `P` may also be a `LowerTriangular` view of a
@@ -1921,26 +1972,38 @@ choL(D::𝔻{T}) where T<:Real = √D
  **Notes:**
  Output ``L^{-H}`` is an inverse square root (whitening matrix) of ``P``,
  since ``L^{-1}PL^{-H}=I``. It therefore yields the inversion of ``P`` as
- ``P^{-1}=L^{-H}L^{-1}``. It is the fastes whitening matrix to be computed,
+ ``P^{-1}=L^{-H}L^{-1}``. It is the fastest whitening matrix to be computed,
  however it yields poor numerical precision, especially for large matrices.
 
- The following relations holds: ``L=PL^{-H}``; ``L^{H}=L^{-1}P``;
- ``L^{-H}=P^{-1}L``; ``L^{-1}=L^{H}P^{-1}``.
+ The following relations holds:
+ - ``L=PL^{-H}``
+ - ``L^{H}=L^{-1}P``
+ - ``L^{-H}=P^{-1}L``
+ - ``L^{-1}=L^{H}P^{-1}``.
 
- We also have ``L^{H}L=L^{-1}P^{2}L^{-H}=UPU^H``, with
- ``U`` orthogonal (see below) and
- ``L^{-1}L^{-H}=L^{H}P^{-2}L=UP^{-1}U^H``.
+ We also have
+ - ``L^{H}L=L^{-1}P^{2}L^{-H}=UPU^H``, with ``U`` orthogonal (see below) and
+ - ``L^{-1}L^{-H}=L^{H}P^{-2}L=UP^{-1}U^H``.
 
  ``LL^{H}`` and ``L^{H}L`` are unitarily similar, that is,
+
  ``ULL^{H}U^H=L^{H}L``,
- where ``U=L^{-1}P^{1/2}``, with ``P^{1/2}=H`` the *principal* (unique symmetric)
- square root of ``P``. This is seen writing
+
+ where ``U=L^{-1}P^{1/2}``, with ``P^{1/2}=H`` the *principal*
+ (unique symmetric) square root of ``P``. This is seen writing
  ``PP^{-1}=HHL^{-H}L^{-1}``; multiplying both sides on the left by ``L^{-1}``
  and on the right by ``L`` we obtain
- ``L^{-1}PP^{-1}L=L^{-1}HHL^{-H}=I=(L^{-1}H)(L^{-1}H)^H`` and since
- ``L^{-1}H`` is square it must be unitary.
 
- From these expressions we have ``H=LU=U^HL^H; L=HU^H; H^{-1}=U^HL^{-1}; L^{-1}=UH^{-1}``.
+ ``L^{-1}PP^{-1}L=L^{-1}HHL^{-H}=I=(L^{-1}H)(L^{-1}H)^H``
+
+ and since ``L^{-1}H`` is square it must be unitary.
+
+ From these expressions we have
+ - ``H=LU=U^HL^H``
+ - ``L=HU^H``
+ - ``H^{-1}=U^HL^{-1}``
+ - ``L^{-1}=UH^{-1}``.
+
  ``U`` is the *polar factor* of ``L^{H}``, *i.e.*, ``L^{H}=UH``,
  since ``LL^{H}=HU^HUH^H=H^2=P``.
 

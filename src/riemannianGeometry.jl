@@ -1164,7 +1164,7 @@ function mean(metric::Metric, 𝐏::ℍVector;
 
     # iterative solutions
     if  metric == Fisher
-        (G, iter, conv) =   gMean(𝐏; w=w, ✓w=✓w, init=init, tol=tol, verbose=verbose, ⏩=⏩);
+        (G, iter, conv) = gMean(𝐏; w=w, ✓w=✓w, init=init, tol=tol, verbose=verbose, ⏩=⏩);
         return G
     end
 
@@ -1239,6 +1239,7 @@ function mean(metric::Metric, 𝐏::ℍVector;
         @error "in RiemannianGeometryP.mean function: the chosen 'metric' does not exist"
     end # if metric
 end # function
+
 
 function mean(metric::Metric, 𝐃::𝔻Vector;
               w::Vector=[],
@@ -1642,9 +1643,11 @@ function geometricMean( 𝐏::ℍVector;
     while true
         M½, M⁻½ = pow(M, 0.5, -0.5)
         if threaded
-            isempty(w) ? ∇ = fVec(𝛍, log, c1(M⁻½, 𝐏), allocs=𝐐) : ∇ = fVec(𝚺, log, c1(M⁻½, 𝐏), w=v, ✓w=false, allocs=𝐐)
+            isempty(w) ? ∇ = fVec(𝛍, log, c1(M⁻½, 𝐏), allocs=𝐐) :
+                         ∇ = fVec(𝚺, log, c1(M⁻½, 𝐏), w=v, ✓w=false, allocs=𝐐)
         else
-            isempty(w) ? ∇ = ℍ(𝛍(log(c2(M⁻½, P)) for P in 𝐏)) : ∇ = ℍ(𝚺(ω * log(c2(M⁻½, P)) for (ω, P) in zip(v, 𝐏)))
+            isempty(w) ? ∇ = ℍ(𝛍(log(c2(M⁻½, P)) for P in 𝐏)) :
+                         ∇ = ℍ(𝚺(ω * log(c2(M⁻½, P)) for (ω, P) in zip(v, 𝐏)))
         end
         adaptStepSize ? 💡 = ℍ(M½*exp(ς*∇)*M½) : 💡 = ℍ(M½*exp(∇)*M½)
 
@@ -1814,7 +1817,7 @@ function geometricpMean(𝐏::ℍVector, p::Real=goldeninv;
                         init = nothing,
                         tol::Real = 0.,
                         maxiter::Int = 500,
-                        adaptStepSize=true,
+                        adaptStepSize = true,
                         verbose = false,
                         ⏩= false)
 
@@ -2379,8 +2382,8 @@ powerMean(𝐃::𝔻Vector, p::Real;
 
  (1) Compute the Fréchet mean of 1d array ``𝐏={P_1,...,P_k}`` of ``k``
  positive definite matrices of [ℍVector type](@ref) with a law of large
- number inductive procedure (Ho et *al.,* 2013; Massart et *al.*, 2018),
- such as [🎓](@ref)
+ number inductive procedure (Ho et *al.,* 2013; Lim and Palfia, 2019;
+ Massart et *al.*, 2018)[🎓](@ref), such as
 
  ``G_1=P_1,``
 
@@ -2404,9 +2407,9 @@ powerMean(𝐃::𝔻Vector, p::Real;
  two iterations of gradient descent or fixed-point algorithms. This comes at
  the price of an approximation.
  In fact, the solution is not invariant to permutations of the matrices
- in array 𝐏 and convergence to the Fréchet mean with the
- implemented procedure is not ensured
- (see Massart et *al.*, 2018)[🎓](@ref).
+ in array 𝐏 and convergence to the Fréchet mean for finite samples
+ is not ensured
+ (see Lim and Palfia, 2019; Massart et *al.*, 2018)[🎓](@ref).
 
  Since the inductive mean uses the [`geodesic`](@ref) function,
  it is not available for the Von Neumann metric.

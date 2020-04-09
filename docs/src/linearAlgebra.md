@@ -27,7 +27,9 @@
 | [`typeofMatrix`](@ref), `typeofMat` | Return the type of the matrix argument |
 | [`typeofVector`](@ref), `typeofVec` | Return the type of the matrix vector argument |
 | [`dim`](@ref)| length of the dimensions of matrices and vectors of matrices |
-
+| [`remove`](@ref)| Remove one or more elements from a vector or one or more
+columns or rows from a matrix |
+| [`isSquare`](@ref)| Return true if matrix arguement is square, false otherwise |
 
 ⋅
 
@@ -35,6 +37,8 @@
 typeofMatrix
 typeofVector
 dim
+remove
+isSquare
 ```
 
 ## Matrix normalizations and approximations

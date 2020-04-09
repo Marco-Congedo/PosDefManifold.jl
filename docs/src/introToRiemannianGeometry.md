@@ -573,6 +573,10 @@ Y. Lim, M. Pálfia (2012)
 [Matrix power means and the Karcher mean](https://core.ac.uk/download/pdf/82248854.pdf),
 Journal of Functional Analysis, 262(4), 1498-1514.
 
+Y. Lim, M. Pálfia (2019)
+[Strong law of large numbers for the L1-Karcher mean](https://arxiv.org/pdf/1912.09295.pdf)
+arXiv:1912.09295
+
 Z. Lin (2019)
 [Riemannian Geometry of Symmetric Positive Definite Matrices via Cholesky Decomposition](https://arxiv.org/abs/1908.09326), in press.
 
