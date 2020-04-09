@@ -402,7 +402,7 @@ function nearestPosDef(X::𝕄; tol::Real=0.)
     tol>=0. ? tolerance=tol : tolerance = 0.
 	F = eigen((X+X')/2)
 	λispos = ispos(F.values; 🔔=false, rev=false)
-    λispos ? D = 𝔻(F.values) : D = nearestPosDef(𝔻(F.values), tol=tolerance)
+    D = λispos ? 𝔻(F.values) : nearestPosDef(𝔻(F.values), tol=tolerance)
 	return λispos ? ℍ(F.vectors * D * F.vectors') : (F.vectors * D * F.vectors')
 end
 
@@ -1909,7 +1909,9 @@ choL(D::𝔻{T}) where T<:Real = √D
  Those are obtained in one pass and for small matrices this is faster
  then calling Julia's
  [chelosky](https://docs.julialang.org/en/v1/stdlib/LinearAlgebra/#LinearAlgebra.cholesky)
- function and inverting the lower factor.
+ function and inverting the lower factor unless you set
+
+	 BLAS.set_num_threads(1).
 
  Input matrix `P` may be of type `Matrix` or `Hermitian`. Since only the
  lower triangle is used, `P` may also be a `LowerTriangular` view of a
