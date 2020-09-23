@@ -714,7 +714,7 @@ distanceMat(metric::Metric, 𝐏::ℍVector;
   If <optional keyword argument> `densityInvariant=true` is used,
   then the density-invariant transformation is applied
 
-   ``W <- E^{-1}WE^{-1}``
+   ``W \\leftarrow E^{-1}WE^{-1}``
 
   where ``E`` is the diagonal matrix holding on the main diagonal
   the sum of the rows (or columns) of ``W``.
@@ -779,7 +779,7 @@ distanceMat(metric::Metric, 𝐏::ℍVector;
      end
 
      # product DWD with D diagonal, using only the lower triangle Ω of W
-     # overwrite Ω wirg the lower triangle of the result
+     # overwrite Ω with the lower triangle of the result
      DWD!(D::Vector{T}, Ω::𝕃{T}, r::Int) where T<:Real =
                  for j=1:r, i=j:r Ω[i, j]*=D[i]*D[j] end
 
