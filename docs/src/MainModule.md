@@ -49,7 +49,7 @@ All packages above are built-in julia packages.
 ### types
 
 #### Metric::Enumerated type
-```
+```julia
 @enum Metric begin
   Euclidean    =1
   invEuclidean =2
@@ -67,10 +67,9 @@ end
  Riemannian manipulations are defined for a given *metric* (see [metrics](@ref)).
  An instance for this type is requested as an argument in many functions
  contained in the [riemannianGeometry.jl](@ref) unit in order to specify
- the metric.
+ the metric, for example:
 
-```
- ## Example
+```julia
  # generate a 15x15 symmetric positive definite matrix
  P=randP(15)
  # distance from P to the identity matrix according to the logdet0 metric
@@ -85,15 +84,21 @@ end
  and then pass `metric` as argument in all your computations,
  *e.g.*, referring to the above example,
 
-    d=distance(metric, P).
+```julia
+d=distance(metric, P).
+```
 
 To know what is the current metric, you can get it as a string using:
 
-    s=string(metric)
+```julia
+s=string(metric)
+```
 
 To see the list of metrics in type `Metric` use:
 
-    instances(Metric)
+```julia
+instances(Metric)
+```
 
 #### Array of Matrices types
 
@@ -312,22 +317,30 @@ To see the list of metrics in type `Metric` use:
 
  - Typecasting `Adjoint` matrices:
 
-    ```Matrix(X')```
+```julia
+Matrix(X')
+```
 
  - here is how to get an `Hermitian` matrix out of the diagonal part of an `Hermitian` matrix H:
 
-    ```Hermitian(Matrix(Diagonal(H)))```
+  ```julia
+  Hermitian(Matrix(Diagonal(H)))
+  ```
 
  - here is how to get a `LowerTriangular` matrix out of an `Hermitian` matrix H:
 
-    ```LowerTriangular(Matrix(H))```
+```julia
+LowerTriangular(Matrix(H))
+```
 
  For example, you can use this to pass a full inter-distance matrix to the [`laplacian`](@ref) function to obtain the Laplacian matrix.
 
  A useful function is [`typeofMatrix`](@ref). For example, the following line
  typecasts matrix `M` to the type of matrix `P` and put the result in `A`:
 
-    A=typeofMatrix(P)(M)
+```julia
+A=typeofMatrix(P)(M)
+```
 
 #### Threads
 Some functions in **PosDefManifold** explicitly call BLAS routines
@@ -336,8 +349,10 @@ concerned functions. Most functions calls BLAS routine implicitly
 via Julia. You can set the number of threads
 the BLAS library should use by:
 
-    using LinearAlgebra
-    BLAS.set_num_threads(n)
+```julia
+using LinearAlgebra
+BLAS.set_num_threads(n)
+```
 
 where `n` is the number of threads.
 By default, **PosDefManifold** reserves to BLAS

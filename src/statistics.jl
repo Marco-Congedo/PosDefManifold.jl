@@ -33,9 +33,11 @@
 
  `` p_i=\\frac{\\textrm{e}^{c_i}}{\\sum_{i=1}^{k}\\textrm{e}^{c_i}} ``.
 
- ## Examples
-    χ=[1.0, 2.3, 0.4, 5.0]
-    π=softmax(χ)
+ **Examples**
+```julia
+χ=[1.0, 2.3, 0.4, 5.0]
+π=softmax(χ)
+```
 
 """
 softmax(χ::Vector{T}) where T<:Real = exp.(χ) ./ 𝚺(exp.(χ))
@@ -54,14 +56,16 @@ softmax(χ::Vector{T}) where T<:Real = exp.(χ) ./ 𝚺(exp.(χ))
  is in unit *statistics.jl*, while the code for all the others is
  in unit *riemannianGeometry.jl*.
 
- ## Examples
-    using PosDefManifold
-    # Generate 10 random numbers distributed as a chi-square with 2 df.
-    ν=[randχ²(2) for i=1:10]
-    arithmetic_mean=mean(Euclidean, ν)
-    geometric_mean=mean(Fisher, ν)
-    harmonic_mean=mean(invEuclidean, ν)
-    harmonic_mean<=geometric_mean<=arithmetic_mean # AGH inequality
+ **Examples**
+```julia
+using PosDefManifold
+# Generate 10 random numbers distributed as a chi-square with 2 df.
+ν=[randχ²(2) for i=1:10]
+arithmetic_mean=mean(Euclidean, ν)
+geometric_mean=mean(Fisher, ν)
+harmonic_mean=mean(invEuclidean, ν)
+harmonic_mean<=geometric_mean<=arithmetic_mean # AGH inequality
+```
 
 """
 function mean(metric::Metric, ν::Vector{T}) where T<:RealOrComplex
@@ -104,13 +108,15 @@ end
  If `corrected` is `true`, then the sum is scaled with ``k-1``,
  whereas if it is `false` the sum is scaled with ``k``.
 
- ## Examples
-    using PosDefManifold
-    # Generate 10 random numbers distributed as a chi-square with 2 df.
-    ν=[randχ²(2) for i=1:10]
-    arithmetic_sd=std(Euclidean, ν) # mean not provided
-    geometric_mean=mean(Fisher, ν)
-    geometric_sd=std(Fisher, ν, mean=geometric_mean) # mean provided
+ **Examples**
+```julia
+using PosDefManifold
+# Generate 10 random numbers distributed as a chi-square with 2 df.
+ν=[randχ²(2) for i=1:10]
+arithmetic_sd=std(Euclidean, ν) # mean not provided
+geometric_mean=mean(Fisher, ν)
+geometric_sd=std(Fisher, ν, mean=geometric_mean) # mean provided
+```
 
 """
 function std(metric::Metric, ν::Vector{T};

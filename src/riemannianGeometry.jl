@@ -138,14 +138,16 @@ end
 
  **See also**: [`mean`](@ref).
 
- ## Examples
-    using PosDefManifold
-    P=randP(10)
-    Q=randP(10)
-    # Wasserstein mean
-    M=geodesic(Wasserstein, P, Q, 0.5)
-    # extrapolate suing the Fisher metric
-    E=geodesic(Fisher, P, Q, 2)
+ **Examples**
+```julia
+using PosDefManifold
+P=randP(10)
+Q=randP(10)
+# Wasserstein mean
+M=geodesic(Wasserstein, P, Q, 0.5)
+# extrapolate suing the Fisher metric
+E=geodesic(Fisher, P, Q, 2)
+```
 
 """
 function geodesic(metric::Metric, P::ℍ{T}, Q::ℍ{T}, a::Real) where T<:RealOrComplex
@@ -301,21 +303,25 @@ end # function
 
  **See also**: [`distanceSqrMat`](@ref).
 
- ## Examples (1)
-    using PosDefManifold
-    P=randP(10)
-    d=distanceSqr(Wasserstein, P)
-    e=distanceSqr(Fisher, P)
-    metric=Metric(Int(logdet0)) # or metric=logdet0
-    s=string(metric) # check what is the current metric
-    f=distance²(metric, P) #using the alias distance²
+ **Examples (1)**
+```julia
+using PosDefManifold
+P=randP(10)
+d=distanceSqr(Wasserstein, P)
+e=distanceSqr(Fisher, P)
+metric=Metric(Int(logdet0)) # or metric=logdet0
+s=string(metric) # check what is the current metric
+f=distance²(metric, P) #using the alias distance²
+```
 
- ## Examples (2)
-    using PosDefManifold
-    P=randP(10)
-    Q=randP(10)
-    d=distanceSqr(logEuclidean, P, Q)
-    e=distance²(Jeffrey, P, Q)
+ **Examples (2)**
+```julia
+using PosDefManifold
+P=randP(10)
+Q=randP(10)
+d=distanceSqr(logEuclidean, P, Q)
+e=distance²(Jeffrey, P, Q)
+```
 
 """
 function distanceSqr(metric::Metric, P::ℍ{T}) where T<:RealOrComplex
@@ -511,20 +517,22 @@ distance(metric::Metric, D::𝔻{T}, E::𝔻{T}) where T<:Real = √(distance²(
 
  **See also**: [`laplacian`](@ref), [`laplacianEigenMaps`](@ref), [`spectralEmbedding`](@ref).
 
- ## Examples
-    using PosDefManifold
-    # Generate a set of 8 random 10x10 SPD matrices
-    Pset=randP(10, 8) # or, using unicode: 𝐏=randP(10, 8)
-    # Compute the squared inter-distance matrix according to the log Euclidean metric.
-    # This is much faster as compared to the Fisher metric and in general
-    # it is a good approximation.
-    Δ²=distanceSqrMat(logEuclidean, Pset)
+ **Examples**
+```julia
+using PosDefManifold
+# Generate a set of 8 random 10x10 SPD matrices
+Pset=randP(10, 8) # or, using unicode: 𝐏=randP(10, 8)
+# Compute the squared inter-distance matrix according to the log Euclidean metric.
+# This is much faster as compared to the Fisher metric and in general
+# it is a good approximation.
+Δ²=distanceSqrMat(logEuclidean, Pset)
 
-    # return a matrix of type Float64
-    Δ²64=distanceSqrMat(Float64, logEuclidean, Pset)
+# return a matrix of type Float64
+Δ²64=distanceSqrMat(Float64, logEuclidean, Pset)
 
-    # Get the full matrix of inter-distances
-    fullΔ²=Hermitian(Δ², :L)
+# Get the full matrix of inter-distances
+fullΔ²=Hermitian(Δ², :L)
+```
 
 """
 function distanceSqrMat(type::Type{T}, metric::Metric, 𝐏::ℍVector;
@@ -668,17 +676,19 @@ distance²Mat=distanceSqrMat
 
  **See**: [distance](@ref).
 
- ## Examples
-    using PosDefManifold
-    # Generate a set of 4 random 10x10 SPD matrices
-    Pset=randP(10, 4) # or, using unicode: 𝐏=randP(10, 4)
-    Δ=distanceMat(Fisher, Pset)
+ **Examples**
+```julia
+using PosDefManifold
+# Generate a set of 4 random 10x10 SPD matrices
+Pset=randP(10, 4) # or, using unicode: 𝐏=randP(10, 4)
+Δ=distanceMat(Fisher, Pset)
 
-    # return a matrix of type Float64
-    Δ64=distanceMat(Float64, Fisher, Pset)
+# return a matrix of type Float64
+Δ64=distanceMat(Float64, Fisher, Pset)
 
-    # Get the full matrix of inter-distances
-    fullΔ=Hermitian(Δ, :L)
+# Get the full matrix of inter-distances
+fullΔ=Hermitian(Δ, :L)
+```
 
 """
 distanceMat(type::Type{T}, metric::Metric, 𝐏::ℍVector;
@@ -747,24 +757,26 @@ distanceMat(metric::Metric, 𝐏::ℍVector;
 
  **See also**: [`distanceSqrMat`](@ref), [`laplacianEigenMaps`](@ref), [`spectralEmbedding`](@ref).
 
- ## Examples
-    using PosDefManifold
-    # Generate a set of 4 random 10x10 SPD matrices
-    Pset=randP(10, 4) # or, using unicode: 𝐏=randP(10, 4)
-    Δ²=distanceSqrMat(Fisher, Pset)
-    Ω=laplacian(Δ²)
+ **Examples**
+```julia
+using PosDefManifold
+# Generate a set of 4 random 10x10 SPD matrices
+Pset=randP(10, 4) # or, using unicode: 𝐏=randP(10, 4)
+Δ²=distanceSqrMat(Fisher, Pset)
+Ω=laplacian(Δ²)
 
-    # density-invariant Laplacian
-    Ω=laplacian(Δ²; densityInvariant=true)
+# density-invariant Laplacian
+Ω=laplacian(Δ²; densityInvariant=true)
 
-    # increase the bandwidth
-    r=size(Δ², 1)
-    myεFactor=0.1
-    med=Statistics.median([Δ²[i, j] for j=1:r-1 for i=j+1:r])
-    ε=2*myεFactor*med
-    Ω=laplacian(Δ², ε; densityInvariant=true)
+# increase the bandwidth
+r=size(Δ², 1)
+myεFactor=0.1
+med=Statistics.median([Δ²[i, j] for j=1:r-1 for i=j+1:r])
+ε=2*myεFactor*med
+Ω=laplacian(Δ², ε; densityInvariant=true)
+```
 
- """
+"""
  function laplacian(Δ²::𝕃{T}, epsilon::Real=0;
                     densityInvariant=false) where T<:Real
 
@@ -855,15 +867,17 @@ distanceMat(metric::Metric, 𝐏::ℍVector;
 
  **See also**: [`distanceSqrMat`](@ref), [`laplacian`](@ref), [`spectralEmbedding`](@ref).
 
- ## Examples
-    using PosDefManifold
-    # Generate a set of 4 random 10x10 SPD matrices
-    Pset=randP(10, 4)
-    Δ²=distanceSqrMat(Fisher, Pset)
-    Ω=laplacian(Δ²)
-    evalues, maps, iterations, convergence=laplacianEM(Ω, 2)
-    evalues, maps, iterations, convergence=laplacianEM(Ω, 2; verbose=true)
-    evalues, maps, iterations, convergence=laplacianEM(Ω, 2; verbose=true, maxiter=500)
+ **Examples**
+```julia
+using PosDefManifold
+# Generate a set of 4 random 10x10 SPD matrices
+Pset=randP(10, 4)
+Δ²=distanceSqrMat(Fisher, Pset)
+Ω=laplacian(Δ²)
+evalues, maps, iterations, convergence=laplacianEM(Ω, 2)
+evalues, maps, iterations, convergence=laplacianEM(Ω, 2; verbose=true)
+evalues, maps, iterations, convergence=laplacianEM(Ω, 2; verbose=true, maxiter=500)
+```
 
 """
 function laplacianEigenMaps(Ω::𝕃{T}, q::Int;
@@ -944,33 +958,35 @@ laplacianEM=laplacianEigenMaps
 
  **See also**: [`distanceSqrMat`](@ref), [`laplacian`](@ref), [`laplacianEigenMaps`](@ref).
 
- ## Examples
-    using PosDefManifold
-    # Generate a set of k random 10x10 SPD matrices
-    k=10
-    Pset=randP(10, k)
-    evalues, maps, iter, conv=spectralEmbedding(Fisher, Pset, 2)
+ **Examples**
+```julia
+using PosDefManifold
+# Generate a set of k random 10x10 SPD matrices
+k=10
+Pset=randP(10, k)
+evalues, maps, iter, conv=spectralEmbedding(Fisher, Pset, 2)
 
-    # show convergence information
-    evalues, maps, iter, conv=spectralEmbedding(Fisher, Pset, 2; verbose=true)
+# show convergence information
+evalues, maps, iter, conv=spectralEmbedding(Fisher, Pset, 2; verbose=true)
 
-    # use Float64 precision.
-    evalues, maps, iter, conv=spectralEmbedding(Float64, Fisher, Pset, 2)
+# use Float64 precision.
+evalues, maps, iter, conv=spectralEmbedding(Float64, Fisher, Pset, 2)
 
-    using Plots
-    # check eigevalues and eigenvectors
-    plot(diag(evalues))
-    plot(maps[:, 1])
-    plot!(maps[:, 2])
-    plot!(maps[:, 3])
+using Plots
+# check eigevalues and eigenvectors
+plot(diag(evalues))
+plot(maps[:, 1])
+plot!(maps[:, 2])
+plot!(maps[:, 3])
 
-    # plot the data in the embedded space
-    plot(maps[:, 1], maps[:, 2], seriestype=:scatter, title="Spectral Embedding", label="Pset")
+# plot the data in the embedded space
+plot(maps[:, 1], maps[:, 2], seriestype=:scatter, title="Spectral Embedding", label="Pset")
 
-    # try a different value of epsilon
-    evalues, maps, iter, conv=spEmb(Fisher, Pset, k-1, 0.01; maxiter=1000)
-    plot(maps[:, 1], maps[:, 2], seriestype=:scatter, title="Spectral Embedding", label="Pset")
-    # see the example in `Laplacian` function for more on this
+# try a different value of epsilon
+evalues, maps, iter, conv=spEmb(Fisher, Pset, k-1, 0.01; maxiter=1000)
+plot(maps[:, 1], maps[:, 2], seriestype=:scatter, title="Spectral Embedding", label="Pset")
+# see the example in `Laplacian` function for more on this
+```
 
 """
 function spectralEmbedding(type::Type{T}, metric::Metric, 𝐏::ℍVector, q::Int, epsilon::Real=0;
@@ -1114,33 +1130,35 @@ spEmb=spectralEmbedding
 
  **See**: [geodesic](@ref), [mean](@ref), [Fréchet mean](@ref).
 
- ## Examples
-    using LinearAlgebra, Statistics, PosDefManifold
-    # Generate 2 random 3x3 SPD matrices
-    P=randP(3)
-    Q=randP(3)
-    M=mean(logdet0, P, Q) # (1)
-    M=mean(Euclidean, P, Q) # (1)
+ **Examples**
+```julia
+using LinearAlgebra, Statistics, PosDefManifold
+# Generate 2 random 3x3 SPD matrices
+P=randP(3)
+Q=randP(3)
+M=mean(logdet0, P, Q) # (1)
+M=mean(Euclidean, P, Q) # (1)
 
-    # passing several matrices and associated weights listing them
-    # weights vector, does not need to be normalized
-    R=randP(3)
-    mean(Fisher, ℍVector([P, Q, R]); w=[1, 2, 3])
+# passing several matrices and associated weights listing them
+# weights vector, does not need to be normalized
+R=randP(3)
+mean(Fisher, ℍVector([P, Q, R]); w=[1, 2, 3])
 
-    # Generate a set of 4 random 3x3 SPD matrices
-    Pset=randP(3, 4)
-    weights=[1, 2, 3, 1]
-    # passing a vector of Hermitian matrices (ℍVector type)
-    M=mean(Euclidean, Pset; w=weights) # (2) weighted Euclidean mean
-    M=mean(Wasserstein, Pset)  # (2) unweighted Wassertein mean
-    # display convergence information when using an iterative algorithm
-    M=mean(Fisher, Pset; verbose=true)
+# Generate a set of 4 random 3x3 SPD matrices
+Pset=randP(3, 4)
+weights=[1, 2, 3, 1]
+# passing a vector of Hermitian matrices (ℍVector type)
+M=mean(Euclidean, Pset; w=weights) # (2) weighted Euclidean mean
+M=mean(Wasserstein, Pset)  # (2) unweighted Wassertein mean
+# display convergence information when using an iterative algorithm
+M=mean(Fisher, Pset; verbose=true)
 
-    # run multi-threaded when the number of matrices is high
-    using BenchmarkTools
-    Pset=randP(20, 160)
-    @benchmark(mean(logEuclidean, Pset; ⏩=false)) # single-threaded
-    @benchmark(mean(logEuclidean, Pset)) # multi-threaded
+# run multi-threaded when the number of matrices is high
+using BenchmarkTools
+Pset=randP(20, 160)
+@benchmark(mean(logEuclidean, Pset; ⏩=false)) # single-threaded
+@benchmark(mean(logEuclidean, Pset)) # multi-threaded
+```
 
 """
 mean(metric::Metric, P::ℍ{T}, Q::ℍ{T}) where T<:RealOrComplex =
@@ -1351,45 +1369,48 @@ end # function
 
   **See also**: [`mean`](@ref).
 
-  ## Examples
-     using PosDefManifold
-     # Generate a set of 4 random 3x3 SPD matrices
-     Pset=randP(3, 4) # or, using unicode: 𝐏=randP(3, 4)
-     # Generate a set of 40 random 4x4 SPD matrices
-     Qset=randP(3, 40) # or, using unicode: 𝐐=randP(3, 40)
-     # listing directly ℍVector objects
-     means(logEuclidean, ℍVector₂([Pset, Qset])) # or: means(logEuclidean, ℍVector₂([𝐏, 𝐐]))
-     # note that [𝐏, 𝐐] is actually a ℍVector₂ type object
+  **Examples**
+```julia
+using PosDefManifold
+# Generate a set of 4 random 3x3 SPD matrices
+Pset=randP(3, 4) # or, using unicode: 𝐏=randP(3, 4)
+# Generate a set of 40 random 4x4 SPD matrices
+Qset=randP(3, 40) # or, using unicode: 𝐐=randP(3, 40)
+# listing directly ℍVector objects
+means(logEuclidean, ℍVector₂([Pset, Qset])) # or: means(logEuclidean, ℍVector₂([𝐏, 𝐐]))
+# note that [𝐏, 𝐐] is actually a ℍVector₂ type object
 
-     # creating and passing an object of ℍVector₂ type
-     sets=ℍVector₂(undef, 2) # or: 𝒫=ℍVector₂(undef, 2)
-     sets[1]=Pset # or: 𝒫[1]=𝐏
-     sets[2]=Qset # or: 𝒫[2]=𝐐
-     means(logEuclidean, sets) # or: means(logEuclidean, 𝒫)
+# creating and passing an object of ℍVector₂ type
+sets=ℍVector₂(undef, 2) # or: 𝒫=ℍVector₂(undef, 2)
+sets[1]=Pset # or: 𝒫[1]=𝐏
+sets[2]=Qset # or: 𝒫[2]=𝐐
+means(logEuclidean, sets) # or: means(logEuclidean, 𝒫)
 
-     # going multi-threated
+# going multi-threated
 
-     # first, create 20 sets of 200 50x50 SPD matrices
-     sets=ℍVector₂([randP(50, 200) for i=1:20])
+# first, create 20 sets of 200 50x50 SPD matrices
+sets=ℍVector₂([randP(50, 200) for i=1:20])
 
-     # How much computing time we save ?
-     # (example min time obtained with 4 threads & 4 BLAS threads)
-     using BenchmarkTools
+# How much computing time we save ?
+# (example min time obtained with 4 threads & 4 BLAS threads)
+using BenchmarkTools
 
-     # non multi-threaded, mean with closed-form solution
-     @benchmark(means(logEuclidean, sets; ⏩=false)) # (6.196 s)
+# non multi-threaded, mean with closed-form solution
+@benchmark(means(logEuclidean, sets; ⏩=false)) # (6.196 s)
 
-     # multi-threaded, mean with closed-form solution
-     @benchmark(means(logEuclidean, sets)) # (1.897 s)
+# multi-threaded, mean with closed-form solution
+@benchmark(means(logEuclidean, sets)) # (1.897 s)
 
-     sets=ℍVector₂([randP(10, 200) for i=1:10])
+sets=ℍVector₂([randP(10, 200) for i=1:10])
 
-     # non multi-threaded, mean with iterative solution
-     # wait a bit
-     @benchmark(means(Fisher, sets; ⏩=false)) # (4.672 s )
+# non multi-threaded, mean with iterative solution
+# wait a bit
+@benchmark(means(Fisher, sets; ⏩=false)) # (4.672 s )
 
-     # multi-threaded, mean with iterative solution
-     @benchmark(means(Fisher, sets)) # (1.510 s)
+# multi-threaded, mean with iterative solution
+@benchmark(means(Fisher, sets)) # (1.510 s)
+```
+
 """
 means(metric::Metric, 𝒫::ℍVector₂; ⏩=true) =
         ℍVector([mean(metric, 𝐏; ⏩=⏩) for 𝐏 in 𝒫])
@@ -1454,29 +1475,31 @@ means(metric::Metric, 𝒟::𝔻Vector₂; ⏩=true) =
 
  **See also**: [`powerMean`](@ref), [`wasMean`](@ref), [`mean`](@ref).
 
- ## Examples
-    using LinearAlgebra, Statistics, PosDefManifold
-    # Generate a set of 4 random 3x3 SPD matrices
-    Pset=randP(3, 4) # or, using unicode: 𝐏=randP(3, 4)
+ **Examples**
+```julia
+using LinearAlgebra, Statistics, PosDefManifold
+# Generate a set of 4 random 3x3 SPD matrices
+Pset=randP(3, 4) # or, using unicode: 𝐏=randP(3, 4)
 
-    # weights vector, does not need to be normalized
-    weights=[1, 2, 3, 1]
+# weights vector, does not need to be normalized
+weights=[1, 2, 3, 1]
 
-    # unweighted mean
-    G = generalizedMean(Pset, 0.25) # or: G = generalizedMean(𝐏, 0.25)
+# unweighted mean
+G = generalizedMean(Pset, 0.25) # or: G = generalizedMean(𝐏, 0.25)
 
-    # weighted mean
-    G = generalizedMean(Pset, 0.5; w=weights)
+# weighted mean
+G = generalizedMean(Pset, 0.5; w=weights)
 
-    # with weights previously normalized we can set ✓w=false
-    weights=weights./sum(weights)
-    G = generalizedMean(Pset, 0.5; w=weights, ✓w=false)
+# with weights previously normalized we can set ✓w=false
+weights=weights./sum(weights)
+G = generalizedMean(Pset, 0.5; w=weights, ✓w=false)
 
-    # run multi-threaded when the number of matrices is high
-    using BenchmarkTools
-    Pset=randP(20, 160)
-    @benchmark(generalizedMean(Pset; ⏩=false)) # single-threaded
-    @benchmark(generalizedMean(Pset)) # multi-threaded
+# run multi-threaded when the number of matrices is high
+using BenchmarkTools
+Pset=randP(20, 160)
+@benchmark(generalizedMean(Pset; ⏩=false)) # single-threaded
+@benchmark(generalizedMean(Pset)) # multi-threaded
+```
 
 """
 function generalizedMean(𝐏::Union{ℍVector, 𝔻Vector}, p::Real;
@@ -1501,7 +1524,6 @@ function generalizedMean(𝐏::Union{ℍVector, 𝔻Vector}, p::Real;
         end
     end # if p
 end # function
-
 
 
 """
@@ -1583,42 +1605,44 @@ See the [log Euclidean](@ref) metric.
 **See also**: [`geometricpMean`](@ref), [`powerMean`](@ref),
  [`wasMean`](@ref), [`logdet0Mean`](@ref), [`mean`](@ref).
 
-## Examples
-    using LinearAlgebra, PosDefManifold
-    # Generate a set of 4 random 3x3 SPD matrices
-    Pset=randP(3, 4) # or, using unicode: 𝐏=randP(3, 4)
+**Examples**
+```julia
+using LinearAlgebra, PosDefManifold
+# Generate a set of 4 random 3x3 SPD matrices
+Pset=randP(3, 4) # or, using unicode: 𝐏=randP(3, 4)
 
-    # unweighted mean
-    G, iter, conv = geometricMean(Pset) # or G, iter, conv = geometricMean(𝐏)
+# unweighted mean
+G, iter, conv = geometricMean(Pset) # or G, iter, conv = geometricMean(𝐏)
 
-    # weights vector, does not need to be normalized
-    weights=[1, 2, 3, 1]
+# weights vector, does not need to be normalized
+weights=[1, 2, 3, 1]
 
-    # weighted mean
-    G, iter, conv = geometricMean(Pset, w=weights)
+# weighted mean
+G, iter, conv = geometricMean(Pset, w=weights)
 
-    # print the convergence at all iterations
-    G, iter, conv = geometricMean(Pset; verbose=true)
+# print the convergence at all iterations
+G, iter, conv = geometricMean(Pset; verbose=true)
 
-    # now suppose Pset has changed a bit, initialize with G to hasten convergence
-    Pset[1]=ℍ(Pset[1]+(randP(3)/100))
-    G, iter, conv = geometricMean(Pset; w=weights, ✓w=true, verbose=true, init=G)
+# now suppose Pset has changed a bit, initialize with G to hasten convergence
+Pset[1]=ℍ(Pset[1]+(randP(3)/100))
+G, iter, conv = geometricMean(Pset; w=weights, ✓w=true, verbose=true, init=G)
 
-    # run multi-threaded when the number of matrices is high
-    using BenchmarkTools
-    Pset=randP(20, 120)
-    @benchmark(geometricMean(Pset; ⏩=false)) # single-threaded
-    @benchmark(geometricMean(Pset)) # multi-threaded
+# run multi-threaded when the number of matrices is high
+using BenchmarkTools
+Pset=randP(20, 120)
+@benchmark(geometricMean(Pset; ⏩=false)) # single-threaded
+@benchmark(geometricMean(Pset)) # multi-threaded
 
-    # show the mean and the input points using spectral embedding
-    using Plots
-    k=80
-    Pset=randP(20, k)
-    G, iter, conv = geometricMean(Pset)
-    push!(Pset, G)
-    Λ, U, iter, conv=spectralEmbedding(Fisher, Pset, 2; verbose=true)
-    plot(U[1:k, 1], U[1:k, 2], seriestype=:scatter, title="Spectral Embedding", label="Pset")
-    plot!(U[k+1:k+1, 1], U[k+1:k+1, 2], seriestype=:scatter, label="mean")
+# show the mean and the input points using spectral embedding
+using Plots
+k=80
+Pset=randP(20, k)
+G, iter, conv = geometricMean(Pset)
+push!(Pset, G)
+Λ, U, iter, conv=spectralEmbedding(Fisher, Pset, 2; verbose=true)
+plot(U[1:k, 1], U[1:k, 2], seriestype=:scatter, title="Spectral Embedding", label="Pset")
+plot!(U[k+1:k+1, 1], U[k+1:k+1, 2], seriestype=:scatter, label="mean")
+```
 
 """
 function geometricMean( 𝐏::ℍVector;
@@ -1757,59 +1781,61 @@ gMean=geometricMean
  **See also**: [`geometricMean`](@ref), [`powerMean`](@ref),
  [`wasMean`](@ref), [`logdet0Mean`](@ref), [`mean`](@ref).
 
- ## Examples
-    using LinearAlgebra, PosDefManifold, Plots
+ **Examples**
+```julia
+using LinearAlgebra, PosDefManifold, Plots
 
-    # This examples show that this algorithm is more robust to outliers
-    # as compared to the standard geometric mean algorithm
+# This examples show that this algorithm is more robust to outliers
+# as compared to the standard geometric mean algorithm
 
-    # Generate a set of 100 random 10x10 SPD matrices
-    Pset=randP(10, 100)
+# Generate a set of 100 random 10x10 SPD matrices
+Pset=randP(10, 100)
 
-    # Get the usual geometric mean for comparison
-    G, iter1, conv1 = geometricMean(Pset, verbose=true)
+# Get the usual geometric mean for comparison
+G, iter1, conv1 = geometricMean(Pset, verbose=true)
 
-    # change p to observe how the convergence behavior changes accordingly
-    # Get the median (default)
-    H, iter2, conv2 = geometricpMean(Pset, verbose=true)
-    # Get the p-mean for p=0.25
-    H, iter2, conv2 = geometricpMean(Pset, 0.25, verbose=true)
+# change p to observe how the convergence behavior changes accordingly
+# Get the median (default)
+H, iter2, conv2 = geometricpMean(Pset, verbose=true)
+# Get the p-mean for p=0.25
+H, iter2, conv2 = geometricpMean(Pset, 0.25, verbose=true)
 
-    println(iter1, " ", iter2); println(conv1, " ", conv2)
+println(iter1, " ", iter2); println(conv1, " ", conv2)
 
-    # move the first matrix in Pset to possibly create an otlier
-    Pset[1]=geodesic(Fisher, G, Pset[1], 3)
-    G1, iter1, conv1 = geometricMean(Pset, verbose=true)
-    H1, iter2, conv2 = geometricpMean(Pset, 0.25, verbose=true)
-    println(iter1, " ", iter2); println(conv1, " ", conv2)
+# move the first matrix in Pset to possibly create an otlier
+Pset[1]=geodesic(Fisher, G, Pset[1], 3)
+G1, iter1, conv1 = geometricMean(Pset, verbose=true)
+H1, iter2, conv2 = geometricpMean(Pset, 0.25, verbose=true)
+println(iter1, " ", iter2); println(conv1, " ", conv2)
 
-    # collect the geometric and p-means, before and after the
-    # introduction of the outier in vector of Hermitian matrices `S`.
-    S=HermitianVector([G, G1, H, H1])
+# collect the geometric and p-means, before and after the
+# introduction of the outier in vector of Hermitian matrices `S`.
+S=HermitianVector([G, G1, H, H1])
 
-    # check the interdistance matrix Δ² to verify that the geometric mean
-    # after the introduction of the outlier (``G1``) is farther away from
-    # the geometric mean as compared to how much ``H1`` is further away
-    # from ``H``, i.e., that element (4,3) is much smaller than element (2,1).
-    Δ²=distance²Mat(Float64, Fisher, S)
+# check the interdistance matrix Δ² to verify that the geometric mean
+# after the introduction of the outlier (``G1``) is farther away from
+# the geometric mean as compared to how much ``H1`` is further away
+# from ``H``, i.e., that element (4,3) is much smaller than element (2,1).
+Δ²=distance²Mat(Float64, Fisher, S)
 
-    # how far are all these matrices from all the others?
-    fullΔ²=Hermitian(Δ², :L)
-    dist=[sum(fullΔ²[:, i]) for i=1:size(fullΔ², 1)]
+# how far are all these matrices from all the others?
+fullΔ²=Hermitian(Δ², :L)
+dist=[sum(fullΔ²[:, i]) for i=1:size(fullΔ², 1)]
 
-    # plot the matrices in `S` using spectral embedding.
-    using Plots
-    Λ, U, iter, conv = laplacianEM(laplacian(Δ²), 3;  verbose=true)
-    plot([U[1, 1]], [U[1, 2]], seriestype=:scatter, label="g-mean")
-    plot!([U[2, 1]], [U[2, 2]], seriestype=:scatter, label="g-mean outlier")
-    plot!([U[3, 1]], [U[3, 2]], seriestype=:scatter, label="p-mean")
-    plot!([U[4, 1]], [U[4, 2]], seriestype=:scatter, label="p-mean outlier")
+# plot the matrices in `S` using spectral embedding.
+using Plots
+Λ, U, iter, conv = laplacianEM(laplacian(Δ²), 3;  verbose=true)
+plot([U[1, 1]], [U[1, 2]], seriestype=:scatter, label="g-mean")
+plot!([U[2, 1]], [U[2, 2]], seriestype=:scatter, label="g-mean outlier")
+plot!([U[3, 1]], [U[3, 2]], seriestype=:scatter, label="p-mean")
+plot!([U[4, 1]], [U[4, 2]], seriestype=:scatter, label="p-mean outlier")
 
-    # estimate how much you gain running the algorithm in multi-threaded mode
-    using BenchmarkTools
-    Pset=randP(20, 120)
-    @benchmark(geometricpMean(Pset; ⏩=true)) # single-threaded
-    @benchmark(geometricpMean(Pset)) # multi-threaded
+# estimate how much you gain running the algorithm in multi-threaded mode
+using BenchmarkTools
+Pset=randP(20, 120)
+@benchmark(geometricpMean(Pset; ⏩=true)) # single-threaded
+@benchmark(geometricpMean(Pset)) # multi-threaded
+```
 
 """
 function geometricpMean(𝐏::ℍVector, p::Real=goldeninv;
@@ -1949,32 +1975,35 @@ gpMean=geometricpMean
  **See also**: [`powerMean`](@ref), [`wasMean`](@ref), [`logdet0Mean`](@ref),
  [`mean`](@ref).
 
- ## Examples
-    using LinearAlgebra, PosDefManifold
-    # Generate a set of 4 random 3x3 SPD matrices
-    Pset=randP(3, 4) # or, using unicode: 𝐏=randP(3, 4)
+ **Examples**
+```julia
+using LinearAlgebra, PosDefManifold
+# Generate a set of 4 random 3x3 SPD matrices
+Pset=randP(3, 4) # or, using unicode: 𝐏=randP(3, 4)
 
-    # unweighted mean
-    G, iter, conv = logdet0Mean(Pset) # or G, iter, conv = logdet0Mean(𝐏)
+# unweighted mean
+G, iter, conv = logdet0Mean(Pset) # or G, iter, conv = logdet0Mean(𝐏)
 
-    # weights vector, does not need to be normalized
-    weights=[1, 2, 3, 1]
+# weights vector, does not need to be normalized
+weights=[1, 2, 3, 1]
 
-    # weighted mean
-    G, iter, conv = logdet0Mean(Pset, w=weights)
+# weighted mean
+G, iter, conv = logdet0Mean(Pset, w=weights)
 
-    # print the convergence at all iterations
-    G, iter, conv = logdet0Mean(Pset; w=weights, verbose=true)
+# print the convergence at all iterations
+G, iter, conv = logdet0Mean(Pset; w=weights, verbose=true)
 
-    # suppose Pset has changed a bit; initialize with G to hasten convergence
-    Pset[1]=ℍ(Pset[1]+(randP(3)/100))
-    G, iter, conv = logdet0Mean(Pset; w=weights, ✓w=false, verbose=true, init=G)
+# suppose Pset has changed a bit; initialize with G to hasten convergence
+Pset[1]=ℍ(Pset[1]+(randP(3)/100))
+G, iter, conv = logdet0Mean(Pset; w=weights, ✓w=false, verbose=true, init=G)
 
-    # estimate how much you gain running the algorithm in multi-threaded mode
-    using BenchmarkTools
-    Pset=randP(20, 120)
-    @benchmark(logdet0Mean(Pset; ⏩=false)) # single-threaded
-    @benchmark(logdet0Mean(Pset)) # multi-threaded
+# estimate how much you gain running the algorithm in multi-threaded mode
+using BenchmarkTools
+Pset=randP(20, 120)
+@benchmark(logdet0Mean(Pset; ⏩=false)) # single-threaded
+@benchmark(logdet0Mean(Pset)) # multi-threaded
+```
+
 """
 function logdet0Mean(𝐏::Union{ℍVector, 𝔻Vector};
                     w::Vector=[],
@@ -2096,32 +2125,34 @@ ld0Mean=logdet0Mean
  **See also**: [`powerMean`](@ref), [`wasMean`](@ref), [`logdet0Mean`](@ref),
  [`mean`](@ref).
 
- ## Examples
-    using LinearAlgebra, PosDefManifold
-    # Generate a set of 4 random 3x3 SPD matrices
-    Pset=randP(3, 4) # or, using unicode: 𝐏=randP(3, 4)
+ **Examples**
+```julia
+using LinearAlgebra, PosDefManifold
+# Generate a set of 4 random 3x3 SPD matrices
+Pset=randP(3, 4) # or, using unicode: 𝐏=randP(3, 4)
 
-    # unweighted mean
-    G, iter, conv = wasMean(Pset) # or: G, iter, conv = wasMean(𝐏)
+# unweighted mean
+G, iter, conv = wasMean(Pset) # or: G, iter, conv = wasMean(𝐏)
 
-    # weights vector, does not need to be normalized
-    weights=[1, 2, 3, 1]
+# weights vector, does not need to be normalized
+weights=[1, 2, 3, 1]
 
-    # weighted mean
-    G, iter, conv = wasMean(Pset; w=weights)
+# weighted mean
+G, iter, conv = wasMean(Pset; w=weights)
 
-    # print the convergence at all iterations
-    G, iter, conv = wasMean(Pset; w=weights, verbose=true)
+# print the convergence at all iterations
+G, iter, conv = wasMean(Pset; w=weights, verbose=true)
 
-    # suppose 𝐏 has changed a bit; initialize with G to hasten convergence
-    Pset[1]=ℍ(Pset[1]+(randP(3)/100))
-    G, iter, conv = wasMean(Pset; w=weights, verbose=true, init=G)
+# suppose 𝐏 has changed a bit; initialize with G to hasten convergence
+Pset[1]=ℍ(Pset[1]+(randP(3)/100))
+G, iter, conv = wasMean(Pset; w=weights, verbose=true, init=G)
 
-    # estimate how much you gain running the algorithm in multi-threaded mode
-    using BenchmarkTools
-    Pset=randP(20, 120)
-    @benchmark(wasMean(Pset; ⏩=false)) # single-threaded
-    @benchmark(wasMean(Pset)) # multi-threaded
+# estimate how much you gain running the algorithm in multi-threaded mode
+using BenchmarkTools
+Pset=randP(20, 120)
+@benchmark(wasMean(Pset; ⏩=false)) # single-threaded
+@benchmark(wasMean(Pset)) # multi-threaded
+```
 
 """
 function wasMean(𝐏::ℍVector;
@@ -2266,32 +2297,34 @@ wasMean(𝐃::𝔻Vector;
  **See also**: [`generalizedMean`](@ref), [`wasMean`](@ref), [`logdet0Mean`](@ref),
  [`mean`](@ref).
 
- ## Examples
-    using LinearAlgebra, PosDefManifold
-    # Generate a set of 4 random 3x3 SPD matrices
-    Pset=randP(3, 4) # or, using unicode: 𝐏=randP(3, 4)
+ **Examples**
+```julia
+using LinearAlgebra, PosDefManifold
+# Generate a set of 4 random 3x3 SPD matrices
+Pset=randP(3, 4) # or, using unicode: 𝐏=randP(3, 4)
 
-    # unweighted mean
-    G, iter, conv = powerMean(Pset, 0.5) # or G, iter, conv = powerMean(𝐏, 0.5)
+# unweighted mean
+G, iter, conv = powerMean(Pset, 0.5) # or G, iter, conv = powerMean(𝐏, 0.5)
 
-    # weights vector, does not need to be normalized
-    weights=[1, 2, 3, 1]
+# weights vector, does not need to be normalized
+weights=[1, 2, 3, 1]
 
-    # weighted mean
-    G, iter, conv = powerMean(Pset, 0.5; w=weights)
+# weighted mean
+G, iter, conv = powerMean(Pset, 0.5; w=weights)
 
-    # print the convergence at all iterations
-    G, iter, conv = powerMean(Pset, 0.5; w=weights, verbose=true)
+# print the convergence at all iterations
+G, iter, conv = powerMean(Pset, 0.5; w=weights, verbose=true)
 
-    # suppose 𝐏 has changed a bit; initialize with G to hasten convergence
-    Pset[1]=ℍ(Pset[1]+(randP(3)/100))
-    G, iter, conv = powerMean(Pset, 0.5; w=weights, verbose=true, init=G)
+# suppose 𝐏 has changed a bit; initialize with G to hasten convergence
+Pset[1]=ℍ(Pset[1]+(randP(3)/100))
+G, iter, conv = powerMean(Pset, 0.5; w=weights, verbose=true, init=G)
 
-    # estimate how much you gain running the algorithm in multi-threaded mode
-    using BenchmarkTools
-    Pset=randP(20, 120)
-    @benchmark(powerMean(Pset, 0.5; ⏩=false)) # single-threaded
-    @benchmark(powerMean(Pset, 0.5)) # multi-threaded
+# estimate how much you gain running the algorithm in multi-threaded mode
+using BenchmarkTools
+Pset=randP(20, 120)
+@benchmark(powerMean(Pset, 0.5; ⏩=false)) # single-threaded
+@benchmark(powerMean(Pset, 0.5)) # multi-threaded
+```
 
 """
 function powerMean(𝐏::ℍVector, p::Real;
@@ -2414,26 +2447,29 @@ powerMean(𝐃::𝔻Vector, p::Real;
  Since the inductive mean uses the [`geodesic`](@ref) function,
  it is not available for the Von Neumann metric.
 
-## Examples
-    # A set of 100 matrices for which we want to compute the mean
-    𝐏=randP(10, 100)
+**Examples**
+```julia
+# A set of 100 matrices for which we want to compute the mean
+𝐏=randP(10, 100)
 
-    𝐏1=ℍVector(collect(𝐏[i] for i=1:50)) # first 50
-    𝐏2=ℍVector(collect(𝐏[i] for i=51:100)) # last 50
+𝐏1=ℍVector(collect(𝐏[i] for i=1:50)) # first 50
+𝐏2=ℍVector(collect(𝐏[i] for i=51:100)) # last 50
 
-    # inductive mean of the whole set 𝐏
-    G=inductiveMean(Fisher, 𝐏)
+# inductive mean of the whole set 𝐏
+G=inductiveMean(Fisher, 𝐏)
 
-    # mean using the usual gradient descent algorithm
-    H, iter, conv=geometricMean(𝐏)
+# mean using the usual gradient descent algorithm
+H, iter, conv=geometricMean(𝐏)
 
-    # inductive mean of 𝐏 given only 𝐏2,
-    # the number of matrices in 𝐏1 and the mean of 𝐏1
-    G2=inductiveMean(Fisher, 𝐏2, length(𝐏1), mean(Fisher, 𝐏1))
+# inductive mean of 𝐏 given only 𝐏2,
+# the number of matrices in 𝐏1 and the mean of 𝐏1
+G2=inductiveMean(Fisher, 𝐏2, length(𝐏1), mean(Fisher, 𝐏1))
 
-    # average error
-    norm(G-H)/(dim(G, 1)^2)
-    norm(G2-H)/(dim(G, 1)^2)
+# average error
+norm(G-H)/(dim(G, 1)^2)
+norm(G2-H)/(dim(G, 1)^2)
+```
+
 """
 function inductiveMean(metric::Metric, 𝐏::ℍVector)
     if metric ∉ (VonNeumann)
@@ -2459,11 +2495,13 @@ end
  where ``\\lambda_(min)`` and ``\\lambda_(max)`` are the extremal generalized
  eigenvalues of ``P`` and ``Q``.
 
-## Examples
+**Examples**
+```julia
+P=randP(3)
+Q=randP(3)
+M=midrange(Fisher, P, Q)
+```
 
-    P=randP(3)
-    Q=randP(3)
-    M=midrange(Fisher, P, Q)
 """
 function midrange(metric::Metric, P::ℍ{T}, Q::ℍ{T}) where T<:RealOrComplex
     if metric == Fisher
@@ -2526,20 +2564,22 @@ indMean=inductiveMean
 
  **See also**: [`vecP`](@ref), [`parallelTransport`](@ref).
 
- ## Examples
-    using PosDefManifold
-    (1)
-    P=randP(3)
-    Q=randP(3)
-    metric=Fisher
-    G=mean(metric, P, Q)
-    # projecting P at the base point given by the geometric mean of P and Q
-    S=logMap(metric, P, G)
+ **Examples**
+```julia
+using PosDefManifold
+(1)
+P=randP(3)
+Q=randP(3)
+metric=Fisher
+G=mean(metric, P, Q)
+# projecting P at the base point given by the geometric mean of P and Q
+S=logMap(metric, P, G)
 
-    (2)
-    Pset=randP(3, 4)
-    # projecting all matrices in Pset at the base point given by their geometric mean.
-    Sset=logMap(Fisher, Pset, mean(Fisher, Pset))
+(2)
+Pset=randP(3, 4)
+# projecting all matrices in Pset at the base point given by their geometric mean.
+Sset=logMap(Fisher, Pset, mean(Fisher, Pset))
+```
 
 """
 function logMap(metric::Metric, P::ℍ{T}, G::ℍ{T}) where T<:RealOrComplex
@@ -2592,24 +2632,26 @@ end
 
  The inverse operation is [`logMap`](@ref).
 
- ## Examples
-    (1)
-    using PosDefManifold, LinearAlgebra
-    P=randP(3)
-    Q=randP(3)
-    G=mean(Fisher, P, Q)
-    # projecting P on the tangent space at the Fisher mean base point G
-    S=logMap(Fisher, P, G)
-    # projecting back onto the manifold
-    P2=expMap(Fisher, S, G)
+ **Examples**
+```julia
+(1)
+using PosDefManifold, LinearAlgebra
+P=randP(3)
+Q=randP(3)
+G=mean(Fisher, P, Q)
+# projecting P on the tangent space at the Fisher mean base point G
+S=logMap(Fisher, P, G)
+# projecting back onto the manifold
+P2=expMap(Fisher, S, G)
 
-    (2)
-    Pset=randP(3, 4)
-    # projecting all matrices in Pset at the base point given by their geometric mean.
-    G=mean(Fisher, Pset)
-    Sset=logMap(Fisher, Pset, G)
-    # projecting back onto the manifold
-    Pset2=expMap(Fisher, Sset, G)
+(2)
+Pset=randP(3, 4)
+# projecting all matrices in Pset at the base point given by their geometric mean.
+G=mean(Fisher, Pset)
+Sset=logMap(Fisher, Pset, G)
+# projecting back onto the manifold
+Pset2=expMap(Fisher, Sset, G)
+```
 
 """
 function expMap(metric::Metric, S::ℍ{T}, G::ℍ{T}) where T<:RealOrComplex
@@ -2662,17 +2704,20 @@ end
  cannot be reverted by the [`matP`](@ref), that is,
  in this case the matrix is 'stuck' in the tangent space.
 
- ## Examples
-    using PosDefManifold
-    P=randP(3)
-    Q=randP(3)
-    G=mean(Fisher, P, Q)
-    # projecting P at the base point given by the geometric mean of P and Q
-    S=logMap(Fisher, P, G)
-    # vectorize S
-    v=vecP(S)
-    # vectorize onlt the first two columns of S
-    v=vecP(S; range=1:2)
+ **Examples**
+```julia
+using PosDefManifold
+P=randP(3)
+Q=randP(3)
+G=mean(Fisher, P, Q)
+# projecting P at the base point given by the geometric mean of P and Q
+S=logMap(Fisher, P, G)
+# vectorize S
+v=vecP(S)
+# vectorize onlt the first two columns of S
+v=vecP(S; range=1:2)
+```
+
 """
 vecP(S::Union{ℍ{T}, Symmetric{R}};
      range::UnitRange=1:size(S, 2)) where T<:RealOrComplex where R<:Real =
@@ -2695,21 +2740,23 @@ vecP(S::Union{ℍ{T}, Symmetric{R}};
 
  **To Do**: This function may be rewritten more efficiently.
 
- ## Examples
-    using PosDefManifold
-    P=randP(3)
-    Q=randP(3)
-    G=mean(Fishr, P, Q)
-    # projecting P at onto the tangent space at the Fisher mean base point
-    S=logMap(Fisher, P, G)
-    # vectorize S
-    v=vecP(S)
-    # Rotate the vector by an orthogonal matrix
-    n=Int(size(S, 1)*(size(S, 1)+1)/2)
-    U=randP(n)
-    z=U*v
-    # Get the point in the tangent space
-    S=matP(z)
+ **Examples**
+```julia
+using PosDefManifold
+P=randP(3)
+Q=randP(3)
+G=mean(Fishr, P, Q)
+# projecting P at onto the tangent space at the Fisher mean base point
+S=logMap(Fisher, P, G)
+# vectorize S
+v=vecP(S)
+# Rotate the vector by an orthogonal matrix
+n=Int(size(S, 1)*(size(S, 1)+1)/2)
+U=randP(n)
+z=U*v
+# Get the point in the tangent space
+S=matP(z)
+```
 """
 function matP(ς::Vector{T}) where T<:RealOrComplex
   n=Int((-1+√(1+8*length(ς)))/2) # Size of the matrix whose vectorization vector v has size length(v)
@@ -2772,47 +2819,49 @@ The transport reduces in this case to:
 
   **See also**: [`logMap`](@ref), [`expMap`](@ref), [`vecP`](@ref), [`matP`](@ref).
 
- ## Examples
-    using PosDefManifold
+ **Examples**
+```julia
+using PosDefManifold
 
-    (1)
-    P=randP(3)
-    Q=randP(3)
-    G=mean(Fisher, P, Q)
+(1)
+P=randP(3)
+Q=randP(3)
+G=mean(Fisher, P, Q)
 
-    # i. projecting P onto the tangent space at base-point G
-    S=logMap(Fisher, P, G)
-    # ii. parallel transport S to the tangent space at base-point Q
-    S_=parallelTransport(S, G, Q)
-    # iii. projecting back into the manifold at base-point Q
-    P_=expMap(Fisher, S_, Q)
+# i. projecting P onto the tangent space at base-point G
+S=logMap(Fisher, P, G)
+# ii. parallel transport S to the tangent space at base-point Q
+S_=parallelTransport(S, G, Q)
+# iii. projecting back into the manifold at base-point Q
+P_=expMap(Fisher, S_, Q)
 
-    # i., ii. and iii. can be done simply by
-    PP_=parallelTransport(P, G, Q)
-    # check
-    P_≈PP_ ? println(" ⭐ ") : println(" ⛔ ")
+# i., ii. and iii. can be done simply by
+PP_=parallelTransport(P, G, Q)
+# check
+P_≈PP_ ? println(" ⭐ ") : println(" ⛔ ")
 
-    (2)
-    P=randP(3)
-    Q=randP(3)
-    G=mean(Fisher, P, Q)
-    # transport to the tangent space at base-point the identity
-    PP_=parallelTransport(P, G)
+(2)
+P=randP(3)
+Q=randP(3)
+G=mean(Fisher, P, Q)
+# transport to the tangent space at base-point the identity
+PP_=parallelTransport(P, G)
 
-    (3)
-    Pset=randP(3, 4)
-    Q=randP(3)
-    G=mean(Fisher, Pset)
-    # trasport at once all matrices in Pset
-    Pset2=parallelTransport(Pset, G, Q)
+(3)
+Pset=randP(3, 4)
+Q=randP(3)
+G=mean(Fisher, Pset)
+# trasport at once all matrices in Pset
+Pset2=parallelTransport(Pset, G, Q)
 
-    (4)
-    Pset=randP(3, 4)
-    G=mean(Fisher, Pset)
-    # recenter all matrices so to have mean=I
-    Pset2=parallelTransport(Pset, G)
-    # check
-    mean(Fisher, Pset2) ≈ I ? println(" ⭐ ") : println(" ⛔ ")
+(4)
+Pset=randP(3, 4)
+G=mean(Fisher, Pset)
+# recenter all matrices so to have mean=I
+Pset2=parallelTransport(Pset, G)
+# check
+mean(Fisher, Pset2) ≈ I ? println(" ⭐ ") : println(" ⛔ ")
+```
 
 """
 function parallelTransport(S::ℍ{T}, P::ℍ{T}, Q::ℍ{T}) where T<:RealOrComplex
@@ -2887,14 +2936,17 @@ pt=parallelTransport
 
  can be solved using Julia package [Manopt](https://github.com/kellertuer/Manopt.jl).
 
- ## Examples
-    using PosDefManifold
-    P=randP(3)
-    Q=randP(3)
-    # argmin problem
-    U=procrustes(P, Q)
-    # argmax problem
-    V=procrustes(P, Q, "max")
+ **Examples**
+```julia
+using PosDefManifold
+P=randP(3)
+Q=randP(3)
+# argmin problem
+U=procrustes(P, Q)
+# argmax problem
+V=procrustes(P, Q, "max")
+```
+
 """
 function procrustes(P::ℍ{T}, Q::ℍ{T}, extremum="min") where T<:RealOrComplex
     Pup=eigvecs(P)
