@@ -23,7 +23,7 @@ For similar code resources in other programming languages see [here](https://sit
 ## About the author
 
 [Marco Congedo](https://sites.google.com/site/marcocongedo) is
-a research scientist of [CNRS](http://www.cnrs.fr/en) (Centre National de la Recherche Scientifique), working at [UGA](https://www.univ-grenoble-alpes.fr/english/) (University of Grenoble Alpes), in Grenoble (France).
+a Research Director of [CNRS](http://www.cnrs.fr/en) (Centre National de la Recherche Scientifique), working at [UGA](https://www.univ-grenoble-alpes.fr/english/) (University of Grenoble Alpes), in Grenoble (France).
 
 ## Contact
 
