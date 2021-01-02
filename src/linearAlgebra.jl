@@ -1,7 +1,7 @@
 #   Unit linearAlgebra.jl, part of PosDefManifold Package for julia language
 #
 #   MIT License
-#   Copyright (c) 2019, Marco Congedo, CNRS, Grenobe, France:
+#   Copyright (c) 2019-21, Marco Congedo, CNRS, Grenobe, France:
 #   https://sites.google.com/site/marcocongedo/home
 #
 #   DESCRIPTION
@@ -99,19 +99,22 @@ end
  which returns the concrete type (see example below), thus
  cannot be used for [typecasting matrices](@ref).
 
- ## Examples
-    using LinearAlgebra, PosDefManifold
-    P=randP(3) # generate a 3x3 Hermitian matrix
-    typeofMatrix(P) # returns `Hermitian`
-    typeof(P) # returns `Hermitian{Float64,Array{Float64,2}}`
-    # typecast P as a `Matrix` M
-    M=Matrix(P)
-    # typecast M as a matrix of the same type as P and write the result in A
-    A=typeofMatrix(P)(M)
+ **Examples**
 
-    Pset=randP(3, 4) # generate a set of 4 3x3 Hermitian matrix
-    # Pset is an ℍVector type
-    typeofMatrix(Pset) # again returns `Hermitian`
+```julia
+using LinearAlgebra, PosDefManifold
+P=randP(3) # generate a 3x3 Hermitian matrix
+typeofMatrix(P) # returns `Hermitian`
+typeof(P) # returns `Hermitian{Float64,Array{Float64,2}}`
+# typecast P as a `Matrix` M
+M=Matrix(P)
+# typecast M as a matrix of the same type as P and write the result in A
+A=typeofMatrix(P)(M)
+
+Pset=randP(3, 4) # generate a set of 4 3x3 Hermitian matrix
+# Pset is an ℍVector type
+typeofMatrix(Pset) # again returns `Hermitian`
+```
 
 """
 typeofMatrix(H::Union{ℍ, ℍVector, ℍVector₂}) = ℍ
@@ -145,14 +148,16 @@ typeofMat=typeofMatrix
  is not of the `ℍVector`, `𝔻Vector`, `𝕃Vector` or
  `𝕄Vector` type.
 
- ## Examples
-    using LinearAlgebra, PosDefManifold
-    P=randP(3, 4) # generate 4 3x3 Hermitian matrix
-    typeofMatrix(P) # returns `Array{Hermitian,1}`
-    typeof(P) # also returns `Array{Hermitian,1}`
+ **Examples**
+```julia
+using LinearAlgebra, PosDefManifold
+P=randP(3, 4) # generate 4 3x3 Hermitian matrix
+typeofMatrix(P) # returns `Array{Hermitian,1}`
+typeof(P) # also returns `Array{Hermitian,1}`
 
-	typeofMatrix(P[1]) # returns `Array{Hermitian,1}`
-    typeof(P[1]) # returns `Hermitian{Float64,Array{Float64,2}}`
+typeofMatrix(P[1]) # returns `Array{Hermitian,1}`
+typeof(P[1]) # returns `Hermitian{Float64,Array{Float64,2}}`
+```
 
 """
 typeofVector(H::Union{ℍ, ℍVector, ℍVector₂}) = ℍVector
@@ -210,38 +215,41 @@ typeofVec=typeofVector
  It is not possible to overload the `size` function for matrix vectors
  since this causes problems to other Julia functions.
 
- ## Examples
-    using LinearAlgebra, PosDefManifold
-    # (1)
-    M=randn(3, 4) # generate a 3x4 `Matrix`
-    dim(M) # returns (3, 4)
-    dim(M, 1) # returns 3
-    dim(M, 2) # returns 4
-    dim(M, 3) # out of range: returns 0
+ **Examples**
+```julia
+using LinearAlgebra, PosDefManifold
+# (1)
+M=randn(3, 4) # generate a 3x4 `Matrix`
+dim(M) # returns (3, 4)
+dim(M, 1) # returns 3
+dim(M, 2) # returns 4
+dim(M, 3) # out of range: returns 0
 
-    # (2)
-    Pset=randP(3, 4) # generate an ℍVector holding 4 3x3 Hermitian matrices
-    dim(Pset) # returns (4, 3, 3)
-    dim(Pset, 1) # returns 4
-    dim(Pset, 2) # returns 3
-    dim(Pset, 3) # returns 3
+# (2)
+Pset=randP(3, 4) # generate an ℍVector holding 4 3x3 Hermitian matrices
+dim(Pset) # returns (4, 3, 3)
+dim(Pset, 1) # returns 4
+dim(Pset, 2) # returns 3
+dim(Pset, 3) # returns 3
 
-    # (3)
-    # Generate a set of 4 random 3x3 SPD matrices
-    Pset=randP(3, 4)
-    # Generate a set of 40 random 4x4 SPD matrices
-    Qset=randP(3, 40)
-    A=ℍVector₂([Pset, Qset])
-    dim(A) # return (2, [4, 40], 3, 3)
-    dim(A, 1) # return 2
-    dim(A, 2) # return [4, 40]
-    dim(A, 2)[1] # return 4
-    dim(A, 3) # return 3
-    dim(A, 4) # return 3
-    dim(A, 5) # out of range: return 0
+# (3)
+# Generate a set of 4 random 3x3 SPD matrices
+Pset=randP(3, 4)
+# Generate a set of 40 random 4x4 SPD matrices
+Qset=randP(3, 40)
+A=ℍVector₂([Pset, Qset])
+dim(A) # return (2, [4, 40], 3, 3)
+dim(A, 1) # return 2
+dim(A, 2) # return [4, 40]
+dim(A, 2)[1] # return 4
+dim(A, 3) # return 3
+dim(A, 4) # return 3
+dim(A, 5) # out of range: return 0
 
-    # note: to create an ℍVector₂ object holding k ℍVector objects use
-    sets=ℍVector₂(undef, k) # and then fill them
+# note: to create an ℍVector₂ object holding k ℍVector objects use
+sets=ℍVector₂(undef, k) # and then fill them
+```
+
 """
 dim(X::AnyMatrix, d::Int) = 1<=d<=2 ? size(X, d) : 0
 dim(X::AnyMatrix) = size(X)
@@ -280,18 +288,22 @@ If `X` is a Matrix, `dims`=1 (default) remove rows,
 If `X` is a Vector, `dims` has no effect.
 
 The second argument is either an integer or a vector of integers.
- ## Examples:
-	a=randn(5)
-	b=remove(a, 2)
-	b=remove(a, collect(1:3)) # remove rows 1 to 3
-	A=randn(3, 3)
-	B=remove(A, 2)
-	B=remove(A, 2; dims=2)
-	A=randn(5, 5)
-	B=remove(A, collect(1:2:5)) # remove rows 1, 3 and 5
-	C=remove(A, [1, 4])
-	A=randn(10, 10)
-	A=remove(A, [collect(2:3); collect(8:10)]; dims=2)
+
+ **Examples**
+```julia
+a=randn(5)
+b=remove(a, 2)
+b=remove(a, collect(1:3)) # remove rows 1 to 3
+A=randn(3, 3)
+B=remove(A, 2)
+B=remove(A, 2; dims=2)
+A=randn(5, 5)
+B=remove(A, collect(1:2:5)) # remove rows 1, 3 and 5
+C=remove(A, [1, 4])
+A=randn(10, 10)
+A=remove(A, [collect(2:3); collect(8:10)]; dims=2)
+```
+
 """
 function remove(X::Union{Vector, Matrix}, what::Union{Int, Vector{Int}}; dims=1)
     1<dims<2 && throw(ArgumentError("function `remove`: the `dims` keyword argument must be 1 or 2"))
@@ -339,13 +351,16 @@ isSquare(X::Matrix)=size(X, 1)==size(X, 2)
 
  **See also**: [`tr1`](@ref).
 
- ## Examples
-    using LinearAlgebra, PosDefManifold
-    P=randP(5) # generate a random real positive definite matrix 5x5
-    Q=det1(P)
-    det(Q) # must be 1
-    # using a tolerance
-    Q=det1(P; tol=1e-12)
+ **Examples**
+```julia
+using LinearAlgebra, PosDefManifold
+P=randP(5) # generate a random real positive definite matrix 5x5
+Q=det1(P)
+det(Q) # must be 1
+# using a tolerance
+Q=det1(P; tol=1e-12)
+```
+
 """
 function det1(X::AnyMatrix; tol::Real=0.)
     tol>=0. ? tolerance=tol : tolerance = 0.
@@ -372,19 +387,20 @@ det1Msg="function det1 in LinearAlgebra.jl of PosDefMaifold package: the determi
 
  **See also**: [`tr`](@ref), [`det1`](@ref).
 
- ## Examples
-    using LinearAlgebra, PosDefManifold
+ **Examples**
+```julia
+using LinearAlgebra, PosDefManifold
 
-    P=randP(5) # generate a random real positive definite matrix 5x5
-    Q=tr1(P)
-    tr(Q)  # must be 1
-    # using a tolerance
-    Q=tr1(P; tol=1e-12)
+P=randP(5) # generate a random real positive definite matrix 5x5
+Q=tr1(P)
+tr(Q)  # must be 1
+# using a tolerance
+Q=tr1(P; tol=1e-12)
 
-	Pc=randP(ComplexF64, 5) # generate a random real positive definite matrix 5x5
-    Qc=tr1(Pc)
-    tr(Qc)  # must be 1
-
+Pc=randP(ComplexF64, 5) # generate a random real positive definite matrix 5x5
+Qc=tr1(Pc)
+tr(Qc)  # must be 1
+```
 
 """
 function tr1(X::AnyMatrix; tol::Real=0.)
@@ -430,15 +446,18 @@ tr1Msg2="function tr1 in LinearAlgebra.jl of PosDefMaifold package: the imaginar
 
  **See also**: [`det1`](@ref), [`procrustes`](@ref).
 
- ## Examples
-    using LinearAlgebra, PosDefManifold
-    X=randn(5, 5) # generate an arbitrary 5x5 matrix
-    S=nearestPosDef(X)
+ **Examples**
+ ```julia
+using LinearAlgebra, PosDefManifold
+X=randn(5, 5) # generate an arbitrary 5x5 matrix
+S=nearestPosDef(X)
 
-	P=randP(5) # generate a random real positive definite 5x5 matrix
-	S=nearestPosDef(Matrix(P)) # typecasting an Hermitian matrix as a `Matrix`
-	# Since P is a positive definite matrix S must be equal to P
-	S ≈ P ? println(" ⭐ ") : println(" ⛔ ")
+P=randP(5) # generate a random real positive definite 5x5 matrix
+S=nearestPosDef(Matrix(P)) # typecasting an Hermitian matrix as a `Matrix`
+# Since P is a positive definite matrix S must be equal to P
+S ≈ P ? println(" ⭐ ") : println(" ⛔ ")
+```
+
 """
 function nearestPosDef(D::𝔻; tol::Real=0.)
 	tol>=0. ? tolerance=tol : tolerance = 0.
@@ -475,9 +494,11 @@ end
 
  **See also**: [`nearestPosDef`](@ref), [`procrustes`](@ref).
 
- ## Examples
-    using PosDefManifold
-    U=nearestOrth(randn(5, 5))
+ **Examples**
+```julia
+using PosDefManifold
+U=nearestOrth(randn(5, 5))
+```
 
 """
 function nearestOrthogonal(X::AnyMatrix)
@@ -525,15 +546,18 @@ nearestOrth=nearestOrthogonal
 
  **See also**: [`colNorm`](@ref), [`colProd`](@ref).
 
- ## Examples
-    using PosDefManifold
-    X=randn(10, 20)
-    normalizeCol!(X, 2)                  # (1) normalize columns 2
-    normalizeCol!(X, 2, 10.0)            # (2) divide columns 2 by 10.0
-    normalizeCol!(X, 2:4)                # (3) normalize columns 2 to 4
-    X=randn(ComplexF64, 10, 20)
-    normalizeCol!(X, 3)                  # (1) normalize columns 3
-    normalizeCol!(X, 3:6, (2.0 + 0.5im)) # (4) divide columns 3 to 5 by (2.0 + 0.5im)
+ **Examples**
+```julia
+using PosDefManifold
+X=randn(10, 20)
+normalizeCol!(X, 2)                  # (1) normalize columns 2
+normalizeCol!(X, 2, 10.0)            # (2) divide columns 2 by 10.0
+normalizeCol!(X, 2:4)                # (3) normalize columns 2 to 4
+X=randn(ComplexF64, 10, 20)
+normalizeCol!(X, 3)                  # (1) normalize columns 3
+normalizeCol!(X, 3:6, (2.0 + 0.5im)) # (4) divide columns 3 to 5 by (2.0 + 0.5im)
+```
+
 """
 function normalizeCol!(X::𝕄{T}, j::Int) where T<:RealOrComplex
     w=colNorm(X, j)
@@ -594,17 +618,17 @@ normalizeCol!(X::𝕄{T}, range::UnitRange, by::Number) where T<:RealOrComplex =
  "at position *pos*", where *pos* is the position where the
  first non-positive element has been found.
 
-```
- ## Examples
- using PosDefManifold
- a=[1, 0, 2, 8]
- ispos(a, msg="non-positive element found")
+ **Examples**
+```julia
+using PosDefManifold
+a=[1, 0, 2, 8]
+ispos(a, msg="non-positive element found")
 
- # it will print:
- # ┌ Warning: non-positive element found at position 2
- # └ @ [here julie will point to the line of code issuing the warning]
+# it will print:
+# ┌ Warning: non-positive element found at position 2
+# └ @ [here julie will point to the line of code issuing the warning]
 ```
- """
+"""
 function ispos(λ::Vector{T};
 				tol::Real=0,
 				rev=true,
@@ -666,12 +690,14 @@ ispos(Λ::Diagonal{T};
 
  **See also**: [`normalizeCol!`](@ref), [`colNorm`](@ref).
 
- ## Examples
-    using PosDefManifold
-    X=randn(10, 20)
-    p=colProd(X, 1, 3)
-    Y=randn(10, 30)
-    q=colProd(X, Y, 2, 25)
+ **Examples**
+```julia
+using PosDefManifold
+X=randn(10, 20)
+p=colProd(X, 1, 3)
+Y=randn(10, 30)
+q=colProd(X, Y, 2, 25)
+```
 
 """
 colProd(X::Union{𝕄{T}, ℍ{T}}, j::Int, l::Int) where T<:RealOrComplex =
@@ -693,10 +719,12 @@ colProd(X::Union{𝕄{T}, ℍ{T}}, Y::Union{𝕄{T}, ℍ{T}}, j::Int, l::Int) wh
 
  **See also**: [`normalizeCol!`](@ref), [`colProd`](@ref), [`sumOfSqr`](@ref).
 
- ## Examples
-    using PosDefManifold
-    X=randn(10, 20)
-    normOfSecondColumn=colNorm(X, 2)
+ **Examples**
+```julia
+using PosDefManifold
+X=randn(10, 20)
+normOfSecondColumn=colNorm(X, 2)
+```
 
 """
 colNorm(X::Union{𝕄{T}, ℍ{T}}, j::Int) where T<:RealOrComplex =
@@ -734,12 +762,14 @@ colNorm(X::Union{𝕄{T}, ℍ{T}}, j::Int) where T<:RealOrComplex =
 
  **See also**: [`colNorm`](@ref), [`sumOfSqrDiag`](@ref), [`sumOfSqrTril`](@ref).
 
- ## Examples
-    using PosDefManifold
-    X=randn(10, 20)
-    sum2=sumOfSqr(X)        # (1) sum of squares of all elements
-    sum2=sumOfSqr(X, 1)     # (2) sum of squares of elements in column 1
-    sum2=sumOfSqr(X, 2:4)   # (3) sum of squares of elements in column 2 to 4
+**Examples**
+```julia
+using PosDefManifold
+X=randn(10, 20)
+sum2=sumOfSqr(X)        # (1) sum of squares of all elements
+sum2=sumOfSqr(X, 1)     # (2) sum of squares of elements in column 1
+sum2=sumOfSqr(X, 2:4)   # (3) sum of squares of elements in column 2 to 4
+```
 
 """
 sumOfSqr(A::Array) = 𝚺(abs2(a) for a in A)
@@ -787,11 +817,15 @@ ss=sumOfSqr
 
  **See also**: [`sumOfSqr`](@ref), [`sumOfSqrTril`](@ref).
 
- ## Examples
-    using LinearAlgebra, PosDefManifold
-    X=randn(10, 20)
-    sumDiag2=sumOfSqrDiag(X) # (1)
-    sumDiag2=sumOfSqrDiag(𝔻(X)) # (2) 𝔻=LinearAlgebra.Diagonal
+ **Examples**
+```julia
+using LinearAlgebra, PosDefManifold
+X=randn(10, 20)
+sumDiag2=sumOfSqrDiag(X) # (1)
+sumDiag2=sumOfSqrDiag(𝔻(X)) # (2)
+# 𝔻=LinearAlgebra.Diagonal is declated in the main module
+```
+
 """
 sumOfSqrDiag(X::𝕄{T}) where T<:RealOrComplex =
     𝚺(abs2(X[i, i]) for i=1:minimum(size(X)))
@@ -804,7 +838,7 @@ ssd=sumOfSqrDiag
 """
     sumOfSqrTril(X::AnyMatrix, k::Int=0)
 
-**alias**: `sst`
+ **alias**: `sst`
 
  Given a real or complex `Matrix`, `Diagonal`, `Hermitian` or
  `LowerTriangular` matrix ``X`` (see [AnyMatrix type](@ref)),
@@ -826,19 +860,21 @@ ssd=sumOfSqrDiag
 
  **See also**: [`sumOfSqr`](@ref), [`sumOfSqrDiag`](@ref).
 
- ## Examples
-    using PosDefManifold
-    A=[4. 3.; 2. 5.; 1. 2.]
-    #3×2 Array{Float64,2}:
-    # 4.0  3.0
-    # 2.0  5.0
-    # 1.0  2.0
+ **Examples**
+```julia
+using PosDefManifold
+A=[4. 3.; 2. 5.; 1. 2.]
+#3×2 Array{Float64,2}:
+# 4.0  3.0
+# 2.0  5.0
+# 1.0  2.0
 
-    s=sumOfSqrTril(A, -1)
-    # 9.0 = 1²+2²+2²
+s=sumOfSqrTril(A, -1)
+# 9.0 = 1²+2²+2²
 
-    s=sumOfSqrTril(A, 0)
-    # 50.0 = 1²+2²+2²+4²+5²
+s=sumOfSqrTril(A, 0)
+# 50.0 = 1²+2²+2²+4²+5²
+```
 
 """
 function sumOfSqrTril(X::AnyMatrix, k::Int=0)
@@ -894,13 +930,15 @@ sst=sumOfSqrTril
 
  **See also**: [`DiagOfProd`](@ref), [`tr1`](@ref).
 
- ## Examples
-    using PosDefManifold
-    P=randP(ComplexF64, 5) # generate a random complex positive definite matrix 5x5
-    Q=randP(ComplexF64, 5) # generate a random complex positive definite matrix 5x5
-    tr(P, Q) ≈ tr(P*Q) ? println(" ⭐ ") : println(" ⛔ ")
-    tr(P, Q) ≈ tr(sqrt(P)*Q*sqrt(P)) ? println(" ⭐ ") : println(" ⛔ ")
-    tr(sqr(P), Q) ≈ tr(P*Q*P) ? println(" ⭐ ") : println(" ⛔ ")
+ **Examples**
+```julia
+using PosDefManifold
+P=randP(ComplexF64, 5) # generate a random complex positive definite matrix 5x5
+Q=randP(ComplexF64, 5) # generate a random complex positive definite matrix 5x5
+tr(P, Q) ≈ tr(P*Q) ? println(" ⭐ ") : println(" ⛔ ")
+tr(P, Q) ≈ tr(sqrt(P)*Q*sqrt(P)) ? println(" ⭐ ") : println(" ⛔ ")
+tr(sqr(P), Q) ≈ tr(P*Q*P) ? println(" ⭐ ") : println(" ⛔ ")
+```
 
 """
 tr(P::ℍ{T}, Q::ℍ{T}) where T<:RealOrComplex = real(tr(DiagOfProd(P, Q)))
@@ -969,13 +1007,16 @@ tr(H::Union{ℍ{T}, 𝕄{T}}, D::𝔻{T}) where T<:RealOrComplex = tr(D, H)
  These formula are used in methods (1), (2) and (3).
 
 
- ## Examples
-    using PosDefManifold
-    P=randP(5) # generate a random real positive definite matrix 5x5
-    v=randn(5)
-    q1=quadraticForm(v, P) # or q1=qf(v, P)
-	q2=v'*P*v
-    q1 ≈ q2 ? println(" ⭐ ") : println(" ⛔ ")
+ **Examples**
+```julia
+using PosDefManifold
+P=randP(5) # generate a random real positive definite matrix 5x5
+v=randn(5)
+q1=quadraticForm(v, P) # or q1=qf(v, P)
+q2=v'*P*v
+q1 ≈ q2 ? println(" ⭐ ") : println(" ⛔ ")
+```
+
 """
 function quadraticForm(v::Vector{T}, P::ℍ{T}) where T<:Real
 	r=length(v)
@@ -1019,7 +1060,6 @@ end
 
 qf=quadraticForm
 
-
 """
     fidelity(P::ℍ{T}, Q::ℍ{T}) where T<:RealOrComplex
 
@@ -1031,11 +1071,13 @@ qf=quadraticForm
   This is used in quantum physics and is related to the
  [Wasserstein](@ref) metric. See for example Bhatia, Jain and Lim (2019b)[🎓](@ref).
 
- ## Examples
-    using PosDefManifold
-    P=randP(5);
-    Q=randP(5);
-    f=fidelity(P, Q)
+ **Examples**
+```julia
+using PosDefManifold
+P=randP(5);
+Q=randP(5);
+f=fidelity(P, Q)
+```
 
 """
 function fidelity(P::ℍ{T}, Q::ℍ{T}) where T<:RealOrComplex
@@ -1081,21 +1123,23 @@ end
 
  **See also**: [`DiagOfProd`](@ref), [`tr`](@ref).
 
- ## Examples
+ **Examples**
+```julia
+using PosDefManifold
+P=randP(5) # use P=randP(ComplexF64, 5) for generating an Hermitian matrix
 
-    using PosDefManifold
-    P=randP(5) # use P=randP(ComplexF64, 5) for generating an Hermitian matrix
+# diagonal matrix with the inverse of the first sub-diagonal of P
+D=fDiag(inv, P, -1)
 
-	# diagonal matrix with the inverse of the first sub-diagonal of P
-    D=fDiag(inv, P, -1)
+(Λ, U) = evd(P) # Λ holds the eigenvalues of P, see evd
 
-	(Λ, U) = evd(P) # Λ holds the eigenvalues of P, see evd
+# diagonal matrix with the log of the eigenvalues
+Δ=fDiag(log, Λ)
 
-	# diagonal matrix with the log of the eigenvalues
-    Δ=fDiag(log, Λ)
+# using an anonymous function for the square of the eigenvalues
+Δ=fDiag(x->x^2, Λ)
+```
 
-	# using an anonymous function for the square of the eigenvalues
-    Δ=fDiag(x->x^2, Λ)
 """
 fDiag(func::Function, X::𝔻{T}, k::Int=0) where T<:RealOrComplex = 𝔻(func.(diag(X)))
 
@@ -1122,10 +1166,13 @@ fDiag(func::Function, X::Union{𝕄{T}, ℍ{T}}, k::Int=0)  where T<:RealOrCompl
 
  **See also**: [`tr`](@ref), [`fDiag`](@ref).
 
- ## Examples
-    using PosDefManifold, LinearAlgebra
-    P, Q=randP(5), randP(5)
-    DiagOfProd(P, Q)≈Diagonal(P*Q) ? println("⭐ ") : println("⛔ ")
+ **Examples**
+```julia
+using PosDefManifold, LinearAlgebra
+P, Q=randP(5), randP(5)
+DiagOfProd(P, Q)≈Diagonal(P*Q) ? println("⭐ ") : println("⛔ ")
+```
+
 """
 DiagOfProd(P::ℍ{T}, Q::ℍ{T}) where T<:RealOrComplex =
            𝔻([colProd(P, Q, i, i) for i=1:size(P, 1)])
@@ -1148,14 +1195,16 @@ dop=DiagOfProd
  then only the first `numCol` columns of ``X`` are orthogonalized.
  In this case only the firt `numCol` columns will be returned.
 
- ## Examples
-    using LinearAlgebra, PosDefManifold
-    X=randn(10, 10);
-    U=mgs(X)        # result is 10⋅10
-    U=mgs(X, 3)     # result is 10⋅3
-    U'*U ≈ I ? println(" ⭐ ") : println(" ⛔ ")
-    # julia undertands also:
-    U'U ≈ I ? println(" ⭐ ") : println(" ⛔ ")
+ **Examples**
+```julia
+using LinearAlgebra, PosDefManifold
+X=randn(10, 10);
+U=mgs(X)        # result is 10⋅10
+U=mgs(X, 3)     # result is 10⋅3
+U'*U ≈ I ? println(" ⭐ ") : println(" ⛔ ")
+# julia undertands also:
+U'U ≈ I ? println(" ⭐ ") : println(" ⛔ ")
+```
 
 """
 function mgs(X::𝕄{T}, numCol::Int=0) where T<:RealOrComplex
@@ -1237,49 +1286,51 @@ end # mgs function
  This option is provided to allow calling this function repeatedly without
  normalizing the same weights vector each time. By default `✓w` is false.
 
- ## Examples
+ **Examples**
+```julia
+using LinearAlgebra, PosDefManifold
+Pset=randP(4, 1000); # generate 1000 positive definite 4x4 matrices
+mean(Pset) # arithmetic mean calling Julia function
+Threads.nthreads() # check how many threads are available
+fVec(mean, Pset) # multi-threaded arithmetic mean
 
-    using LinearAlgebra, PosDefManifold
-    Pset=randP(4, 1000); # generate 1000 positive definite 4x4 matrices
-	mean(Pset) # arithmetic mean calling Julia function
-	Threads.nthreads() # check how many threads are available
-	fVec(mean, Pset) # multi-threaded arithmetic mean
+inv(mean(inv, Pset)) # Harmonic mean calling Julia function
+inv(fVec(mean, inv, Pset)) # multi-threaded Harmonic mean
 
-	inv(mean(inv, Pset)) # Harmonic mean calling Julia function
-	inv(fVec(mean, inv, Pset)) # multi-threaded Harmonic mean
+exp(mean(log, Pset)) # log Euclidean mean calling Julia function
+exp(fVec(mean, log, Pset)) # multi-threaded log Euclidean mean
 
-	exp(mean(log, Pset)) # log Euclidean mean calling Julia function
-	exp(fVec(mean, log, Pset)) # multi-threaded log Euclidean mean
+# notice that Julia `exp` function has changed the type of the result
+# to `Symmetric`. To obtain an `Hermitian` output use
+ℍ(exp(fVec(mean, log, Pset)))
 
-	# notice that Julia `exp` function has changed the type of the result
-	# to `Symmetric`. To obtain an `Hermitian` output use
-	ℍ(exp(fVec(mean, log, Pset)))
+w=(randn(1000)).^2
+w=w./sum(w)  		# generate normalized random weights
 
-	w=(randn(1000)).^2
-	w=w./sum(w)  		# generate normalized random weights
+# weighted arithmetic mean calling Julia function
+sum(Pset[i]*w[i] for i=1:length(w))
+# multi-threaded weighted arithmetic mean
+fVec(sum, Pset, w=w)
 
-	# weighted arithmetic mean calling Julia function
-	sum(Pset[i]*w[i] for i=1:length(w))
-	# multi-threaded weighted arithmetic mean
-	fVec(sum, Pset, w=w)
+# weighted harmonic mean calling Julia function
+inv(sum(inv(Pset[i])*w[i] for i=1:length(w)))
+# multi-threaded weighted harmonic mean
+inv(fVec(sum, inv, Pset, w=w))
 
-	# weighted harmonic mean calling Julia function
-	inv(sum(inv(Pset[i])*w[i] for i=1:length(w)))
-	# multi-threaded weighted harmonic mean
-	inv(fVec(sum, inv, Pset, w=w))
+# pre-allocating memory
+Pset=randP(100, 1000); # generate 1000 positive definite 100x100 matrices
+Qset=MatrixVector(repeat([similar(Pset[1])], Threads.nthreads()))
+fVec(mean, log, Pset, allocs=Qset)
 
-	# pre-allocating memory
-	Pset=randP(100, 1000); # generate 1000 positive definite 100x100 matrices
-	Qset=MatrixVector(repeat([similar(Pset[1])], Threads.nthreads()))
-	fVec(mean, log, Pset, allocs=Qset)
+# How much computing time we save ?
+# (example min time obtained with 4 threads & 4 BLAS threads)
+using BenchmarkTools
+# standard Julia function
+@benchmark(mean(log, Pset)) 					# (5.271 s)
+# fVec
+@benchmark(fVec(mean, log, Pset))				# (1.540 s)
+```
 
-	# How much computing time we save ?
-	# (example min time obtained with 4 threads & 4 BLAS threads)
-	using BenchmarkTools
-	# standard Julia function
-	@benchmark(mean(log, Pset)) 					# (5.271 s)
-	# fVec
-	@benchmark(fVec(mean, log, Pset))				# (1.540 s)
 """
 function fVec(f::Function, g::Function, 𝐏::AnyMatrixVector;
 			  w::Vector=[],
@@ -1410,48 +1461,49 @@ fVec(f::Function, 𝐏::AnyMatrixVector;
     be obtained as an `Hermitian` matrix by `cong(B, P, ℍ)` and as a generic
     matrix object by `cong(B, P, 𝕄)`.
 
- ## Examples
+ **Examples**
+```julia
+using LinearAlgebra, PosDefManifold
 
-    using LinearAlgebra, PosDefManifold
+# (1)
+P=randP(3) # generate a 3x3 positive matrix
+M=randn(3, 3)
+C=cong(M, P, ℍ) # equivalent to C=ℍ(M*P*M')
 
-	# (1)
-	P=randP(3) # generate a 3x3 positive matrix
-	M=randn(3, 3)
-	C=cong(M, P, ℍ) # equivalent to C=ℍ(M*P*M')
+# (2)
+Pset=randP(4, 100); # generate 100 positive definite 4x4 matrices
+M=randn(4, 4)
+Qset=cong(M, Pset, ℍVector) # = [M*Pset_1*M',...,M*Pset_k*M'] as an ℍVector type
 
-	# (2)
-    Pset=randP(4, 100); # generate 100 positive definite 4x4 matrices
-	M=randn(4, 4)
-	Qset=cong(M, Pset, ℍVector) # = [M*Pset_1*M',...,M*Pset_k*M'] as an ℍVector type
+# recenter the matrices in Pset to their Fisher mean:
+Qset=cong(invsqrt(mean(Fisher, Pset)), Pset, ℍVector)
 
-	# recenter the matrices in Pset to their Fisher mean:
-	Qset=cong(invsqrt(mean(Fisher, Pset)), Pset, ℍVector)
+# as a check, the Fisher mean of Qset is now the identity
+mean(Fisher, Qset)≈I ? println("⭐") : println("⛔")
 
-	# as a check, the Fisher mean of Qset is now the identity
-	mean(Fisher, Qset)≈I ? println("⭐") : println("⛔")
+# (3)
+Pset1=randP(4, 10); # generate 10 positive definite 4x4 matrices
+Pset2=randP(4, 8);
+Pset=ℍVector₂([Pset1, Pset2]);
+M=randn(4, 4)
+Qset=cong(M, Pset, MatrixVector₂)
+Qset[1][1]≈M*Pset[1][1]*M' ? println("⭐") : println("⛔")
+Qset[1][5]≈M*Pset[1][5]*M' ? println("⭐") : println("⛔")
+Qset[2][1]≈M*Pset[2][1]*M' ? println("⭐") : println("⛔")
+Qset[2][4]≈M*Pset[2][4]*M' ? println("⭐") : println("⛔")
 
-	# (3)
-    Pset1=randP(4, 10); # generate 10 positive definite 4x4 matrices
-	Pset2=randP(4, 8);
-	Pset=ℍVector₂([Pset1, Pset2]);
-	M=randn(4, 4)
-	Qset=cong(M, Pset, MatrixVector₂)
-	Qset[1][1]≈M*Pset[1][1]*M' ? println("⭐") : println("⛔")
-	Qset[1][5]≈M*Pset[1][5]*M' ? println("⭐") : println("⛔")
-	Qset[2][1]≈M*Pset[2][1]*M' ? println("⭐") : println("⛔")
-	Qset[2][4]≈M*Pset[2][4]*M' ? println("⭐") : println("⛔")
+# (4)
+Pset1=randP(4, 2); # generate 2 positive definite 4x4 matrices
+Pset2=randP(4, 2);
+Pset=ℍVector₂([Pset1, Pset2]);
+U=𝕄Vector([randU(4), randU(4)])
+Qset=cong(U, Pset, MatrixVector₂)
+Qset[1][1]≈U[1]*Pset[1][1]*U[1]' ? println("⭐") : println("⛔")
+Qset[1][2]≈U[1]*Pset[1][2]*U[2]' ? println("⭐") : println("⛔")
+Qset[2][1]≈U[2]*Pset[2][1]*U[1]' ? println("⭐") : println("⛔")
+Qset[2][2]≈U[2]*Pset[2][2]*U[2]' ? println("⭐") : println("⛔")
+```
 
-
-	# (4)
-    Pset1=randP(4, 2); # generate 2 positive definite 4x4 matrices
-	Pset2=randP(4, 2);
-	Pset=ℍVector₂([Pset1, Pset2]);
-	U=𝕄Vector([randU(4), randU(4)])
-	Qset=cong(U, Pset, MatrixVector₂)
-	Qset[1][1]≈U[1]*Pset[1][1]*U[1]' ? println("⭐") : println("⛔")
-	Qset[1][2]≈U[1]*Pset[1][2]*U[2]' ? println("⭐") : println("⛔")
-	Qset[2][1]≈U[2]*Pset[2][1]*U[1]' ? println("⭐") : println("⛔")
-	Qset[2][2]≈U[2]*Pset[2][2]*U[2]' ? println("⭐") : println("⛔")
 """
 congruence(B::AnyMatrix, P::AnyMatrix, matrixType) = matrixType(B*P*B')
 
@@ -1529,13 +1581,16 @@ cong=congruence
 
  **See also**: [`spectralFunctions`](@ref).
 
- ## Examples
-    using PosDefManifold
-    A=randn(3, 3);
-    S=A+A';
-    Λ, U=evd(S); # which is equivalent to (Λ, U)=evd(P)
-    (U*Λ*U') ≈ S ? println(" ⭐ ") : println(" ⛔ ")
-    # => UΛU'=S, UΛ=SU, ΛU'=U'S
+ **Examples**
+```julia
+using PosDefManifold
+A=randn(3, 3);
+S=A+A';
+Λ, U=evd(S); # which is equivalent to (Λ, U)=evd(P)
+(U*Λ*U') ≈ S ? println(" ⭐ ") : println(" ⛔ ")
+# => UΛU'=S, UΛ=SU, ΛU'=U'S
+```
+
 """
 function evd(S::Union{𝕄{T}, ℍ{T}}) where T<:RealOrComplex # return tuple (Λ, U)
     F = eigen(S)
@@ -1565,13 +1620,14 @@ thus ``F^{-1}`` is a whitening matrix.
 
 **See also**: [`invfrf`](@ref).
 
-## Examples
-```
+**Examples**
+```julia
 using LinearAlgebra, PosDefManifold
 P=randP(3)
 F = frf(P)
 F*F'≈P ? println(" ⭐ ") : println(" ⛔ ")
 ```
+
 """
 function frf(P::ℍ{T}) where T<:RealOrComplex
    #size(P, 1)≠size(A, 2) && throw(ArgumentError(📌*", frf function: input matrix must be square"))
@@ -1601,13 +1657,14 @@ thus ``F`` is a whitening matrix.
 
 **See also**: [`frf`](@ref).
 
-## Examples
-```
+**Examples**
+```julia
 using LinearAlgebra, PosDefManifold
 P=randP(3)
 F = invfrf(P)
 F*P*F'≈I ? println(" ⭐ ") : println(" ⛔ ")
 ```
+
 """
 function invfrf(P::ℍ{T}) where T<:RealOrComplex
    #size(P, 1)≠size(A, 2) && throw(ArgumentError(📌*", frf function: input matrix must be square"))
@@ -1658,13 +1715,15 @@ end
 
  **See also**: [`evd`](@ref).
 
- ## Examples
-    using LinearAlgebra, PosDefManifold
-    n=5
-    P=randP(n) # P=randP(ComplexF64, 5) to generate an Hermitian complex matrix
-    noise=0.1;
-    Q=spectralFunctions(P, x->x+noise) # add white noise to the eigenvalues
-    tr(Q)-tr(P) ≈ noise*n ? println(" ⭐ ") : println(" ⛔ ")
+**Examples**
+```julia
+using LinearAlgebra, PosDefManifold
+n=5
+P=randP(n) # P=randP(ComplexF64, 5) to generate an Hermitian complex matrix
+noise=0.1;
+Q=spectralFunctions(P, x->x+noise) # add white noise to the eigenvalues
+tr(Q)-tr(P) ≈ noise*n ? println(" ⭐ ") : println(" ⛔ ")
+```
 
 """
 function spectralFunctions(P::ℍ{T}, func::Function) where T<:RealOrComplex
@@ -1695,15 +1754,17 @@ spectralFunctions(D::𝔻{T}, func::Function) where T<:Real = fDiag(func, D)
 
  **See also**: [`invsqrt`](@ref).
 
- ## Examples
-    using LinearAlgebra, PosDefManifold
-    P=randP(5);     # use P=randP(ComplexF64, 5) for generating an Hermitian matrix
-    Q=pow(P, 0.5);            # =>  QQ=P
-    Q, W=pow(P, 0.5, -0.5);
-    W*P*W ≈ I ? println(" ⭐ ") : println(" ⛔ ")
-    Q*Q ≈ P ? println(" ⭐ ") : println(" ⛔ ")
-    R, S=pow(P, 0.3, 0.7);
-    R*S ≈ P ? println(" ⭐ ") : println(" ⛔ ")
+ **Examples**
+```julia
+using LinearAlgebra, PosDefManifold
+P=randP(5);     # use P=randP(ComplexF64, 5) for generating an Hermitian matrix
+Q=pow(P, 0.5);            # =>  QQ=P
+Q, W=pow(P, 0.5, -0.5);
+W*P*W ≈ I ? println(" ⭐ ") : println(" ⛔ ")
+Q*Q ≈ P ? println(" ⭐ ") : println(" ⛔ ")
+R, S=pow(P, 0.3, 0.7);
+R*S ≈ P ? println(" ⭐ ") : println(" ⛔ ")
+```
 
 """
 pow(P::ℍ{T}, p) where T<:RealOrComplex = spectralFunctions(P, x->x^p) # one argument
@@ -1745,11 +1806,13 @@ end
 
  **See also**: [`pow`](@ref).
 
- ## Examples
-    using LinearAlgebra, PosDefManifold
-    P=randP(ComplexF64, 5);
-    Q=invsqrt(P);
-    Q*P*Q ≈ I ? println(" ⭐ ") : println(" ⛔ ")
+ **Examples**
+```julia
+using LinearAlgebra, PosDefManifold
+P=randP(ComplexF64, 5);
+Q=invsqrt(P);
+Q*P*Q ≈ I ? println(" ⭐ ") : println(" ⛔ ")
+```
 
 """
 invsqrt(P::ℍ{T}) where T<:RealOrComplex = spectralFunctions(P, x->1/√x)
@@ -1773,11 +1836,13 @@ invsqrt(D::𝔻{T}) where T<:Real = spectralFunctions(D, x->1/√x)
 
  **See also**: [`pow`](@ref).
 
- ## Examples
-    using PosDefManifold
-    P=randP(5);
-    P²=sqr(P);  # =>  P²=PP
-    sqrt(P²)≈ P ? println(" ⭐ ") : println(" ⛔ ")
+ **Examples**
+```julia
+using PosDefManifold
+P=randP(5);
+P²=sqr(P);  # =>  P²=PP
+sqrt(P²)≈ P ? println(" ⭐ ") : println(" ⛔ ")
+```
 
 """
 sqr(P::ℍ{T}) where T<:RealOrComplex = ℍ(P*P)
@@ -1836,22 +1901,24 @@ sqr(X::Union{𝕄{T}, 𝕃{T}, 𝔻{S}}) where T<:RealOrComplex where S<:Real = 
 
 **See also**: [`mgs`](@ref).
 
- ## Examples
-    using LinearAlgebra, PosDefManifold
-    # Generate an Hermitian (complex) matrix
-    H=randP(ComplexF64, 10);
-    # 3 eigenvectors and eigenvalues
-    U, iterations, convergence=powIter(H, 3, verbose=true)
-    # all eigenvectors
-    Λ, U, iterations, convergence=powIter(H, size(H, 2), evalues=true, verbose=true);
-    U'*U ≈ I && U*Λ*U'≈H ? println(" ⭐ ") : println(" ⛔ ")
+ **Examples**
+```julia
+using LinearAlgebra, PosDefManifold
+# Generate an Hermitian (complex) matrix
+H=randP(ComplexF64, 10);
+# 3 eigenvectors and eigenvalues
+U, iterations, convergence=powIter(H, 3, verbose=true)
+# all eigenvectors
+Λ, U, iterations, convergence=powIter(H, size(H, 2), evalues=true, verbose=true);
+U'*U ≈ I && U*Λ*U'≈H ? println(" ⭐ ") : println(" ⛔ ")
 
-    # passing a `Matrix` object
-    Λ, U, iterations, convergence=powIter(Matrix(H), 3, evalues=true)
+# passing a `Matrix` object
+Λ, U, iterations, convergence=powIter(Matrix(H), 3, evalues=true)
 
-    # passing a `LowerTriangular` object (must be a real matrix in this case)
-    L=𝕃(randP(10))
-    Λ, U, iterations, convergence=powIter(L, 3, evalues=true)
+# passing a `LowerTriangular` object (must be a real matrix in this case)
+L=𝕃(randP(10))
+Λ, U, iterations, convergence=powIter(L, 3, evalues=true)
+```
 
 """
 function powerIterations(H::𝕄{T}, q::Int;
@@ -1927,11 +1994,13 @@ powIter=powerIterations
 
 **See also**: [`choInv`](@ref).
 
- ## Examples
-    using PosDefManifold
-    P=randP(5);
-    L=choL(P);
-    L*L'≈ P ? println(" ⭐ ") : println(" ⛔ ")
+ **Examples**
+```julia
+using PosDefManifold
+P=randP(5);
+L=choL(P);
+L*L'≈ P ? println(" ⭐ ") : println(" ⛔ ")
+```
 
 """
 function choL(P::ℍ{T}) where T<:RealOrComplex
@@ -2012,34 +2081,36 @@ choL(D::𝔻{T}) where T<:Real = √D
 
 **See also**: [`choInv!`](@ref), [`choL`](@ref).
 
- ## Examples
-    using PosDefManifold
-	n, t = 800, 6000
-	etol = 1e-9
-	Z=randn(t, n)
-	Y=Z'*Z
-	Yi=inv(Y)
+ **Examples**
+```julia
+using PosDefManifold
+n, t = 800, 6000
+etol = 1e-9
+Z=randn(t, n)
+Y=Z'*Z
+Yi=inv(Y)
 
-	A, B=choInv!(copy(Y))
-	norm(A*A'-Y)/√n < etol ? println(" ⭐ ") : println(" ⛔ ")
-	norm(B*B'-Yi)/√n < etol ? println(" ⭐ ") : println(" ⛔ ")
+A, B=choInv!(copy(Y))
+norm(A*A'-Y)/√n < etol ? println(" ⭐ ") : println(" ⛔ ")
+norm(B*B'-Yi)/√n < etol ? println(" ⭐ ") : println(" ⛔ ")
 
-	A, D, B=choInv!(copy(Y); kind=:LDLt)
-	norm(Y-A*D*A')/√n < etol ? println(" ⭐ ") : println(" ⛔ ")
-	norm(Yi-B*inv(D)*B')/√n < etol ? println(" ⭐ ") : println(" ⛔ ")
+A, D, B=choInv!(copy(Y); kind=:LDLt)
+norm(Y-A*D*A')/√n < etol ? println(" ⭐ ") : println(" ⛔ ")
+norm(Yi-B*inv(D)*B')/√n < etol ? println(" ⭐ ") : println(" ⛔ ")
 
-	# repeat the test for complex matrices
-	Z=randn(ComplexF64, t, n)
-	Y=Z'*Z
-	Yi=inv(Y)
+# repeat the test for complex matrices
+Z=randn(ComplexF64, t, n)
+Y=Z'*Z
+Yi=inv(Y)
 
-	A, B=choInv!(copy(Y))
-	norm(A*A'-Y)/√n < etol ? println(" ⭐ ") : println(" ⛔ ")
-	norm(B*B'-Yi)/√n < etol ? println(" ⭐ ") : println(" ⛔ ")
+A, B=choInv!(copy(Y))
+norm(A*A'-Y)/√n < etol ? println(" ⭐ ") : println(" ⛔ ")
+norm(B*B'-Yi)/√n < etol ? println(" ⭐ ") : println(" ⛔ ")
 
-	A, D, B=choInv!(copy(Y); kind=:LDLt)
-	norm(Y-A*D*A')/√n < etol ? println(" ⭐ ") : println(" ⛔ ")
-	norm(Yi-B*inv(D)*B')/√n < etol ? println(" ⭐ ") : println(" ⛔ ")
+A, D, B=choInv!(copy(Y); kind=:LDLt)
+norm(Y-A*D*A')/√n < etol ? println(" ⭐ ") : println(" ⛔ ")
+norm(Yi-B*inv(D)*B')/√n < etol ? println(" ⭐ ") : println(" ⛔ ")
+```
 
 """
 choInv(P::AbstractArray{T};

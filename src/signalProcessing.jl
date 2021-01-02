@@ -1,7 +1,7 @@
 #    Unit signalProcessing.jl, part of PosDefManifold Package for julia language
 #
 #    MIT License
-#    Copyright (c) 2019, Marco Congedo, CNRS, Grenobe, France:
+#    Copyright (c) 2019-21, Marco Congedo, CNRS, Grenobe, France:
 #    https://sites.google.com/site/marcocongedo/home
 #
 #    DESCRIPTION
@@ -21,10 +21,13 @@
  It uses the *Wilson–Hilferty transformation* for `df`>=20 -
  see [chi-squared distribution](https://en.wikipedia.org/wiki/Chi-squared_distribution).
 
- ## Examples
-    using Plots, PosDefManifold
-    chi=[randχ²(2) for i=1:10000]
-    histogram(chi) # needs Plots package. Check your plots back-end.
+ **Examples**
+```julia
+using Plots, PosDefManifold
+chi=[randχ²(2) for i=1:10000]
+histogram(chi) # needs Plots package. Check your plots back-end.
+```
+
 """
 randChi²(df::Int) =
     df<20 ? sum(randn()^2 for i=1:df) : df*(1.0-2.0/(9.0*df)+randn()*sqrt2/sqrt(9.0*df))^3
@@ -47,12 +50,14 @@ randχ²=randChi²
 
  **See also**: `randU` ([`randUnitaryMat`](@ref)), `randP` ([`randPosDefMat`](@ref)).
 
- ## Examples
-    using Plots, PosDefManifold
-    λ=sort(randλ(10), rev=true)
-    σ=sort(randλ(10, eigvalsSNR=10), rev=true)
-    plot(λ) # needs Plots package. Check your plots back-end.
-    plot!(σ) # needs Plots package. Check your plots back-end.
+ **Examples**
+```julia
+using Plots, PosDefManifold
+λ=sort(randλ(10), rev=true)
+σ=sort(randλ(10, eigvalsSNR=10), rev=true)
+plot(λ) # needs Plots package. Check your plots back-end.
+plot!(σ) # needs Plots package. Check your plots back-end.
+```
 
 """
 randEigvals(n::Int;
@@ -116,18 +121,20 @@ randλ=randEigvals
  **See also**: `randλ` ([`randEigvals`](@ref)), `randU` ([`randUnitaryMat`](@ref)),
  `randP` ([`randPosDefMat`](@ref)), `randχ²` ([`randChi²`](@ref)).
 
- ## Examples
-    using PosDefManifold
-    # (1)
-    n=3;
-    U=randU(n);
-    Λ=randΛ(n, eigvalsSNR=100)
-    P=U*Λ*U' # generate an SPD matrix
-    using LinearAlgebra
-    Q=ℍ(U*Λ*U') # generate an SPD matrix and flag it as 'Hermitian'
+ **Examples**
+```julia
+using PosDefManifold
+# (1)
+n=3;
+U=randU(n);
+Λ=randΛ(n, eigvalsSNR=100)
+P=U*Λ*U' # generate an SPD matrix
+using LinearAlgebra
+Q=ℍ(U*Λ*U') # generate an SPD matrix and flag it as 'Hermitian'
 
-    # (2) generate an array of 10 matrices of simulated eigenvalues
-    Dvec=randΛ(n, 10)
+# (2) generate an array of 10 matrices of simulated eigenvalues
+Dvec=randΛ(n, 10)
+```
 
 """
 randEigvalsMat(n::Int;
@@ -159,14 +166,16 @@ randΛ=randEigvalsMat
 
  **See also**: `randΛ` ([`randEigvals`](@ref)), `randP` ([`randPosDefMat`](@ref)).
 
- ## Examples
-    using PosDefManifold
-    n=3;
-    X=randU(n)*sqrt(randΛ(n))*randU(n)'  # (1) generate a random square real matrix
+ **Examples**
+```julia
+using PosDefManifold
+n=3;
+X=randU(n)*sqrt(randΛ(n))*randU(n)'  # (1) generate a random square real matrix
 
-    U=randU(ComplexF64, n);
-    V=randU(ComplexF64, n);
-    Y=U*sqrt(randΛ(n))*V' # (2) generate a random square complex matrix
+U=randU(ComplexF64, n);
+V=randU(ComplexF64, n);
+Y=U*sqrt(randΛ(n))*V' # (2) generate a random square complex matrix
+```
 
 """
 randUnitaryMat(n::Int)=mgs(randn(Float64, n, n))
@@ -251,14 +260,16 @@ randU=randUnitaryMat
 
  **See also**: the aforementioned paper and `randΛ` ([`randEigvalsMat`](@ref)).
 
- ## Examples
-    using PosDefManifold
-    R=randP(10, df=10, eigvalsSNR=1000) # 1 SDP Matrix of size 10x10 #(1)
-    H=randP(ComplexF64, 5, eigvalsSNR=10) # 1 Hermitian Matrix of size 5x5 # (2)
-    ℛ=randP(10, 1000, eigvalsSNR=100) # 1000 SPD Matrices of size 10x10 # (3)
-    using Plots
-    heatmap(Matrix(ℛ[1]), yflip=true, c=:bluesreds)
-    ℋ=randP(ComplexF64, 20, 1000) # 1000 Hermitian Matrices of size 20x20 # (4)
+ **Examples**
+```julia
+using PosDefManifold
+R=randP(10, df=10, eigvalsSNR=1000) # 1 SDP Matrix of size 10x10 #(1)
+H=randP(ComplexF64, 5, eigvalsSNR=10) # 1 Hermitian Matrix of size 5x5 # (2)
+ℛ=randP(10, 1000, eigvalsSNR=100) # 1000 SPD Matrices of size 10x10 # (3)
+using Plots
+heatmap(Matrix(ℛ[1]), yflip=true, c=:bluesreds)
+ℋ=randP(ComplexF64, 20, 1000) # 1000 Hermitian Matrices of size 20x20 # (4)
+```
 
 """
 randPosDefMat(n::Int;
@@ -356,32 +367,34 @@ randP=randPosDefMat
 
 **See also**: `randP` ([`randPosDefMat`](@ref)).
 
- ## Examples
-    # (1)
-    using LinearAlgebra, Plots, PosDefManifold
-    n=3
-    U=randU(n)
-    # in Q we will write two matrices,
-    # the unregularized and regularized matrix side by side
-    Q=Matrix{Float64}(undef, n, n*2)
-    P=ℍ(U*Diagonal(randn(n).^2)*U') # generate a real 3x3 positive matrix
-    for i=1:n, j=1:n Q[i, j]=P[i, j] end
-    regularize!(P, SNR=5)
-    for i=1:n, j=1:n Q[i, j+n]=P[i, j] end # the regularized matrix is on the right
-    heatmap(Matrix(Q), yflip=true, c=:bluesreds)
+ **Examples**
+```julia
+# (1)
+using LinearAlgebra, Plots, PosDefManifold
+n=3
+U=randU(n)
+# in Q we will write two matrices,
+# the unregularized and regularized matrix side by side
+Q=Matrix{Float64}(undef, n, n*2)
+P=ℍ(U*Diagonal(randn(n).^2)*U') # generate a real 3x3 positive matrix
+for i=1:n, j=1:n Q[i, j]=P[i, j] end
+regularize!(P, SNR=5)
+for i=1:n, j=1:n Q[i, j+n]=P[i, j] end # the regularized matrix is on the right
+heatmap(Matrix(Q), yflip=true, c=:bluesreds)
 
-    # (2)
-    𝐏=[ℍ(U*Diagonal(randn(3).^2)*U') for i=1:5] # 5 real 3x3 positive matrices
-    regularize!(𝐏, SNR=1000)
+# (2)
+𝐏=[ℍ(U*Diagonal(randn(3).^2)*U') for i=1:5] # 5 real 3x3 positive matrices
+regularize!(𝐏, SNR=1000)
 
- ## Run a test
-    using LinearAlgebra
-    𝐏=randP(10, 100, SNR=1000); # 100 real Hermitian matrices
-    signalVar=sum(tr(P) for P in 𝐏);
-    regularize!(𝐏, SNR=1000);
-    signalPlusNoiseVar=sum(tr(P) for P in 𝐏);
-    output_snr=signalVar/(signalPlusNoiseVar-signalVar)
-    # output_snr should be approx. equal to 1000
+## Run a test
+using LinearAlgebra
+𝐏=randP(10, 100, SNR=1000); # 100 real Hermitian matrices
+signalVar=sum(tr(P) for P in 𝐏);
+regularize!(𝐏, SNR=1000);
+signalPlusNoiseVar=sum(tr(P) for P in 𝐏);
+output_snr=signalVar/(signalPlusNoiseVar-signalVar)
+# output_snr should be approx. equal to 1000
+```
 
 """
 function regularize!(P::ℍ;
@@ -415,12 +428,15 @@ end
     If ``X`` is wide or square (r<=c) return ``XX^H/c``.
     If ``X`` is tall (r>c)            return ``X^HX/r``.
 
- ## Examples
-    using PosDefManifold
-    X=randn(5, 150);
-    G=gram(X) # => G=X*X'/150
-    X=randn(100, 2);
-    F=gram(X); # => G=X'*X/100
+ **Examples**
+```julia
+using PosDefManifold
+X=randn(5, 150);
+G=gram(X) # => G=X*X'/150
+X=randn(100, 2);
+F=gram(X); # => G=X'*X/100
+```
+
 """
 function gram(X::𝕄{T}) where T<:RealOrComplex
     (r, c)=size(X)
@@ -439,23 +455,26 @@ trade(P::ℍ{T}) where T<:RealOrComplex
  `P` must be flagged by julia as `Hermitian`.
   See [typecasting matrices](@ref).
 
- ### Examples
-    using PosDefManifold
-    P=randP(3)
-    t, d=trade(P)  # equivalent to (t, d)=trade(P)
+ **Examples**
+```julia
+using PosDefManifold
+P=randP(3)
+t, d=trade(P)  # equivalent to (t, d)=trade(P)
 
-    # TraDe plot
-    using Plots
-    k=100
-    n=10
-    𝐏=randP(n, k, SNR=1000); # 100 real Hermitian matrices
-    x=Vector{Float64}(undef, k)
-    y=Vector{Float64}(undef, k)
-    for i=1:k
-        x[i], y[i] = trade(𝐏[i])
-    end
-    x=log.(x./n)
-    y=log.(y)
-    plot(x, y, seriestype=:scatter)
+# TraDe plot
+using Plots
+k=100
+n=10
+𝐏=randP(n, k, SNR=1000); # 100 real Hermitian matrices
+x=Vector{Float64}(undef, k)
+y=Vector{Float64}(undef, k)
+for i=1:k
+    x[i], y[i] = trade(𝐏[i])
+end
+x=log.(x./n)
+y=log.(y)
+plot(x, y, seriestype=:scatter)
+```
+
 """
 trade(P::ℍ{T}) where T<:RealOrComplex = (tr(P), det(P))

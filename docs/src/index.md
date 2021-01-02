@@ -17,7 +17,7 @@ To obtain the latest development version execute instead
 ## About the Author
 
 [Marco Congedo](https://sites.google.com/site/marcocongedo) is
-a research scientist of CNRS (Centre National de la Recherche Scientifique),
+a Research Director of CNRS (Centre National de la Recherche Scientifique),
 working in Grenoble, France.
 
 
