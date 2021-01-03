@@ -323,9 +323,9 @@ Matrix(X')
 
  - here is how to get an `Hermitian` matrix out of the diagonal part of an `Hermitian` matrix H:
 
-  ```julia
-  Hermitian(Matrix(Diagonal(H)))
-  ```
+```julia
+Hermitian(Matrix(Diagonal(H)))
+```
 
  - here is how to get a `LowerTriangular` matrix out of an `Hermitian` matrix H:
 
