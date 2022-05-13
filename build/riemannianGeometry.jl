@@ -1424,7 +1424,7 @@ function geometricMean(𝐏::ℍVector;
     maxiter, iter, conv, oldconv = 500, 1, 0., maxpos
     ⏩ && k>=thr*4 && thr > 1 ? threaded=true : threaded=false
     isempty(w) ? v=[] : v = _getWeights(w, ✓w, k)
-    init == nothing ? M = mean(logEuclidean, 𝐏; w=v, ✓w=false, ⏩=⏩) : M = ℍ(init)
+    init === nothing ? M = mean(logEuclidean, 𝐏; w=v, ✓w=false, ⏩=⏩) : M = ℍ(init)
     tol==0 ? tolerance = √eps(real(type))*1e2 : tolerance = tol
     💡 = similar(M, type)
     if threaded 𝐐 = similar(𝐏) end
@@ -1564,7 +1564,7 @@ function logdet0Mean(𝐏::Union{ℍVector, 𝔻Vector};
     maxiter, iter, conv, oldconv, l = 500, 1, 0., maxpos, k/2
     ⏩ && k>=thr*4 && thr > 1 ? threaded=true : threaded=false
     isempty(w) ? v=[] : v = _getWeights(w, ✓w, k)
-    init == nothing ? M = mean(logEuclidean, 𝐏; w=v, ✓w=false, ⏩=⏩) : M = 𝕋(init)
+    init === nothing ? M = mean(logEuclidean, 𝐏; w=v, ✓w=false, ⏩=⏩) : M = 𝕋(init)
     tol==0 ? tolerance = √eps(real(type))*1e2 : tolerance = tol
     💡 = similar(M, type)
     if threaded 𝐐 = similar(𝐏) end
@@ -1701,7 +1701,7 @@ function wasMean(𝐏::ℍVector;
     maxiter, iter, conv, oldconv = 500, 1, 0., maxpos
     ⏩ && k>=thr*4 && thr > 1 ? threaded=true : threaded=false
     isempty(w) ? v=[] : v = _getWeights(w, ✓w, k)
-    init == nothing ? M = generalizedMean(𝐏, 0.5; w=v, ✓w=false, ⏩=⏩) : M = ℍ(init)
+    init === nothing ? M = generalizedMean(𝐏, 0.5; w=v, ✓w=false, ⏩=⏩) : M = ℍ(init)
     tol==0 ? tolerance = √eps(real(type))*1e2 : tolerance = tol
     💡 = similar(M, type)
     if threaded 𝐐 = similar(𝐏) end
@@ -1876,7 +1876,7 @@ function powerMean(𝐏::ℍVector, p::Real;
        sqrtn, maxiter, iter, conv, oldconv, r = √n, 500, 1, 0., maxpos, -0.375/absp
        ⏩ && k>=thr*4 && thr > 1 ? threaded=true : threaded=false
        isempty(w) ? v=[] : v = _getWeights(w, ✓w, k)
-       init == nothing ? M = generalizedMean(𝐏, p; w=v, ✓w=false, ⏩=⏩) : M = ℍ(init)
+       init === nothing ? M = generalizedMean(𝐏, p; w=v, ✓w=false, ⏩=⏩) : M = ℍ(init)
        p<0 ? X=ℍ(M^(0.5)) : X=ℍ(M^(-0.5))
        💡, H, 𝒫 = similar(X, type), similar(X, type), similar(𝐏)
        p<0 ? 𝒫=[inv(P) for P in 𝐏] : 𝒫=𝐏

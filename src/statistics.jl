@@ -1,7 +1,7 @@
 #   Unit statistics.jl, part of PosDefManifold Package for julia language
 #
 #   MIT License
-#   Copyright (c) 2019-21, Marco Congedo, CNRS, Grenobe, France:
+#   Copyright (c) 2019-22, Marco Congedo, CNRS, Grenobe, France:
 #   https://sites.google.com/site/marcocongedo/home
 #
 #   DESCRIPTION
@@ -10,7 +10,7 @@
 #   CONTENT
 #   1.  Utilities
 #   2.  Probability
-#   3.  Descriptive Statistocs
+#   3.  Descriptive Statistics
 # __________________________________________________________________
 
 
@@ -126,7 +126,7 @@ function std(metric::Metric, ν::Vector{T};
     if      metric == Euclidean     return std(ν; corrected=corrected, mean=mean)
 
     elseif  metric == Fisher
-            mean==nothing ? μ=mean(Fisher, ν) : μ=mean
+            mean===nothing ? μ=mean(Fisher, ν) : μ=mean
             if corrected return exp(√(𝚺(log(w/μ)^2 for w in ν)/(length(ν)-1)))
             else         return exp(√(𝛍(log(w/μ)^2 for w in ν))) end
 
