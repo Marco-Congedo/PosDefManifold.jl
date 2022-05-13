@@ -1,16 +1,16 @@
 #    Unit test.jl, part of PosDefManifold Package for julia language
 #
 #    MIT License
-#    Copyright (c) 2019-21, Marco Congedo, CNRS, Grenobe, France:
+#    Copyright (c) 2019-22, Marco Congedo, CNRS, Grenobe, France:
 #    https://sites.google.com/site/marcocongedo/home
 #
 #    DESCRIPTION
 #    This Unit tests all functions in PosDefManifold.
 #    Some functions are fully tested, the others are just executed.
-#    Unce you ran it, for each method of each function,
+#    Unce you run it, for each method of each function,
 #    a ⭐ sign is printed if the test is succesful, while
 #    a ⛔ sign is printed if the test is not succesful.
-#    a ☆ sign is printed if the function has been executed correctly.
+#    A ☆ sign is printed if the function has been executed correctly.
 #    If there are fails, the concerned functions will be listed as Warnings
 #    and returned by the testall() function as an array of strings
 

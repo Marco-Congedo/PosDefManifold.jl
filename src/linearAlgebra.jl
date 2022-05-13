@@ -1,7 +1,7 @@
 #   Unit linearAlgebra.jl, part of PosDefManifold Package for julia language
 #
 #   MIT License
-#   Copyright (c) 2019-21, Marco Congedo, CNRS, Grenobe, France:
+#   Copyright (c) 2019-22, Marco Congedo, CNRS, Grenobe, France:
 #   https://sites.google.com/site/marcocongedo/home
 #
 #   DESCRIPTION
@@ -27,7 +27,7 @@
 #    By convention their name begin with underscore char
 # -----------------------------------------------------------
 
-# return a vector of ranges partitioning lineraly and
+# return a vector of ranges partitioning linearly and
 # as much as possible evenly `n` elements in `threads` ranges.
 # `threads` is the number of threads to which the ranges are to be
 # dispatched. If `threads` is not provided, it is set to the number

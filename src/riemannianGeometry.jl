@@ -1,7 +1,7 @@
 #    Unit riemannianGeometry.jl, part of PosDefManifold Package for julia language
 #
 #    MIT License
-#    Copyright (c) 2019-21, Marco Congedo, CNRS, Grenobe, France:
+#    Copyright (c) 2019-22, Marco Congedo, CNRS, Grenobe, France:
 #    https://sites.google.com/site/marcocongedo/home
 #
 #    DESCRIPTION
@@ -1657,7 +1657,7 @@ function geometricMean( 𝐏::ℍVector;
 
     (k, n, type, thr, n², iter, conv, oldconv, converged, ς, threaded, tolerance, v) = _setVar_IterAlg(𝐏, w, ✓w, tol, ⏩)
     _giveStartInfo_IterAlg(threaded, verbose, "geometricMean Fixed-Point")
-    init == nothing ? M = mean(logEuclidean, 𝐏; w=v, ✓w=false, ⏩=⏩) : M = ℍ(init)
+    init === nothing ? M = mean(logEuclidean, 𝐏; w=v, ✓w=false, ⏩=⏩) : M = ℍ(init)
     💡 = similar(M, type) # new iteration solution
     if threaded 𝐐 = 𝕄Vector(repeat([𝐏[1]], thr)) end # memory pre-allocation for fVec function
     c1(M⁻½::ℍ, 𝐏::ℍVector) = cong(M⁻½, 𝐏, ℍVector) # utility function
@@ -1850,7 +1850,7 @@ function geometricpMean(𝐏::ℍVector, p::Real=goldeninv;
     (k, n, type, thr, n², iter, conv, oldconv, converged, ς, threaded, tolerance, v) = _setVar_IterAlg(𝐏, w, ✓w, tol, ⏩)
     _giveStartInfo_IterAlg(threaded, verbose, "geometricpMean Fixed-Point")
     𝑓, d², q, ςHasNotChanged, ςold = Fisher, distance², p-1, 0, 0
-    init == nothing ? M = mean(logEuclidean, 𝐏; w=v, ✓w=false, ⏩=⏩) : M = ℍ(init)
+    init === nothing ? M = mean(logEuclidean, 𝐏; w=v, ✓w=false, ⏩=⏩) : M = ℍ(init)
     💡 = similar(M, type)
     𝐑 = similar(𝐏)
     if threaded 𝐐 = similar(𝐏) end
@@ -2018,7 +2018,7 @@ function logdet0Mean(𝐏::Union{ℍVector, 𝔻Vector};
     (k, n, type, thr, n², iter, conv, oldconv, converged, ς, threaded, tolerance, v) = _setVar_IterAlg(𝐏, w, ✓w, tol, ⏩)
     _giveStartInfo_IterAlg(threaded, verbose, "logDet0Mean Fixed-Point")
     𝕋, l = typeofMatrix(𝐏), k/2
-    init == nothing ? M = mean(logEuclidean, 𝐏; w=v, ✓w=false, ⏩=⏩) : M = 𝕋(init)
+    init === nothing ? M = mean(logEuclidean, 𝐏; w=v, ✓w=false, ⏩=⏩) : M = 𝕋(init)
     💡 = similar(M, type)
     if threaded 𝐐 = similar(𝐏) end
 
@@ -2166,7 +2166,7 @@ function wasMean(𝐏::ℍVector;
 
     (k, n, type, thr, n², iter, conv, oldconv, converged, ς, threaded, tolerance, v) = _setVar_IterAlg(𝐏, w, ✓w, tol, ⏩)
     _giveStartInfo_IterAlg(threaded, verbose, "wasMean Fixed-Point")
-    init == nothing ? M = generalizedMean(𝐏, 0.5; w=v, ✓w=false, ⏩=⏩) : M = ℍ(init)
+    init === nothing ? M = generalizedMean(𝐏, 0.5; w=v, ✓w=false, ⏩=⏩) : M = ℍ(init)
     💡 = similar(M, type)
     if threaded 𝐐 = similar(𝐏) end
 
@@ -2355,7 +2355,7 @@ function powerMean(𝐏::ℍVector, p::Real;
        _giveStartInfo_IterAlg(threaded, verbose, "powerMean Fixed-Point")
        absp, sqrtn = abs(p), √n
        r = -0.375/absp
-       init == nothing ? M = generalizedMean(𝐏, p; w=v, ✓w=false, ⏩=⏩) : M = ℍ(init)
+       init === nothing ? M = generalizedMean(𝐏, p; w=v, ✓w=false, ⏩=⏩) : M = ℍ(init)
        p<0 ? X=ℍ(M^(0.5)) : X=ℍ(M^(-0.5))
        💡, H, 𝒫 = similar(X, type), similar(X, type), similar(𝐏)
        p<0 ? 𝒫=[inv(P) for P in 𝐏] : 𝒫=𝐏
