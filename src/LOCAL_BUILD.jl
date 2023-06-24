@@ -22,7 +22,11 @@
 
 begin
     # change the 'juliaCodeDir' path to the folder where your projects are
+<<<<<<< HEAD
     juliaCodeDir= homedir()*"\\Documents\\Code\\julia\\"
+=======
+    juliaCodeDir= homedir()*"\\Documents\\@ Documenti\\Code\\julia\\"
+>>>>>>> dev
     projectName = "PosDefManifold"
     srcDir      = juliaCodeDir*projectName*"\\src\\"
     docsDir     = juliaCodeDir*projectName*"\\docs\\"
@@ -36,9 +40,19 @@ begin
     # Modules = juliaCodeDir*"Modules"
     # push!(LOAD_PATH, Modules)
     # using IOtxt
+<<<<<<< HEAD
 
     # for compiling the documentation
     cd(docsDir);
     clipboard("""makedocs(sitename="PosDefManifold", modules=[PosDefManifold])""")
     @info("\nhit CTRL+V+ENTER on the REPL for building the documentation.");
 end
+=======
+end
+
+# for compiling the documentation
+cd(docsDir);
+clipboard("""makedocs(sitename="PosDefManifold", modules=[PosDefManifold])""")
+@info("\nhit CTRL+V+ENTER on the REPL for building the documentation.");
+#makedocs(sitename="PosDefManifold", modules=[PosDefManifold])
+>>>>>>> dev

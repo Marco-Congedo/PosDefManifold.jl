@@ -188,6 +188,11 @@ $(document).ready(function() {
     searchresults = $('#documenter-search-results');
     searchinfo = $('#documenter-search-info');
     searchbox = $('#documenter-search-query');
+<<<<<<< HEAD
+=======
+    searchform = $('.docs-search');
+    sidebar = $('.docs-sidebar');
+>>>>>>> dev
     function update_search(querystring) {
       tokens = lunr.tokenizer(querystring)
       results = index.query(function (q) {
@@ -239,6 +244,23 @@ $(document).ready(function() {
     searchbox.keyup(_.debounce(update_search_box, 250))
     searchbox.change(update_search_box)
 
+<<<<<<< HEAD
+=======
+    // Disable enter-key form submission for the searchbox on the search page
+    // and just re-run search rather than refresh the whole page.
+    searchform.keypress(
+      function(event){
+        if (event.which == '13') {
+          if (sidebar.hasClass('visible')) {
+            sidebar.removeClass('visible');
+          }
+          update_search_box();
+          event.preventDefault();
+        }
+      }
+    );
+
+>>>>>>> dev
     search_query_uri = parseUri(window.location).queryKey["q"]
     if(search_query_uri !== undefined) {
       search_query = decodeURIComponent(search_query_uri.replace(/\+/g, '%20'))
