@@ -36,12 +36,6 @@ begin
     # Modules = juliaCodeDir*"Modules"
     # push!(LOAD_PATH, Modules)
     # using IOtxt
-<<<<<<< HEAD
-
-    # for compiling the documentation
-    cd(docsDir);
-    clipboard("""makedocs(sitename="PosDefManifold", modules=[PosDefManifold])""")
-    @info("\nhit CTRL+V+ENTER on the REPL for building the documentation.");
 end
 
 # for compiling the documentation
@@ -49,4 +43,3 @@ cd(docsDir);
 clipboard("""makedocs(sitename="PosDefManifold", modules=[PosDefManifold])""")
 @info("\nhit CTRL+V+ENTER on the REPL for building the documentation.");
 #makedocs(sitename="PosDefManifold", modules=[PosDefManifold])
-

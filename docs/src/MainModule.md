@@ -55,11 +55,7 @@ All packages above are built-in julia packages.
   invEuclidean =2
   ChoEuclidean =3
   logEuclidean =4
-<<<<<<< HEAD
-  LogCholesky  =5
-=======
   logCholesky  =5
->>>>>>> dev
   Fisher       =6
   logdet0      =7
   Jeffrey      =8
