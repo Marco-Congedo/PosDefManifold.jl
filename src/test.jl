@@ -1,11 +1,7 @@
 #    Unit test.jl, part of PosDefManifold Package for julia language
 #
 #    MIT License
-<<<<<<< HEAD
-#    Copyright (c) 2019-22, Marco Congedo, CNRS, Grenobe, France:
-=======
 #    Copyright (c) 2019-23, Marco Congedo, CNRS, Grenobe, France:
->>>>>>> dev
 #    https://sites.google.com/site/marcocongedo/home
 #
 #    DESCRIPTION
@@ -200,11 +196,7 @@ function tests();
     v=randn(n)
     vC=randn(ComplexF64, n)
     quadraticForm(v, P) ≈ v'*P*v ? OK() : OH(name*" Method 1 real case")
-<<<<<<< HEAD
-    quadraticForm(v, LowerTriangular(Matrix(P))) ≈ v'*LowerTriangular(Matrix(P))*v ? OK() : OH(name*" Method 2 real case")
-=======
     quadraticForm(v, LowerTriangular(Matrix(P))) ≈ v'*Symmetric((LowerTriangular(P))')*v ? OK() : OH(name*" Method 2 real case")
->>>>>>> dev
     quadraticForm(v, Matrix(P), true) ≈ v'*P*v ? OK() : OH(name*" Method 3a real case")
     quadraticForm(v, Matrix(P), false) ≈ v'*P*v ? OK() : OH(name*" Method 3b real case")
     quadraticForm(vC, PC) ≈ vC'*PC*vC ? OK() : OH(name*" Method 4a complex case")
