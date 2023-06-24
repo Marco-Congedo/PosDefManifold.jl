@@ -1,11 +1,7 @@
 #   Unit statistics.jl, part of PosDefManifold Package for julia language
 #
 #   MIT License
-<<<<<<< HEAD
-#   Copyright (c) 2019-22, Marco Congedo, CNRS, Grenobe, France:
-=======
 #   Copyright (c) 2019-23, Marco Congedo, CNRS, Grenobe, France:
->>>>>>> dev
 #   https://sites.google.com/site/marcocongedo/home
 #
 #   DESCRIPTION

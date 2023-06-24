@@ -1,11 +1,7 @@
 #    Unit riemannianGeometry.jl, part of PosDefManifold Package for julia language
 #
 #    MIT License
-<<<<<<< HEAD
-#    Copyright (c) 2019-22, Marco Congedo, CNRS, Grenobe, France:
-=======
 #    Copyright (c) 2019-23, Marco Congedo, CNRS, Grenobe, France:
->>>>>>> dev
 #    https://sites.google.com/site/marcocongedo/home
 #
 #    DESCRIPTION
@@ -395,15 +391,7 @@ function distanceSqr(metric::Metric, P::ℍ{T}, Q::ℍ{T}) where T<:RealOrComple
 
     elseif metric==logEuclidean return  max(z, ss(ℍ(log(P) - log(Q))))
 
-<<<<<<< HEAD
-    elseif metric==Fisher
-           if  size(P, 1) <= 80 && T<:Real
-                                return  max(z, 𝚺(log.(eigvals(inv(P)*Q)).^2))
-           else                 return  max(z, 𝚺(log.(eigvals(P, Q)).^2))
-           end
-=======
     elseif metric==Fisher return  max(z, 𝚺(log.(eigvals(P, Q)).^2))
->>>>>>> dev
 
     elseif metric==logdet0      return  max(z, real(logdet(0.5*(P + Q)) - 0.5*logdet(P * Q)))
 
@@ -1548,11 +1536,7 @@ end # function
     ⏩=true >)
 ```
 
-<<<<<<< HEAD
-**alias**: `gmean`
-=======
 **alias**: `gMean`
->>>>>>> dev
 
 Given a 1d array ``𝐏={P_1,...,P_k}`` of ``k`` positive definite matrices of
 [ℍVector type](@ref) or diagonal matrices of [𝔻Vector type](@ref)
@@ -2242,11 +2226,7 @@ wasMean(𝐃::𝔻Vector;
  and convergence attained by the algorithm, respectively.
  Mean ``G`` is the unique positive definite matrix satisfying
 
-<<<<<<< HEAD
- ``G=\\sum_{i=1}^{k}(w_iG\\textrm{#}_pP_i)``,
-=======
  ``G=\\sum_{i=1}^{k}w_i(G\\textrm{#}_pP_i)``,
->>>>>>> dev
 
  where ``G\\textrm{#}_pP_i`` is the [Fisher](@ref) [geodesic](@ref) equation.
  In particular:

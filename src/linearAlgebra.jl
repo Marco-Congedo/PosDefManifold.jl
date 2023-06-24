@@ -1,11 +1,7 @@
 #   Unit linearAlgebra.jl, part of PosDefManifold Package for julia language
 #
 #   MIT License
-<<<<<<< HEAD
-#   Copyright (c) 2019-22, Marco Congedo, CNRS, Grenobe, France:
-=======
 #   Copyright (c) 2019-23, Marco Congedo, CNRS, Grenobe, France:
->>>>>>> dev
 #   https://sites.google.com/site/marcocongedo/home
 #
 #   DESCRIPTION
@@ -1056,11 +1052,7 @@ function quadraticForm(v::Vector{T}, L::𝕃{T}) where T<:Real
     s=T(0)
     for j=1:r-1
         @inbounds s+=(v[j]^2 * L[j, j])
-<<<<<<< HEAD
-        for i=j+1:r @inbounds s+=v[i]*v[j]*L[i, j]  end
-=======
         for i=j+1:r @inbounds s+=2*v[i]*v[j]*L[i, j]  end
->>>>>>> dev
     end
     @inbounds s+=(v[r]^2 * L[r, r])
     return s
