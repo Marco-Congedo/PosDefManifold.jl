@@ -15,15 +15,13 @@ The functions are divided in six categories:
 | 5. [Tangent Space operations](@ref) | maps from the manifold to the tangent space and viceversa, parallel transport,... |
 | 6. [Procrustes problems](@ref) | data matching, transfer learning (domain adaptation), ...|
 
-⋅
-
 ## Geodesic equations
 
 | Function   | Description |
 |:---------- |:----------- |
 | [`geodesic`](@ref) | Geodesic equations (weighted mean of two positive definite matrices) for any metric |
 
-⋅
+
 
 ```@docs
 geodesic
