@@ -79,29 +79,31 @@ end
 # -----------------------------------------------------------
 
 """
+```julia
     (1) geodesic(metric::Metric, P::ℍ{T}, Q::ℍ{T}, a::Real) where T<:RealOrComplex
     (2) geodesic(metric::Metric, D::𝔻{S}, E::𝔻{S}, a::Real) where S<:Real
+```
 
- (1) Move along the [geodesic](@ref) from point ``P`` to point ``Q``
- (two positive definite matrices) with *arclegth* ``0<=a<=1``,
- using the specified metric, of type [Metric::Enumerated type](@ref).
+(1) Move along the [geodesic](@ref) from point ``P`` to point ``Q``
+(two positive definite matrices) with *arclegth* ``0<=a<=1``,
+using the specified metric, of type [Metric::Enumerated type](@ref).
 
- For all metrics,
- - with ``a=0`` we stay at ``P``,
- - with ``a=1`` we move up to ``Q``,
- - with ``a=1/2`` we move to the mid-point of ``P`` and ``Q`` (mean).
+For all metrics,
+- with ``a=0`` we stay at ``P``,
+- with ``a=1`` we move up to ``Q``,
+- with ``a=1/2`` we move to the mid-point of ``P`` and ``Q`` (mean).
 
- Using the Fisher metric, argument ``a`` can be *any* real number, for instance:
- - with ``0<a<1`` we move toward ``Q`` (*attraction*),
- - with ``a>1`` we move over and beyond ``Q`` (*extrapolation*),
- - with ``a<0`` we move back away from Q (*repulsion*).
+Using the Fisher metric, argument ``a`` can be *any* real number, for instance:
+- with ``0<a<1`` we move toward ``Q`` (*attraction*),
+- with ``a>1`` we move over and beyond ``Q`` (*extrapolation*),
+- with ``a<0`` we move back away from Q (*repulsion*).
 
- ``P`` and ``Q`` must be flagged by julia as `Hermitian`.
- See [typecasting matrices](@ref).
+``P`` and ``Q`` must be flagged by julia as `Hermitian`.
+See [typecasting matrices](@ref).
 
- The Fisher geodesic move is computed by the Cholesky-Schur algorithm
- given in Eq. 4.2 by Iannazzo(2016)[🎓](@ref). If ``Q=I``,
- the Fisher geodesic move is simply ``P^a`` (no need to call this funtion).
+The Fisher geodesic move is computed by the Cholesky-Schur algorithm
+given in Eq. 4.2 by Iannazzo(2016)[🎓](@ref). If ``Q=I``,
+the Fisher geodesic move is simply ``P^a`` (no need to call this funtion).
 
 !!! note "Nota Bene"
     For the [logdet zero](@ref) and [Jeffrey](@ref) metric no closed form expression
@@ -111,13 +113,13 @@ end
     For the [Von Neumann](@ref) not even an expression for the mean is available,
     so in this case the geodesic is not provided and a *warning* is printed.
 
- (2) Like in (1), but for two real positive definite diagonal matrices
- ``D`` and ``E``.
+(2) Like in (1), but for two real positive definite diagonal matrices
+``D`` and ``E``.
 
- **Maths**
+**Maths**
 
- For points ``P``, ``Q`` and arclength ``a``, letting ``b=1-a``,
- the geodesic equations for the supported metrics are:
+For points ``P``, ``Q`` and arclength ``a``, letting ``b=1-a``,
+the geodesic equations for the supported metrics are:
 
 | Metric   | geodesic equation |
 |:----------:|:----------- |
@@ -148,7 +150,6 @@ M=geodesic(Wasserstein, P, Q, 0.5)
 # extrapolate suing the Fisher metric
 E=geodesic(Fisher, P, Q, 2)
 ```
-
 """
 function geodesic(metric::Metric, P::ℍ{T}, Q::ℍ{T}, a::Real) where T<:RealOrComplex
     if a ≈ 0 return P end
@@ -239,34 +240,35 @@ end # function
 # -----------------------------------------------------------
 
 """
+```julia
     (1) distanceSqr(metric::Metric, P::ℍ{T}) where T<:RealOrComplex
     (2) distanceSqr(metric::Metric, P::ℍ{T}, Q::ℍ{T}) where T<:RealOrComplex
     (3) distanceSqr(metric::Metric, D::𝔻{S}) where S<:Real
     (4) distanceSqr(metric::Metric, D::𝔻{S}, E::𝔻{S}) where S<:Real
+```
 
+**alias**: `distance²`
 
- **alias**: `distance²`
+(1) Return ``δ^2(P, I)``, the *square of the distance* (or *divergence*) of positive definite
+matrix ``P`` from the the identity matrix. See [distance from the origin](@ref).
 
- (1) Return ``δ^2(P, I)``, the *square of the distance* (or *divergence*) of positive definite
- matrix ``P`` from the the identity matrix. See [distance from the origin](@ref).
+(2) Return ``δ^2(P, Q)``, the *square of the distance* (or *divergence*) between two
+positive definite matrices ``P`` and ``Q``. See [distance](@ref).
 
- (2) Return ``δ^2(P, Q)``, the *square of the distance* (or *divergence*) between two
- positive definite matrices ``P`` and ``Q``. See [distance](@ref).
+In both cases the distance function ``δ`` is induced by the argument `metric` of type
+[Metric::Enumerated type](@ref).
 
- In both cases the distance function ``δ`` is induced by the argument `metric` of type
- [Metric::Enumerated type](@ref).
+``P`` in (1) and ``P``, ``Q`` in (2) must be flagged by julia as `Hermitian`.
+See [typecasting matrices](@ref).
 
- ``P`` in (1) and ``P``, ``Q`` in (2) must be flagged by julia as `Hermitian`.
- See [typecasting matrices](@ref).
+(3) and (4) are specialized methods of (1) and (2), respectively,
+for real positive definite `Diagonal` matrices.
+See [ℍVector type](@ref) and [𝔻Vector type](@ref).
 
- (3) and (4) are specialized methods of (1) and (2), respectively,
- for real positive definite `Diagonal` matrices.
- See [ℍVector type](@ref) and [𝔻Vector type](@ref).
+**Maths**
 
- **Maths**
-
- For point ``P`` the *squared distances from the identity*
- for the supported metrics are:
+For point ``P`` the *squared distances from the identity*
+for the supported metrics are:
 
 | Metric   | Squared Distance from the identity |
 |:----------:|:----------- |
@@ -281,7 +283,7 @@ end # function
 |VonNeumann | ``\\frac{1}{2}\\textrm{tr}(P\\textrm{log}P-\\textrm{log}P)``|
 |Wasserstein| ``\\textrm{tr}(P+I) -2\\textrm{tr}(P^{1/2})`` |
 
- For points ``P`` and ``Q`` their *squared distances* for the supported metrics are:
+For points ``P`` and ``Q`` their *squared distances* for the supported metrics are:
 
 | Metric   | Squared Distance |
 |:----------:|:----------- |
@@ -296,13 +298,13 @@ end # function
 |VonNeumann | ``\\frac{1}{2}\\textrm{tr}(P\\textrm{log}P-P\\textrm{log}Q+Q\\textrm{log}Q-Q\\textrm{log}P)``|
 |Wasserstein| ``\\textrm{tr}(P+Q) -2\\textrm{tr}(P^{1/2}QP^{1/2})^{1/2}`` | ``\\textrm{tr}(P+Q) -2\\textrm{tr}(P^{1/2}QP^{1/2})^{1/2}`` |
 
-  **legend:** ``L_X``, ``S_X`` and ``D_X``
-  are the Cholesky lower triangle of ``X``, its strictly lower triangular part
-  and diagonal part, respectively (hence, ``S_X+D_X=L_X``,  ``L_XL_X^*=X``).
+**legend:** ``L_X``, ``S_X`` and ``D_X``
+are the Cholesky lower triangle of ``X``, its strictly lower triangular part
+and diagonal part, respectively (hence, ``S_X+D_X=L_X``,  ``L_XL_X^*=X``).
 
- **See also**: [`distanceSqrMat`](@ref).
+**See also**: [`distanceSqrMat`](@ref).
 
- **Examples (1)**
+**Examples (1)**
 ```julia
 using PosDefManifold
 P=randP(10)
@@ -313,7 +315,7 @@ s=string(metric) # check what is the current metric
 f=distance²(metric, P) #using the alias distance²
 ```
 
- **Examples (2)**
+**Examples (2)**
 ```julia
 using PosDefManifold
 P=randP(10)
@@ -321,7 +323,6 @@ Q=randP(10)
 d=distanceSqr(logEuclidean, P, Q)
 e=distance²(Jeffrey, P, Q)
 ```
-
 """
 function distanceSqr(metric::Metric, P::ℍ{T}) where T<:RealOrComplex
     z=real(T)(0)
@@ -444,24 +445,26 @@ distance²=distanceSqr # alias
 
 
 """
+```julia
     (1) distance(metric::Metric, P::ℍ{T}) where T<:RealOrComplex
     (2) distance(metric::Metric, P::ℍ{T}, Q::ℍ{T}) where T<:RealOrComplex
     (3) distance(metric::Metric, D::𝔻{S}) where S<:Real
     (4) distance(metric::Metric, D::𝔻{S}, E::𝔻{S}) where S<:Real
+```
 
- (1) Return ``δ(P, I)``, the *distance* between positive definite matrix ``P`` and
- the identity matrix.
+(1) Return ``δ(P, I)``, the *distance* between positive definite matrix ``P`` and
+the identity matrix.
 
- (2) Return ``δ(P, Q)``, the *distance* between positive definite
- matrices ``P`` and ``Q``.
+(2) Return ``δ(P, Q)``, the *distance* between positive definite
+matrices ``P`` and ``Q``.
 
- (3) and (4) are specialized methods of (1) and (2), respectively,
- for real positive definite `Diagonal` matrices.
+(3) and (4) are specialized methods of (1) and (2), respectively,
+for real positive definite `Diagonal` matrices.
 
- This is the square root of [`distanceSqr`](@ref)
- and is invoked with the same syntax therein.
+This is the square root of [`distanceSqr`](@ref)
+and is invoked with the same syntax therein.
 
- **See also**: [`distanceMat`](@ref).
+**See also**: [`distanceMat`](@ref).
 """
 distance(metric::Metric, P::ℍ{T}) where T<:RealOrComplex = √(distance²(metric, P))
 distance(metric::Metric, D::𝔻{T}) where T<:Real = √(distance²(metric, D))
@@ -476,7 +479,7 @@ distance(metric::Metric, D::𝔻{T}, E::𝔻{T}) where T<:Real = √(distance²(
 # -----------------------------------------------------------
 
 """
-```
+```julia
     (1) distanceSqrMat(metric::Metric, 𝐏::ℍVector;
     <⏩=true>)
 
@@ -484,35 +487,35 @@ distance(metric::Metric, D::𝔻{T}, E::𝔻{T}) where T<:Real = √(distance²(
     <⏩=true>) where T<:AbstractFloat
 ```
 
- **alias**: `distance²Mat`
+**alias**: `distance²Mat`
 
- Given a 1d array ``𝐏`` of ``k`` positive definite matrices
- ``{P_1,...,P_k}`` of [ℍVector type](@ref), create the ``k⋅k`` real
- `LowerTriangular` matrix comprising elements ``δ^2(P_i, P_j)\\textrm{, for all }i>=j``.
+Given a 1d array ``𝐏`` of ``k`` positive definite matrices
+``{P_1,...,P_k}`` of [ℍVector type](@ref), create the ``k⋅k`` real
+`LowerTriangular` matrix comprising elements ``δ^2(P_i, P_j)\\textrm{, for all }i>=j``.
 
- This is the lower triangular matrix holding all *squared inter-distances*
- (zero on diagonal), using the
- specified `metric`, of type [Metric::Enumerated type](@ref),
- giving rise to distance function ``δ``. See [`distanceSqr`](@ref).
+This is the lower triangular matrix holding all *squared inter-distances*
+(zero on diagonal), using the
+specified `metric`, of type [Metric::Enumerated type](@ref),
+giving rise to distance function ``δ``. See [`distanceSqr`](@ref).
 
- Only the lower triangular part is computed in order to optimize memory use.
+Only the lower triangular part is computed in order to optimize memory use.
 
- By default, the result matrix is of type `Float32`. The type can be changed
- to another real `type` using method (2).
+By default, the result matrix is of type `Float32`. The type can be changed
+to another real `type` using method (2).
 
- <optional keyword arguments>:
- - if ⏩=true (default) the computation of inter-distances is multi-threaded.
+<optional keyword arguments>:
+- if ⏩=true (default) the computation of inter-distances is multi-threaded.
 
 !!! note "Nota Bene"
     [Multi-threading](https://docs.julialang.org/en/v1/manual/parallel-computing/#Multi-Threading-(Experimental)-1)
     is automatically disabled if Julia is instructed to use only one thread.
     See [Threads](@ref).
 
- **See**: [distance](@ref).
+**See**: [distance](@ref).
 
- **See also**: [`laplacian`](@ref), [`laplacianEigenMaps`](@ref), [`spectralEmbedding`](@ref).
+**See also**: [`laplacian`](@ref), [`laplacianEigenMaps`](@ref), [`spectralEmbedding`](@ref).
 
- **Examples**
+**Examples**
 ```julia
 using PosDefManifold
 # Generate a set of 8 random 10x10 SPD matrices
@@ -528,7 +531,6 @@ Pset=randP(10, 8) # or, using unicode: 𝐏=randP(10, 8)
 # Get the full matrix of inter-distances
 fullΔ²=Hermitian(Δ², :L)
 ```
-
 """
 function distanceSqrMat(type::Type{T}, metric::Metric, 𝐏::ℍVector;
                          ⏩=true) where T<:AbstractFloat
@@ -635,7 +637,7 @@ distance²Mat=distanceSqrMat
 
 
 """
-```
+```julia
     (1) distanceMat(metric::Metric, 𝐏::ℍVector;
     <⏩=true>)
 
@@ -643,35 +645,35 @@ distance²Mat=distanceSqrMat
     <⏩=true>) where T<:AbstractFloat
 ```
 
- Given a 1d array ``𝐏`` of ``k`` positive definite matrices
- ``{P_1,...,P_k}`` of [ℍVector type](@ref), create the ``k⋅k`` real
- `LowerTriangular` matrix comprising elements
- ``δ(P_i, P_j)\\textrm{, for all }i>=j``.
+Given a 1d array ``𝐏`` of ``k`` positive definite matrices
+``{P_1,...,P_k}`` of [ℍVector type](@ref), create the ``k⋅k`` real
+`LowerTriangular` matrix comprising elements
+``δ(P_i, P_j)\\textrm{, for all }i>=j``.
 
- This is the lower triangular matrix holding all *inter-distances*
- (zero on diagonal), using the
- specified `metric`, of type [Metric::Enumerated type](@ref),
- giving rise to distance ``δ``. See [`distance`](@ref).
+This is the lower triangular matrix holding all *inter-distances*
+(zero on diagonal), using the
+specified `metric`, of type [Metric::Enumerated type](@ref),
+giving rise to distance ``δ``. See [`distance`](@ref).
 
- Only the lower triangular part is computed in order to optimize memory use.
+Only the lower triangular part is computed in order to optimize memory use.
 
- By default, the result matrix is of type `Float32`. The type can be changed
- to another real `type` using method (2).
+By default, the result matrix is of type `Float32`. The type can be changed
+to another real `type` using method (2).
 
- The elements of this matrix are the square root of
- [`distanceSqrMat`](@ref).
+The elements of this matrix are the square root of
+[`distanceSqrMat`](@ref).
 
- <optional keyword arguments>:
- - if ⏩=true the computation of inter-distances is multi-threaded.
+<optional keyword arguments>:
+- if ⏩=true the computation of inter-distances is multi-threaded.
 
 !!! note "Nota Bene"
     [Multi-threading](https://docs.julialang.org/en/v1/manual/parallel-computing/#Multi-Threading-(Experimental)-1)
     is automatically disabled if Julia is instructed to use only one thread.
     See [Threads](@ref).
 
- **See**: [distance](@ref).
+**See**: [distance](@ref).
 
- **Examples**
+**Examples**
 ```julia
 using PosDefManifold
 # Generate a set of 4 random 10x10 SPD matrices
@@ -684,7 +686,6 @@ Pset=randP(10, 4) # or, using unicode: 𝐏=randP(10, 4)
 # Get the full matrix of inter-distances
 fullΔ=Hermitian(Δ, :L)
 ```
-
 """
 distanceMat(type::Type{T}, metric::Metric, 𝐏::ℍVector;
             ⏩=true) where T<:AbstractFloat =
@@ -696,52 +697,54 @@ distanceMat(metric::Metric, 𝐏::ℍVector;
 
 
 """
+```julia
     laplacian(Δ²::𝕃{S}, epsilon::Real=0;
               <densityInvariant=false>) where S<:Real
+```
 
- Given a `LowerTriangular` matrix of squared inter-distances ``Δ^2``,
- return the lower triangular part of the so-called
- *normalized Laplacian* or *density-invariant normalized Laplacian*,
- which in both cases is a symmetric Laplacian.
- The elements of the Laplacian are of the same type as the elements of ``Δ^2``.
- The result is a `LowerTriangular` matrix.
+Given a `LowerTriangular` matrix of squared inter-distances ``Δ^2``,
+return the lower triangular part of the so-called
+*normalized Laplacian* or *density-invariant normalized Laplacian*,
+which in both cases is a symmetric Laplacian.
+The elements of the Laplacian are of the same type as the elements of ``Δ^2``.
+The result is a `LowerTriangular` matrix.
 
- The definition of Laplacian given by Lafon (2004)[🎓](@ref) is implemented:
+The definition of Laplacian given by Lafon (2004)[🎓](@ref) is implemented:
 
- First, a [Gaussian radial basis functions](https://bit.ly/1HVyf55),
- known as *Gaussian kernel* or *heat kernel*,
- is applied to all elements of ``Δ^2``, such as
+First, a [Gaussian radial basis functions](https://bit.ly/1HVyf55),
+known as *Gaussian kernel* or *heat kernel*,
+is applied to all elements of ``Δ^2``, such as
 
- ``W_{ij} = exp\\bigg(\\frac{\\displaystyle{-Δ^2_{ij}}}{\\displaystyle{2ε}}\\bigg)``,
+``W_{ij} = exp\\bigg(\\frac{\\displaystyle{-Δ^2_{ij}}}{\\displaystyle{2ε}}\\bigg)``,
 
-  where ``ε`` is the *bandwidth* of the kernel.
+where ``ε`` is the *bandwidth* of the kernel.
 
-  If <optional keyword argument> `densityInvariant=true` is used,
-  then the density-invariant transformation is applied
+If <optional keyword argument> `densityInvariant=true` is used,
+then the density-invariant transformation is applied
 
-   ``W \\leftarrow E^{-1}WE^{-1}``
+``W \\leftarrow E^{-1}WE^{-1}``
 
-  where ``E`` is the diagonal matrix holding on the main diagonal
-  the sum of the rows (or columns) of ``W``.
+where ``E`` is the diagonal matrix holding on the main diagonal
+the sum of the rows (or columns) of ``W``.
 
-  Finally, the normalized Laplacian (density-invariant or not) is defined as
+Finally, the normalized Laplacian (density-invariant or not) is defined as
 
- ``Ω = D^{-1/2}WD^{-1/2}``,
+``Ω = D^{-1/2}WD^{-1/2}``,
 
-  where ``D`` is the diagonal matrix holding on the main diagonal
-  the sum of the rows (or columns) of ``W``.
+where ``D`` is the diagonal matrix holding on the main diagonal
+the sum of the rows (or columns) of ``W``.
 
-  If you do not provide argument `epsilon`, the bandwidth ``ε`` is set to the
-  median of the elements of squared distance matrix ``Δ^2_{ij}``.
-  Another educated guess is the dimension of the original data, that is,
-  the data that has been used to compute the squared distance matrix.
-  For positive definite matrices this is ``n(n-1)/2``, where ``n`` is the
-  dimension of the matrices. Still another is the dimension of the ensuing
-  [`spectralEmbedding`](@ref) space.
-  Keep in mind that by tuning the `epsilon` parameter
-  (which must be positive) you can control both the rate of compression of the
-  embedding space and the spread of points in the embedding space.
-  See Coifman et *al.* (2008)[🎓](@ref) for a discussion on ``ε``.
+If you do not provide argument `epsilon`, the bandwidth ``ε`` is set to the
+median of the elements of squared distance matrix ``Δ^2_{ij}``.
+Another educated guess is the dimension of the original data, that is,
+the data that has been used to compute the squared distance matrix.
+For positive definite matrices this is ``n(n-1)/2``, where ``n`` is the
+dimension of the matrices. Still another is the dimension of the ensuing
+[`spectralEmbedding`](@ref) space.
+Keep in mind that by tuning the `epsilon` parameter
+(which must be positive) you can control both the rate of compression of the
+embedding space and the spread of points in the embedding space.
+See Coifman et *al.* (2008)[🎓](@ref) for a discussion on ``ε``.
 
 !!! note "Nota Bene"
     The Laplacian as here defined can be requested for any
@@ -750,9 +753,9 @@ distanceMat(metric::Metric, 𝐏::ℍVector;
     In any case, only the lower triangular part of the Laplacian is
     taken as input. See [typecasting matrices](@ref).
 
- **See also**: [`distanceSqrMat`](@ref), [`laplacianEigenMaps`](@ref), [`spectralEmbedding`](@ref).
+**See also**: [`distanceSqrMat`](@ref), [`laplacianEigenMaps`](@ref), [`spectralEmbedding`](@ref).
 
- **Examples**
+**Examples**
 ```julia
 using PosDefManifold
 # Generate a set of 4 random 10x10 SPD matrices
@@ -770,7 +773,6 @@ med=Statistics.median([Δ²[i, j] for j=1:r-1 for i=j+1:r])
 ε=2*myεFactor*med
 Ω=laplacian(Δ², ε; densityInvariant=true)
 ```
-
 """
  function laplacian(Δ²::𝕃{T}, epsilon::Real=0;
                     densityInvariant=false) where T<:Real
@@ -804,7 +806,7 @@ med=Statistics.median([Δ²[i, j] for j=1:r-1 for i=j+1:r])
 
 
 """
-```
+```julia
     laplacianEigenMaps(Ω::𝕃{S}, q::Int;
     <
     tol::Real=0.,
@@ -812,44 +814,44 @@ med=Statistics.median([Δ²[i, j] for j=1:r-1 for i=j+1:r])
     verbose=false >) where S<:Real
 ```
 
- **alias**: `laplacianEM`
+**alias**: `laplacianEM`
 
- Given the lower triangular part of a Laplacian ``Ω``
- (see [`laplacian`](@ref) ) return the *eigen maps* in ``q`` dimensions,
- i.e., the ``q`` eigenvectors of the Laplacian associated with the largest ``q``
- eigenvalues, excluding the first (which is always equal to 1.0).
- The eigenvectors are of the same type as ``Ω``. They are all divided
- element-wise by the first eigenvector (see Lafon, 2004[🎓](@ref)).
+Given the lower triangular part of a Laplacian ``Ω``
+(see [`laplacian`](@ref) ) return the *eigen maps* in ``q`` dimensions,
+i.e., the ``q`` eigenvectors of the Laplacian associated with the largest ``q``
+eigenvalues, excluding the first (which is always equal to 1.0).
+The eigenvectors are of the same type as ``Ω``. They are all divided
+element-wise by the first eigenvector (see Lafon, 2004[🎓](@ref)).
 
- The eigenvectors of the Laplacian are computed by the
- power iterations+modified Gram-Schmidt method (see [`powerIterations`](@ref)),
- allowing the execution of this function for Laplacian matrices of very large size.
+The eigenvectors of the Laplacian are computed by the
+power iterations+modified Gram-Schmidt method (see [`powerIterations`](@ref)),
+allowing the execution of this function for Laplacian matrices of very large size.
 
- Return the 4-tuple ``(Λ, U, iterations, convergence)``, where:
- - ``Λ`` is a ``q⋅q`` diagonal matrix holding on diagonal the eigenvalues corresponding to the ``q`` dimensions of the Laplacian eigen maps,
- - ``U`` holds in columns the ``q`` eigenvectors holding the ``q`` coordinates of the points in the embedding space,
- - ``iterations`` is the number of iterations executed by the power method,
- - ``convergence`` is the convergence attained by the power method.
+Return the 4-tuple ``(Λ, U, iterations, convergence)``, where:
+- ``Λ`` is a ``q⋅q`` diagonal matrix holding on diagonal the eigenvalues corresponding to the ``q`` dimensions of the Laplacian eigen maps,
+- ``U`` holds in columns the ``q`` eigenvectors holding the ``q`` coordinates of the points in the embedding space,
+- ``iterations`` is the number of iterations executed by the power method,
+- ``convergence`` is the convergence attained by the power method.
 
- Using the notion of Laplacian, spectral embedding seek a
- low-dimension representation of the data emphasizing local neighbothood
- information while neglecting long-distance information.
- The embedding is non-linear, however the embedding space is Euclidean.
- The eigenvectors of ``U`` holds the coordinates of the points in the
- embedding space (typically two- or three-dimensional for plotting or more
- for clustering). Spectral embedding is done for plotting data in low-dimension,
- clustering, imaging, classification, following their trajectories over time
- or other dimensions, and much more.
- For examples of applications see Ridrigues et *al.* (2018) [🎓](@ref)
- and references therein.
+Using the notion of Laplacian, spectral embedding seek a
+low-dimension representation of the data emphasizing local neighbothood
+information while neglecting long-distance information.
+The embedding is non-linear, however the embedding space is Euclidean.
+The eigenvectors of ``U`` holds the coordinates of the points in the
+embedding space (typically two- or three-dimensional for plotting or more
+for clustering). Spectral embedding is done for plotting data in low-dimension,
+clustering, imaging, classification, following their trajectories over time
+or other dimensions, and much more.
+For examples of applications see Ridrigues et *al.* (2018) [🎓](@ref)
+and references therein.
 
- **Arguments**:
- - ``Ω`` is a real `LowerTriangular` normalized Laplacian obtained by the [`laplacian`](@ref) function,
- - ``q`` is the dimension of the Laplacian eigen maps;
- - The following are *<optional keyword arguments>* for the power iterations:
-   * `tol` is the tolerance for convergence (see below),
-   * `maxiter` is the maximum number of iterations allowed,
-   * if `verbose` is true, the convergence at all iterations will be printed.
+**Arguments**:
+- ``Ω`` is a real `LowerTriangular` normalized Laplacian obtained by the [`laplacian`](@ref) function,
+- ``q`` is the dimension of the Laplacian eigen maps;
+- The following are *<optional keyword arguments>* for the power iterations:
+* `tol` is the tolerance for convergence (see below),
+* `maxiter` is the maximum number of iterations allowed,
+* if `verbose` is true, the convergence at all iterations will be printed.
 
 !!! note "Nota Bene"
     The maximum value of ``q`` that can be requested is ``n-1``,
@@ -860,9 +862,9 @@ med=Statistics.median([Δ²[i, j] for j=1:r-1 for i=j+1:r])
     of ``Ω``. This corresponds to requiring equality for the convergence criterion
     over two successive power iterations of about half of the significant digits.
 
- **See also**: [`distanceSqrMat`](@ref), [`laplacian`](@ref), [`spectralEmbedding`](@ref).
+**See also**: [`distanceSqrMat`](@ref), [`laplacian`](@ref), [`spectralEmbedding`](@ref).
 
- **Examples**
+**Examples**
 ```julia
 using PosDefManifold
 # Generate a set of 4 random 10x10 SPD matrices
@@ -893,7 +895,7 @@ laplacianEM=laplacianEigenMaps
 
 
 """
-```
+```julia
     (1) spectralEmbedding(metric::Metric, 𝐏::ℍVector, q::Int, epsilon::Real=0;
     <
     tol::Real=0.,
@@ -906,40 +908,39 @@ laplacianEM=laplacianEigenMaps
     < same optional keyword arguments as in (1) >) where T<:Real
 ```
 
- **alias**: `spEmb`
+**alias**: `spEmb`
 
- Given a 1d array ``𝐏`` of ``k`` positive definite matrices ``{P_1,...,P_k}``
- (real or complex), compute its *eigen maps* in ``q`` dimensions.
+Given a 1d array ``𝐏`` of ``k`` positive definite matrices ``{P_1,...,P_k}``
+(real or complex), compute its *eigen maps* in ``q`` dimensions.
 
- This function runs one after the other the functions:
- - [`distanceSqrMat`](@ref) (compute the squared inter-distance matrix),
- - [`laplacian`](@ref) (compute the normalized Laplacian),
- - [`laplacianEigenMaps`](@ref) (get the eigen maps).
+This function runs one after the other the functions:
+- [`distanceSqrMat`](@ref) (compute the squared inter-distance matrix),
+- [`laplacian`](@ref) (compute the normalized Laplacian),
+- [`laplacianEigenMaps`](@ref) (get the eigen maps).
 
- By default all computations above are done with `Float32` precision.
- Another real type can be requested using method (2), where the `type` argument
- is defined.
+By default all computations above are done with `Float32` precision.
+Another real type can be requested using method (2), where the `type` argument
+is defined.
 
-  Return the 4-tuple `(Λ, U, iterations, convergence)`, where:
- - ``Λ`` is a ``q⋅q`` diagonal matrix holding on diagonal the eigenvalues corresponding to the ``q`` dimensions of the Laplacian eigen maps,
- - ``U`` holds in columns the ``q`` eigenvectors holding the ``q`` coordinates of the points in the embedding space,
- - ``iterations`` is the number of iterations executed by the power method,
- - ``convergence`` is the convergence attained by the power method.
+Return the 4-tuple `(Λ, U, iterations, convergence)`, where:
+- ``Λ`` is a ``q⋅q`` diagonal matrix holding on diagonal the eigenvalues corresponding to the ``q`` dimensions of the Laplacian eigen maps,
+- ``U`` holds in columns the ``q`` eigenvectors holding the ``q`` coordinates of the points in the embedding space,
+- ``iterations`` is the number of iterations executed by the power method,
+- ``convergence`` is the convergence attained by the power method.
 
- **Arguments**:
- - `metric` is the metric of type [Metric::Enumerated type](@ref) used for computing the inter-distances,
- - ``𝐏`` is a 1d array of ``k`` positive matrices of [ℍVector type](@ref),
- - ``q`` is the dimension of the Laplacian eigen maps,
- - ``epsilon`` is the bandwidth of the Laplacian (see [`laplacian`](@ref));
- - The following *<optional keyword argument>* applyies for computing the inter-distances:
-   * if `⏩=true` (default) the computation of inter-distances is multi-threaded.
- - The following *<optional keyword argument>* applyies to the computation of the Laplacian by the [`laplacian`](@ref) function:
-   * if `densityInvariant=true` the density-invariant Laplacian is computed (see [`laplacian`](@ref)).
- - The following are *<optional keyword arguments>* for the power method iterative algorithm invoked by [`laplacianEigenMaps`](@ref):
-     * `tol` is the tolerance for convergence of the power method (see below),
-     * `maxiter` is the maximum number of iterations allowed for the power method,
-     * if `verbose=true` the convergence at all iterations will be printed;
-
+**Arguments**:
+- `metric` is the metric of type [Metric::Enumerated type](@ref) used for computing the inter-distances,
+- ``𝐏`` is a 1d array of ``k`` positive matrices of [ℍVector type](@ref),
+- ``q`` is the dimension of the Laplacian eigen maps,
+- ``epsilon`` is the bandwidth of the Laplacian (see [`laplacian`](@ref));
+- The following *<optional keyword argument>* applyies for computing the inter-distances:
+* if `⏩=true` (default) the computation of inter-distances is multi-threaded.
+- The following *<optional keyword argument>* applyies to the computation of the Laplacian by the [`laplacian`](@ref) function:
+* if `densityInvariant=true` the density-invariant Laplacian is computed (see [`laplacian`](@ref)).
+- The following are *<optional keyword arguments>* for the power method iterative algorithm invoked by [`laplacianEigenMaps`](@ref):
+    * `tol` is the tolerance for convergence of the power method (see below),
+    * `maxiter` is the maximum number of iterations allowed for the power method,
+    * if `verbose=true` the convergence at all iterations will be printed;
 
 !!! note "Nota Bene"
     ``tol`` defaults to the square root of `Base.eps` of the `Float32` type (1)
@@ -951,9 +952,9 @@ laplacianEM=laplacianEigenMaps
     is automatically disabled if Julia is instructed to use only one thread.
     See [Threads](@ref).
 
- **See also**: [`distanceSqrMat`](@ref), [`laplacian`](@ref), [`laplacianEigenMaps`](@ref).
+**See also**: [`distanceSqrMat`](@ref), [`laplacian`](@ref), [`laplacianEigenMaps`](@ref).
 
- **Examples**
+**Examples**
 ```julia
 using PosDefManifold
 # Generate a set of k random 10x10 SPD matrices
@@ -982,7 +983,6 @@ evalues, maps, iter, conv=spEmb(Fisher, Pset, k-1, 0.01; maxiter=1000)
 plot(maps[:, 1], maps[:, 2], seriestype=:scatter, title="Spectral Embedding", label="Pset")
 # see the example in `Laplacian` function for more on this
 ```
-
 """
 function spectralEmbedding(type::Type{T}, metric::Metric, 𝐏::ℍVector, q::Int, epsilon::Real=0;
                            tol::Real=0.,
@@ -1021,7 +1021,7 @@ spEmb=spectralEmbedding
 # -----------------------------------------------------------
 
 """
-```
+```julia
     (1) mean(metric::Metric, P::ℍ{T}, Q::ℍ{T}) where T<:RealOrComplex
 
     (2) mean(metric::Metric, D::𝔻{T}, E::𝔻{T}) where T<:Real
@@ -1039,66 +1039,66 @@ spEmb=spectralEmbedding
     < same optional keyword arguments as in (3) >)
 ```
 
- (1) Mean of two positive definite matrices, passed in arbitrary order as
- arguments ``P`` and ``Q``, using the specified `metric` of type
- [Metric::Enumerated type](@ref). The order is arbitrary as all metrics
- implemented in **PosDefManifold** are symmetric.
- This is the midpoint of the geodesic.
- For the weighted mean of two positive definite matrices use instead
- the [`geodesic`](@ref) function.
- ``P`` and ``Q`` must be flagged as `Hermitian`. See [typecasting matrices](@ref).
+(1) Mean of two positive definite matrices, passed in arbitrary order as
+arguments ``P`` and ``Q``, using the specified `metric` of type
+[Metric::Enumerated type](@ref). The order is arbitrary as all metrics
+implemented in **PosDefManifold** are symmetric.
+This is the midpoint of the geodesic.
+For the weighted mean of two positive definite matrices use instead
+the [`geodesic`](@ref) function.
+``P`` and ``Q`` must be flagged as `Hermitian`. See [typecasting matrices](@ref).
 
- (2) Like in (1), but for two real diagonal positive definite matrices
- ``D`` and ``E``.
+(2) Like in (1), but for two real diagonal positive definite matrices
+``D`` and ``E``.
 
- (3) [Fréchet mean](@ref) of an 1d array ``𝐏`` of ``k`` positive definite
- matrices ``𝐏={P_1,...,P_k}`` of [ℍVector type](@ref),
- with optional non-negative real weights ``w={w_1,...,w_k}`` and using the
- specified `metric`as in (1).
+(3) [Fréchet mean](@ref) of an 1d array ``𝐏`` of ``k`` positive definite
+matrices ``𝐏={P_1,...,P_k}`` of [ℍVector type](@ref),
+with optional non-negative real weights ``w={w_1,...,w_k}`` and using the
+specified `metric`as in (1).
 
- (4) [Fréchet mean](@ref) of an 1d array ``𝐃`` of ``k`` positive definite
- matrices ``𝐃={D_1,...,D_k}`` of [𝔻Vector type](@ref),
- with optional non-negative real weights ``w={w_1,...,w_k}`` and using the
- specified `metric`as in (1).
+(4) [Fréchet mean](@ref) of an 1d array ``𝐃`` of ``k`` positive definite
+matrices ``𝐃={D_1,...,D_k}`` of [𝔻Vector type](@ref),
+with optional non-negative real weights ``w={w_1,...,w_k}`` and using the
+specified `metric`as in (1).
 
- If you don't pass a weight vector with *<optional keyword argument>* ``w``,
- return the *unweighted mean*.
+If you don't pass a weight vector with *<optional keyword argument>* ``w``,
+return the *unweighted mean*.
 
- If *<optional keyword argument>* `✓w=true` (default), the weights are
- normalized so as to sum up to 1, otherwise they are used as they are passed
- and should be already normalized.  This option is provided to allow
- calling this function repeatedly without normalizing the same weights
- vector each time.
+If *<optional keyword argument>* `✓w=true` (default), the weights are
+normalized so as to sum up to 1, otherwise they are used as they are passed
+and should be already normalized.  This option is provided to allow
+calling this function repeatedly without normalizing the same weights
+vector each time.
 
- Adopting the `Fisher`, `logdet0` and `Wasserstein` metric in (3) and the
- `logdet0` metric in (4), the mean is computed by means of an iterative
- algorithm. A particular initialization for these algorithms can be
- provided passing an Hermitian matrix as *<optional keyword argument>* `init`.
- The convergence for these algorithm is required with a tolerance
- given by *<optional keyword argument>* `tol`.
- if `verbose=true` the covergence attained at each iteration is printed.
- Other information such as if the algorithm has diverged is also printed.
- For more options in computing these means call directly
- functions [`geometricMean`](@ref), [`logdet0Mean`](@ref)
- and [`wasMean`](@ref), which are called hereby.
- For the meaning of the `tol` default value see the documentation of
- these functions. See also the robust mean function [`geometricpMean`](@ref),
- which cannot be called from here. Notice that arguments `init` and `tol`
- have an effect only for the aferomentioned metrics in methods (3) and (4).
+Adopting the `Fisher`, `logdet0` and `Wasserstein` metric in (3) and the
+`logdet0` metric in (4), the mean is computed by means of an iterative
+algorithm. A particular initialization for these algorithms can be
+provided passing an Hermitian matrix as *<optional keyword argument>* `init`.
+The convergence for these algorithm is required with a tolerance
+given by *<optional keyword argument>* `tol`.
+if `verbose=true` the covergence attained at each iteration is printed.
+Other information such as if the algorithm has diverged is also printed.
+For more options in computing these means call directly
+functions [`geometricMean`](@ref), [`logdet0Mean`](@ref)
+and [`wasMean`](@ref), which are called hereby.
+For the meaning of the `tol` default value see the documentation of
+these functions. See also the robust mean function [`geometricpMean`](@ref),
+which cannot be called from here. Notice that arguments `init` and `tol`
+have an effect only for the aferomentioned metrics in methods (3) and (4).
 
- For (3) and (4), if `⏩=true` (default),
- the computation of the mean is multi-threaded for all metrics.
+For (3) and (4), if `⏩=true` (default),
+the computation of the mean is multi-threaded for all metrics.
 
 !!! note "Nota Bene"
     [Multi-threading](https://docs.julialang.org/en/v1/manual/parallel-computing/#Multi-Threading-(Experimental)-1)
     is automatically disabled if Julia is instructed to use only one thread.
     See [Threads](@ref).
 
- ## Math
+## Math
 
- The Fréchet mean of a set of ``k`` matrices ``{P_1, P_2,..., P_k}`` weighted by
- ``{w_1, w_2,..., w_k}:\\sum_{i=1}^{k}w_i=1`` for the supported metrics are,
- for those with closed form expression:
+The Fréchet mean of a set of ``k`` matrices ``{P_1, P_2,..., P_k}`` weighted by
+``{w_1, w_2,..., w_k}:\\sum_{i=1}^{k}w_i=1`` for the supported metrics are,
+for those with closed form expression:
 
 | Metric   | weighted Fréchet mean |
 |:----------:|:----------- |
@@ -1118,14 +1118,14 @@ spEmb=spectralEmbedding
 |VonNeumann | N.A.|
 |Wasserstein| ``G=\\sum_{i=1}^{k}w_i\\big( G^{1/2}  P_i G^{1/2}\\big)^{1/2}`` |
 
- **legend:** ``L_X``, ``S_X`` and ``D_X``
-  are the Cholesky lower triangle of ``X``, its strictly lower triangular part
-  and diagonal part, respectively (hence, ``S_X+D_X=L_X``,  ``L_XL_X^*=X``).
-  ``A`` and ``H`` are the weighted arithmetic and weighted harmonic mean, respectively.
+**legend:** ``L_X``, ``S_X`` and ``D_X``
+are the Cholesky lower triangle of ``X``, its strictly lower triangular part
+and diagonal part, respectively (hence, ``S_X+D_X=L_X``,  ``L_XL_X^*=X``).
+``A`` and ``H`` are the weighted arithmetic and weighted harmonic mean, respectively.
 
- **See**: [geodesic](@ref), [mean](@ref), [Fréchet mean](@ref).
+**See**: [geodesic](@ref), [mean](@ref), [Fréchet mean](@ref).
 
- **Examples**
+**Examples**
 ```julia
 using LinearAlgebra, Statistics, PosDefManifold
 # Generate 2 random 3x3 SPD matrices
@@ -1154,7 +1154,6 @@ Pset=randP(20, 160)
 @benchmark(mean(logEuclidean, Pset; ⏩=false)) # single-threaded
 @benchmark(mean(logEuclidean, Pset)) # multi-threaded
 ```
-
 """
 mean(metric::Metric, P::ℍ{T}, Q::ℍ{T}) where T<:RealOrComplex =
     if metric==Fisher && size(P, 1)>=120 #(faster proc: Congedo et al., 2005)
@@ -1332,7 +1331,7 @@ end # function
 
 
 """
-```
+```julia
     (1) means(metric::Metric, 𝒫::ℍVector₂;
     <⏩=true>)
 
@@ -1340,31 +1339,31 @@ end # function
     <⏩=true>)
 ```
 
- (1) Given a 2d array ``𝒫`` of positive definite matrices as an [ℍVector₂ type](@ref)
- compute the [Fréchet mean](@ref) for as many [ℍVector type](@ref) objects
- as hold in ``𝒫``, using the specified `metric` of type
- [Metric::Enumerated type](@ref).
- Return the means in a vector of `Hermitian` matrices, that is, as an `ℍVector` type.
+(1) Given a 2d array ``𝒫`` of positive definite matrices as an [ℍVector₂ type](@ref)
+compute the [Fréchet mean](@ref) for as many [ℍVector type](@ref) objects
+as hold in ``𝒫``, using the specified `metric` of type
+[Metric::Enumerated type](@ref).
+Return the means in a vector of `Hermitian` matrices, that is, as an `ℍVector` type.
 
- (2) Given a 2d array ``𝒟`` of real positive definite matrices as an [𝔻Vector₂ type](@ref)
- compute the [Fréchet mean](@ref) for as many [𝔻Vector type](@ref) objects
- as hold in ``𝒟``, using the specified `metric` of type
- [Metric::Enumerated type](@ref).
- Return the means in a vector of `Diagonal` matrices, that is, as a `𝔻Vector` type.
+(2) Given a 2d array ``𝒟`` of real positive definite matrices as an [𝔻Vector₂ type](@ref)
+compute the [Fréchet mean](@ref) for as many [𝔻Vector type](@ref) objects
+as hold in ``𝒟``, using the specified `metric` of type
+[Metric::Enumerated type](@ref).
+Return the means in a vector of `Diagonal` matrices, that is, as a `𝔻Vector` type.
 
- The weigted Fréchet mean is not supported in this function.
+The weigted Fréchet mean is not supported in this function.
 
- If `⏩=true` (default) the computation of the means
- is multi-threaded.
+If `⏩=true` (default) the computation of the means
+is multi-threaded.
 
 !!! note "Nota Bene"
     [Multi-threading](https://docs.julialang.org/en/v1/manual/parallel-computing/#Multi-Threading-(Experimental)-1)
     is automatically disabled if Julia is instructed to use only one thread.
     See [Threads](@ref).
 
-  **See also**: [`mean`](@ref).
+**See also**: [`mean`](@ref).
 
-  **Examples**
+**Examples**
 ```julia
 using PosDefManifold
 # Generate a set of 4 random 3x3 SPD matrices
@@ -1416,7 +1415,7 @@ means(metric::Metric, 𝒟::𝔻Vector₂; ⏩=true) =
 
 
 """
-```
+```julia
     generalizedMean(𝐏::Union{ℍVector, 𝔻Vector}, p::Real;
     <
     w::Vector=[],
@@ -1424,53 +1423,52 @@ means(metric::Metric, 𝒟::𝔻Vector₂; ⏩=true) =
     ⏩=true >)
 ```
 
- Given a 1d array ``𝐏={P_1,...,P_k}`` of ``k`` positive definite matrices of
- [ℍVector type](@ref) or real positive definite diagonal matrices of
- [𝔻Vector type](@ref) and optional non-negative real weights vector
- ``w={w_1,...,w_k}``, return the *weighted generalized means* ``G``
- with real parameter ``p``, that is,
+Given a 1d array ``𝐏={P_1,...,P_k}`` of ``k`` positive definite matrices of
+[ℍVector type](@ref) or real positive definite diagonal matrices of
+[𝔻Vector type](@ref) and optional non-negative real weights vector
+``w={w_1,...,w_k}``, return the *weighted generalized means* ``G``
+with real parameter ``p``, that is,
 
- ``G=\\big(\\sum_{i=1}^{k}w_iP_i^p\\big)^{1/p}``.
+``G=\\big(\\sum_{i=1}^{k}w_iP_i^p\\big)^{1/p}``.
 
- If you don't pass a weight vector with *<optional keyword argument>* ``w``,
- return the *unweighted generalized mean*
+If you don't pass a weight vector with *<optional keyword argument>* ``w``,
+return the *unweighted generalized mean*
 
- ``G=\\big(\\sum_{i=1}^{k}P_i^p\\big)^{1/p}``.
+``G=\\big(\\sum_{i=1}^{k}P_i^p\\big)^{1/p}``.
 
- If *<optional keyword argument>* `✓w=true` (default), the weights are
- normalized so as to sum up to 1, otherwise they are used as they are passed
- and should be already normalized.
- This option is provided to allow
- calling this function repeatedly without normalizing the weights each time.
+If *<optional keyword argument>* `✓w=true` (default), the weights are
+normalized so as to sum up to 1, otherwise they are used as they are passed
+and should be already normalized.
+This option is provided to allow
+calling this function repeatedly without normalizing the weights each time.
 
- If *<optional key argmuent>* ⏩=true the computation of the generalized mean
- is multi-threaded.
+If *<optional key argmuent>* ⏩=true the computation of the generalized mean
+is multi-threaded.
 
 !!! note "Nota Bene"
     [Multi-threading](https://docs.julialang.org/en/v1/manual/parallel-computing/#Multi-Threading-(Experimental)-1)
     is automatically disabled if Julia is instructed to use only one thread.
     See [Threads](@ref).
 
+The following special cases for parameter ``p`` are noteworthy:
+- For ``p=\\frac{1}{2}`` the generalized mean is the [modified Bhattacharyya mean](@ref).
+- For ``p=1`` the generalized mean is the [Euclidean](@ref) mean.
+- For ``p=-1`` the generalized mean is the [inverse Euclidean](@ref) mean.
+- For (the limit of) ``p=0`` the generalized mean is the [log Euclidean](@ref) mean, which is the [Fisher](@ref) mean when matrices in 𝐏 all pair-wise commute.
 
- The following special cases for parameter ``p`` are noteworthy:
- - For ``p=\\frac{1}{2}`` the generalized mean is the [modified Bhattacharyya mean](@ref).
- - For ``p=1`` the generalized mean is the [Euclidean](@ref) mean.
- - For ``p=-1`` the generalized mean is the [inverse Euclidean](@ref) mean.
- - For (the limit of) ``p=0`` the generalized mean is the [log Euclidean](@ref) mean, which is the [Fisher](@ref) mean when matrices in 𝐏 all pair-wise commute.
+Notice that when matrices in 𝐏 all pair-wise commute, for instance if the
+matrices are diagonal,
+the generalized means coincide with the [power means](@ref)
+for any ``p∈[-1, 1]`` and for ``p=0.5`` it coincides also with the
+[Wasserstein](@ref) mean. For this reason the generalized means are used
+as default initialization of both the [`powerMean`](@ref) and [`wasMean`](@ref)
+algorithm.
 
- Notice that when matrices in 𝐏 all pair-wise commute, for instance if the
- matrices are diagonal,
- the generalized means coincide with the [power means](@ref)
- for any ``p∈[-1, 1]`` and for ``p=0.5`` it coincides also with the
- [Wasserstein](@ref) mean. For this reason the generalized means are used
- as default initialization of both the [`powerMean`](@ref) and [`wasMean`](@ref)
- algorithm.
+**See**: [generalized means](@ref).
 
- **See**: [generalized means](@ref).
+**See also**: [`powerMean`](@ref), [`wasMean`](@ref), [`mean`](@ref).
 
- **See also**: [`powerMean`](@ref), [`wasMean`](@ref), [`mean`](@ref).
-
- **Examples**
+**Examples**
 ```julia
 using LinearAlgebra, Statistics, PosDefManifold
 # Generate a set of 4 random 3x3 SPD matrices
@@ -1495,7 +1493,6 @@ Pset=randP(20, 160)
 @benchmark(generalizedMean(Pset; ⏩=false)) # single-threaded
 @benchmark(generalizedMean(Pset)) # multi-threaded
 ```
-
 """
 function generalizedMean(𝐏::Union{ℍVector, 𝔻Vector}, p::Real;
                          w::Vector=[],
@@ -1522,7 +1519,7 @@ end # function
 
 
 """
-```
+```julia
     geometricMean(𝐏::Union{ℍVector, 𝔻Vector};
     <
     w::Vector=[],
@@ -1638,7 +1635,6 @@ push!(Pset, G)
 plot(U[1:k, 1], U[1:k, 2], seriestype=:scatter, title="Spectral Embedding", label="Pset")
 plot!(U[k+1:k+1, 1], U[k+1:k+1, 2], seriestype=:scatter, label="mean")
 ```
-
 """
 function geometricMean( 𝐏::ℍVector;
                         w::Vector=[],
@@ -1698,7 +1694,7 @@ gMean=geometricMean
 
 
 """
-```
+```julia
     geometricpMean(𝐏::ℍVector, p::Real=0.5;
     <
     w::Vector=[],
@@ -1711,40 +1707,40 @@ gMean=geometricMean
     ⏩=true >)
 ```
 
- **alias**: `gpmean`
+**alias**: `gpmean`
 
- Given a 1d array ``𝐏={P_1,...,P_k}`` of ``k`` positive definite matrices of
- [ℍVector type](@ref), a real parameter ``0<p<=1`` and optional non-negative real
- weights vector ``w={w_1,...,w_k}``, return the 3-tuple ``(G, iter, conv)``,
- where ``G`` is the *p-mean*, i.e., the mean according to the
- [Fisher](@ref) metric minimizing the *p-dispersion* (see below) and
- ``iter``, ``conv`` are the number of
- iterations and convergence attained by the algorithm.
+Given a 1d array ``𝐏={P_1,...,P_k}`` of ``k`` positive definite matrices of
+[ℍVector type](@ref), a real parameter ``0<p<=1`` and optional non-negative real
+weights vector ``w={w_1,...,w_k}``, return the 3-tuple ``(G, iter, conv)``,
+where ``G`` is the *p-mean*, i.e., the mean according to the
+[Fisher](@ref) metric minimizing the *p-dispersion* (see below) and
+``iter``, ``conv`` are the number of
+iterations and convergence attained by the algorithm.
 
- This function implements the p-dispersion gradient descent
- algorithm with step-size ``ς`` (to be published), yielding iterations
+This function implements the p-dispersion gradient descent
+algorithm with step-size ``ς`` (to be published), yielding iterations
 
 ``G ←G^{1/2}\\textrm{exp}\\big(ς\\sum_{i=1}^{k}pδ^2(G, P_i)^{p-1}w_i\\textrm{log}(G^{-1/2} P_i G^{-1/2})\\big)G^{1/2}.``
 
 - if ``p=1`` this yields the geometric mean (implemented specifically in [`geometricMean`](@ref)).
 - if ``p=0.5`` this yields the geometric median (default).
 
- If you don't pass a weight vector with *<optional keyword argument>* ``w``,
- return the *unweighted geometric-p mean*.
+If you don't pass a weight vector with *<optional keyword argument>* ``w``,
+return the *unweighted geometric-p mean*.
 
- If *<optional keyword argument>* `✓w=true` (default), the weights are
- normalized so as to sum up to 1, otherwise they are used as they are passed
- and should be already normalized.  This option is provided to allow
- calling this function repeatedly without normalizing the same weights
- vector each time.
+If *<optional keyword argument>* `✓w=true` (default), the weights are
+normalized so as to sum up to 1, otherwise they are used as they are passed
+and should be already normalized.  This option is provided to allow
+calling this function repeatedly without normalizing the same weights
+vector each time.
 
- The following are more *<optional keyword arguments*>:
- * `init` is a matrix to be used as initialization for the mean. If no matrix is provided, the [Euclidean](@ref) mean will be used,
- * `tol` is the tolerance for the convergence (see below).
- * `maxiter` is the maximum number of iterations allowed.
- * if `adaptStepSize`=true (default) the step size ``ς`` for the gradient descent is adapted at each iteration (see below).
- * if `verbose`=true, the step-size and convergence attained at each iteration is printed. Also, a *warning* is printed if convergence is not attained.
- * if ⏩=true the iterations are multi-threaded (see below).
+The following are more *<optional keyword arguments*>:
+* `init` is a matrix to be used as initialization for the mean. If no matrix is provided, the [Euclidean](@ref) mean will be used,
+* `tol` is the tolerance for the convergence (see below).
+* `maxiter` is the maximum number of iterations allowed.
+* if `adaptStepSize`=true (default) the step size ``ς`` for the gradient descent is adapted at each iteration (see below).
+* if `verbose`=true, the step-size and convergence attained at each iteration is printed. Also, a *warning* is printed if convergence is not attained.
+* if ⏩=true the iterations are multi-threaded (see below).
 
 !!! note "Nota Bene"
     [Multi-threading](https://docs.julialang.org/en/v1/manual/parallel-computing/#Multi-Threading-(Experimental)-1)
@@ -1771,12 +1767,12 @@ gMean=geometricMean
     norm of the satisfying matrix equation divided by the number of elements
     to vanish for about half the significant digits.
 
- **See**: [Fisher](@ref) metric.
+**See**: [Fisher](@ref) metric.
 
- **See also**: [`geometricMean`](@ref), [`powerMean`](@ref),
- [`wasMean`](@ref), [`logdet0Mean`](@ref), [`mean`](@ref).
+**See also**: [`geometricMean`](@ref), [`powerMean`](@ref),
+[`wasMean`](@ref), [`logdet0Mean`](@ref), [`mean`](@ref).
 
- **Examples**
+**Examples**
 ```julia
 using LinearAlgebra, PosDefManifold, Plots
 
@@ -1831,7 +1827,6 @@ Pset=randP(20, 120)
 @benchmark(geometricpMean(Pset; ⏩=true)) # single-threaded
 @benchmark(geometricpMean(Pset)) # multi-threaded
 ```
-
 """
 function geometricpMean(𝐏::ℍVector, p::Real=goldeninv;
                         w::Vector = [], ✓w = true,
@@ -1904,7 +1899,7 @@ gpMean=geometricpMean
 
 
 """
-```
+```julia
     logdet0Mean(𝐏::Union{ℍVector, 𝔻Vector};
     <
     w::Vector=[],
@@ -1916,39 +1911,39 @@ gpMean=geometricpMean
     ⏩=true >)
 ```
 
- **alias**: `ld0Mean`
+**alias**: `ld0Mean`
 
- Given a 1d array ``𝐏={P_1,...,P_k}`` of ``k`` positive definite matrices of
- [ℍVector type](@ref) or real positive definite diagonal matrices of
- [𝔻Vector type](@ref) and optional
- non-negative real weights vector ``w={w_1,...,w_k}``,
- return the 3-tuple ``(G, iter, conv)``, where ``G`` is the mean according
- to the [logdet zero](@ref) metric and ``iter``, ``conv`` are the number of iterations
- and convergence attained by the algorithm.
- Mean ``G`` is the unique positive definite matrix satisfying
+Given a 1d array ``𝐏={P_1,...,P_k}`` of ``k`` positive definite matrices of
+[ℍVector type](@ref) or real positive definite diagonal matrices of
+[𝔻Vector type](@ref) and optional
+non-negative real weights vector ``w={w_1,...,w_k}``,
+return the 3-tuple ``(G, iter, conv)``, where ``G`` is the mean according
+to the [logdet zero](@ref) metric and ``iter``, ``conv`` are the number of iterations
+and convergence attained by the algorithm.
+Mean ``G`` is the unique positive definite matrix satisfying
 
- ``\\sum_{i=1}^{k}w_i\\big(\\frac{1}{2}P_i+\\frac{1}{2}G\\big)^{-1}-G^{-1}=0``.
+``\\sum_{i=1}^{k}w_i\\big(\\frac{1}{2}P_i+\\frac{1}{2}G\\big)^{-1}-G^{-1}=0``.
 
- For estimating it, this function implements the fixed-point iteration algorithm
- suggested by (Moakher, 2012, p315)[🎓](@ref), yielding iterations
+For estimating it, this function implements the fixed-point iteration algorithm
+suggested by (Moakher, 2012, p315)[🎓](@ref), yielding iterations
 
- ``G ← \\frac{1}{2}\\big(\\sum_{i=1}^{k}w_i(P_i+G)^{-1}\\big)^{-1}``.
+``G ← \\frac{1}{2}\\big(\\sum_{i=1}^{k}w_i(P_i+G)^{-1}\\big)^{-1}``.
 
- If you don't pass a weight vector with *<optional keyword argument>* ``w``,
- return the *unweighted logdet zero mean*.
+If you don't pass a weight vector with *<optional keyword argument>* ``w``,
+return the *unweighted logdet zero mean*.
 
- If *<optional keyword argument>* `✓w=true` (default), the weights are
- normalized so as to sum up to 1, otherwise they are used as they are passed
- and should be already normalized.  This option is provided to allow
- calling this function repeatedly without normalizing the same weights
- vector each time.
+If *<optional keyword argument>* `✓w=true` (default), the weights are
+normalized so as to sum up to 1, otherwise they are used as they are passed
+and should be already normalized.  This option is provided to allow
+calling this function repeatedly without normalizing the same weights
+vector each time.
 
- The following are more *<optional keyword arguments*>:
- - `init` is a matrix to be used as initialization for the mean. If no matrix is provided, the [Euclidean](@ref) mean will be used,
- - `tol` is the tolerance for the convergence (see below).
- - `maxiter` is the maximum number of iterations allowed.
- - if `verbose`=true, the convergence attained at each iteration is printed and a *warning* is printed if convergence is not attained.
- - if ⏩=true the iterations are multi-threaded (see below).
+The following are more *<optional keyword arguments*>:
+- `init` is a matrix to be used as initialization for the mean. If no matrix is provided, the [Euclidean](@ref) mean will be used,
+- `tol` is the tolerance for the convergence (see below).
+- `maxiter` is the maximum number of iterations allowed.
+- if `verbose`=true, the convergence attained at each iteration is printed and a *warning* is printed if convergence is not attained.
+- if ⏩=true the iterations are multi-threaded (see below).
 
 !!! note "Nota Bene"
     [Multi-threading](https://docs.julialang.org/en/v1/manual/parallel-computing/#Multi-Threading-(Experimental)-1)
@@ -1965,12 +1960,12 @@ gpMean=geometricpMean
     convergence criterion over two successive iterations to vanish for about
     half the significant digits minus 2.
 
- **See**: [logdet zero](@ref) metric, [modified Bhattacharyya mean](@ref).
+**See**: [logdet zero](@ref) metric, [modified Bhattacharyya mean](@ref).
 
- **See also**: [`powerMean`](@ref), [`wasMean`](@ref), [`logdet0Mean`](@ref),
- [`mean`](@ref).
+**See also**: [`powerMean`](@ref), [`wasMean`](@ref), [`logdet0Mean`](@ref),
+[`mean`](@ref).
 
- **Examples**
+**Examples**
 ```julia
 using LinearAlgebra, PosDefManifold
 # Generate a set of 4 random 3x3 SPD matrices
@@ -1998,7 +1993,6 @@ Pset=randP(20, 120)
 @benchmark(logdet0Mean(Pset; ⏩=false)) # single-threaded
 @benchmark(logdet0Mean(Pset)) # multi-threaded
 ```
-
 """
 function logdet0Mean(𝐏::Union{ℍVector, 𝔻Vector};
                     w::Vector=[],
@@ -2051,7 +2045,7 @@ ld0Mean=logdet0Mean
 
 
 """
-```
+```julia
     wasMean(𝐏::Union{ℍVector, 𝔻Vector};
     <
     w::Vector=[],
@@ -2063,43 +2057,43 @@ ld0Mean=logdet0Mean
     ⏩=true >)
 ```
 
- Given a 1d array ``𝐏={P_1,...,P_k}`` of ``k`` positive definite matrices
- of [ℍVector type](@ref) or real positive definite diagonal matrices of
- [𝔻Vector type](@ref) and optional non-negative real weights vector
- ``w={w_1,...,w_k}``,
- return the 3-tuple ``(G, iter, conv)``, where ``G`` is the mean according
- to the [Wasserstein](@ref) metric and ``iter``, ``conv`` are the number of iterations
- and convergence attained by the algorithm.
- Mean ``G`` is the unique positive definite matrix satisfying
+Given a 1d array ``𝐏={P_1,...,P_k}`` of ``k`` positive definite matrices
+of [ℍVector type](@ref) or real positive definite diagonal matrices of
+[𝔻Vector type](@ref) and optional non-negative real weights vector
+``w={w_1,...,w_k}``,
+return the 3-tuple ``(G, iter, conv)``, where ``G`` is the mean according
+to the [Wasserstein](@ref) metric and ``iter``, ``conv`` are the number of iterations
+and convergence attained by the algorithm.
+Mean ``G`` is the unique positive definite matrix satisfying
 
- ``G=\\sum_{i=1}^{k}w_i\\big( G^{1/2}  P_i G^{1/2}\\big)^{1/2}``.
+``G=\\sum_{i=1}^{k}w_i\\big( G^{1/2}  P_i G^{1/2}\\big)^{1/2}``.
 
- For estimating it, this function implements the fixed-point iterative algorithm
- proposed by (Álvarez-Esteban et *al.*, 2016)[🎓](@ref):
+For estimating it, this function implements the fixed-point iterative algorithm
+proposed by (Álvarez-Esteban et *al.*, 2016)[🎓](@ref):
 
- ``G ← G^{-1/2}\\big(\\sum_{i=1}^{k} w_i(G^{1/2}P_i G^{1/2})^{1/2}\\big)^2 G^{-1/2}``.
+``G ← G^{-1/2}\\big(\\sum_{i=1}^{k} w_i(G^{1/2}P_i G^{1/2})^{1/2}\\big)^2 G^{-1/2}``.
 
- If you don't pass a weight vector with *<optional keyword argument>* ``w``,
- return the *unweighted Wassertein mean*.
+If you don't pass a weight vector with *<optional keyword argument>* ``w``,
+return the *unweighted Wassertein mean*.
 
- If *<optional keyword argument>* `✓w=true` (default), the weights are
- normalized so as to sum up to 1, otherwise they are used as they are passed
- and they should be already normalized.  This option is provided to allow
- calling this function repeatedly without normalizing the same weights
- vector each time.
+If *<optional keyword argument>* `✓w=true` (default), the weights are
+normalized so as to sum up to 1, otherwise they are used as they are passed
+and they should be already normalized.  This option is provided to allow
+calling this function repeatedly without normalizing the same weights
+vector each time.
 
- The following are more *<optional keyword arguments*>:
- - `init` is a matrix to be used as initialization for the mean. If no matrix is provided, the instance of [generalized means](@ref) with ``p=0.5`` will be used,
- - `tol` is the tolerance for the convergence (see below).
- - `maxiter` is the maximum number of iterations allowed.
- - if `verbose`=true, the convergence attained at each iteration is printed and a *warning* is printed if convergence is not attained.
- - if ⏩=true the iterations are multi-threaded (see below).
+The following are more *<optional keyword arguments*>:
+- `init` is a matrix to be used as initialization for the mean. If no matrix is provided, the instance of [generalized means](@ref) with ``p=0.5`` will be used,
+- `tol` is the tolerance for the convergence (see below).
+- `maxiter` is the maximum number of iterations allowed.
+- if `verbose`=true, the convergence attained at each iteration is printed and a *warning* is printed if convergence is not attained.
+- if ⏩=true the iterations are multi-threaded (see below).
 
- If the input is a 1d array of ``k`` real positive definite diagonal matrices
- the solution is available in closed-form as the modified Bhattacharyya mean,
- hence the *<optional keyword arguments*> `init`, `tol` and `verbose`
- have no effect and return the 3-tuple ``(G, 1, 0)``.
- See [modified Bhattacharyya mean](@ref).
+If the input is a 1d array of ``k`` real positive definite diagonal matrices
+the solution is available in closed-form as the modified Bhattacharyya mean,
+hence the *<optional keyword arguments*> `init`, `tol` and `verbose`
+have no effect and return the 3-tuple ``(G, 1, 0)``.
+See [modified Bhattacharyya mean](@ref).
 
 !!! note "Nota Bene"
     [Multi-threading](https://docs.julialang.org/en/v1/manual/parallel-computing/#Multi-Threading-(Experimental)-1)
@@ -2115,12 +2109,12 @@ ld0Mean=logdet0Mean
     norm of the satisfying matrix equation divided by the number of elements
     to vanish for about half the significant digits.
 
- **See**: [Wasserstein](@ref) metric.
+**See**: [Wasserstein](@ref) metric.
 
- **See also**: [`powerMean`](@ref), [`wasMean`](@ref), [`logdet0Mean`](@ref),
- [`mean`](@ref).
+**See also**: [`powerMean`](@ref), [`wasMean`](@ref), [`logdet0Mean`](@ref),
+[`mean`](@ref).
 
- **Examples**
+**Examples**
 ```julia
 using LinearAlgebra, PosDefManifold
 # Generate a set of 4 random 3x3 SPD matrices
@@ -2148,7 +2142,6 @@ Pset=randP(20, 120)
 @benchmark(wasMean(Pset; ⏩=false)) # single-threaded
 @benchmark(wasMean(Pset)) # multi-threaded
 ```
-
 """
 function wasMean(𝐏::ℍVector;
                 w::Vector=[],
@@ -2203,7 +2196,7 @@ wasMean(𝐃::𝔻Vector;
 
 
 """
-```
+```julia
     powerMean(𝐏::Union{ℍVector, 𝔻Vector}, p::Real;
     <
     w::Vector=[],
@@ -2215,56 +2208,56 @@ wasMean(𝐃::𝔻Vector;
     ⏩=true >)
 ```
 
- Given a 1d array ``𝐏={P_1,...,P_k}`` of ``k`` positive definite matrices
- of [ℍVector type](@ref) or real positive definite diagonal matrices of
- [𝔻Vector type](@ref), an optional non-negative real weights vector
- ``w={w_1,...,w_k}`` and a real parameter `p` ``\\in[-1, 1]``, return the
- 3-tuple ``(G, iter, conv)``, where ``G`` is
- Lim and Palfia (2012)'s [power means](@ref)  of order ``p`` and
- ``iter``, ``conv`` are the number of iterations
- and convergence attained by the algorithm, respectively.
- Mean ``G`` is the unique positive definite matrix satisfying
+Given a 1d array ``𝐏={P_1,...,P_k}`` of ``k`` positive definite matrices
+of [ℍVector type](@ref) or real positive definite diagonal matrices of
+[𝔻Vector type](@ref), an optional non-negative real weights vector
+``w={w_1,...,w_k}`` and a real parameter `p` ``\\in[-1, 1]``, return the
+3-tuple ``(G, iter, conv)``, where ``G`` is
+Lim and Palfia (2012)'s [power means](@ref)  of order ``p`` and
+``iter``, ``conv`` are the number of iterations
+and convergence attained by the algorithm, respectively.
+Mean ``G`` is the unique positive definite matrix satisfying
 
- ``G=\\sum_{i=1}^{k}w_i(G\\textrm{#}_pP_i)``,
+``G=\\sum_{i=1}^{k}w_i(G\\textrm{#}_pP_i)``,
 
- where ``G\\textrm{#}_pP_i`` is the [Fisher](@ref) [geodesic](@ref) equation.
- In particular:
+where ``G\\textrm{#}_pP_i`` is the [Fisher](@ref) [geodesic](@ref) equation.
+In particular:
 
- - with ``p=-1`` this is the *harmonic mean* (see the [inverse Euclidean](@ref) metric),
- - with ``p=+1`` this is the *arithmetic mean* (see the [Euclidean](@ref) metric),
- - at the limit of ``p`` evaluated at zero from both side this is the *geometric mean* (see [Fisher](@ref) metric).
+- with ``p=-1`` this is the *harmonic mean* (see the [inverse Euclidean](@ref) metric),
+- with ``p=+1`` this is the *arithmetic mean* (see the [Euclidean](@ref) metric),
+- at the limit of ``p`` evaluated at zero from both side this is the *geometric mean* (see [Fisher](@ref) metric).
 
- For estimating power means for ``p\\in(-1, 1)``, this function implements
- the  fixed-point iterative algorithm of (Congedo et *al.*, 2017b)[🎓](@ref).
- For ``p=0`` (geometric mean)
- this algorithm is run two times with a small positive and negative value
- of ``p`` and the geometric mean of the two
- resulting means is returned, as suggested in (Congedo et *al.*, 2017b)[🎓](@ref).
- This way of estimating the geometric mean of
- a set of matrices is faster as compared to the usual gradient descent algorithm.
+For estimating power means for ``p\\in(-1, 1)``, this function implements
+the  fixed-point iterative algorithm of (Congedo et *al.*, 2017b)[🎓](@ref).
+For ``p=0`` (geometric mean)
+this algorithm is run two times with a small positive and negative value
+of ``p`` and the geometric mean of the two
+resulting means is returned, as suggested in (Congedo et *al.*, 2017b)[🎓](@ref).
+This way of estimating the geometric mean of
+a set of matrices is faster as compared to the usual gradient descent algorithm.
 
- If you don't pass a weight vector with *<optional keyword argument>* ``w``,
- return the *unweighted power mean*.
+If you don't pass a weight vector with *<optional keyword argument>* ``w``,
+return the *unweighted power mean*.
 
- If *<optional keyword argument>* `✓w=true` (default), the weights are
- normalized so as to sum up to 1, otherwise they are used as they are passed
- and should be already normalized.  This option is provided to allow
- calling this function repeatedly without normalizing the same weights
- vector each time.
+If *<optional keyword argument>* `✓w=true` (default), the weights are
+normalized so as to sum up to 1, otherwise they are used as they are passed
+and should be already normalized.  This option is provided to allow
+calling this function repeatedly without normalizing the same weights
+vector each time.
 
- The following are more *<optional keyword arguments*>:
- - `init` is a matrix to be used as initialization for the mean. If no matrix is provided, the instance of [generalized means](@ref) with parameter ``p`` will be used.
- - `tol` is the tolerance for the convergence (see below).
- - `maxiter` is the maximum number of iterations allowed.
- - if `verbose`=true, the convergence attained at each iteration is printed and a *warning* is printed if convergence is not attained.
- - if ⏩=true the iterations are multi-threaded.
+The following are more *<optional keyword arguments*>:
+- `init` is a matrix to be used as initialization for the mean. If no matrix is provided, the instance of [generalized means](@ref) with parameter ``p`` will be used.
+- `tol` is the tolerance for the convergence (see below).
+- `maxiter` is the maximum number of iterations allowed.
+- if `verbose`=true, the convergence attained at each iteration is printed and a *warning* is printed if convergence is not attained.
+- if ⏩=true the iterations are multi-threaded.
 
- If the input is a 1d array of ``k`` real positive definite diagonal matrices
- the solution is available in closed-form as the generalized
- mean of order `p`, hence the *<optional keyword arguments*>
- `init`, `tol` and `verbose`
- have no effect and return the 3-tuple ``(G, 1, 0)``.
- See [generalized means](@ref).
+If the input is a 1d array of ``k`` real positive definite diagonal matrices
+the solution is available in closed-form as the generalized
+mean of order `p`, hence the *<optional keyword arguments*>
+`init`, `tol` and `verbose`
+have no effect and return the 3-tuple ``(G, 1, 0)``.
+See [generalized means](@ref).
 
 !!! note "Nota Bene"
     [Multi-threading](https://docs.julialang.org/en/v1/manual/parallel-computing/#Multi-Threading-(Experimental)-1)
@@ -2281,18 +2274,18 @@ wasMean(𝐃::𝔻Vector;
     iterations divided by the number of elements in the matrix
     to vanish for about half the significant digits.
 
- (2) Like in (1), but for a 1d array ``𝐃={D_1,...,D_k}`` of ``k``
- real positive definite diagonal matrices of [𝔻Vector type](@ref).
- In this case the solution is available in closed-form, hence the
- *<optional keyword arguments*> `init`, `tol` and `verbose` have no effect and return
- the 3-tuple ``(G, 1, 0)``. See [generalized means](@ref).
+(2) Like in (1), but for a 1d array ``𝐃={D_1,...,D_k}`` of ``k``
+real positive definite diagonal matrices of [𝔻Vector type](@ref).
+In this case the solution is available in closed-form, hence the
+*<optional keyword arguments*> `init`, `tol` and `verbose` have no effect and return
+the 3-tuple ``(G, 1, 0)``. See [generalized means](@ref).
 
- **See**: [power means](@ref), [generalized means](@ref), [modified Bhattacharyya mean](@ref).
+**See**: [power means](@ref), [generalized means](@ref), [modified Bhattacharyya mean](@ref).
 
- **See also**: [`generalizedMean`](@ref), [`wasMean`](@ref), [`logdet0Mean`](@ref),
- [`mean`](@ref).
+**See also**: [`generalizedMean`](@ref), [`wasMean`](@ref), [`logdet0Mean`](@ref),
+[`mean`](@ref).
 
- **Examples**
+**Examples**
 ```julia
 using LinearAlgebra, PosDefManifold
 # Generate a set of 4 random 3x3 SPD matrices
@@ -2320,7 +2313,6 @@ Pset=randP(20, 120)
 @benchmark(powerMean(Pset, 0.5; ⏩=false)) # single-threaded
 @benchmark(powerMean(Pset, 0.5)) # multi-threaded
 ```
-
 """
 function powerMean(𝐏::ℍVector, p::Real;
          w::Vector=[],
@@ -2402,45 +2394,47 @@ powerMean(𝐃::𝔻Vector, p::Real;
 
 
 """
+```julia
     (1) inductiveMean(metric::Metric, 𝐏::ℍVector)
 
     (2) inductiveMean(metric::Metric, 𝐏::ℍVector, q::Int, Q::ℍ)
+```
 
 **alias**: `indMean`
 
- (1) Compute the Fréchet mean of 1d array ``𝐏={P_1,...,P_k}`` of ``k``
- positive definite matrices of [ℍVector type](@ref) with a law of large
- number inductive procedure (Ho et *al.,* 2013; Lim and Palfia, 2019;
- Massart et *al.*, 2018)[🎓](@ref), such as
+(1) Compute the Fréchet mean of 1d array ``𝐏={P_1,...,P_k}`` of ``k``
+positive definite matrices of [ℍVector type](@ref) with a law of large
+number inductive procedure (Ho et *al.,* 2013; Lim and Palfia, 2019;
+Massart et *al.*, 2018)[🎓](@ref), such as
 
- ``G_1=P_1,``
+``G_1=P_1,``
 
- ``G_i=γ(i^{-1}, G_{(i-1)}, P_i), i=2,...,k,``
+``G_i=γ(i^{-1}, G_{(i-1)}, P_i), i=2,...,k,``
 
- where ``γ(i^{-1}, G_{(i-1)}, P_i)`` is a step on the [geodesic](@ref) relying
- ``G_{(i-1)}`` to ``P_i`` with arclength ``i^{-1}``
- using the specified `metric`, of type [Metric::Enumerated type](@ref).
+where ``γ(i^{-1}, G_{(i-1)}, P_i)`` is a step on the [geodesic](@ref) relying
+``G_{(i-1)}`` to ``P_i`` with arclength ``i^{-1}``
+using the specified `metric`, of type [Metric::Enumerated type](@ref).
 
- (2) Like (1), but for the set of matrices ``𝐐 ∪ 𝐏``,
- where it is assumed knowledge only of the set ``𝐏``,
- the mean of ``𝐐`` (Hermitian matrix argument `Q`) and the number of
- matrices in ``𝐐`` (integer argument `q`).
- This method can be used, for example, for updating a block on-line algorithm,
- where ``𝐏`` is the incoming block, `Q` the previous mean estimation
- and `q` the cumulative number of matrices on which the mean has been
- computed on-line.
+(2) Like (1), but for the set of matrices ``𝐐 ∪ 𝐏``,
+where it is assumed knowledge only of the set ``𝐏``,
+the mean of ``𝐐`` (Hermitian matrix argument `Q`) and the number of
+matrices in ``𝐐`` (integer argument `q`).
+This method can be used, for example, for updating a block on-line algorithm,
+where ``𝐏`` is the incoming block, `Q` the previous mean estimation
+and `q` the cumulative number of matrices on which the mean has been
+computed on-line.
 
- For Fréchet means that do not have a closed form expression,
- this procedure features a computational complexity amounting to less than
- two iterations of gradient descent or fixed-point algorithms. This comes at
- the price of an approximation.
- In fact, the solution is not invariant to permutations of the matrices
- in array 𝐏 and convergence to the Fréchet mean for finite samples
- is not ensured
- (see Lim and Palfia, 2019; Massart et *al.*, 2018)[🎓](@ref).
+For Fréchet means that do not have a closed form expression,
+this procedure features a computational complexity amounting to less than
+two iterations of gradient descent or fixed-point algorithms. This comes at
+the price of an approximation.
+In fact, the solution is not invariant to permutations of the matrices
+in array 𝐏 and convergence to the Fréchet mean for finite samples
+is not ensured
+(see Lim and Palfia, 2019; Massart et *al.*, 2018)[🎓](@ref).
 
- Since the inductive mean uses the [`geodesic`](@ref) function,
- it is not available for the Von Neumann metric.
+Since the inductive mean uses the [`geodesic`](@ref) function,
+it is not available for the Von Neumann metric.
 
 **Examples**
 ```julia
@@ -2464,7 +2458,6 @@ G2=inductiveMean(Fisher, 𝐏2, length(𝐏1), mean(Fisher, 𝐏1))
 norm(G-H)/(dim(G, 1)^2)
 norm(G2-H)/(dim(G, 1)^2)
 ```
-
 """
 function inductiveMean(metric::Metric, 𝐏::ℍVector)
     if metric ∉ (VonNeumann)
@@ -2478,17 +2471,19 @@ end
 
 
 """
+```julia
     midrange(metric::Metric, P::ℍ{T}, Q::ℍ{T}) where T<:RealOrComplex
+```
 
- Midrange (average of extremal values) of positive definite matrices
- ``P`` and ``Q``. Only the Fisher metric is supported, allowing the so-called
- *geometric midrange*. This has been defined in Mostajeran et *al.* (2019)
- [🎓](@ref) as
+Midrange (average of extremal values) of positive definite matrices
+``P`` and ``Q``. Only the Fisher metric is supported, allowing the so-called
+*geometric midrange*. This has been defined in Mostajeran et *al.* (2019)
+[🎓](@ref) as
 
- ``P * Q = \\frac{1}{\\sqrt{\\lambda_(min)}+\\sqrt{\\lambda_(max)}}\\Big(Q+\\sqrt{\\lambda_(min)*\\lambda_(max)}P\\Big)``,
+``P * Q = \\frac{1}{\\sqrt{\\lambda_(min)}+\\sqrt{\\lambda_(max)}}\\Big(Q+\\sqrt{\\lambda_(min)*\\lambda_(max)}P\\Big)``,
 
- where ``\\lambda_(min)`` and ``\\lambda_(max)`` are the extremal generalized
- eigenvalues of ``P`` and ``Q``.
+where ``\\lambda_(min)`` and ``\\lambda_(max)`` are the extremal generalized
+eigenvalues of ``P`` and ``Q``.
 
 **Examples**
 ```julia
@@ -2526,40 +2521,42 @@ indMean=inductiveMean
 # -----------------------------------------------------------
 
 """
+```julia
     (1) logMap(metric::Metric, P::ℍ{T}, G::ℍ{T})
 
     (2) logMap(metric::Metric, 𝐏::ℍVector, G::ℍ{T})
     for all the above: where T<:RealOrComplex
+```
 
- (1) *Logaritmic Map:* map a positive definite matrix ``P`` from the SPD or
- Hermitian manifold into the tangent space at base-point ``G``
- using the [Fisher](@ref) metric.
+(1) *Logaritmic Map:* map a positive definite matrix ``P`` from the SPD or
+Hermitian manifold into the tangent space at base-point ``G``
+using the [Fisher](@ref) metric.
 
- ``P`` and ``G`` must be flagged as `Hermitian`.
- See [typecasting matrices](@ref).
+``P`` and ``G`` must be flagged as `Hermitian`.
+See [typecasting matrices](@ref).
 
- The map is defined as
+The map is defined as
 
- `` Log_G(P)=S=G^{1/2}\\textrm{log}\\big(G^{-1/2}PG^{-1/2}\\big)G^{1/2}``.
+`` Log_G(P)=S=G^{1/2}\\textrm{log}\\big(G^{-1/2}PG^{-1/2}\\big)G^{1/2}``.
 
- `metric` is a metric of type [Metric::Enumerated type](@ref).
+`metric` is a metric of type [Metric::Enumerated type](@ref).
 
- The result is an `Hermitian` matrix.
+The result is an `Hermitian` matrix.
 
- (2) *Logarithmic map* (1) at base-point ``G`` at once for ``k`` positive definite
- matrices in 1d array ``𝐏={P_1,...,P_k}`` of [ℍVector type](@ref).
+(2) *Logarithmic map* (1) at base-point ``G`` at once for ``k`` positive definite
+matrices in 1d array ``𝐏={P_1,...,P_k}`` of [ℍVector type](@ref).
 
- The result is an `ℍVector`.
+The result is an `ℍVector`.
 
 !!! note "Nota Bene"
     Currently only the [Fisher](@ref) metric is supported for
     tangent space operations.
 
- The inverse operation is [`expMap`](@ref).
+The inverse operation is [`expMap`](@ref).
 
- **See also**: [`vecP`](@ref), [`parallelTransport`](@ref).
+**See also**: [`vecP`](@ref), [`parallelTransport`](@ref).
 
- **Examples**
+**Examples**
 ```julia
 using PosDefManifold
 (1)
@@ -2575,7 +2572,6 @@ Pset=randP(3, 4)
 # projecting all matrices in Pset at the base point given by their geometric mean.
 Sset=logMap(Fisher, Pset, mean(Fisher, Pset))
 ```
-
 """
 function logMap(metric::Metric, P::ℍ{T}, G::ℍ{T}) where T<:RealOrComplex
     if   metric==Fisher
@@ -2597,37 +2593,39 @@ end
 
 
 """
+```julia
     (1) expMap(metric::Metric, S::ℍ{T}, G::ℍ{T})
 
     (2) expMap(metric::Metric, 𝐒::ℍVector, G::ℍ{T})
     for all the above: where T<:RealOrComplex
+```
 
- (1) *Exponential Map:* map a tangent vector (a matrix) ``S`` from the tangent
- space at base-point ``G`` into the SPD or Hermitian manifold
- (using the [Fisher](@ref) metric).
+(1) *Exponential Map:* map a tangent vector (a matrix) ``S`` from the tangent
+space at base-point ``G`` into the SPD or Hermitian manifold
+(using the [Fisher](@ref) metric).
 
- ``S`` and ``G`` must be flagged as `Hermitian`.
- See [typecasting matrices](@ref).
+``S`` and ``G`` must be flagged as `Hermitian`.
+See [typecasting matrices](@ref).
 
- The map is defined as
+The map is defined as
 
- ``Exp_G(S)=P=G^{1/2}\\textrm{exp}\\big(G^{-1/2}SG^{-1/2}\\big)G^{1/2}``.
+``Exp_G(S)=P=G^{1/2}\\textrm{exp}\\big(G^{-1/2}SG^{-1/2}\\big)G^{1/2}``.
 
- `metric` is a metric of type [Metric::Enumerated type](@ref).
+`metric` is a metric of type [Metric::Enumerated type](@ref).
 
- The result is an `Hermitian` matrix.
+The result is an `Hermitian` matrix.
 
- (2) *Exponential map* (1) at base-point ``G`` at once for ``k`` tangent vectors
- (matrices) in 1d array ``𝐒={S_1,...,S_k}`` of [ℍVector type](@ref).
+(2) *Exponential map* (1) at base-point ``G`` at once for ``k`` tangent vectors
+(matrices) in 1d array ``𝐒={S_1,...,S_k}`` of [ℍVector type](@ref).
 
- The result is an `ℍVector`.
+The result is an `ℍVector`.
 
 !!! note "Nota Bene"
     Currently only the [Fisher](@ref) metric is supported for tangent space operations.
 
- The inverse operation is [`logMap`](@ref).
+The inverse operation is [`logMap`](@ref).
 
- **Examples**
+**Examples**
 ```julia
 (1)
 using PosDefManifold, LinearAlgebra
@@ -2647,7 +2645,6 @@ Sset=logMap(Fisher, Pset, G)
 # projecting back onto the manifold
 Pset2=expMap(Fisher, Sset, G)
 ```
-
 """
 function expMap(metric::Metric, S::ℍ{T}, G::ℍ{T}) where T<:RealOrComplex
     if   metric==Fisher
@@ -2672,34 +2669,36 @@ end
 
 
 """
+```julia
     vecP(S::Union{ℍ{T}, Symmetric{R}};
          range::UnitRange=1:size(S, 2)) where T<:RealOrComplex where R<:Real =
+```
 
- *Vectorize* a tangent vector (which is an `Hermitian` or `Symmetric` matrix)
- ``S``:  mat ↦ vec.
+*Vectorize* a tangent vector (which is an `Hermitian` or `Symmetric` matrix)
+``S``:  mat ↦ vec.
 
- It gives weight ``1`` to diagonal elements and ``√2`` to off-diagonal elements
- so as to preserve the norm (Barachant et *al.*, 201E)[🎓](@ref), such as
+It gives weight ``1`` to diagonal elements and ``√2`` to off-diagonal elements
+so as to preserve the norm (Barachant et *al.*, 201E)[🎓](@ref), such as
 
- ``∥S∥_F=∥vecP(S)∥_F``.
+``∥S∥_F=∥vecP(S)∥_F``.
 
- The result is a vector holding ``n(n+1)/2`` elements, where ``n``
- is the size of ``S``.
+The result is a vector holding ``n(n+1)/2`` elements, where ``n``
+is the size of ``S``.
 
- ``S`` must be flagged as `Hermitian` or `Symmetric`.
- See [typecasting matrices](@ref).
+``S`` must be flagged as `Hermitian` or `Symmetric`.
+See [typecasting matrices](@ref).
 
- The reverse operation is provided by [`matP`](@ref),
- which always return an `Hermitian` matrix.
+The reverse operation is provided by [`matP`](@ref),
+which always return an `Hermitian` matrix.
 
- If an optional keyword argument `range` is provided,
- the vectorization concerns only the rows (or columns,
- since the input matrix is symmetric or Hermitian)
- in the range. Note that in this case the operation
- cannot be reverted by the [`matP`](@ref), that is,
- in this case the matrix is 'stuck' in the tangent space.
+If an optional keyword argument `range` is provided,
+the vectorization concerns only the rows (or columns,
+since the input matrix is symmetric or Hermitian)
+in the range. Note that in this case the operation
+cannot be reverted by the [`matP`](@ref), that is,
+in this case the matrix is 'stuck' in the tangent space.
 
- **Examples**
+**Examples**
 ```julia
 using PosDefManifold
 P=randP(3)
@@ -2712,7 +2711,6 @@ v=vecP(S)
 # vectorize onlt the first two columns of S
 v=vecP(S; range=1:2)
 ```
-
 """
 vecP(S::Union{ℍ{T}, Symmetric{R}};
      range::UnitRange=1:size(S, 2)) where T<:RealOrComplex where R<:Real =
@@ -2720,22 +2718,24 @@ vecP(S::Union{ℍ{T}, Symmetric{R}};
 
 
 """
+```julia
     matP(ς::Vector{T}) where T<:RealOrComplex
+```
 
- *Matrizize* a tangent vector (vector) ς :  vec -> mat.
+*Matrizize* a tangent vector (vector) ς :  vec -> mat.
 
- This is the function reversing the [`vecP`](@ref) function,
- thus the weighting applied therein is reversed as well.
+This is the function reversing the [`vecP`](@ref) function,
+thus the weighting applied therein is reversed as well.
 
- If ``ς=vecP(S)`` and ``S`` is a ``n⋅n`` Hermitian or Symmetric matrix,
- ``ς``  is a tangent vector of size ``n(n+1)/2``.
- The result of calling `matP(ς)` is then ``n⋅n`` matrix ``S``.
- ``S`` is always returned flagged as `Hermitian`.
+If ``ς=vecP(S)`` and ``S`` is a ``n⋅n`` Hermitian or Symmetric matrix,
+``ς``  is a tangent vector of size ``n(n+1)/2``.
+The result of calling `matP(ς)` is then ``n⋅n`` matrix ``S``.
+``S`` is always returned flagged as `Hermitian`.
 
 
- **To Do**: This function may be rewritten more efficiently.
+**To Do**: This function may be rewritten more efficiently.
 
- **Examples**
+**Examples**
 ```julia
 using PosDefManifold
 P=randP(3)
@@ -2770,6 +2770,7 @@ function matP(ς::Vector{T}) where T<:RealOrComplex
 end
 
 """
+```julia
     (1) parallelTransport(S::ℍ{T}, P::ℍ{T}, Q::ℍ{T})
 
     (2) parallelTransport(S::ℍ{T}, P::ℍ{T})
@@ -2778,23 +2779,24 @@ end
 
     (4) parallelTransport(𝐒::ℍVector, P::ℍ{T})
     for all the above: where T<:RealOrComplex
+```
 
- **alias**: `pt`
+**alias**: `pt`
 
- (1) *Parallel transport* of tangent vector ``S`` (a matrix) lying on
- the tangent space at base-point ``P`` to the tangent space at base-point ``Q``.
+(1) *Parallel transport* of tangent vector ``S`` (a matrix) lying on
+the tangent space at base-point ``P`` to the tangent space at base-point ``Q``.
 
- ``S``, ``P`` and ``Q`` must all be `Hermitian` matrices.
- Return an `Hermitian` matrix.
- The transport is defined as:
+``S``, ``P`` and ``Q`` must all be `Hermitian` matrices.
+Return an `Hermitian` matrix.
+The transport is defined as:
 
 ``∥_{(P→Q)}(S)=\\big(QP^{-1}\\big)^{1/2}S\\big(QP^{-1}\\big)^{H/2}``.
 
- If ``S`` is a positive definite matrix in the manifold (and not a tangent vector)
- it will be 'trasported' from ``P`` to ``Q``, amounting to (Yair et *al.*, 2019[🎓](@ref))
- - project ``S`` onto the tangent space at base-point ``P``,
- - parallel transport it to the tangent space at base-point ``Q``,
- - project it back onto the manifold at base-point ``Q``.
+If ``S`` is a positive definite matrix in the manifold (and not a tangent vector)
+it will be 'trasported' from ``P`` to ``Q``, amounting to (Yair et *al.*, 2019[🎓](@ref))
+- project ``S`` onto the tangent space at base-point ``P``,
+- parallel transport it to the tangent space at base-point ``Q``,
+- project it back onto the manifold at base-point ``Q``.
 
 (2) *Parallel transport* as in (1), but to the tangent space at base-point
 the *identity matrix*.
@@ -2812,9 +2814,9 @@ The transport reduces in this case to:
 !!! note "Nota Bene"
     Currently only the [Fisher](@ref) metric is supported for parallel transport.
 
-  **See also**: [`logMap`](@ref), [`expMap`](@ref), [`vecP`](@ref), [`matP`](@ref).
+**See also**: [`logMap`](@ref), [`expMap`](@ref), [`vecP`](@ref), [`matP`](@ref).
 
- **Examples**
+**Examples**
 ```julia
 using PosDefManifold
 
@@ -2857,7 +2859,6 @@ Pset2=parallelTransport(Pset, G)
 # check
 mean(Fisher, Pset2) ≈ I ? println(" ⭐ ") : println(" ⛔ ")
 ```
-
 """
 function parallelTransport(S::ℍ{T}, P::ℍ{T}, Q::ℍ{T}) where T<:RealOrComplex
     # this is the classical definition of parallel transport.
@@ -2891,47 +2892,49 @@ pt=parallelTransport
 # -----------------------------------------------------------
 
 """
+```julia
     procrustes(P::ℍ{T}, Q::ℍ{T}, extremum="min") where T<:RealOrComplex
+```
 
- Given two positive definite matrices ``P`` and ``Q``,
- return by default the solution of problem
+Given two positive definite matrices ``P`` and ``Q``,
+return by default the solution of problem
 
- ``\\textrm{argmin}_Uδ(P,U^HQU)``,
+``\\textrm{argmin}_Uδ(P,U^HQU)``,
 
- where ``U`` varies over the set of unitary matrices and ``δ(.,.)`` is a
- distance or divergence function.
+where ``U`` varies over the set of unitary matrices and ``δ(.,.)`` is a
+distance or divergence function.
 
- ``U^HQU`` is named in physics the *unitary orbit* of ``Q``.
+``U^HQU`` is named in physics the *unitary orbit* of ``Q``.
 
- If the argument `extremum` is passed as "max", it returns instead the solution of
+If the argument `extremum` is passed as "max", it returns instead the solution of
 
- ``\\textrm{argmax}_Uδ(P,U^HQU)``.
+``\\textrm{argmax}_Uδ(P,U^HQU)``.
 
-  ``P`` and ``Q`` must be flagged as `Hermitian`. See [typecasting matrices](@ref).
+``P`` and ``Q`` must be flagged as `Hermitian`. See [typecasting matrices](@ref).
 
- As it has been shown in Bhatia and Congedo (2019)[🎓](@ref),
- using each of the [Fisher](@ref), [logdet zero](@ref), [Wasserstein](@ref)
- and the Kullback-Leibler divergence (see [logdet α](@ref)),
- the best approximant to ``P`` from the unitary orbit of ``Q``
- commutes with ``P`` and, surprisingly, has the same closed-form expression, namely
+As it has been shown in Bhatia and Congedo (2019)[🎓](@ref),
+using each of the [Fisher](@ref), [logdet zero](@ref), [Wasserstein](@ref)
+and the Kullback-Leibler divergence (see [logdet α](@ref)),
+the best approximant to ``P`` from the unitary orbit of ``Q``
+commutes with ``P`` and, surprisingly, has the same closed-form expression, namely
 
- ``U_Q^↓U_P^{↓H}`` for the argmin and ``U_Q^↑U_P^{↓H}`` for the argmax,
+``U_Q^↓U_P^{↓H}`` for the argmin and ``U_Q^↑U_P^{↓H}`` for the argmax,
 
- where ``U^↓`` denotes the eigenvector matrix of the subscript argument with
- eigenvectors in columns sorted by *decreasing* order of corresponding eigenvalues and
- ``U^↑`` denotes the eigenvector matrix of the subscript argument with
- eigenvectors in columns sorted by *increasing* order of corresponding eigenvalues.
+where ``U^↓`` denotes the eigenvector matrix of the subscript argument with
+eigenvectors in columns sorted by *decreasing* order of corresponding eigenvalues and
+``U^↑`` denotes the eigenvector matrix of the subscript argument with
+eigenvectors in columns sorted by *increasing* order of corresponding eigenvalues.
 
- The same solutions are known since a long time also by solving the extremal
- problem here above using the [Euclidean](@ref) metric (Umeyama, 1988).
+The same solutions are known since a long time also by solving the extremal
+problem here above using the [Euclidean](@ref) metric (Umeyama, 1988).
 
- The generalized Procrustes problem
+The generalized Procrustes problem
 
- ``\\textrm{argmin}_Usum_{i=1}^{k}δ(P_i,U^HQ_iU)``
+``\\textrm{argmin}_Usum_{i=1}^{k}δ(P_i,U^HQ_iU)``
 
- can be solved using Julia package [Manopt](https://github.com/kellertuer/Manopt.jl).
+can be solved using Julia package [Manopt](https://github.com/kellertuer/Manopt.jl).
 
- **Examples**
+**Examples**
 ```julia
 using PosDefManifold
 P=randP(3)
@@ -2941,7 +2944,6 @@ U=procrustes(P, Q)
 # argmax problem
 V=procrustes(P, Q, "max")
 ```
-
 """
 function procrustes(P::ℍ{T}, Q::ℍ{T}, extremum="min") where T<:RealOrComplex
     Pup=eigvecs(P)
