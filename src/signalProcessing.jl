@@ -13,15 +13,15 @@
 """
     randChi²(df::Int)
 
- **alias**: `randχ²`
+**alias**: `randχ²`
 
- Generate a random variable distributed as a *chi-squared* with `df`
- degrees of freedom.
+Generate a random variable distributed as a *chi-squared* with `df`
+degrees of freedom.
 
- It uses the *Wilson–Hilferty transformation* for `df`>=20 -
- see [chi-squared distribution](https://en.wikipedia.org/wiki/Chi-squared_distribution).
+It uses the *Wilson–Hilferty transformation* for `df`>=20 -
+see [chi-squared distribution](https://en.wikipedia.org/wiki/Chi-squared_distribution).
 
- **Examples**
+**Examples**
 ```julia
 using Plots, PosDefManifold
 chi=[randχ²(2) for i=1:10000]
@@ -42,15 +42,15 @@ randχ²=randChi²
     eigvalsSNR::Real=10e3 >)
 ```
 
- **alias**: `randλ`
+**alias**: `randλ`
 
- Generate an ``n``-vector of random real positive eigenvalues.
- The eigenvalues are generated as in function `randΛ`([`randEigvalsMat`](@ref)),
- the syntax of which is used.
+Generate an ``n``-vector of random real positive eigenvalues.
+The eigenvalues are generated as in function `randΛ`([`randEigvalsMat`](@ref)),
+the syntax of which is used.
 
- **See also**: `randU` ([`randUnitaryMat`](@ref)), `randP` ([`randPosDefMat`](@ref)).
+**See also**: `randU` ([`randUnitaryMat`](@ref)), `randP` ([`randPosDefMat`](@ref)).
 
- **Examples**
+**Examples**
 ```julia
 using Plots, PosDefManifold
 λ=sort(randλ(10), rev=true)
@@ -78,32 +78,32 @@ randλ=randEigvals
     < same keyword arguments as in (1) >)
 ```
 
- **alias**: `randΛ`
+**alias**: `randΛ`
 
- (1) Generate an ``n⋅n`` diagonal matrix of random real positive eigenvalues.
+(1) Generate an ``n⋅n`` diagonal matrix of random real positive eigenvalues.
 
- (2) An array 1d (of [𝔻Vector type](@ref)) of ``k`` matrices of the kind in (1)
+(2) An array 1d (of [𝔻Vector type](@ref)) of ``k`` matrices of the kind in (1)
 
- The eigenvalues are generated according to model
+The eigenvalues are generated according to model
 
- ``λ_i=χ_{df}^2+η,\\hspace{6pt}\\textrm{for}\\hspace{2pt}i=1:n,``
+``λ_i=χ_{df}^2+η,\\hspace{6pt}\\textrm{for}\\hspace{2pt}i=1:n,``
 
- where
- - ``χ_{df}^2`` (signal term) is randomly distributed as a [chi-square](https://bit.ly/1IXkulE) with `df` degrees of freedom,
- - ``η`` is a [white noise](https://bit.ly/2TN8472) term, function of *<keyword argument>* `eigvalsSNR`, such that
+where
+- ``χ_{df}^2`` (signal term) is randomly distributed as a [chi-square](https://bit.ly/1IXkulE) with `df` degrees of freedom,
+- ``η`` is a [white noise](https://bit.ly/2TN8472) term, function of *<keyword argument>* `eigvalsSNR`, such that
 
- ``\\textrm{eigenvalues SNR}=\\mathbb{E}\\big(\\sum_{i=1}^{n}λ_i\\big)\\big/nη.``
+``\\textrm{eigenvalues SNR}=\\mathbb{E}\\big(\\sum_{i=1}^{n}λ_i\\big)\\big/nη.``
 
- The expected sum ``\\mathbb{E}\\big(\\sum_{i=1}^{n}λ_i\\big)`` here above is the
- expected variance of the signal term, i.e., ``n(df)``, since the expectation
- of a random chi-squared variable is equal to its degrees of freedom.
+The expected sum ``\\mathbb{E}\\big(\\sum_{i=1}^{n}λ_i\\big)`` here above is the
+expected variance of the signal term, i.e., ``n(df)``, since the expectation
+of a random chi-squared variable is equal to its degrees of freedom.
 
- If `eigvalsSNR=Inf` is passed as argument, then ``η`` is set to zero, *i.e.*,
- no white noise is added. In any case `eigvalsSNR` must be positive.
+If `eigvalsSNR=Inf` is passed as argument, then ``η`` is set to zero, *i.e.*,
+no white noise is added. In any case `eigvalsSNR` must be positive.
 
- Note that with the default value of *<keyword argument>* `df` (`df=2`)
- the generating model assumes that the eigenvalues
- have exponentially decaying variance, which is often observed on real data.
+Note that with the default value of *<keyword argument>* `df` (`df=2`)
+the generating model assumes that the eigenvalues
+have exponentially decaying variance, which is often observed on real data.
 
 !!! note "Nota Bene"
     The *<keyword argument>* `eigvalsSNR` expresses the expected eigenvalues SNR
@@ -111,17 +111,15 @@ randλ=randEigvals
     not the real one, and is not expressed in decibels,
     but as the expected SNR variance ratio.
 
- This function is used by function `randP` ([`randPosDefMat`](@ref)) to generate
- random positive definite matrices with added white noise in order
- to emulate eigenvalues observed in real data and to
- improve the conditioning of the generated matrices with respect to inversion.
+This function is used by function `randP` ([`randPosDefMat`](@ref)) to generate
+random positive definite matrices with added white noise in order
+to emulate eigenvalues observed in real data and to
+improve the conditioning of the generated matrices with respect to inversion.
 
+**See also**: `randλ` ([`randEigvals`](@ref)), `randU` ([`randUnitaryMat`](@ref)),
+`randP` ([`randPosDefMat`](@ref)), `randχ²` ([`randChi²`](@ref)).
 
-
- **See also**: `randλ` ([`randEigvals`](@ref)), `randU` ([`randUnitaryMat`](@ref)),
- `randP` ([`randPosDefMat`](@ref)), `randχ²` ([`randChi²`](@ref)).
-
- **Examples**
+**Examples**
 ```julia
 using PosDefManifold
 # (1)
@@ -154,19 +152,19 @@ randΛ=randEigvalsMat
     (1) randUnitaryMat(n::Int)
     (2) randUnitaryMat(::Type{Complex{T}}, n::Int)
 
- **aliases**: `randOrthMat`, `randU`
+**aliases**: `randOrthMat`, `randU`
 
- Generate a random ``n⋅n``
- - (1) [orthogonal](https://bit.ly/2vrr0wU) matrix (real)
- - (2) [unitary](https://bit.ly/2JCHbmC) matrix (complex)
+Generate a random ``n⋅n``
+- (1) [orthogonal](https://bit.ly/2vrr0wU) matrix (real)
+- (2) [unitary](https://bit.ly/2JCHbmC) matrix (complex)
 
- The matrices are generated running the modified (stabilized)
- [Gram-Schmidt orthogonalization](https://bit.ly/2YE6zvy)
- procedure ([`mgs`](@ref)) on an ``n⋅n`` matrix filled with random Gaussian elements.
+The matrices are generated running the modified (stabilized)
+[Gram-Schmidt orthogonalization](https://bit.ly/2YE6zvy)
+procedure ([`mgs`](@ref)) on an ``n⋅n`` matrix filled with random Gaussian elements.
 
- **See also**: `randΛ` ([`randEigvals`](@ref)), `randP` ([`randPosDefMat`](@ref)).
+**See also**: `randΛ` ([`randEigvals`](@ref)), `randP` ([`randPosDefMat`](@ref)).
 
- **Examples**
+**Examples**
 ```julia
 using PosDefManifold
 n=3;
@@ -208,59 +206,59 @@ randU=randUnitaryMat
     < same keyword arguments as in (3) >)
 ```
 
- **alias**: `randP`
+**alias**: `randP`
 
- Generate
- - (1) one random `Hermitian` positive definite matrix (real) of size ``n⋅n``
- - (2) one random `Hermitian` positive definite matrix (complex) of size ``n⋅n``
- - (3) an array 1d (of [ℍVector type](@ref)) of ``k`` matrices of the kind in (1)
- - (4) an array 1d (of [ℍVector type](@ref)) of ``k`` matrices of the kind in (2).
+Generate
+- (1) one random `Hermitian` positive definite matrix (real) of size ``n⋅n``
+- (2) one random `Hermitian` positive definite matrix (complex) of size ``n⋅n``
+- (3) an array 1d (of [ℍVector type](@ref)) of ``k`` matrices of the kind in (1)
+- (4) an array 1d (of [ℍVector type](@ref)) of ``k`` matrices of the kind in (2).
 
- Methods (3) and (4) are **multi-threaded**. See [Threads](@ref).
+Methods (3) and (4) are **multi-threaded**. See [Threads](@ref).
 
- For (1) and (2) the matrix is generated according to model
+For (1) and (2) the matrix is generated according to model
 
- ``UΛU^H+ηI``,
+``UΛU^H+ηI``,
 
- where ``U`` is a random orthogonal (1) or unitary (2) matrix generated by
- function `randU`([`randUnitaryMat`](@ref)) and ``Λ``, ``η`` are a positive definite
- diagonal matrix and a non-negative scalar depending on *<optional keywords arguments>*
- `df` and `eigvalsSNR` randomly generated calling function
- `randΛ`([`randEigvalsMat`](@ref)).
+where ``U`` is a random orthogonal (1) or unitary (2) matrix generated by
+function `randU`([`randUnitaryMat`](@ref)) and ``Λ``, ``η`` are a positive definite
+diagonal matrix and a non-negative scalar depending on *<optional keywords arguments>*
+`df` and `eigvalsSNR` randomly generated calling function
+`randΛ`([`randEigvalsMat`](@ref)).
 
- For (3) and (4), if the *<optional keyword argument>* `commuting=true` is passed,
- the ``k`` matrices are generated according to model
+For (3) and (4), if the *<optional keyword argument>* `commuting=true` is passed,
+the ``k`` matrices are generated according to model
 
-  ``UΛ_iU^H+ηI,\\hspace{8pt}``, for ``i``=1:``k``
+``UΛ_iU^H+ηI,\\hspace{8pt}``, for ``i``=1:``k``
 
- otherwise they are generated according to model
+otherwise they are generated according to model
 
- ``(UΛ_iU^H+ηI)+φ(V_iΔ_iV_i^H+ηI),\\hspace{8pt}``, for ``i``=1:``k``  Eq.[1]
+``(UΛ_iU^H+ηI)+φ(V_iΔ_iV_i^H+ηI),\\hspace{8pt}``, for ``i``=1:``k``  Eq.[1]
 
- where
- - ``U`` and the ``V_i`` are random (3) orthogonal/(4) unitary matrices,
- - ``Λ_i`` and ``Δ_i`` are positive definite diagonal matrices
- - ``η`` is a non-negative scalar.
-  All variables here above are randomly generated as in (1) and (2)
- - ``φ`` is adjusted so as to obtain a desired output `SNR` ([signal-to-noise ratio](https://bit.ly/1VvpvnQ)), which is also an
- *<optional keywords arguments>*, such as
+where
+- ``U`` and the ``V_i`` are random (3) orthogonal/(4) unitary matrices,
+- ``Λ_i`` and ``Δ_i`` are positive definite diagonal matrices
+- ``η`` is a non-negative scalar.
+All variables here above are randomly generated as in (1) and (2)
+- ``φ`` is adjusted so as to obtain a desired output `SNR` ([signal-to-noise ratio](https://bit.ly/1VvpvnQ)), which is also an
+*<optional keywords arguments>*, such as
 
- ``SNR=\\frac{\\displaystyle\\sum_{i=1}^{k}\\textrm{tr}(UΛ_iU^H+ηI)}{\\displaystyle\\sum_{i=1}^{k}\\textrm{tr}φ(V_iΔ_iV_i^H+ηI)}``.
+``SNR=\\frac{\\displaystyle\\sum_{i=1}^{k}\\textrm{tr}(UΛ_iU^H+ηI)}{\\displaystyle\\sum_{i=1}^{k}\\textrm{tr}φ(V_iΔ_iV_i^H+ηI)}``.
 
 !!! note "Nota Bene"
     The keyword arguments `SNR` is not expressed in decibels,
     but as the expected SNR variance ratio. It must be a positive number.
 
- A slightly different version of this model for generating positive definite
- matrices has been proposed in (Congedo et *al.*, 2017b)[🎓];
- in the model of Eq. [1]
- - ``UΛ_iU^H`` is the signal term, where the signal is supposed sharing the same coordinates for all matrices,
- - ``φ(V_iΔ_iV_i^H)`` is a structured noise term, which is different for all matrices
- - ``ηI`` is a [white noise](https://bit.ly/2TN8472) term, with same variance for all matrices.
+A slightly different version of this model for generating positive definite
+matrices has been proposed in (Congedo et *al.*, 2017b)[🎓];
+in the model of Eq. [1]
+- ``UΛ_iU^H`` is the signal term, where the signal is supposed sharing the same coordinates for all matrices,
+- ``φ(V_iΔ_iV_i^H)`` is a structured noise term, which is different for all matrices
+- ``ηI`` is a [white noise](https://bit.ly/2TN8472) term, with same variance for all matrices.
 
- **See also**: the aforementioned paper and `randΛ` ([`randEigvalsMat`](@ref)).
+**See also**: the aforementioned paper and `randΛ` ([`randEigvalsMat`](@ref)).
 
- **Examples**
+**Examples**
 ```julia
 using PosDefManifold
 R=randP(10, df=10, eigvalsSNR=1000) # 1 SDP Matrix of size 10x10 #(1)
@@ -331,31 +329,31 @@ randP=randPosDefMat
     (1) regularize!(P::ℍ; <SNR=10e3>)
     (2) regularize!(𝐏::ℍVector; <SNR=10e3>)
 
- Add [white noise](https://bit.ly/2TN8472) to either
- - (1) a positive definite matrix ``P`` of size ``n⋅n``, or
- - (2) a 1d array ``𝐏`` of ``k`` positive definite matrices of size ``n⋅n``, of [ℍVector type](@ref).
+Add [white noise](https://bit.ly/2TN8472) to either
+- (1) a positive definite matrix ``P`` of size ``n⋅n``, or
+- (2) a 1d array ``𝐏`` of ``k`` positive definite matrices of size ``n⋅n``, of [ℍVector type](@ref).
 
- The added noise improves the matrix conditioning with respect to inversion.
- This is used to avoid numerical errors when decomposing these matrices
- or when evaluating some functions of their eigevalues such as the log.
+The added noise improves the matrix conditioning with respect to inversion.
+This is used to avoid numerical errors when decomposing these matrices
+or when evaluating some functions of their eigevalues such as the log.
 
- A constant value is added to all diagonal elements of (1) ``P``
- or (2) af all matrices in ``𝐏``,
- that is, on output:
+A constant value is added to all diagonal elements of (1) ``P``
+or (2) af all matrices in ``𝐏``,
+that is, on output:
 
- ``\\textrm{(1)}\\hspace{2pt}P\\leftarrow P+ηI``
+``\\textrm{(1)}\\hspace{2pt}P\\leftarrow P+ηI``
 
- ``\\textrm{(2)}\\hspace{2pt}𝐏_i\\leftarrow 𝐏_i+ηI, \\hspace{2pt}\\textrm{for}\\hspace{2pt} i=1:k.``
+``\\textrm{(2)}\\hspace{2pt}𝐏_i\\leftarrow 𝐏_i+ηI, \\hspace{2pt}\\textrm{for}\\hspace{2pt} i=1:k.``
 
- The amount of added noise ``η`` is determined by the `SNR`
- *<keyword argument>*, which by default is 10000. This is
- such that
+The amount of added noise ``η`` is determined by the `SNR`
+*<keyword argument>*, which by default is 10000. This is
+such that
 
- ``\\textrm{(1)}\\hspace{2pt}SNR=\\frac{\\displaystyle\\textrm{tr}(P)}{\\displaystyle\\textrm{tr}(ηI)}.``
+``\\textrm{(1)}\\hspace{2pt}SNR=\\frac{\\displaystyle\\textrm{tr}(P)}{\\displaystyle\\textrm{tr}(ηI)}.``
 
- ``\\textrm{(2)}\\hspace{2pt}SNR=\\frac{\\displaystyle\\sum_{i=1}^{k}\\textrm{tr}(𝐏_i)}{\\displaystyle k\\hspace{1pt}\\textrm{tr}(ηI)}.``
+``\\textrm{(2)}\\hspace{2pt}SNR=\\frac{\\displaystyle\\sum_{i=1}^{k}\\textrm{tr}(𝐏_i)}{\\displaystyle k\\hspace{1pt}\\textrm{tr}(ηI)}.``
 
- ``P`` in (1) must be flagged as Hermitian. See [typecasting matrices](@ref).
+``P`` in (1) must be flagged as Hermitian. See [typecasting matrices](@ref).
 
 !!! note "Nota Bene"
     The keyword argument `SNR` expresses a SNR ([signal-to-noise ratio](https://bit.ly/1VvpvnQ)),
@@ -367,7 +365,7 @@ randP=randPosDefMat
 
 **See also**: `randP` ([`randPosDefMat`](@ref)).
 
- **Examples**
+**Examples**
 ```julia
 # (1)
 using LinearAlgebra, Plots, PosDefManifold
@@ -395,7 +393,6 @@ signalPlusNoiseVar=sum(tr(P) for P in 𝐏);
 output_snr=signalVar/(signalPlusNoiseVar-signalVar)
 # output_snr should be approx. equal to 1000
 ```
-
 """
 function regularize!(P::ℍ;
                     SNR=10e3)
@@ -416,19 +413,19 @@ end
 """
     gram(X::Matrix{T}) where T<:RealOrComplex
 
- Given a generic data matrix ``X``, comprised of real or complex elements,
- return the normalized [Gram matrix](https://bit.ly/2I0FQn2), that is,
- the covariance matrix of ``X``
- corrected by sample size, but without subtracting the mean.
+Given a generic data matrix ``X``, comprised of real or complex elements,
+return the normalized [Gram matrix](https://bit.ly/2I0FQn2), that is,
+the covariance matrix of ``X``
+corrected by sample size, but without subtracting the mean.
 
- The result is flagged as `Hermitian`.
- See [typecasting matrices](@ref).
+The result is flagged as `Hermitian`.
+See [typecasting matrices](@ref).
 
 !!! note "Nota Bene"
     If ``X`` is wide or square (r<=c) return ``XX^H/c``.
     If ``X`` is tall (r>c)            return ``X^HX/r``.
 
- **Examples**
+**Examples**
 ```julia
 using PosDefManifold
 X=randn(5, 150);
@@ -447,15 +444,15 @@ end # function gram
 """
 trade(P::ℍ{T}) where T<:RealOrComplex
 
- Given a positive definite matrix `P`, return as a 2-tuple the
- *trace* and the *determinant* of `P`.
- This is used to plot positive matrices in two dimensions
- (*TraDe plots*: log(trace/n) vs. log(determinant), see exemple here below).
+Given a positive definite matrix `P`, return as a 2-tuple the
+*trace* and the *determinant* of `P`.
+This is used to plot positive matrices in two dimensions
+(*TraDe plots*: log(trace/n) vs. log(determinant), see exemple here below).
 
- `P` must be flagged by julia as `Hermitian`.
-  See [typecasting matrices](@ref).
+`P` must be flagged by julia as `Hermitian`.
+See [typecasting matrices](@ref).
 
- **Examples**
+**Examples**
 ```julia
 using PosDefManifold
 P=randP(3)
