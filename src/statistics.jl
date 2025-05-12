@@ -26,14 +26,14 @@
 """
     softmax(χ::Vector{T}) where T<:Real
 
- Given a real vector of ``k`` non-negative scores ``χ=c_1,...,c_k``,
- return the vector ``π=p_1,...,p_k`` of their
- [softmax](https://en.wikipedia.org/wiki/Softmax_function) probabilities,
- as per
+Given a real vector of ``k`` non-negative scores ``χ=c_1,...,c_k``,
+return the vector ``π=p_1,...,p_k`` of their
+[softmax](https://en.wikipedia.org/wiki/Softmax_function) probabilities,
+as per
 
- `` p_i=\\frac{\\textrm{e}^{c_i}}{\\sum_{i=1}^{k}\\textrm{e}^{c_i}} ``.
+`` p_i=\\frac{\\textrm{e}^{c_i}}{\\sum_{i=1}^{k}\\textrm{e}^{c_i}} ``.
 
- **Examples**
+**Examples**
 ```julia
 χ=[1.0, 2.3, 0.4, 5.0]
 π=softmax(χ)
@@ -49,14 +49,14 @@ softmax(χ::Vector{T}) where T<:Real = exp.(χ) ./ 𝚺(exp.(χ))
 """
     mean(metric::Metric, ν::Vector{T}) where T<:RealOrComplex
 
- Mean of ``k`` real or complex scalars, using the specified `metric`
- of type [Metric::Enumerated type](@ref). Note that using the Fisher,
- logEuclidean and Jeffrey metric, the resulting mean
- is the scalar geometric mean. Note also that the code of this method
- is in unit *statistics.jl*, while the code for all the others is
- in unit *riemannianGeometry.jl*.
+Mean of ``k`` real or complex scalars, using the specified `metric`
+of type [Metric::Enumerated type](@ref). Note that using the Fisher,
+logEuclidean and Jeffrey metric, the resulting mean
+is the scalar geometric mean. Note also that the code of this method
+is in unit *statistics.jl*, while the code for all the others is
+in unit *riemannianGeometry.jl*.
 
- **Examples**
+**Examples**
 ```julia
 using PosDefManifold
 # Generate 10 random numbers distributed as a chi-square with 2 df.
@@ -91,24 +91,24 @@ end
         corrected::Bool=true,
         mean=nothing) where T<:RealOrComplex
 
- Standard deviation of ``k`` real or complex scalars,
- using the specified `metric`
- of type [Metric::Enumerated type](@ref) and the
- specified `mean` if provided.
+Standard deviation of ``k`` real or complex scalars,
+using the specified `metric`
+of type [Metric::Enumerated type](@ref) and the
+specified `mean` if provided.
 
- Only the Euclidean and Fisher
- metric are supported by this function. Using the Euclidean
- metric return the output of standard Julia
- [std](https://docs.julialang.org/en/v1/stdlib/Statistics/#Statistics.std)
- function. Using the Fisher metric return the scalar geometric standard deviation,
- which is defined such as,
+Only the Euclidean and Fisher
+metric are supported by this function. Using the Euclidean
+metric return the output of standard Julia
+[std](https://docs.julialang.org/en/v1/stdlib/Statistics/#Statistics.std)
+function. Using the Fisher metric return the scalar geometric standard deviation,
+which is defined such as,
 
- ``\\sigma=\\text{exp}\\Big(\\sqrt{k^{-1}\\sum_{i=1}^{k}\\text{ln}^2(v_i/\\mu})\\Big)``.
+``\\sigma=\\text{exp}\\Big(\\sqrt{k^{-1}\\sum_{i=1}^{k}\\text{ln}^2(v_i/\\mu})\\Big)``.
 
- If `corrected` is `true`, then the sum is scaled with ``k-1``,
- whereas if it is `false` the sum is scaled with ``k``.
+If `corrected` is `true`, then the sum is scaled with ``k-1``,
+whereas if it is `false` the sum is scaled with ``k``.
 
- **Examples**
+**Examples**
 ```julia
 using PosDefManifold
 # Generate 10 random numbers distributed as a chi-square with 2 df.
