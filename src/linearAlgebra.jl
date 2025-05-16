@@ -1296,7 +1296,9 @@ normalized so as to sum up to 1, otherwise they are used as they are passed.
 This option is provided to allow calling this function repeatedly without
 normalizing the same weights vector each time. By default `✓w` is false.
 
- **Examples**
+**See also** [`typeofMatrix`](@ref), [`typeofVector`](@ref), [`dim`](@ref).
+
+**Examples**
 ```julia
 using LinearAlgebra, PosDefManifold
 Pset=randP(4, 1000); # generate 1000 positive definite 4x4 matrices
@@ -1415,8 +1417,8 @@ congruent transformations
 ``BP_{mk}B^H``,
 
 for all ``m`` vectors of ``k[m]`` vectors of matrices in ``𝑷``,
-for ``B`` and ``𝑷`` any combination of matrix type `Hermitian`,
-`LowerTriangular`, `Diagonal` or `Matrix` (``B``) and vector of matrices type
+for ``𝐁`` and ``𝑷`` any combination of matrix type `Hermitian`,
+`LowerTriangular`, `Diagonal` or `Matrix` (``𝐁``) and vector of matrices type
 `ℍVector₂`, `𝔻Vector₂`,
 `𝕃Vector₂` and `𝕄Vector₂` (``𝑷``). See [Array of Matrices types](@ref).
 
@@ -1430,19 +1432,19 @@ congruent transformations
 
 ``B_iP_{ij}B_j^H``, for ``i,j∈[1,...,m]``.
 
-for ``𝐁`` holding ``m`` matrices and ``𝑷`` holding ``m`` vectors
+for ``𝑩`` holding ``m`` matrices and ``𝑷`` holding ``m`` vectors
 holding ``m`` matrices each.
 Note that, differently from method (3), here the vectors of ``𝑷``
-are all of the same length and this is eaxctly the length of ``𝐁``.
-``𝐁`` and ``𝑷`` may be any combination of matrix vector type `ℍVector`,
-`𝔻Vector`, `𝕃Vector` and `𝕄Vector` (``𝐁``) and vector of matrices type
+are all of the same length and this is eaxctly the length of ``𝑩``.
+``𝑩`` and ``𝑷`` may be any combination of matrix vector type `ℍVector`,
+`𝔻Vector`, `𝕃Vector` and `𝕄Vector` (``𝑩``) and vector of matrices type
 `ℍVector₂`, `𝔻Vector₂`, `𝕃Vector₂` and `𝕄Vector₂` (``𝑷``).
 See [Array of Matrices types](@ref).
 
 Note that this function computes the following algebraic expression:
 
 ``\begin{pmatrix} B_1 & \hspace{0.01cm} & 0 \\ \hspace{0.01cm} & \ddots & \hspace{0.01cm} \\ 0 & \hspace{0.01cm} & B_m \end{pmatrix}
-\begin{pmatrix} C_{11} & \cdots & C_{1m} \\ \vdots & \ddots & \vdots \\ C_{m1} & \cdots & C_{mm} \end{pmatrix}
+\begin{pmatrix} P_{11} & \cdots & P_{1m} \\ \vdots & \ddots & \vdots \\ P_{m1} & \cdots & P_{mm} \end{pmatrix}
 \begin{pmatrix}B_1^T & \hspace{0.01cm} & 0 \\ \hspace{0.01cm} & \ddots & \hspace{0.01cm} \\ 0 & \hspace{0.01cm} & B_m^T\end{pmatrix}``
 
 
@@ -1451,7 +1453,7 @@ argument, which must be provided and must be one of the following
 abstract types: `ℍVector₂`, `𝔻Vector₂`, `𝕃Vector₂` or `𝕄Vector₂`
 (and not an instance of these types).
 
-When you pass it to this function, make sure to typecast ``𝐁``
+When you pass it to this function, make sure to typecast ``𝑩``
 as an `ℍVector`, `𝔻Vector`, `𝕃Vector` or `𝕄Vector` type if it is not
 already created as one of these types. See the example here below
 and [typecasting matrices](@ref).
@@ -1470,6 +1472,8 @@ Method (2), (3) and (4) are **multi-threaded**. See [Threads](@ref).
     actually return its lower triangular part. The full congruence can
     be obtained as an `Hermitian` matrix by `cong(B, P, ℍ)` and as a generic
     matrix object by `cong(B, P, 𝕄)`.
+
+**See also** [`typeofMatrix`](@ref), [`typeofVector`](@ref), [`dim`](@ref).
 
 **Examples**
 ```julia
