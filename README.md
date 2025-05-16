@@ -10,4 +10,8 @@ The documentation is rich and gives all mathematical details pertaining to the i
 
 For similar code resources in other programming languages see [here](https://sites.google.com/site/marcocongedo/science/code-resources).
 
+To cite the package use:
+Congedo M, Jain S (2019) [A Julia Package for manipulating Brain-Computer Interface Data in the Manifold of Positive Definite Matrices](https://hal.archives-ouvertes.fr/hal-02315153/document), Int IEEE Systems, Man and Cybernetics Conf.
+
 [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://Marco-Congedo.github.io/PosDefManifold.jl/stable)
+
