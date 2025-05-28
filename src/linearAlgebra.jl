@@ -607,10 +607,7 @@ for example, in spectral functions to check that all eigenvalues are positive.
 
 The following are *<optional keyword arguments>*:
 
-- If ``rev=true`` the (1) elements in ``λ`` or (2) the diagonal elements
-in ``Λ`` will be chacked in reverse order.
-This is done for allowing a very fast check when the elements
-are sorted and it is known from where is best to start checking.
+- If ``rev=true`` the (1) elements in ``λ`` or (2) the diagonal elements in ``Λ`` will be chacked in reverse order. This is done for allowing a very fast check when the elements are sorted and it is known from where is best to start checking.
 
 If the result is ``false``:
 - if ``🔔=true`` a bell character will be printed. In most systems this will ring a bell on the computer.
@@ -936,7 +933,7 @@ and
 ``\\textrm{tr}(PQP)=\\textrm{tr}(P^{2}Q)`` (see example below).
 
 
-**See**: [trace](https://bit.ly/2HoOLiM).
+**See**: [tr](https://bit.ly/2HoOLiM).
 
 **See also**: [`DiagOfProd`](@ref), [`tr1`](@ref).
 
@@ -1264,7 +1261,7 @@ or
 
 where ``f`` is either the `mean` or the `sum` standard julia functions
 and ``g`` is whatever matrix function
-applying to each matrix ``P_k``, such as `exp`, `log, `sqrt`, etc,
+applying to each matrix ``P_k``, such as `exp`, `log`, `sqrt`, etc,
 and [anonymous functions](https://docs.julialang.org/en/v1/manual/functions/#man-anonymous-functions-1).
 
 This function is **multi-threaded**. It works by partitioning the ``k``
@@ -1278,7 +1275,6 @@ multiple of the number of threads Julia is instructed to use.
 For this latter, see [Threads](@ref).
 
 !!! note "Nota Bene"
-
     Contrarily to Julia `mean` and `sum` function (v 1.1.0) the `fVec` function
     returns a matrix of the same type of the matrices in ``𝐏``.
 
@@ -1890,11 +1886,11 @@ or an Hermitian matrix if it is complex.
 This option is available only for real matrices (see below).
 
 The following are *<optional keyword arguments>*:
-- `tol is the tolerance for the convergence of the power method (see below),
-- `maxiter is the maximum number of iterations allowed for the power method,
-- if `verbose=true, the convergence of all iterations will be printed,
-- if `evalues=true, return the 4-tuple ``(Λ, U, iterations, covergence)``,
-- if `evalues=false return the 3-tuple ``(U, iterations, covergence)``.
+- `tol` is the tolerance for the convergence of the power method (see below),
+- `maxiter` is the maximum number of iterations allowed for the power method,
+- if `verbose`=true, the convergence of all iterations will be printed,
+- if `evalues`=true, return the 4-tuple ``(Λ, U, iterations, covergence)``,
+- if `evalues`=false return the 3-tuple ``(U, iterations, covergence)``.
 
 !!! note "Nota Bene"
     Differently from the [`evd`](@ref) function, the eigenvectors and
@@ -2141,7 +2137,7 @@ choInv(P::AbstractArray{T};
 		kind::Symbol = :LLt, tol::Real = √eps(T)) where T<:RealOrComplex
 
 The same thing as [`choInv`](@ref), but destroys the input matrix.
-This function does nt require copying the input matrix,
+This function does not require copying the input matrix,
 thus it is slightly faster.
 """
 function choInv!(P::AbstractArray{T};
