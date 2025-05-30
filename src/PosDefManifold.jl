@@ -131,6 +131,7 @@ export
     normalizeCol!,
     colProd,
     sumOfSqr, ss,
+    sumOfSqrDiff, ssdiff,
     sumOfSqrDiag, ssd,
     colNorm,
     sumOfSqrTril, sst,

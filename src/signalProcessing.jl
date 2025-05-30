@@ -27,7 +27,6 @@ using Plots, PosDefManifold
 chi=[randχ²(2) for i=1:10000]
 histogram(chi) # needs Plots package. Check your plots back-end.
 ```
-
 """
 randChi²(df::Int) =
     df<20 ? sum(randn()^2 for i=1:df) : df*(1.0-2.0/(9.0*df)+randn()*sqrt2/sqrt(9.0*df))^3
@@ -58,7 +57,6 @@ using Plots, PosDefManifold
 plot(λ) # needs Plots package. Check your plots back-end.
 plot!(σ) # needs Plots package. Check your plots back-end.
 ```
-
 """
 randEigvals(n::Int;
             df::Int=2,
@@ -133,7 +131,6 @@ Q=ℍ(U*Λ*U') # generate an SPD matrix and flag it as 'Hermitian'
 # (2) generate an array of 10 matrices of simulated eigenvalues
 Dvec=randΛ(n, 10)
 ```
-
 """
 randEigvalsMat(n::Int;
                 df::Int=2,
@@ -174,7 +171,6 @@ U=randU(ComplexF64, n);
 V=randU(ComplexF64, n);
 Y=U*sqrt(randΛ(n))*V' # (2) generate a random square complex matrix
 ```
-
 """
 randUnitaryMat(n::Int)=mgs(randn(Float64, n, n))
 
@@ -183,7 +179,6 @@ randOrthMat(n::Int)=mgs(randn(Float64, n, n))
 randUnitaryMat(::Type{Complex{T}}, n::Int) where {T<:AbstractFloat} = mgs(randn(ComplexF64, n, n))
 
 randU=randUnitaryMat
-
 
 """
 ```
@@ -268,7 +263,6 @@ using Plots
 heatmap(Matrix(ℛ[1]), yflip=true, c=:bluesreds)
 ℋ=randP(ComplexF64, 20, 1000) # 1000 Hermitian Matrices of size 20x20 # (4)
 ```
-
 """
 randPosDefMat(n::Int;
               df::Int=2,
@@ -321,9 +315,7 @@ function randPosDefMat(::Type{Complex{T}}, n::Int, k::Int;
     return 𝐏
 end
 
-
 randP=randPosDefMat
-
 
 """
     (1) regularize!(P::ℍ; <SNR=10e3>)
@@ -433,7 +425,6 @@ G=gram(X) # => G=X*X'/150
 X=randn(100, 2);
 F=gram(X); # => G=X'*X/100
 ```
-
 """
 function gram(X::𝕄{T}) where T<:RealOrComplex
     (r, c)=size(X)
@@ -472,6 +463,5 @@ x=log.(x./n)
 y=log.(y)
 plot(x, y, seriestype=:scatter)
 ```
-
 """
 trade(P::ℍ{T}) where T<:RealOrComplex = (tr(P), det(P))

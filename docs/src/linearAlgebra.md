@@ -18,8 +18,6 @@
 | 8. [Spectral decompositions of positive matrices](@ref) | spectral function of input|
 | 9. [Decompositions involving triangular matrices](@ref) | triangular matrix |
 
-⋅
-
 ## Utilities
 
 | Function   | Description |
@@ -30,8 +28,6 @@
 | [`remove`](@ref)| Remove one or more elements from a vector or one or more
 columns or rows from a matrix |
 | [`isSquare`](@ref)| Return true if matrix arguement is square, false otherwise |
-
-⋅
 
 ```@docs
 typeofMatrix
@@ -50,8 +46,6 @@ isSquare
 | [`nearestPosDef`](@ref) | Nearest Symmetric/Hermitian Positive Semi-definite matrix|
 | [`nearestOrthogonal`](@ref) `nearestOrth`| Nearest Orthogonal matrix |
 | [`normalizeCol!`](@ref) | Normalize one or more columns|
-
-⋅
 
 ```@docs
 det1
@@ -84,11 +78,10 @@ ispos
 | [`quadraticForm`](@ref), `qf` | Fast quadratic form |
 | [`fidelity`](@ref) | (Quantum) Fidelity of two positive matrices |
 
-⋅
-
 ```@docs
 colProd
 sumOfSqr
+sumOfSqrDiff
 sumOfSqrDiag
 colNorm
 sumOfSqrTril
@@ -104,8 +97,6 @@ fidelity
 | [`fDiag`](@ref), `𝑓𝔻` | Elemen-wise functions of matrix diagonals|
 | [`DiagOfProd`](@ref), `dop` | Diagonal of the product of two matrices|
 
-⋅
-
 ```@docs
 fDiag
 DiagOfProd
@@ -117,8 +108,6 @@ DiagOfProd
 |:---------- |:----------- |
 | [`mgs`](@ref) | Modified Gram-Schmidt orthogonalization|
 
-⋅
-
 ```@docs
 mgs
 ```
@@ -129,11 +118,6 @@ mgs
 |:---------- |:----------- |
 | [`fVec`](@ref) | General function for multi-threaded computation of means and sums of matrix vectors|
 | [`congruence`](@ref), `cong` | Compute congruent transformations |
-
-
-
-
-⋅
 
 ```@docs
 fVec
@@ -153,8 +137,6 @@ congruence
 | [`sqr`](@ref)| Square of a positive matrix|
 | [`powerIterations`](@ref), `powIter` | Power method for estimating any number of eigenvectors and associated eigenvalues|
 
-⋅
-
 ```@docs
 evd
 frf
@@ -173,8 +155,6 @@ powerIterations
 | [`choL`](@ref) | Lower triangular factor of Cholesky decomposition|
 | [`choInv`](@ref) | Lower triangular factor of Cholesky decomposition and its inverse in one pass|
 | [`choInv!`](@ref) | as [`choInv`](@ref), but destroying the input matrix|
-
-⋅
 
 ```@docs
 choL

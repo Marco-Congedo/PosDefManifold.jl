@@ -794,7 +794,6 @@ sum2=sumOfSqr(X)        # (1) sum of squares of all elements
 sum2=sumOfSqr(X, 1)     # (2) sum of squares of elements in column 1
 sum2=sumOfSqr(X, 2:4)   # (3) sum of squares of elements in column 2 to 4
 ```
-
 """
 sumOfSqr(A::Array) = 𝚺(abs2(a) for a in A)
 
@@ -832,6 +831,61 @@ ss=sumOfSqr
 
 
 """
+    (1) sumOfSqrDiff(H1, H2::ℍ{T})
+    (2) sumOfSqrDiff(L1, L2::𝕃{T})
+    (3) sumOfSqrDiff(D1, D2::𝔻{T})
+    for (1)-(3) above: where T<:RealOrComplex
+
+**alias**: `ssdiff`
+
+Return the sum of the squares of the elements of the difference of the arguments, i.e., of
+- (1) ``H_1-H_2`` (Hermitian matrices) 
+- (2) ``L_1-L_2`` (lower triangular matrices) 
+- (3) ``D_1-D_2`` (Diagonal matrices) 
+
+All methods support real and complex matrices.
+
+**Examples**
+```julia
+using PosDefManifold
+H1, H2 = randn(10, 20), randn(10, 20)
+sum2=sumOfSqrDiff(H1, H2) 
+```
+"""
+function sumOfSqrDiff(H1, H2::ℍ{T}) where T<:RealOrComplex
+    r=size(H1, 1)
+    s=real(T)(0)
+    for j=1:size(H1, 2)-1
+        @inbounds s+=abs2(H1[j, j]-H2[j, j])
+        for i=j+1:r @inbounds s+=2*abs2(H1[i, j]-H2[i, j]) end
+    end
+    @inbounds s+=abs2(H1[r, r]-H2[r, r])
+    return s
+end
+
+function sumOfSqrDiff(L1, L2::𝕃{T}) where T<:RealOrComplex
+    r=size(L1, 1)
+    s=real(T)(0)
+    for j=1:size(L1, 2)-1
+        @inbounds s+=abs2(L1[j, j]-L2[j, j])
+        for i=j+1:r @inbounds s+=abs2(L1[i, j]-L2[i, j]) end
+    end
+    @inbounds s+=abs2(L1[r, r]-L2[r, r])
+    return s
+end
+
+function sumOfSqrDiff(D1, D2::𝔻{T}) where T<:RealOrComplex
+    s=real(T)(0)
+    @simd for j=1:size(D1, 2)
+        @inbounds s+=abs2(D1[j, j]-D2[j, j])
+    end
+    return s
+end
+
+ssdiff=sumOfSqrDiff
+
+
+"""
     sumOfSqrDiag(X::AnyMatrix)
 
 **alias**: `ssd`
@@ -853,7 +907,6 @@ sumDiag2=sumOfSqrDiag(X) # (1)
 sumDiag2=sumOfSqrDiag(𝔻(X)) # (2)
 # 𝔻=LinearAlgebra.Diagonal is declated in the main module
 ```
-
 """
 sumOfSqrDiag(X::𝕄{T}) where T<:RealOrComplex =
     𝚺(abs2(X[i, i]) for i=1:minimum(size(X)))
@@ -862,6 +915,7 @@ sumOfSqrDiag(X::Union{𝔻{T}, ℍ{T}, 𝕃{T}}) where T<:RealOrComplex =
     𝚺(abs2(X[i, i]) for i=1:size(X, 1))
 
 ssd=sumOfSqrDiag
+
 
 """
     sumOfSqrTril(X::AnyMatrix, k::Int=0)
@@ -903,7 +957,6 @@ s=sumOfSqrTril(A, -1)
 s=sumOfSqrTril(A, 0)
 # 50.0 = 1²+2²+2²+4²+5²
 ```
-
 """
 function sumOfSqrTril(X::AnyMatrix, k::Int=0)
     (r, c) = size(X)
