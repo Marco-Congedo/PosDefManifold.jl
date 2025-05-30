@@ -71,6 +71,7 @@ ispos
 |:---------- |:----------- |
 | [`colProd`](@ref) | Sum of products of the elements in two columns |
 | [`sumOfSqr`](@ref), `ss` | Sum of squares of all elements or of specified columns |
+| [`sumOfSqrDiff`](@ref), `ssdiff` | Sum of squares of the difference of two matrices |
 | [`sumOfSqrDiag`](@ref), `ssd` | Sum of squares of the diagonal elements |
 | [`colNorm`](@ref) | Eucliden norm of a column |
 | [`sumOfSqrTril`](@ref), `sst` | Sum of squares of the lower triangle elements up to a given underdiagonal |
