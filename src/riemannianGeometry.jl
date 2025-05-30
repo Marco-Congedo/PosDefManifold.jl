@@ -173,7 +173,7 @@ function geodesic(metric::Metric, P::ℍ{T}, Q::ℍ{T}, a::Real) where T<:RealOr
             #P½, P⁻½ = pow(P, 0.5, -0.5)
             #return ℍ( P½ * (P⁻½ * Q * P⁻½)^a * P½ )
 
-    elseif  metric ∈ (logdet0, Jeffrey)
+    elseif metric ∈ (logdet0, Jeffrey)
             return mean(metric, ℍVector([P, Q]), w=[b, a], ✓w=false)
 
     elseif  metric==VonNeumann
@@ -220,7 +220,7 @@ function geodesic(metric::Metric, D::𝔻{T}, E::𝔻{T}, a::Real) where T<:Real
             @warn("An expression for the geodesic is not available for the Von Neumann metric")
 
     elseif  metric==ChoEuclidean
-            Z=ℍ(√D)b + ℍ(√E)a;     return Z*Z
+            Z=ℍ(√D)b + ℍ(√E)a;  return Z*Z
 
     elseif  metric==logCholesky # ???
             LD=ℍ(√D)
@@ -385,17 +385,17 @@ end #function
 
 function distanceSqr(metric::Metric, P::ℍ{T}, Q::ℍ{T}) where T<:RealOrComplex
     z=real(T)(0)
-    if     metric==Euclidean    return  max(z, ss(ℍ(P - Q)))
+    if     metric==Euclidean    return  max(z, ssdiff(P, Q))
 
-    elseif metric==invEuclidean return  max(z, ss(ℍ(inv(P) - inv(Q))))
+    elseif metric==invEuclidean return  max(z, ssdiff(inv(P), inv(Q)))
 
-    elseif metric==logEuclidean return  max(z, ss(ℍ(log(P) - log(Q))))
+    elseif metric==logEuclidean return  max(z, ssdiff(ℍ(log(P)), ℍ(log(Q))))
 
-    elseif metric==Fisher return  max(z, 𝚺(log.(eigvals(P, Q)).^2))
+    elseif metric==Fisher       return  max(z, 𝚺(log.(eigvals(P, Q)).^2))
 
     elseif metric==logdet0      return  max(z, real(logdet(0.5*(P + Q)) - 0.5*logdet(P * Q)))
 
-    elseif metric==ChoEuclidean return  max(z, ss(choL(P)-choL(Q)))
+    elseif metric==ChoEuclidean return  max(z, ssdiff(choL(P), choL(Q)))
 
     elseif metric==logCholesky
            LP=choL(P); LQ=choL(Q);
@@ -403,7 +403,7 @@ function distanceSqr(metric::Metric, P::ℍ{T}, Q::ℍ{T}) where T<:RealOrComple
 
     elseif metric==Jeffrey      return  max(z, 0.5*(tr(inv(Q), P) + tr(inv(P), Q)) - size(P, 1)) #using formula tr(Q⁻¹P)/2 + tr(P⁻¹Q)/2 -n
 
-    elseif metric==VonNeumann              # using formula: tr(PlogP - PlogQ + QlogQ - QlogP)/2=(tr(P(logP - LoqQ)) + tr(Q(logQ - logP)))/2=
+    elseif metric==VonNeumann # using formula: tr(PlogP - PlogQ + QlogQ - QlogP)/2=(tr(P(logP - LoqQ)) + tr(Q(logQ - logP)))/2=
            R=ℍ(log(P)-log(Q));  return  max(z, 0.5*real(tr(P, R) - tr(Q, R)))  # (tr(P(logP - LoqQ)) - tr(Q(logP - LoqQ)))/2
 
     elseif metric==Wasserstein
@@ -544,34 +544,34 @@ function distanceSqrMat(type::Type{T}, metric::Metric, 𝐏::ℍVector;
       m=length(R)
    end # ranges
 
-   if     metric == invEuclidean
+   if metric == invEuclidean
        if threaded
            𝐏𝓲=ℍVector(undef, k)
            @threads for j=1:k 𝐏𝓲[j]=inv(𝐏[j]) end
-           @threads for i=1:m △[R[i], C[i]]=ss(ℍ(𝐏𝓲[R[i]] - 𝐏𝓲[C[i]])) end
+           @threads for i=1:m △[R[i], C[i]]=ssdiff(𝐏𝓲[R[i]], 𝐏𝓲[C[i]]) end
        else
            𝐏𝓲=map(inv, 𝐏) # inv preserves Hermitianity
-           for j=1:k-1, i=j+1:k △[i, j]=ss(ℍ(𝐏𝓲[i] - 𝐏𝓲[j]))  end
+           for j=1:k-1, i=j+1:k △[i, j]=ssdiff(𝐏𝓲[i], 𝐏𝓲[j])  end
        end
 
    elseif metric == logEuclidean
        if threaded
            𝐏𝓵=ℍVector(undef, k)
            @threads for j=1:k 𝐏𝓵[j]=ℍ(log(𝐏[j])) end
-           @threads for i=1:m △[R[i], C[i]]=ss(ℍ(𝐏𝓵[R[i]] - 𝐏𝓵[C[i]])) end
+           @threads for i=1:m △[R[i], C[i]]=ssdiff(𝐏𝓵[R[i]], 𝐏𝓵[C[i]]) end
        else
-           𝐏𝓵=map(log, 𝐏)
-           for j=1:k-1, i=j+1:k △[i, j]=ss(ℍ(𝐏𝓵[i] - 𝐏𝓵[j]))  end
+           𝐏𝓵=map(log, 𝐏) # log change Hermitian into Symmetric is real
+           for j=1:k-1, i=j+1:k △[i, j]=ssdiff(ℍ(𝐏𝓵[i]), ℍ(𝐏𝓵[j]))  end
        end
 
    elseif metric == ChoEuclidean
        if threaded
            𝐏L=𝕃Vector(undef, k)
            @threads for j=1:k 𝐏L[j]=choL(𝐏[j]) end
-           @threads for i=1:m △[R[i], C[i]]=ss(𝐏L[R[i]] - 𝐏L[C[i]]) end
+           @threads for i=1:m △[R[i], C[i]]=ssdiff(𝐏L[R[i]], 𝐏L[C[i]]) end
        else
            𝐏L=map(choL, 𝐏)
-           for j=1:k-1, i=j+1:k △[i, j]=ss(𝐏L[i] - 𝐏L[j])  end
+           for j=1:k-1, i=j+1:k △[i, j]=ssdiff(𝐏L[i], 𝐏L[j])  end
        end
 
    elseif metric==logCholesky
@@ -689,10 +689,11 @@ fullΔ=Hermitian(Δ, :L)
 """
 distanceMat(type::Type{T}, metric::Metric, 𝐏::ℍVector;
             ⏩=true) where T<:AbstractFloat =
-            sqrt.(distanceSqrMat(type, metric, 𝐏; ⏩=⏩))
+    sqrt.(distanceSqrMat(type, metric, 𝐏; ⏩=⏩))
 
 distanceMat(metric::Metric, 𝐏::ℍVector;
-            ⏩=true) = sqrt.(distanceSqrMat(metric, 𝐏, ⏩=⏩))
+            ⏩=true) = 
+    sqrt.(distanceSqrMat(metric, 𝐏, ⏩=⏩))
 
 
 
@@ -880,7 +881,7 @@ evalues, maps, iterations, convergence=laplacianEM(Ω, 2; verbose=true, maxiter=
 function laplacianEigenMaps(Ω::𝕃{T}, q::Int;
                             tol::Real=0.,
                             maxiter::Int=300,
-                            verbose=false)                where T<:Real
+                            verbose=false) where T<:Real
     # make a check for q<size(Ω, 1)
     tol≈0. ? tolerance = √eps(T) : tolerance = tol
     (Λ, U, iter, conv) = powIter(Ω, q+1;
@@ -989,7 +990,7 @@ function spectralEmbedding(type::Type{T}, metric::Metric, 𝐏::ℍVector, q::In
                            maxiter::Int=300,
                            densityInvariant=false,
                            verbose=false,
-                           ⏩=true)                where T<:Real
+                           ⏩=true) where T<:Real
 
     tol≈0. ? tolerance = √eps(type) : tolerance = tol
     return (Λ, U, iter, conv) =

@@ -36,43 +36,47 @@
 # and `threads`=4, return Array{UnitRange{Int64},1}:[1:25, 26:50, 51:75, 76:99].
 # This function is called by threaded function `fVec`
 function _partitionLinRange4threads(n::Int, threads::Int=0)
-    threads<1 ? thr=nthreads() : thr=threads
+    threads < 1 ? thr = nthreads() : thr = threads
     #n<thr && throw(ArgumentError("PosDefManifold, internal function `_partitionLinRange4threads`: n must be larger than the number of threads"))
-	d=n ÷ thr # integer division
-	e=n % thr # reminder
-	range=Vector{Any}(undef, thr)
-	if e==0
-	  	for r=1:thr range[r]=d*r-d+1:d*r end
-	else
-		for r=1:thr-1 range[r]=d*r-d+1:d*r end
-		range[thr]=	d*(thr-1)+1:n
-	end
-	return range
+    d = n ÷ thr # integer division
+    e = n % thr # reminder
+    range = Vector{Any}(undef, thr)
+    if e == 0
+        for r = 1:thr
+            range[r] = d*r-d+1:d*r
+        end
+    else
+        for r = 1:thr-1
+            range[r] = d*r-d+1:d*r
+        end
+        range[thr] = d*(thr-1)+1:n
+    end
+    return range
 end
 
 
 function _GetThreads(n::Int, callingFunction::String)
-	thr=Threads.nthreads()
-	n<1 && throw(ArgumentError("PosDefManifold.jl, internal function `_GetThreads`: `n` must be a positive integer (n=($n))"))
-	return n>=thr ? thr : 1
-	# return min(n, thr) # this does not work
+    thr = Threads.nthreads()
+    n < 1 && throw(ArgumentError("PosDefManifold.jl, internal function `_GetThreads`: `n` must be a positive integer (n=($n))"))
+    return n >= thr ? thr : 1
+    # return min(n, thr) # this does not work
 end
 
 function _GetThreadsAndLinRanges(n::Int, callingFunction::String)
-	threads = _GetThreads(n, callingFunction)
-	ranges=_partitionLinRange4threads(n, threads)
-	return threads, ranges
+    threads = _GetThreads(n, callingFunction)
+    ranges = _partitionLinRange4threads(n, threads)
+    return threads, ranges
 end
 
 # used by function fvec
 function _fVec_common(𝐏::AnyMatrixVector;
-					  w::Vector=[], ✓w=false, allocs=[])
+    w::Vector=[], ✓w=false, allocs=[])
     threads, ranges = _GetThreadsAndLinRanges(dim(𝐏, 1), "fVec")
-	isempty(w) ? v=[] : v = _getWeights(w, ✓w)
-	#allocs==[] ? 𝐐=𝕄Vector([𝕄{type}(undef, n, n) for i=1:threads]) : 𝐐=allocs
-	#allocs==[] ? 𝐐=𝕄Vector(repeat([zeros(eltype(𝐏[1]), size(𝐏[1]))], threads)) : 𝐐=allocs
-	allocs==[] ? 𝐐=𝕄Vector(repeat([similar(𝐏[1])], threads)) : 𝐐=allocs
-	return (threads, ranges, 𝐐, v)
+    isempty(w) ? v = [] : v = _getWeights(w, ✓w)
+    #allocs==[] ? 𝐐=𝕄Vector([𝕄{type}(undef, n, n) for i=1:threads]) : 𝐐=allocs
+    #allocs==[] ? 𝐐=𝕄Vector(repeat([zeros(eltype(𝐏[1]), size(𝐏[1]))], threads)) : 𝐐=allocs
+    allocs == [] ? 𝐐 = 𝕄Vector(repeat([similar(𝐏[1])], threads)) : 𝐐 = allocs
+    return (threads, ranges, 𝐐, v)
 end
 
 #  ------------------------
@@ -252,6 +256,7 @@ sets=ℍVector₂(undef, k) # and then fill them
 
 """
 dim(X::AnyMatrix, d::Int) = 1<=d<=2 ? size(X, d) : 0
+
 dim(X::AnyMatrix) = size(X)
 
 function dim(vector::AnyMatrixVector, d::Int) # change to bold X
@@ -260,6 +265,7 @@ function dim(vector::AnyMatrixVector, d::Int) # change to bold X
     elseif          return 0
     end
 end
+
 dim(vector::AnyMatrixVector) = (length(vector), size(vector[1], 1), size(vector[1], 2))
 
 function dim(vector₂::AnyMatrixVector₂, d::Int)
@@ -269,6 +275,7 @@ function dim(vector₂::AnyMatrixVector₂, d::Int)
     elseif          return 0
     end
 end
+
 dim(vector₂::AnyMatrixVector₂) =
     (length(vector₂), collect(length(vec) for vec in vector₂), size(vector₂[1][1], 1), size(vector₂[1][1], 2))
 
@@ -317,7 +324,7 @@ end
 
 
 """
-	function isSquare(X::Matrix)=size(X, 1)==size(X, 2)
+    function isSquare(X::Matrix)=size(X, 1)==size(X, 2)
 
 Return true if matrix `X` is square, false otherwise.
 """
@@ -404,21 +411,21 @@ tr(Qc)  # must be 1
 
 """
 function tr1(X::AnyMatrix; tol::Real=0.)
-    tol>=0. ? tolerance=tol : tolerance = 0.
+    tol >= 0. ? tolerance = tol : tolerance = 0.
     trace = tr(X)
-	imagtr = imag(trace)
-	if abs(imagtr)>tolerance
-		@warn tr1Msg2 imagtr tolerance
-		return X
-	else
-		trace=real(trace)
-	end
-    if trace>tolerance
-		return X/trace
-	else
-		@warn tr1Msg1 trace tolerance
-		return X
-	end
+    imagtr = imag(trace)
+    if abs(imagtr) > tolerance
+        @warn tr1Msg2 imagtr tolerance
+        return X
+    else
+        trace = real(trace)
+    end
+    if trace > tolerance
+        return X / trace
+    else
+        @warn tr1Msg1 trace tolerance
+        return X
+    end
 end
 tr1Msg1="function tr1 in LinearAlgebra.jl of PosDefMaifold package: the trace of the input matrix is not greater than the tolerance."
 tr1Msg2="function tr1 in LinearAlgebra.jl of PosDefMaifold package: the imaginary part of the trace of the input matrix is greater than the tolerance."
@@ -460,17 +467,17 @@ S ≈ P ? println(" ⭐ ") : println(" ⛔ ")
 
 """
 function nearestPosDef(D::𝔻; tol::Real=0.)
-	tol>=0. ? tolerance=tol : tolerance = 0.
-	return 𝔻([D[i, i]>=tolerance ? D[i, i] : 0 for i=1:size(D, 1)])
+    tol >= 0. ? tolerance = tol : tolerance = 0.
+    return 𝔻([D[i, i] >= tolerance ? D[i, i] : 0 for i = 1:size(D, 1)])
 end
 
 function nearestPosDef(X::𝕄; tol::Real=0.)
-	size(X, 1)==size(X, 2) || throw(ArgumentError("PosDefManifold.jl, function nearestPosDef: the input matrix must be square"))
-    tol>=0. ? tolerance=tol : tolerance = 0.
-	F = eigen((X+X')/2)
-	λispos = ispos(F.values; 🔔=false, rev=false)
+    size(X, 1) == size(X, 2) || throw(ArgumentError("PosDefManifold.jl, function nearestPosDef: the input matrix must be square"))
+    tol >= 0. ? tolerance = tol : tolerance = 0.
+    F = eigen((X + X') / 2)
+    λispos = ispos(F.values; 🔔=false, rev=false)
     D = λispos ? 𝔻(F.values) : nearestPosDef(𝔻(F.values), tol=tolerance)
-	return λispos ? ℍ(F.vectors * D * F.vectors') : (F.vectors * D * F.vectors')
+    return λispos ? ℍ(F.vectors * D * F.vectors') : (F.vectors * D * F.vectors')
 end
 
 
@@ -502,14 +509,15 @@ U=nearestOrth(randn(5, 5))
 
 """
 function nearestOrthogonal(X::AnyMatrix)
-	size(X, 1)==size(X, 2) || throw(ArgumentError("PosDefManifold.jl, function nearestOrthogonal: the input matrix must be square"))
-	if X isa Diagonal return X
-	else
-		sv = svd(X)
-		return BLAS.gemm('N', 'N', sv.U, sv.Vt) # sv.U * sv.Vt
-	end
+    size(X, 1) == size(X, 2) || throw(ArgumentError("PosDefManifold.jl, function nearestOrthogonal: the input matrix must be square"))
+    if X isa Diagonal
+        return X
+    else
+        sv = svd(X)
+        return BLAS.gemm('N', 'N', sv.U, sv.Vt) # sv.U * sv.Vt
+    end
 end
-nearestOrth=nearestOrthogonal
+nearestOrth = nearestOrthogonal
 
 
 
@@ -560,21 +568,29 @@ normalizeCol!(X, 3:6, (2.0 + 0.5im)) # (4) divide columns 3 to 5 by (2.0 + 0.5im
 
 """
 function normalizeCol!(X::𝕄{T}, j::Int) where T<:RealOrComplex
-    w=colNorm(X, j)
-    for i=1:size(X, 1) @inbounds X[i, j]/=w end
+    w = colNorm(X, j)
+    for i = 1:size(X, 1)
+        @inbounds X[i, j] /= w
+    end
 end
 
 normalizeCol!(X::𝕄{T}, j::Int, by::Number) where T<:RealOrComplex =
-             for i=1:size(X, 1) @inbounds X[i, j]/=by end
+    for i = 1:size(X, 1)
+        @inbounds X[i, j] /= by
+    end
 
 function normalizeCol!(X::𝕄{T}, range::UnitRange) where T<:RealOrComplex
-    l=range[1]-1
-    w=[colNorm(X, j) for j in range]
-    for j in range normalizeCol!(X, j, w[j-l]) end
+    l = range[1] - 1
+    w = [colNorm(X, j) for j in range]
+    for j in range
+        normalizeCol!(X, j, w[j-l])
+    end
 end
 
 normalizeCol!(X::𝕄{T}, range::UnitRange, by::Number) where T<:RealOrComplex =
-             for j in range normalizeCol!(X, j, by) end
+    for j in range
+        normalizeCol!(X, j, by)
+    end
 
 
 #  -------------------------------
@@ -607,10 +623,7 @@ for example, in spectral functions to check that all eigenvalues are positive.
 
 The following are *<optional keyword arguments>*:
 
-- If ``rev=true`` the (1) elements in ``λ`` or (2) the diagonal elements
-in ``Λ`` will be chacked in reverse order.
-This is done for allowing a very fast check when the elements
-are sorted and it is known from where is best to start checking.
+- If ``rev=true`` the (1) elements in ``λ`` or (2) the diagonal elements in ``Λ`` will be chacked in reverse order. This is done for allowing a very fast check when the elements are sorted and it is known from where is best to start checking.
 
 If the result is ``false``:
 - if ``🔔=true`` a bell character will be printed. In most systems this will ring a bell on the computer.
@@ -630,29 +643,30 @@ ispos(a, msg="non-positive element found")
 ```
 """
 function ispos(λ::Vector{T};
-				tol::Real=0,
-				rev=true,
-				🔔=true,
-				msg="") 			where T<:Real
+        tol::Real=0,
+        rev=true,
+        🔔=true,
+        msg="") where T<:Real
 
-    tol==0 ? tolerance = √eps(T) : tolerance = tol
-    rev ? iterations = (length(λ):-1:1) : iterations=(1:length(λ))
+    tol == 0 ? tolerance = √eps(T) : tolerance = tol
+    rev ? iterations = (length(λ):-1:1) : iterations = (1:length(λ))
     for i in iterations
-        if λ[i]<tolerance
+        if λ[i] < tolerance
             🔔 && print('\a') # print('\a') sounds a bell
-            length(msg)>0 && @warn("function ispos(linearAlgebra.jl) "*msg* " at position $i")
-            return false; break
+            length(msg) > 0 && @warn("function ispos(linearAlgebra.jl) " * msg * " at position $i")
+            return false
+            break
         end
     end
     return true
 end
 
 ispos(Λ::Diagonal{T};
-		tol::Real=0,
-		rev=true,
-		🔔=true,
-		msg="") 					where T<:Real =
-      ispos( diag(Λ); tol=tol, rev=rev, 🔔=🔔, msg=msg)
+        tol::Real=0,
+        rev=true,
+        🔔=true,
+        msg="") where T<:Real =
+    ispos(diag(Λ); tol=tol, rev=rev, 🔔=🔔, msg=msg)
 
 
 #  -------------------------------
@@ -780,7 +794,6 @@ sum2=sumOfSqr(X)        # (1) sum of squares of all elements
 sum2=sumOfSqr(X, 1)     # (2) sum of squares of elements in column 1
 sum2=sumOfSqr(X, 2:4)   # (3) sum of squares of elements in column 2 to 4
 ```
-
 """
 sumOfSqr(A::Array) = 𝚺(abs2(a) for a in A)
 
@@ -789,7 +802,9 @@ function sumOfSqr(H::ℍ{T}) where T<:RealOrComplex
     s=real(T)(0)
     for j=1:size(H, 2)-1
         @inbounds s+=abs2(H[j, j])
-        for i=j+1:r @inbounds s+=2*abs2(H[i, j]) end
+        @simd for i=j+1:r 
+            @inbounds s+=2*abs2(H[i, j]) 
+        end
     end
     @inbounds s+=abs2(H[r, r])
     return s
@@ -797,8 +812,10 @@ end
 
 function sumOfSqr(L::𝕃{T}) where T<:RealOrComplex
     s=real(T)(0)
-    for j=1:size(L, 2), i=j:size(L, 1)
-        @inbounds s+=abs2(L[i, j])
+    for j=1:size(L, 2) 
+        @simd for i=j:size(L, 1)
+            @inbounds s+=abs2(L[i, j])
+        end
     end
     return s
 end
@@ -811,6 +828,61 @@ sumOfSqr(X::Union{𝕄{T}, ℍ{T}}, range::UnitRange) where T<:RealOrComplex =
          𝚺(sumOfSqr(X, j) for j in range)
 
 ss=sumOfSqr
+
+
+"""
+    (1) sumOfSqrDiff(H1, H2::ℍ{T})
+    (2) sumOfSqrDiff(L1, L2::𝕃{T})
+    (3) sumOfSqrDiff(D1, D2::𝔻{T})
+    for (1)-(3) above: where T<:RealOrComplex
+
+**alias**: `ssdiff`
+
+Return the sum of the squares of the elements of the difference of the arguments, i.e., of
+- (1) ``H_1-H_2`` (Hermitian matrices) 
+- (2) ``L_1-L_2`` (lower triangular matrices) 
+- (3) ``D_1-D_2`` (Diagonal matrices) 
+
+All methods support real and complex matrices.
+
+**Examples**
+```julia
+using PosDefManifold
+H1, H2 = randn(10, 20), randn(10, 20)
+sum2=sumOfSqrDiff(H1, H2) 
+```
+"""
+function sumOfSqrDiff(H1, H2::ℍ{T}) where T<:RealOrComplex
+    r=size(H1, 1)
+    s=real(T)(0)
+    for j=1:size(H1, 2)-1
+        @inbounds s+=abs2(H1[j, j]-H2[j, j])
+        for i=j+1:r @inbounds s+=2*abs2(H1[i, j]-H2[i, j]) end
+    end
+    @inbounds s+=abs2(H1[r, r]-H2[r, r])
+    return s
+end
+
+function sumOfSqrDiff(L1, L2::𝕃{T}) where T<:RealOrComplex
+    r=size(L1, 1)
+    s=real(T)(0)
+    for j=1:size(L1, 2)-1
+        @inbounds s+=abs2(L1[j, j]-L2[j, j])
+        for i=j+1:r @inbounds s+=abs2(L1[i, j]-L2[i, j]) end
+    end
+    @inbounds s+=abs2(L1[r, r]-L2[r, r])
+    return s
+end
+
+function sumOfSqrDiff(D1, D2::𝔻{T}) where T<:RealOrComplex
+    s=real(T)(0)
+    @simd for j=1:size(D1, 2)
+        @inbounds s+=abs2(D1[j, j]-D2[j, j])
+    end
+    return s
+end
+
+ssdiff=sumOfSqrDiff
 
 
 """
@@ -835,7 +907,6 @@ sumDiag2=sumOfSqrDiag(X) # (1)
 sumDiag2=sumOfSqrDiag(𝔻(X)) # (2)
 # 𝔻=LinearAlgebra.Diagonal is declated in the main module
 ```
-
 """
 sumOfSqrDiag(X::𝕄{T}) where T<:RealOrComplex =
     𝚺(abs2(X[i, i]) for i=1:minimum(size(X)))
@@ -844,6 +915,7 @@ sumOfSqrDiag(X::Union{𝔻{T}, ℍ{T}, 𝕃{T}}) where T<:RealOrComplex =
     𝚺(abs2(X[i, i]) for i=1:size(X, 1))
 
 ssd=sumOfSqrDiag
+
 
 """
     sumOfSqrTril(X::AnyMatrix, k::Int=0)
@@ -885,14 +957,17 @@ s=sumOfSqrTril(A, -1)
 s=sumOfSqrTril(A, 0)
 # 50.0 = 1²+2²+2²+4²+5²
 ```
-
 """
 function sumOfSqrTril(X::AnyMatrix, k::Int=0)
     (r, c) = size(X)
     X isa 𝕃 ? range = (1-r:0) : range = (1-r:c-1)
     if k in range
         s=eltype(X)(0)
-        for j=1:c, i=max(j-k, 1):r @inbounds s+=abs2(X[i, j]) end
+        for j=1:c
+            @simd for i=max(j-k, 1):r 
+                @inbounds s+=abs2(X[i, j]) 
+            end
+        end
         return real(s)
     else
         @error "in LinearAmgebraInP.sumOfSqrTRil function: argument k is out of bounds"
@@ -936,7 +1011,7 @@ and
 ``\\textrm{tr}(PQP)=\\textrm{tr}(P^{2}Q)`` (see example below).
 
 
-**See**: [trace](https://bit.ly/2HoOLiM).
+**See**: [tr](https://bit.ly/2HoOLiM).
 
 **See also**: [`DiagOfProd`](@ref), [`tr1`](@ref).
 
@@ -962,13 +1037,19 @@ function tr(P::ℍ{T}, M::𝕄{T}) where T<:RealOrComplex
             break
         end
     end
-    if OK return real(𝚺(λ)) else return 𝚺(λ) end
+    if OK 
+        return real(𝚺(λ)) 
+    else 
+        return 𝚺(λ) 
+    end
 end
 
 
 function tr(D::𝔻{T}, H::Union{ℍ{T}, 𝕄{T}}) where T<:RealOrComplex
     s=T(0)
-    for i=1:size(D, 1) @inbounds s += D[i, i] * H[i, i] end
+    @simd for i=1:size(D, 1) 
+        @inbounds s += D[i, i] * H[i, i] 
+    end
     return s
 end
 
@@ -1029,30 +1110,33 @@ q1 ≈ q2 ? println(" ⭐ ") : println(" ⛔ ")
 
 """
 function quadraticForm(v::Vector{T}, P::ℍ{T}) where T<:Real
-	r=length(v)
-    s=T(0)
-    for j=1:r-1
-        @inbounds s+=(v[j]^2 * P[j, j])
-        for i=j+1:r @inbounds s+=2*v[i]*v[j]*P[i, j]  end
+    r = length(v)
+    s = T(0)
+    for j = 1:r-1
+        @inbounds s += (v[j]^2 * P[j, j])
+        @simd for i = j+1:r
+            @inbounds s += 2 * v[i] * v[j] * P[i, j]
+        end
     end
-    @inbounds s+=(v[r]^2 * P[r, r])
+    @inbounds s += (v[r]^2 * P[r, r])
     return s
 end
 
-function quadraticForm(v::Vector{T}, X::𝕄{T},
-	                   forceLower::Bool=false) where T<: Real
-	if forceLower
-		r=length(v)
-		s=T(0)
-		for j=1:r-1
-			@inbounds s+=(v[j]^2 * X[j, j])
-			for i=j+1:r @inbounds s+=2*v[i]*v[j]*X[i, j]  end
-		end
-		@inbounds s+=(v[r]^2 * X[r, r])
-		return s
-	else
-		return v'*X*v
-	end
+function quadraticForm(v::Vector{T}, X::𝕄{T}, forceLower::Bool=false) where T<:Real
+    if forceLower
+        r = length(v)
+        s = T(0)
+        for j = 1:r-1
+            @inbounds s += (v[j]^2 * X[j, j])
+            @simd for i = j+1:r
+                @inbounds s += 2 * v[i] * v[j] * X[i, j]
+            end
+        end
+        @inbounds s += (v[r]^2 * X[r, r])
+        return s
+    else
+        return v' * X * v
+    end
 end
 
 quadraticForm(v::Vector{T}, X::Union{𝕄{T}, ℍ{T}, 𝕃{T}}) where T<:Complex = v'*X*v
@@ -1062,7 +1146,7 @@ function quadraticForm(v::Vector{T}, L::𝕃{T}) where T<:Real
     s=T(0)
     for j=1:r-1
         @inbounds s+=(v[j]^2 * L[j, j])
-        for i=j+1:r @inbounds s+=2*v[i]*v[j]*L[i, j]  end
+        @simd for i=j+1:r @inbounds s+=2*v[i]*v[j]*L[i, j] end
     end
     @inbounds s+=(v[r]^2 * L[r, r])
     return s
@@ -1153,10 +1237,12 @@ D=fDiag(inv, P, -1)
 """
 fDiag(func::Function, X::𝔻{T}, k::Int=0) where T<:RealOrComplex = 𝔻(func.(diag(X)))
 
-function fDiag(func::Function, X::𝕃{T}, k::Int=0)  where T<:RealOrComplex
- if k>0 @error("in function fDiag (linearAlgebra.jl): k argument cannot be positive.")
- else return 𝔻(func.(diag(X, k)))
- end
+function fDiag(func::Function, X::𝕃{T}, k::Int=0) where T<:RealOrComplex
+    if k > 0
+        @error("in function fDiag (linearAlgebra.jl): k argument cannot be positive.")
+    else
+        return 𝔻(func.(diag(X, k)))
+    end
 end
 
 fDiag(func::Function, X::Union{𝕄{T}, ℍ{T}}, k::Int=0)  where T<:RealOrComplex =
@@ -1264,7 +1350,7 @@ or
 
 where ``f`` is either the `mean` or the `sum` standard julia functions
 and ``g`` is whatever matrix function
-applying to each matrix ``P_k``, such as `exp`, `log, `sqrt`, etc,
+applying to each matrix ``P_k``, such as `exp`, `log`, `sqrt`, etc,
 and [anonymous functions](https://docs.julialang.org/en/v1/manual/functions/#man-anonymous-functions-1).
 
 This function is **multi-threaded**. It works by partitioning the ``k``
@@ -1278,7 +1364,6 @@ multiple of the number of threads Julia is instructed to use.
 For this latter, see [Threads](@ref).
 
 !!! note "Nota Bene"
-
     Contrarily to Julia `mean` and `sum` function (v 1.1.0) the `fVec` function
     returns a matrix of the same type of the matrices in ``𝐏``.
 
@@ -1345,9 +1430,9 @@ using BenchmarkTools
 
 """
 function fVec(f::Function, g::Function, 𝐏::AnyMatrixVector;
-			  w::Vector=[],
-			  ✓w=false,
-			  allocs=[])
+        w::Vector=[],
+        ✓w=false,
+        allocs=[])
     f≠mean && f≠sum && begin
 	    @error "the `f` argument of the fVec function must be `mean` or `sum`"
 		return
@@ -1357,11 +1442,11 @@ function fVec(f::Function, g::Function, 𝐏::AnyMatrixVector;
 	#println("ranges ", ranges)
 
 	if isempty(w)
-		g==identity ?   (@threads for r=1:threads 𝐐[r]=sum(𝐏[i] for i in ranges[r]) end) :
- 						(@threads for r=1:threads 𝐐[r]=sum(g(𝐏[i]) for i in ranges[r]) end)
+		g==identity ? (@threads for r=1:threads 𝐐[r]=sum(𝐏[i] for i in ranges[r]) end) :
+ 			(@threads for r=1:threads 𝐐[r]=sum(g(𝐏[i]) for i in ranges[r]) end)
 	else
-		g==identity ?   (@threads for r=1:threads 𝐐[r]=sum(v[i]*𝐏[i] for i in ranges[r]) end) :
-						(@threads for r=1:threads 𝐐[r]=sum(v[i]*g(𝐏[i]) for i in ranges[r]) end)
+		g==identity ? (@threads for r=1:threads 𝐐[r]=sum(v[i]*𝐏[i] for i in ranges[r]) end) :
+			(@threads for r=1:threads 𝐐[r]=sum(v[i]*g(𝐏[i]) for i in ranges[r]) end)
 	end
 	if f==sum
     	return threads==1 ? typeofMatrix(𝐏)(𝐐[1]) : typeofMatrix(𝐏)(sum(𝐐))
@@ -1373,10 +1458,10 @@ end
 
 
 fVec(f::Function, 𝐏::AnyMatrixVector;
-     w::Vector=[],
-	 ✓w=false,
-	 allocs=[]) =
-  fVec(f, identity, 𝐏; w=w, ✓w=✓w, allocs=allocs)
+        w::Vector=[],
+        ✓w=false,
+        allocs=[]) =
+    fVec(f, identity, 𝐏; w=w, ✓w=✓w, allocs=allocs)
 
 @doc raw"""
 	(1) congruence(B::AnyMatrix, P::AnyMatrix, matrixType)
@@ -1522,48 +1607,60 @@ Qset[2][2]≈U[2]*Pset[2][2]*U[2]' ? println("⭐") : println("⛔")
 congruence(B::AnyMatrix, P::AnyMatrix, matrixType) = matrixType(B*P*B')
 
 function congruence(B::AnyMatrix, 𝐏::AnyMatrixVector, matrixVectorType)
-	k, 𝕋 = dim(𝐏, 1), typeofMat(matrixVectorType(undef, 0))
+    k, 𝕋 = dim(𝐏, 1), typeofMat(matrixVectorType(undef, 0))
 
-	threads = _GetThreads(k, "congruence")
-	if threads==1
-		return matrixVectorType([congruence(B, P, 𝕋) for P in 𝐏])
-	else
-		𝐐=matrixVectorType(undef, k)
-		@threads for i=1:k 𝐐[i] = congruence(B, 𝐏[i], 𝕋) end
-		return 𝐐
-	end
+    threads = _GetThreads(k, "congruence")
+    if threads == 1
+        return matrixVectorType([congruence(B, P, 𝕋) for P in 𝐏])
+    else
+        𝐐 = matrixVectorType(undef, k)
+        @threads for i = 1:k
+            𝐐[i] = congruence(B, 𝐏[i], 𝕋)
+        end
+        return 𝐐
+    end
 end
 
 
 function congruence(B::AnyMatrix, 𝑷::AnyMatrixVector₂, matrixVector₂Type)
-	m, k, 𝕋 = dim(𝑷, 1), dim(𝑷, 2), typeofVec(matrixVector₂Type(undef, 0)) #NB: k is a vector
-	threads = _GetThreads(m, "congruence")
-	𝓠=matrixVector₂Type(undef, m)
+    m, k, 𝕋 = dim(𝑷, 1), dim(𝑷, 2), typeofVec(matrixVector₂Type(undef, 0)) #NB: k is a vector
+    threads = _GetThreads(m, "congruence")
+    𝓠 = matrixVector₂Type(undef, m)
 
-	if threads==1
-		for i=1:m 𝓠[i] = congruence(B, 𝑷[i], 𝕋) end
-	else
-		@threads for i=1:m 𝓠[i] = congruence(B, 𝑷[i], 𝕋) end
-	end
-	return 𝓠
+    if threads == 1
+        for i = 1:m
+            𝓠[i] = congruence(B, 𝑷[i], 𝕋)
+        end
+    else
+        @threads for i = 1:m
+            𝓠[i] = congruence(B, 𝑷[i], 𝕋)
+        end
+    end
+    return 𝓠
 end
 
 
 function congruence(𝐁::AnyMatrixVector, 𝑷::AnyMatrixVector₂, matrixVector₂Type)
-	m, k, dummy = dim(𝑷, 1), dim(𝑷, 2), matrixVector₂Type(undef, 0) #NB: k is a vector
-    𝕊, 𝕋=typeofMat(dummy), typeofVec(dummy)
-	threads = _GetThreads(sum(m*k), "congruence")
-	𝓠=matrixVector₂Type(undef, m)
-	for i=1:m 𝓠[i]=𝕋(undef, k[i]) end
+    m, k, dummy = dim(𝑷, 1), dim(𝑷, 2), matrixVector₂Type(undef, 0) #NB: k is a vector
+    𝕊, 𝕋 = typeofMat(dummy), typeofVec(dummy)
+    threads = _GetThreads(sum(m * k), "congruence")
+    𝓠 = matrixVector₂Type(undef, m)
+    for i = 1:m
+        𝓠[i] = 𝕋(undef, k[i])
+    end
 
-	if threads==1
-		for i=1:m, j=1:k[i] 𝓠[i][j] = 𝕊(𝐁[i]*𝑷[i][j]*𝐁[j]') end
-	else
-		@threads for i=1:m
-			@threads for j=1:k[i] 𝓠[i][j] = 𝕊(𝐁[i]*𝑷[i][j]*𝐁[j]') end
-		end
-	end
-	return 𝓠
+    if threads == 1
+        for i = 1:m, j = 1:k[i]
+            𝓠[i][j] = 𝕊(𝐁[i] * 𝑷[i][j] * 𝐁[j]')
+        end
+    else
+        @threads for i = 1:m
+            @threads for j = 1:k[i]
+                𝓠[i][j] = 𝕊(𝐁[i] * 𝑷[i][j] * 𝐁[j]')
+            end
+        end
+    end
+    return 𝓠
 end
 
 
@@ -1890,11 +1987,11 @@ or an Hermitian matrix if it is complex.
 This option is available only for real matrices (see below).
 
 The following are *<optional keyword arguments>*:
-- `tol is the tolerance for the convergence of the power method (see below),
-- `maxiter is the maximum number of iterations allowed for the power method,
-- if `verbose=true, the convergence of all iterations will be printed,
-- if `evalues=true, return the 4-tuple ``(Λ, U, iterations, covergence)``,
-- if `evalues=false return the 3-tuple ``(U, iterations, covergence)``.
+- `tol` is the tolerance for the convergence of the power method (see below),
+- `maxiter` is the maximum number of iterations allowed for the power method,
+- if `verbose`=true, the convergence of all iterations will be printed,
+- if `evalues`=true, return the 4-tuple ``(Λ, U, iterations, covergence)``,
+- if `evalues`=false return the 3-tuple ``(U, iterations, covergence)``.
 
 !!! note "Nota Bene"
     Differently from the [`evd`](@ref) function, the eigenvectors and
@@ -1935,18 +2032,18 @@ L=𝕃(randP(10))
 
 """
 function powerIterations(H::𝕄{T}, q::Int;
-  						evalues=false,
-						tol::Real=0,
-						maxiter::Int=300,
-						verbose=false) 			where T<:RealOrComplex
+        evalues=false,
+        tol::Real=0,
+        maxiter::Int=300,
+        verbose=false) where T<:RealOrComplex
 
     (n, sqrtn, type) = size(H, 1), √(size(H, 1)), eltype(H)
     tol==0 ? tolerance = √eps(real(type))*1e2 : tolerance = tol
-    msg1="Power Iterations reached a saddle point at:"
-    msg2="Power Iterations reached the max number of iterations at:"
-    U=randn(type, n, q) # initialization
+    msg1 = "Power Iterations reached a saddle point at:"
+    msg2 = "Power Iterations reached the max number of iterations at:"
+    U = randn(type, n, q) # initialization
     normalizeCol!(U, 1:q)
-    💡=similar(U) # 💡 is the poweriteration matrix
+    💡 = similar(U) # 💡 is the poweriteration matrix
     (iter, conv, oldconv) = 1, 0., maxpos
     verbose && @info("Running Power Iterations...")
     while true
@@ -1973,20 +2070,20 @@ end
 
 
 powerIterations(H::ℍ{T}, q::Int;
-    			evalues=false,
-				tol::Real=0,
-				maxiter::Int=300,
-				verbose=false) 			where T<:RealOrComplex =
+        evalues=false,
+        tol::Real=0,
+        maxiter::Int=300,
+        verbose=false) where T<:RealOrComplex =
     powIter(Matrix(H), q; evalues=evalues, tol=tol, maxiter=maxiter, verbose=verbose)
 
 powerIterations(L::𝕃{T}, q::Int;
-        		evalues=false,
-				tol::Real=0,
-				maxiter::Int=300,
-				verbose=false) 			where T<:Real =
+        evalues=false,
+        tol::Real=0,
+        maxiter::Int=300,
+        verbose=false) where T<:Real =
     powIter(𝕄(L), q; evalues=evalues, tol=tol, maxiter=maxiter, verbose=verbose)
 
-powIter=powerIterations
+powIter = powerIterations
 
 
 #  -----------------------------------------------
@@ -2141,59 +2238,64 @@ choInv(P::AbstractArray{T};
 		kind::Symbol = :LLt, tol::Real = √eps(T)) where T<:RealOrComplex
 
 The same thing as [`choInv`](@ref), but destroys the input matrix.
-This function does nt require copying the input matrix,
+This function does not require copying the input matrix,
 thus it is slightly faster.
 """
 function choInv!(P::AbstractArray{T};
 			  	 kind::Symbol = :LLt, tol::Real = √eps(T)) where T<:Real
 
-	P isa Matrix || P isa LowerTriangular || throw(ArgumentError("function choInv!: input matrix must be of the Matrix or LowerTriangular type. Call `choinv` instead"))
-	n 	= size(P, 1)
-	L₁ 	= kind==:LDLt ? UnitLowerTriangular(zeros(T, n, n)) : LowerTriangular(Matrix{T}(I, n, n))
-	U₁⁻¹= kind==:LDLt ? UnitUpperTriangular(zeros(T, n, n)) : UpperTriangular(Matrix{T}(I, n, n))
+    P isa Matrix || P isa LowerTriangular || throw(ArgumentError("function choInv!: input matrix must be of the Matrix or LowerTriangular type. Call `choinv` instead"))
+    n = size(P, 1)
+    L₁ = kind == :LDLt ? UnitLowerTriangular(zeros(T, n, n)) : LowerTriangular(Matrix{T}(I, n, n))
+    U₁⁻¹ = kind == :LDLt ? UnitUpperTriangular(zeros(T, n, n)) : UpperTriangular(Matrix{T}(I, n, n))
 
-	@inbounds begin
-		for j=1:n-1
-			P[j, j]<tol && throw(LinearAlgebra.PosDefException(1))
-			for i=j+1:n
-				θ = P[i, j] / -P[j, j]
-				for k=i:n P[k, i] += θ * P[k, j] end # update A and write D
-				L₁[i, j] = -θ
-				for k=1:j-1 U₁⁻¹[k, i] += θ * U₁⁻¹[k, j] end
-				U₁⁻¹[j, i] = θ
-			end
-		end
-	end
+    
+    for j = 1:n-1
+        @inbounds P[j, j] < tol && throw(LinearAlgebra.PosDefException(1))
+        for i = j+1:n
+            @inbounds θ = P[i, j] / -P[j, j]
+            @simd for k = i:n
+                @inbounds P[k, i] += θ * P[k, j]
+            end # update A and write D
+            @inbounds L₁[i, j] = -θ
+            @simd for k = 1:j-1
+                @inbounds U₁⁻¹[k, i] += θ * U₁⁻¹[k, j]
+            end
+            @inbounds U₁⁻¹[j, i] = θ
+        end
+    end
 
-	kind == :LDLt ? (return L₁, Diagonal(P), U₁⁻¹) : begin
-		D=sqrt.(Diagonal(P))
-		return L₁*D, U₁⁻¹*inv(D)
-	end
+    kind == :LDLt ? (return L₁, Diagonal(P), U₁⁻¹) : begin
+        D = sqrt.(Diagonal(P))
+        return L₁ * D, U₁⁻¹ * inv(D)
+    end
 end
 
 
 function choInv!(P::AbstractArray{T};
-			  	 kind::Symbol=:LLt, tol::Real = √eps(real(T))) where T<:Complex
-	P isa Matrix || P isa LowerTriangular || throw(ArgumentError("function choInv!: input matrix must be of the Matrix or LowerTriangular type Call `choInv` instead"))
-	n 	= size(P, 1)
-	L₁ 	= kind==:LDLt ? UnitLowerTriangular(zeros(T, n, n)) : LowerTriangular(Matrix{T}(I, n, n))
-	U₁⁻¹= kind==:LDLt ? UnitUpperTriangular(zeros(T, n, n)) : UpperTriangular(Matrix{T}(I, n, n))
+    kind::Symbol=:LLt, tol::Real=√eps(real(T))) where T<:Complex
+    P isa Matrix || P isa LowerTriangular || throw(ArgumentError("function choInv!: input matrix must be of the Matrix or LowerTriangular type Call `choInv` instead"))
+    n = size(P, 1)
+    L₁ = kind == :LDLt ? UnitLowerTriangular(zeros(T, n, n)) : LowerTriangular(Matrix{T}(I, n, n))
+    U₁⁻¹ = kind == :LDLt ? UnitUpperTriangular(zeros(T, n, n)) : UpperTriangular(Matrix{T}(I, n, n))
 
-	@inbounds begin
-		for j=1:n-1
-			abs2(P[j, j])<tol && throw(LinearAlgebra.PosDefException(1))
-			for i=j+1:n
-				θ = conj(P[i, j] / -P[j, j])
-				for k=i:n P[k, i] += θ * P[k, j] end # update A and write D
-				L₁[i, j] = conj(-θ)
-				for k=1:j-1 U₁⁻¹[k, i] += θ * U₁⁻¹[k, j] end
-				U₁⁻¹[j, i] = θ
-			end
-		end
-	end
+    for j = 1:n-1
+        @inbounds abs2(P[j, j]) < tol && throw(LinearAlgebra.PosDefException(1))
+        for i = j+1:n
+            @inbounds θ = conj(P[i, j] / -P[j, j])
+            @simd for k = i:n
+                @inbounds P[k, i] += θ * P[k, j]
+            end # update A and write D
+            @inbounds L₁[i, j] = conj(-θ)
+            @simd for k = 1:j-1
+                @inbounds U₁⁻¹[k, i] += θ * U₁⁻¹[k, j]
+            end
+            @inbounds U₁⁻¹[j, i] = θ
+        end
+    end
 
-	kind == :LDLt ? (return L₁, Diagonal(P), U₁⁻¹) : begin
-		D=sqrt.(Diagonal(P))
-		return L₁*D, U₁⁻¹*inv(D)
-	end
+    kind == :LDLt ? (return L₁, Diagonal(P), U₁⁻¹) : begin
+        D = sqrt.(Diagonal(P))
+        return L₁ * D, U₁⁻¹ * inv(D)
+    end
 end

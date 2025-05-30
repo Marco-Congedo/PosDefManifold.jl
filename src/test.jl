@@ -132,13 +132,13 @@ function tests();
 
     name="colProd"; newTest(name)
     j1=1; j2=rand(2:n);
-    s=𝚺(T[:, j1].*T[:, j2])
+    s=sum(T[:, j1].*T[:, j2])
     colProd(T, j1, j2) ≈ s ? OK() : OH(name*" Method 1 real case")
-    s=𝚺(conj(TC[:, j1]).*TC[:, j2])
+    s=sum(conj(TC[:, j1]).*TC[:, j2])
     colProd(TC, j1, j2) ≈ s ? OK() : OH(name*" Method 1 complex case")
-    s=𝚺(T[:, j1].*T2[:, j2])
+    s=sum(T[:, j1].*T2[:, j2])
     colProd(T, T2, j1, j2) ≈ s ? OK() : OH(name*" Method 2 real case")
-    s=𝚺(conj(TC[:, j1]).*TC2[:, j2])
+    s=sum(conj(TC[:, j1]).*TC2[:, j2])
     colProd(TC, TC2, j1, j2) ≈ s ? OK() : OH(name*" Method 2 complex case")
 
 
@@ -160,7 +160,14 @@ function tests();
     sumOfSqr(PC_, 2)      ≈ 24.08 ? OK() : OH(name*" Method 5 complex case")
     sumOfSqr(PC_, 1:3)    ≈ 68.18 ? OK() : OH(name*" Method 6 complex case")
 
-
+    name="sumOfSqrDiff"; newTest(name)
+    sumOfSqrDiff(P, Q)  ≈ sumOfSqr(P-Q) ? OK() : OH(name*" Method 1 real case")
+    sumOfSqrDiff(𝕃(P), 𝕃(Q))  ≈ sumOfSqr(𝕃(P)-𝕃(Q)) ? OK() : OH(name*" Method 2 real case")
+    sumOfSqrDiff(𝔻(P), 𝔻(Q))  ≈ sumOfSqr(𝔻(P)-𝔻(Q)) ? OK() : OH(name*" Method 3 real case")
+    sumOfSqrDiff(PC, QC)  ≈ sumOfSqr(PC-QC) ? OK() : OH(name*" Method 1 complex case")
+    sumOfSqrDiff(𝕃(PC), 𝕃(QC))  ≈ sumOfSqr(𝕃(PC)-𝕃(QC)) ? OK() : OH(name*" Method 2 complex case")
+    sumOfSqrDiff(𝔻(PC), 𝔻(QC))  ≈ sumOfSqr(𝔻(PC)-𝔻(QC)) ? OK() : OH(name*" Method 3 complex case")    
+    
     name="sumOfSqrDiag"; newTest(name)
     sumOfSqrDiag(P_)    ≈ 50 ? OK() : OH(name*" Method 1 real case")
     A=randn(ComplexF64, 3, 3)
@@ -404,15 +411,15 @@ function tests();
     signalVar/(signalPlusNoiseVar-signalVar) ≈ 10 ? OK() : OH(name*" Complex Input Method 1")
 
     𝐏2=randP(5, 20)
-    signalVar=𝚺(tr(P) for P in 𝐏2)
+    signalVar=sum(tr(P) for P in 𝐏2)
     regularize!(𝐏2, SNR=10)
-    signalPlusNoiseVar=𝚺(tr(P) for P in 𝐏2)
+    signalPlusNoiseVar=sum(tr(P) for P in 𝐏2)
     signalVar/(signalPlusNoiseVar-signalVar) ≈ 10 ? OK() : OH(name*" Real Input Method 2")
 
     𝐏C2=randP(ComplexF64, 5, 20)
-    signalVar=𝚺(tr(P) for P in 𝐏C2)
+    signalVar=sum(tr(P) for P in 𝐏C2)
     regularize!(𝐏C2, SNR=10)
-    signalPlusNoiseVar=𝚺(tr(P) for P in 𝐏C2)
+    signalPlusNoiseVar=sum(tr(P) for P in 𝐏C2)
     signalVar/(signalPlusNoiseVar-signalVar) ≈ 10 ? OK() : OH(name*" Real Input Method 2")
 
 
