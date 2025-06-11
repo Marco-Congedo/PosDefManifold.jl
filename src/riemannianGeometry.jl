@@ -934,10 +934,11 @@ Return the 4-tuple `(Λ, U, iterations, convergence)`, where:
 - ``𝐏`` is a 1d array of ``k`` positive matrices of [ℍVector type](@ref),
 - ``q`` is the dimension of the Laplacian eigen maps,
 - ``epsilon`` is the bandwidth of the Laplacian (see [`laplacian`](@ref));
-- The following *<optional keyword argument>* applyies for computing the inter-distances:
-* if `⏩=true` (default) the computation of inter-distances is multi-threaded.
+
+The following *<optional keyword argument>* applyies for computing the inter-distances:
+- if `⏩=true` (default) the computation of inter-distances is multi-threaded.
 - The following *<optional keyword argument>* applyies to the computation of the Laplacian by the [`laplacian`](@ref) function:
-* if `densityInvariant=true` the density-invariant Laplacian is computed (see [`laplacian`](@ref)).
+- if `densityInvariant=true` the density-invariant Laplacian is computed (see [`laplacian`](@ref)).
 - The following are *<optional keyword arguments>* for the power method iterative algorithm invoked by [`laplacianEigenMaps`](@ref):
     * `tol` is the tolerance for convergence of the power method (see below),
     * `maxiter` is the maximum number of iterations allowed for the power method,
