@@ -22,19 +22,13 @@
 
 begin
     # change the 'juliaCodeDir' path to the folder where your projects are
-    juliaCodeDir= homedir()*"\\Documents\\Documenti\\Code\\julia\\"
+    juliaCodeDir= homedir()*"\\Documents\\Code\\julia\\"
     projectName = "PosDefManifold"
     srcDir      = juliaCodeDir*projectName*"\\src\\"
     docsDir     = juliaCodeDir*projectName*"\\docs\\"
 
     push!(LOAD_PATH, srcDir)
 
-    using Documenter, LinearAlgebra, Statistics, Base.Threads,
-          Revise, PosDefManifold
+    using Revise, PosDefManifold
 end
 
-# for compiling the documentation
-cd(docsDir);
-clipboard("""makedocs(sitename="PosDefManifold", modules=[PosDefManifold])""")
-@info("\nhit CTRL+V+ENTER on the REPL for building the documentation.");
-#makedocs(sitename="PosDefManifold", modules=[PosDefManifold])
