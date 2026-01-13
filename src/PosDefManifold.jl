@@ -1,5 +1,5 @@
 #   Main Module of the  PosDefManifold Package for julia language
-#   v0.5.3 - May 2025
+#   v0.5.4 - Jan 2026
 
 #   MIT License
 #   Copyright (c) 2019-25, Marco Congedo, CNRS, Grenobe, France:
@@ -8,6 +8,8 @@
 # __precompile__()
 
 module PosDefManifold
+
+using PrecompileSignatures: @precompile_signatures
 
 using LinearAlgebra, Statistics, Base.Threads
 
@@ -214,5 +216,8 @@ println(" runs on kernel ",Sys.KERNEL," with word size ",Sys.WORD_SIZE,".")
 println(" CPU  Threads: ", separatorFont, Sys.CPU_THREADS, defaultFont)
 println(" Base.Threads: ", separatorFont, "$(Threads.nthreads())", defaultFont)
 println(" BLAS Threads: ", separatorFont, "$(BLAS.get_num_threads())", "\n", defaultFont)
+
+# Generate and run `precompile` directives.
+@precompile_signatures(PosDefManifold)
 
 end # module

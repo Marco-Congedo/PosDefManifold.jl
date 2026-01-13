@@ -8,7 +8,11 @@ using PosDefManifold
 
 makedocs(
    sitename="PosDefManifold",
-   format = Documenter.HTML((prettyurls = false)), # ELIMINATE pretty URL for deploying
+   remotes = nothing, 
+   format = Documenter.HTML(
+        prettyurls = false,
+        edit_link = nothing
+    ), # ELIMINATE prettyurls for deploying
    authors="Marco Congedo, CNRS, Grenoble, France",
    modules=[PosDefManifold],
    pages =  [
@@ -23,8 +27,3 @@ makedocs(
    ]
 )
 
-deploydocs(
-    repo = "github.com/Marco-Congedo/PosDefManifold.jl.git",
-    target = "build",
-    devurl = "dev",
-)

@@ -299,16 +299,24 @@ The second argument is either an integer or a vector of integers.
  **Examples**
 ```julia
 a=randn(5)
-b=remove(a, 2)
+b=remove(a, 2) # remove second element
 b=remove(a, collect(1:3)) # remove rows 1 to 3
+
 A=randn(3, 3)
-B=remove(A, 2)
-B=remove(A, 2; dims=2)
+B=remove(A, 2) # remove second row
+B=remove(A, 2; dims=2) # remove second column
+
 A=randn(5, 5)
 B=remove(A, collect(1:2:5)) # remove rows 1, 3 and 5
-C=remove(A, [1, 4])
+C=remove(A, [1, 4]) # remove rows 1 and 4
+
+# remove columns 2, 3, 8, 9, 10
 A=randn(10, 10)
-A=remove(A, [collect(2:3); collect(8:10)]; dims=2)
+B=remove(A, [collect(2:3); collect(8:10)]; dims=2)
+
+# remove every other sample (decimation by a factor of 2)
+A=randn(10, 10)
+B=remove(A, collect(1:2:size(A, 1)); dims=1)
 ```
 
 """
