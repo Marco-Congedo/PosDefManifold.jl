@@ -1159,9 +1159,9 @@ Pset=randP(20, 160)
 """
 mean(metric::Metric, P::ℍ{T}, Q::ℍ{T}) where T<:RealOrComplex =
     if metric==Fisher && size(P, 1)>=120 #(faster proc: Congedo et al., 2005)
-        λ, B=eigen(P, Q) # the eigenvalues of Q are all 1.0 after diagonalization
-        A=(Diagonal(λ))^(0.25)*inv(B)
-        return ℍ(A'*A)
+        λ, B=eigen(P, Q) # the eigenvalues of Q are all 1.0 after joint diagonalization
+        C=(Q*B)*(Diagonal(λ))^(0.25) # C = Λ * (B' * Q), where A = inv(B) = (B' * Q) by gevd construction
+        return ℍ(C*C')
     else
         return geodesic(metric, P, Q, 0.5)
     end
