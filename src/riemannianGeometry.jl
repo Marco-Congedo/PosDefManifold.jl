@@ -164,10 +164,16 @@ function geodesic(metric::Metric, P::ℍ{T}, Q::ℍ{T}, a::Real) where T<:RealOr
 
     elseif  metric==Fisher
             # Cholesky-Schur form (faster):
-            L = cholesky(P, check=true)
-            U⁻¹ = inv(L.U)
-            F = schur(U⁻¹' * Q * U⁻¹)
-            return ℍ(L.U' * (F.Z * F.T^a * F.Z') * L.U)
+            if size(P, 1) > 200
+                L = cholesky(P, check=true)
+                U⁻¹ = inv(L.U)
+                F = schur(U⁻¹' * Q * U⁻¹)
+                return ℍ(L.U' * (F.Z * F.T^a * F.Z') * L.U)
+            else # compute in one pass (see linearAlgebra.jl), avoid inversion, but slower for big matrices
+                L, U⁻¹ = choInv(P) # because doesn't use the block form of LAPACK
+                F = schur(U⁻¹' * Q * U⁻¹)
+                return ℍ(L * (F.Z * F.T^a * F.Z') * L')
+            end
 
             # classical form (slower):
             #P½, P⁻½ = pow(P, 0.5, -0.5)
@@ -1158,10 +1164,14 @@ Pset=randP(20, 160)
 ```
 """
 function mean(metric::Metric, P::ℍ{T}, Q::ℍ{T}) where T<:RealOrComplex
-    #(faster proc: Congedo et al., 2005)
-    λ, B=eigen(P, Q) # the eigenvalues of Q are all 1.0 after joint diagonalization
-    C=(Q*B)*(Diagonal(λ))^(0.25) # C = Λ * (B' * Q), where A = inv(B) = (B' * Q) by gevd construction
-    return ℍ(C*C')
+    if mean==Fisher
+        #(faster proc: Congedo et al., 2005)
+        λ, B=eigen(P, Q) # the eigenvalues of Q are all 1.0 after joint diagonalization
+        C=(Q*B)*(Diagonal(λ))^(0.25) # C = Λ * (B' * Q), where A = inv(B) = (B' * Q) by gevd construction
+        return ℍ(C*C')
+    else
+        return geodesic(metric, P, Q, 0.5)
+    end
 end
 
 mean(metric::Metric, D::𝔻{T}, E::𝔻{T}) where T<:Real = geodesic(metric, D, E, 0.5)
@@ -2956,4 +2966,39 @@ function procrustes(P::ℍ{T}, Q::ℍ{T}, extremum="min") where T<:RealOrComplex
             return Qup*Pdown'
     else    @warn "in RiemannianGeometryP.procrustes: the argument 'extremum' is incorrect."
     end
+end
+
+
+"""
+```julia
+    coregistration(𝐏::ℍVector)
+```
+Riemannian co-registration of J. Schiavon (doctoral thesis at University of Padova, Italy, 2022, Ch. 3).
+
+The method co-register the input set of matrices ``𝐏`` by means of a rotation (orthogonal congruence), 
+finding a new mean ``G`` for them such that
+- the dispersion of the co-registered data is minimized
+- the rotational effort to co-register them is as close as possible to the identity matrix.
+
+Return ``(G, Γ, 𝐂)``, where 
+- ``𝐂``is the vector of the matrices in 𝐏 after co-registration
+- ``G`` is the Fisher mean of the co-registered matrices 
+- Γ is a matrix used internally for computations (returned for advanced use).
+
+**Example:**
+```julia
+𝐏 = randP(10, 20) # generate 20 random 10x10 SPD matrices
+G, Γ, 𝐂 = coregistration(𝐏)
+```
+"""
+function coregistration(𝐂::ℍVector)
+    n = dim(𝐂, 1) # number of matrices in 𝐂
+    d = dim(𝐂, 2) # dimension of matrices
+    𝐔, 𝛌 = 𝕄Vector(undef, n), Vector{Diagonal}(undef, n)
+    for (i, C)∈enumerate(𝐂) 𝛌[i], 𝐔[i] = evd(C) end # all EVD's
+    sv = svd(sum(U for U∈𝐔)) # SVD of the sum of eigenvector matrices
+    Γ = BLAS.gemm('N', 'N', sv.U, sv.Vt) # U*V', where sum(U)=UwV' (SVD)
+    𝓁 = [exp(sum(log(𝛌[i][j, j]) for i=1:n)/n) for j=1:d] # in Eq 3.14
+    return ℍ(Γ*(𝓁.*Γ')), Γ, ℍVector([ℍ(Γ*λ*Γ') for λ∈𝛌]) # M, Γ and
+            # all matrices Σ*_i in Eq. 3.14 and 3.15
 end
