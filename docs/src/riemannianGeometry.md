@@ -76,8 +76,6 @@ spectralEmbedding
 | [`inductiveMean`](@ref), `indMean` | Recursive Fréchet mean of a matrix set (constructive)|
 | [`midrange`](@ref) | Geometric midrange of two matrices |
 
-
-
 ⋅
 
 ```@docs
@@ -118,9 +116,11 @@ parallelTransport
 | Function   | Description |
 |:---------- |:----------- |
 | [`procrustes`](@ref) | Solution to the Procrustes problem in the manifold of positive definite matrices |
+| [`coregistration`](@ref) | Rotate all matrices in a set of positive definite matrices in order to minimize their dispersion |
 
 ⋅
 
 ```@docs
 procrustes
+coregistration
 ```

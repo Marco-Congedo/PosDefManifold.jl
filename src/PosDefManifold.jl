@@ -193,6 +193,7 @@ export
     matP,
     parallelTransport, pt,
     procrustes,
+    coregistration,
 
     # from statistics.jl
     # mean # already exported by RiemannianGeometry.jl
@@ -214,7 +215,7 @@ println("\n⭐ "," Welcome to the ", 📌, " package", " ⭐\n")
 println(" Your Machine `", separatorFont, gethostname(), defaultFont, "` (",Sys.MACHINE, ")")
 println(" runs on kernel ",Sys.KERNEL," with word size ",Sys.WORD_SIZE,".")
 println(" CPU  Threads: ", separatorFont, Sys.CPU_THREADS, defaultFont)
-println(" Base.Threads: ", separatorFont, "$(Threads.nthreads())", defaultFont)
+println(" Base.Threads: ", separatorFont, "$(Threads.maxthreadid())", defaultFont)
 println(" BLAS Threads: ", separatorFont, "$(BLAS.get_num_threads())", "\n", defaultFont)
 
 # Generate and run `precompile` directives.
