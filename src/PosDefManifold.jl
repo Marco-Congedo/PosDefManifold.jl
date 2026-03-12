@@ -23,8 +23,8 @@ const golden    =   (√5+1)/2 # 1.618033988749894848204586834365638117720309...
 const goldeninv =   golden-1.0 # = 1/gold = (√5-1)/2 = ...
 const maxpos    =   1e15
 
-const titleFont     = "\x1b[91m " # light red
-const separatorFont = "\x1b[31m " # red
+const titleFont     = "\x1b[91m" # light red
+const separatorFont = "\x1b[31m" # red
 const defaultFont   = "\x1b[0m"
 const greyFont      = "\x1b[90m"
 const 📌            = titleFont*"PosDefManifold.jl "*defaultFont
