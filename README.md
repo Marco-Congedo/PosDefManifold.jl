@@ -6,7 +6,7 @@
 
 This package computes **distances**, **geodesics** and **weighted Fréchet means** for the supported metrics, **graph Laplacians**, **Lapacian eigen maps** and a special solution of the [**Procrustes problem**](https://en.wikipedia.org/wiki/Orthogonal_Procrustes_problem) in **P**. Key functions are multi-threaded.
 
-The documentation is rich and gives all mathematical details pertaining to the implemented functions (click the 'docs|dev' button).
+The documentation is rich and gives all mathematical details pertaining to the implemented functions (click the 'docs|stable' button).
 
 For similar code resources in other programming languages see [here](https://sites.google.com/site/marcocongedo/science/code-resources).
 
