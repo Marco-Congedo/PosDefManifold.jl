@@ -433,9 +433,10 @@ function tests();
     trade(PC); RUN()
 
 
-    # functions in RiemannianGeometryinP.jl
+    # functions in RiemannianGeometry.jl
     println(" ")
     print("\n- Unit 'riemannianGeometry.jl'")
+
 
     name="geodesic"; newTest(name);
     (geodesic(m, P, Q, 0.5) for m in metrics if m≠9); RUN()
@@ -762,6 +763,31 @@ function tests();
     procrustesU=procrustes(PC, rotatedP)
     newP=Hermitian(procrustesU'*rotatedP*procrustesU)
     newP ≈ PC ? OK() : OH(name*" Complex Input")
+
+
+    name="phi"; newTest(name);
+    P=randP(4);
+    Q=randP(4);
+    geo=phi(P, Q, x->x^0.1; fispos=true);
+    g=geodesic(Fisher, P, Q, 0.1);
+    g≈geo ? OK() : OH(name*" Real Input");
+
+    logmap=phi(P, Q, log);
+    l=logMap(Fisher, Q, P);
+    l≈logmap ? OK() : OH(name*" Real Input 2");
+
+    cP=randP(ComplexF64, 4);
+    cQ=randP(ComplexF64, 4);
+    geo=phi(cP, cQ, x->x^0.1; fispos=true);
+    g=geodesic(Fisher, cP, cQ, 0.1);
+    g≈geo ? OK() : OH(name*" Complex Input");
+
+    logmap=phi(cP, cQ, log);
+    l=logMap(Fisher, cQ, cP);
+    l≈logmap ? OK() : OH(name*" Complex Input 2");
+
+
+
 
     # functions in classification.jl
     println(" ")

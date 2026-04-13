@@ -1073,6 +1073,14 @@ tr(H::Union{ℍ{T}, 𝕄{T}}, D::𝔻{T}) where T<:RealOrComplex = tr(D, H)
 
 **alias**: `qf`
 
+!!! info
+    This function is deprecated. It is faster to use:
+    - method (1): `dot(v, P, v)` 
+    - method (2): `dot(v, Hermitian(L, :L), v)`
+    - method (3): `dot(v, X, v)` (it is no possible in this case to use argument  `forceLower=true`)
+    - method (4): `dot(v, S, v)`
+
+
 (1) Given a real vector ``v`` and a real `Hermitian` matrix ``P``,
 compute the quadratic form
 

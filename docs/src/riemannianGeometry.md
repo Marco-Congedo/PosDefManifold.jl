@@ -4,7 +4,7 @@ This is the fundamental unit of **PosDefManifold**. It contains functions
 for manipulating points in the Riemannian manifold of
 *Symmetric Positive Definite (SPD)* or *Hermitian Positive Definite (HPD)* matrices. In Julia those are `Hermitian` matrices, see [typecasting matrices](@ref).
 
-The functions are divided in six categories:
+The functions are divided in seven categories:
 
 | Category  | Output |
 |:---------- |:----------- |
@@ -14,6 +14,7 @@ The functions are divided in six categories:
 | 4. [Means](@ref) | mid-points of geodesics, Fréchet means of several points, midrange,... |
 | 5. [Tangent Space operations](@ref) | maps from the manifold to the tangent space and viceversa, parallel transport,... |
 | 6. [Procrustes problems](@ref) | data matching, transfer learning (domain adaptation), ...|
+| 6. [The phi function](@ref) | generic function for fast computations of geodesic, exponential and logarithmic map|
 
 ## Geodesic equations
 
@@ -123,4 +124,10 @@ parallelTransport
 ```@docs
 procrustes
 coregistration
+```
+
+## The phi function
+
+```@docs
+phi
 ```

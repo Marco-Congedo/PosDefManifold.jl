@@ -74,6 +74,63 @@ function _giveEndInfo_IterAlg(converged::Bool, verbose::Bool)
     verbose && println("")
 end
 
+
+# -----------------------------------------------------------
+# ϕ Function (2026)
+# -----------------------------------------------------------
+"""
+```julia
+    phi(P, Q::Hermitian{T}, f::Function; fispos::Bool=false) where T<:RealOrComplex
+```
+Let
+
+``\\varphi(f, P, Q) := Pf(P^{-1}Q) = P^{1/2} f(P^{-1/2}QP^{-1/2}) P^{1/2}``,
+
+where ``P`` and ``Q`` are two positive definite matrices and ``f : \\mathbb{R}_{++} \\to \\mathbb{R}`` 
+is a function defined on the spectrum of ``P^{-1} Q``.
+
+Given two positive definite matrices ``P`` and ``Q`` and adopting the Fisher metric, 
+the ``\\varphi`` function allows the most rapid computation of
+
+- the geodesic connecting ``P`` to ``Q`` with arc-length ``a``,  using `x->x^a` as `f`,
+- the retraction of tangent vector Q to the manifold from the tangent space at base point ``P``, using `exp` as `f` (exponential map),
+- the lifting of matrix ``Q`` onto the tangent space at base point ``P``, using `log` as `f` (logarithmic map).
+
+For ``f`` a function mapping in the strictly positive half line (like for the geodesic and the exponential map),
+use keyword argument `fispos=true` to get an even faster computation.
+
+**See also**: [`geodesic`](@ref), [`expMap`](@ref), [`logMap`](@ref)
+
+**NB**: 
+
+- `phi(P, Q, x->x^0.1; fispos=true)` is equivalent to `geodesic(Fisher, P, Q, 0.1)`
+- `phi(P, Q, exp; fispos=true)` is equivalent to `expMap(Fisher, Q, P)`
+- `phi(P, Q, log)` is equivalent to `logMap(Fisher, Q, P)`
+
+**Examples**
+```julia
+using PosDefManifold
+P=randP(10) 
+Q=randP(10) 
+geo=phi(P, Q, x->x^0.1; fispos=true) # geodesic with arc-length 0.1
+geo=phi(P, Q, x->x^0.5; fispos=true) # geometric mean
+expmap=phi(P, Q, exp; fispos=true) # exponential map
+logmap=phi(P, Q, log) # logarithmic map
+```
+"""
+function phi(P, Q::Hermitian{T}, f::Function; fispos::Bool=false) where T<:RealOrComplex
+    if fispos
+        λ, B = eigen(Q, P)
+        mul!(B, P, B*Diagonal(map(x -> sqrt(f(x)), λ))) # F = P*B*sqrt(f(Λ))
+        return T<:Real ?    Hermitian(BLAS.syrk('U', 'N', 1.0, B)) : 
+                            Hermitian(BLAS.herk('U', 'N', 1.0, B)) # (F * F')
+    else
+        λ, B = eigen(Q, P)
+        A = B'*P 
+        return Hermitian(A' * f(Diagonal(λ)) * A) 
+    end
+end
+
 # -----------------------------------------------------------
 # 1. Geodesic Equations
 # -----------------------------------------------------------
@@ -104,6 +161,7 @@ See [typecasting matrices](@ref).
 The Fisher geodesic move is computed by the Cholesky-Schur algorithm
 given in Eq. 4.2 by Iannazzo(2016)[🎓](@ref). If ``Q=I``,
 the Fisher geodesic move is simply ``P^a`` (no need to call this funtion).
+For faster computations, see [`phi`](@ref).
 
 !!! note "Nota Bene"
     For the [logdet zero](@ref) and [Jeffrey](@ref) metric no closed form expression
@@ -1165,10 +1223,12 @@ Pset=randP(20, 160)
 """
 function mean(metric::Metric, P::ℍ{T}, Q::ℍ{T}) where T<:RealOrComplex
     if mean==Fisher
-        #(faster proc: Congedo et al., 2005)
+        # faster procedure by Congedo et al., 2005:
+        # Using the congruence invariance of the mean, let the mean be A (B*P*B' # B*Q*B') A' = A * Λ^(1/2) * A',
+        # where B is the joint diagonalizer such that B*P*B' = Λ and B*P*B' = I, and A = inv(B)
         λ, B=eigen(P, Q) # the eigenvalues of Q are all 1.0 after joint diagonalization
-        C=(Q*B)*(Diagonal(λ))^(0.25) # C = Λ * (B' * Q), where A = inv(B) = (B' * Q) by gevd construction
-        return ℍ(C*C')
+        C=(Q*B)*(Diagonal(λ))^(0.25) # where C = A Λ^(1/4), A = inv(B) = (Q*B) by gevd construction
+        return ℍ(C*C') # = A Λ^(1/4) * Λ^(1/4) A' =  A * Λ^(1/2) * A'
     else
         return geodesic(metric, P, Q, 0.5)
     end
@@ -2564,6 +2624,8 @@ The result is an `ℍVector`.
 
 The inverse operation is [`expMap`](@ref).
 
+For faster computations, see [`phi`](@ref).
+
 **See also**: [`vecP`](@ref), [`parallelTransport`](@ref).
 
 **Examples**
@@ -2634,6 +2696,8 @@ The result is an `ℍVector`.
     Currently only the [Fisher](@ref) metric is supported for tangent space operations.
 
 The inverse operation is [`logMap`](@ref).
+
+For faster computations, see [`phi`](@ref).
 
 **Examples**
 ```julia
@@ -2808,6 +2872,14 @@ it will be 'trasported' from ``P`` to ``Q``, amounting to (Yair et *al.*, 2019[�
 - parallel transport it to the tangent space at base-point ``Q``,
 - project it back onto the manifold at base-point ``Q``.
 
+Using the properties of similarity transformation, it can be shown that
+
+``\\big(QP^{-1}\\big)^{1/2} = \\big(Q#P\\big)P^{-1}``,
+
+where ``\\big(Q#P\\big)`` is the geometric mean of ``P`` and ``Q``, hence
+
+``∥_{(P→Q)}(S)=\\big(Q#P\\big)P^{-1}SP^{-1}\\big(Q#P\\big)``.
+
 (2) *Parallel transport* as in (1), but to the tangent space at base-point
 the *identity matrix*.
 
@@ -2871,11 +2943,10 @@ mean(Fisher, Pset2) ≈ I ? println(" ⭐ ") : println(" ⛔ ")
 ```
 """
 function parallelTransport(S::ℍ{T}, P::ℍ{T}, Q::ℍ{T}) where T<:RealOrComplex
-    # this is the classical definition of parallel transport.
-    # IT DOES NOT TRANSPORT MATRICES ALONG THE MANIFOLD
-    # M = mean(Fisher, P, Q)
-    # W = sqrt(M) * inv(P) # curious: if W=M*inv(P), return=M
-    T<:Real ? W = real(√(Q * inv(P))) : W = √(Q * inv(P))
+    #old version
+    #T<:Real ? W = real(√(Q * inv(P))) : W = √(Q * inv(P))
+    #return ℍ(W * S * W')
+    W = T<:Real ? real(√(Q / P)) : √(Q / P)
     return ℍ(W * S * W')
 end
 
@@ -2885,7 +2956,8 @@ function parallelTransport(S::ℍ{T}, P::ℍ{T}) where T<:RealOrComplex
 end
 
 function parallelTransport(𝐒::ℍVector, P::ℍ{T}, Q::ℍ{T}) where T<:RealOrComplex
-    T<:Real ? W = real(√(Q * inv(P))) : W = √(Q * inv(P))
+    #T<:Real ? W = real(√(Q * inv(P))) : W = √(Q * inv(P))
+    W = T<:Real ? real(√(Q / P)) : √(Q / P)
     return ℍVector([ℍ(W * S * W') for S in 𝐒])
 end
 
