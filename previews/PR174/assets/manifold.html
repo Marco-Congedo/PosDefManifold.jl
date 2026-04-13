@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Riemannian Manifold</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #020d04; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+  canvas { display: block; }
+</style>
+</head>
+<body>
+<canvas id="c" width="850" height="270"></canvas>
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const W = 850, H = 270;
+
+const A = 0.09, B = 1.10;
+const SX = 7.0, SY = 3.8;
+
+function surfacePoint(u, v) {
+  const x = (u - 0.5) * SX;
+  const y = (v - 0.5) * SY;
+  const z = A * (x * x + B * y * y);
+  return [x, y, z];
+}
+
+const FOV = 580, CX = W * 0.50, CY = H * 0.62;
+const TILT = 0.30;
+const cosT = Math.cos(TILT), sinT = Math.sin(TILT);
+const CAM_DIST = 5.8;
+
+function project([x, y, z]) {
+  const ry = y * cosT - z * sinT;
+  const rz = y * sinT + z * cosT;
+  const dist = ry + CAM_DIST;
+  return [CX + (x / dist) * FOV, CY - (rz / dist) * FOV, dist];
+}
+
+// ── Grid ──────────────────────────────────────────────────
+function buildGrid() {
+  const nu = 46, nv = 32, du = 1/nu, dv = 1/nv;
+  const cells = [];
+  for (let i = 0; i < nu; i++) for (let j = 0; j < nv; j++) {
+    const u = i*du, v = j*dv;
+    const pts = [
+      surfacePoint(u,    v   ), surfacePoint(u+du, v   ),
+      surfacePoint(u+du, v+dv), surfacePoint(u,    v+dv),
+    ];
+    const mc = pts.reduce((a,p) => [a[0]+p[0]/4, a[1]+p[1]/4, a[2]+p[2]/4], [0,0,0]);
+    cells.push({ pts, dist: project(mc)[2] });
+  }
+  cells.sort((a,b) => b.dist - a.dist);
+  return cells;
+}
+const grid = buildGrid();
+
+function drawManifold() {
+  grid.forEach(({ pts }) => {
+    const pr = pts.map(p => project(p));
+    ctx.beginPath();
+    ctx.moveTo(pr[0][0], pr[0][1]);
+    pr.forEach(([px,py]) => ctx.lineTo(px, py));
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(14,40,17,0.09)';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(210,35,42,0.21)';
+    ctx.lineWidth = 0.55;
+    ctx.stroke();
+  });
+}
+
+// ── Geodesic ODE ─────────────────────────────────────────
+function accel(u, v, du, dv) {
+  const x = (u-0.5)*SX, y = (v-0.5)*SY;
+  const zu = 2*A*x*SX,  zv = 2*A*B*y*SY;
+  const zuu = 2*A*SX*SX, zvv = 2*A*B*SY*SY;
+  const g11 = 1+zu*zu, g12 = zu*zv, g22 = 1+zv*zv;
+  const det = g11*g22 - g12*g12;
+  const G11 = g22/det, G12 = -g12/det, G22 = g11/det;
+  const ddu = -(G11*zu*zuu + G12*zv*zuu)*du*du - (G11*zu*zvv + G12*zv*zvv)*dv*dv;
+  const ddv = -(G12*zu*zuu + G22*zv*zuu)*du*du - (G12*zu*zvv + G22*zv*zvv)*dv*dv;
+  return [ddu, ddv];
+}
+
+function geodesicRK4(u0, v0, du0, dv0, steps, ds) {
+  let u=u0, v=v0, du=du0, dv=dv0;
+  const pts = [[u, v]];
+  for (let i = 0; i < steps; i++) {
+    const [a1u,a1v] = accel(u, v, du, dv);
+    const [a2u,a2v] = accel(u+du*ds/2, v+dv*ds/2, du+a1u*ds/2, dv+a1v*ds/2);
+    const [a3u,a3v] = accel(u+du*ds/2, v+dv*ds/2, du+a2u*ds/2, dv+a2v*ds/2);
+    const [a4u,a4v] = accel(u+du*ds,   v+dv*ds,   du+a3u*ds,   dv+a3v*ds);
+    u  += ds * du;
+    v  += ds * dv;
+    du += ds*(a1u + 2*a2u + 2*a3u + a4u)/6;
+    dv += ds*(a1v + 2*a2v + 2*a3v + a4v)/6;
+    // renormalise to unit speed
+    const x=(u-0.5)*SX, y=(v-0.5)*SY;
+    const zu=2*A*x*SX, zv=2*A*B*y*SY;
+    const g11=1+zu*zu, g12=zu*zv, g22=1+zv*zv;
+    const sp = Math.sqrt(g11*du*du + 2*g12*du*dv + g22*dv*dv) || 1;
+    du /= sp; dv /= sp;
+    pts.push([u, v]);
+  }
+  return pts;
+}
+
+// Shooting method — iterate until last point == (u1,v1) to high precision
+function shootGeodesic(u0, v0, u1, v1) {
+  const STEPS = 180, DS = 0.013;
+  let du = u1-u0, dv = v1-v0;
+  const n = Math.sqrt(du*du+dv*dv); du/=n; dv/=n;
+
+  let bestPts = null, bestErr = Infinity;
+
+  for (let iter = 0; iter < 60; iter++) {
+    const pts = geodesicRK4(u0, v0, du, dv, STEPS, DS);
+    const last = pts[pts.length-1];
+    const ex = last[0]-u1, ey = last[1]-v1;
+    const err = Math.sqrt(ex*ex + ey*ey);
+    if (err < bestErr) { bestErr = err; bestPts = pts; }
+    if (err < 0.0002) break;
+    // Jacobian-free correction
+    du -= ex * 0.06; dv -= ey * 0.06;
+    const nn = Math.sqrt(du*du+dv*dv); du/=nn; dv/=nn;
+  }
+  return bestPts;
+}
+
+// p and q — q placed well within surface, away from right border
+const U0=0.16, V0=0.44, U1=0.76, V1=0.53;
+
+const rawGeo = shootGeodesic(U0, V0, U1, V1);
+
+// Find the index closest to q and trim there — geodesic ends exactly at q
+function closestIdx(pts, u1, v1) {
+  let best = 0, bestD = Infinity;
+  pts.forEach(([u,v], i) => {
+    const d = (u-u1)**2 + (v-v1)**2;
+    if (d < bestD) { bestD = d; best = i; }
+  });
+  return best;
+}
+const qIdx = closestIdx(rawGeo, U1, V1);
+const geoPts = rawGeo.slice(0, qIdx + 1);   // ends right at q
+
+// ── Background ────────────────────────────────────────────
+function drawBackground() {
+  const bg = ctx.createLinearGradient(0,0,W,H);
+  bg.addColorStop(0,'#020d04'); bg.addColorStop(0.5,'#041608'); bg.addColorStop(1,'#020d04');
+  ctx.fillStyle = bg; ctx.fillRect(0,0,W,H);
+  [{x:0.25,y:0.45,r:0.52},{x:0.75,y:0.45,r:0.44}].forEach(g => {
+    const gr = ctx.createRadialGradient(W*g.x,H*g.y,4,W*g.x,H*g.y,W*g.r);
+    gr.addColorStop(0,'rgba(10,70,24,0.14)'); gr.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle = gr; ctx.fillRect(0,0,W,H);
+  });
+}
+
+// ── Point ─────────────────────────────────────────────────
+function drawPoint(u, v, label, isMain, col) {
+  const sp = surfacePoint(u,v); sp[2] -= 0.035;
+  const [px,py] = project(sp);
+  if (isMain) {
+    [38,22,12,6].forEach((r,i) => {
+      ctx.beginPath(); ctx.arc(px,py,r,0,Math.PI*2);
+      ctx.fillStyle = `rgba(${col},${[0.03,0.08,0.18,0.55][i]})`; ctx.fill();
+    });
+    ctx.beginPath(); ctx.arc(px,py,4,0,Math.PI*2);
+    ctx.fillStyle = `rgba(${col},1)`; ctx.fill();
+    ctx.beginPath(); ctx.arc(px,py,1.8,0,Math.PI*2);
+    ctx.fillStyle = 'rgba(255,245,235,0.95)'; ctx.fill();
+    if (label) {
+      ctx.save(); ctx.font = 'italic 15px Georgia,serif';
+      ctx.fillStyle = `rgba(${col},0.95)`; ctx.fillText(label,px+9,py-9); ctx.restore();
+    }
+  } else {
+    [11,5.5,2.8].forEach((r,i) => {
+      ctx.beginPath(); ctx.arc(px,py,r,0,Math.PI*2);
+      ctx.fillStyle = `rgba(${col},${[0.05,0.13,0.60][i]})`; ctx.fill();
+    });
+  }
+}
+
+const scatter = [
+  [0.08,0.22],[0.90,0.18],[0.48,0.85],[0.25,0.20],[0.78,0.22],
+  [0.10,0.72],[0.92,0.76],[0.54,0.10],[0.16,0.88],[0.70,0.90],
+  [0.36,0.30],[0.84,0.52],[0.60,0.78],[0.30,0.62],[0.72,0.36],
+];
+
+let t = 0;
+function render() {
+  ctx.clearRect(0,0,W,H);
+  drawBackground();
+  drawManifold();
+
+  // Animate: grow from p → q, then shrink back, loop
+  const prog = 0.5 + 0.5*Math.sin(t*0.007);
+  const count = Math.max(2, Math.floor(geoPts.length * prog));
+  const visible = geoPts.slice(0, count);
+  const vis3d = visible.map(([u,v]) => { const p=surfacePoint(u,v); return [p[0],p[1],p[2]-0.020]; });
+
+  if (vis3d.length >= 2) {
+    // Glow passes
+    [[10,0.05],[5,0.14],[2,0.88]].forEach(([lw,alpha],pass) => {
+      ctx.beginPath();
+      vis3d.forEach((p,i) => { const [px,py]=project(p); i===0?ctx.moveTo(px,py):ctx.lineTo(px,py); });
+      ctx.strokeStyle = `rgba(255,${[95,145,215][pass]},${[75,115,178][pass]},${alpha})`;
+      ctx.lineWidth = lw; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.stroke();
+    });
+
+    // Direction arrows
+    [0.25,0.52,0.78].forEach(frac => {
+      const i = Math.floor(frac*(vis3d.length-1));
+      if (i<5 || i>=vis3d.length-3) return;
+      const [ax,ay] = project(vis3d[i]);
+      const [bx,by] = project(vis3d[Math.min(i+6, vis3d.length-1)]);
+      const dx=bx-ax, dy=by-ay, len=Math.sqrt(dx*dx+dy*dy);
+      if (len<0.1) return;
+      const nx=dx/len, ny=dy/len, tx=ax+nx*4, ty=ay+ny*4;
+      ctx.beginPath(); ctx.moveTo(tx,ty);
+      ctx.lineTo(tx-nx*9+ny*4.5, ty-ny*9-nx*4.5);
+      ctx.lineTo(tx-nx*9-ny*4.5, ty-ny*9+nx*4.5);
+      ctx.closePath(); ctx.fillStyle='rgba(255,192,150,0.82)'; ctx.fill();
+    });
+  }
+
+  scatter.forEach(([u,v]) => drawPoint(u,v,null,false,'200,40,50'));
+
+  // Draw p first, q on top so the geodesic visually arrives at it
+  drawPoint(U0,V0,'p',true,'255,80,80');
+  drawPoint(U1,V1,'q',true,'255,130,100');
+
+  // Traveling dot — sits exactly on the geodesic tip
+  if (vis3d.length > 0) {
+    const [mx,my] = project(vis3d[vis3d.length-1]);
+    const pulse = 0.6 + 0.4*Math.sin(t*0.08);
+    ctx.beginPath(); ctx.arc(mx,my,13*pulse,0,Math.PI*2);
+    ctx.fillStyle = `rgba(255,200,155,${0.09*pulse})`; ctx.fill();
+    ctx.beginPath(); ctx.arc(mx,my,4.8,0,Math.PI*2);
+    ctx.fillStyle = 'rgba(255,218,185,0.95)'; ctx.fill();
+    ctx.beginPath(); ctx.arc(mx,my,2,0,Math.PI*2);
+    ctx.fillStyle = 'rgba(255,255,248,1)'; ctx.fill();
+  }
+
+  t++;
+  requestAnimationFrame(render);
+}
+
+render();
+</script>
+</body>
+</html>
