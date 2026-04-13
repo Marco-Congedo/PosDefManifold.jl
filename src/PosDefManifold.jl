@@ -169,6 +169,7 @@ export
     trade,
 
     # from RiemannianGeometry.jl
+    phi,
     geodesic,
     distanceSqr, distance²,
     distance,
